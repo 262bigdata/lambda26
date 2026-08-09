@@ -1,0 +1,21 @@
+site_name: Lambda26 - Big Data
+site_url: https://262bigdata.github.io/lambda26/
+docs_dir: docs
+
+nav:
+  - Inicio: index.md
+  - Sílabos:
+      - Sílabo Big Data 2026-1: silabo_bigdata_2026_1.md
+      - Sílabo Big Data 2026-2: silabo_bigdata_2026_2.md
+  - Repositorio 2026-1 (lambdalab): https://github.com/261bigdata/lambdalab/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+
+plugins:
+  - search
