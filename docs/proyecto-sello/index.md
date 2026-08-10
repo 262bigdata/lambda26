@@ -12,11 +12,11 @@ Al finalizar el Proyecto Sello, el estudiante demuestra que puede construir y de
 
 | Código | Competencia | Relación con el proyecto |
 |---|---|---|
-| CE022 | Ingeniería de la Información | Evidencia diseño, procesamiento, almacenamiento y administración de datasets distribuidos para análisis y toma de decisiones. |
-| CE023 | Programación | Evidencia implementación de pipelines batch y streaming, ingesta de eventos e integración técnica de la solución. |
-| CE024 | Calidad de Software | Evidencia observabilidad, DataOps, reproducibilidad, validación, documentación, repositorio y sustentación integral. |
+| CE042 | Diseño de dataset y pipeline analítico | Evidencia el diseño de arquitecturas Lambda/Kappa, esquemas analíticos y pipelines batch/streaming reproducibles. |
+| CE043 | Construcción y experimentación | Evidencia la implementación de ETL batch con Spark, ingesta y procesamiento streaming con Kafka. |
+| CE044 | Evaluación, monitoreo y mejora | Evidencia observabilidad, DataOps, monitoreo y mejora continua del sistema en producción. |
 
-Fuente oficial de los códigos: [Transcripción de evidencias por competencia — Ingeniería de Software](https://upeuoficial.github.io/planb/transcripcion/#c-area-de-ingenieria-de-software).
+Fuente oficial de los códigos: [Línea de Ciencia de Datos e IA — Competencias y evidencias (CE04)](https://upeuoficial.github.io/planb/lineas/cd-ia/).
 
 ```text
 Arquitectura -> ETL batch -> Almacenamiento analítico -> Streaming -> Observabilidad -> BI/ML -> DataOps -> Sustentación
@@ -189,18 +189,18 @@ La presentación puede organizarse con una secuencia breve de apoyo visual. El v
 
 | Orden | Slide o momento | Propósito | Competencia evidenciada |
 |---:|---|---|---|
-| 1 | Título del proyecto y equipo | Identificar el proyecto, integrantes y dominio de datos elegido. | CE024 |
-| 2 | Video pitch o introducción ejecutiva | Presentar problema, solución, valor y participación del equipo. | CE024 |
-| 3 | 1. Problema y alcance | Explicar la necesidad analítica, las fuentes de datos y el alcance del sistema. | CE022 |
-| 4 | Arquitectura Big Data | Mostrar ingesta, procesamiento, almacenamiento, consumo y observabilidad. | CE022 + CE023 |
-| 5 | Procesamiento batch | Explicar el pipeline Spark, transformaciones, calidad de datos y salidas en Parquet. | CE022 + CE023 |
-| 6 | Ingesta y streaming | Mostrar el flujo de eventos con Kafka y el procesamiento con Spark Structured Streaming. | CE023 |
-| 7 | Observabilidad y costos | Presentar métricas, paneles, logs y estimación de costos operacionales. | CE024 |
-| 8 | Resultados BI/ML | Mostrar el modelo, la inferencia o el tablero BI generado para la toma de decisiones. | CE022 |
-| 9 | Demo end-to-end | Ejecutar o evidenciar el flujo batch/streaming completo del sistema. | CE023 + CE024 |
-| 10 | 4. Aporte individual | Indicar qué hizo cada integrante. | CE024 |
-| 11 | 5. Repositorio y estándares | Mostrar repositorio, topics, estructura, documentación publicada en MkDocs o equivalente, y forma de ejecución. | CE024 |
-| 12 | Limitaciones y mejoras | Reconocer límites del producto y mejoras posibles. | CE024 |
+| 1 | Título del proyecto y equipo | Identificar el proyecto, integrantes y dominio de datos elegido. | CE044 |
+| 2 | Video pitch o introducción ejecutiva | Presentar problema, solución, valor y participación del equipo. | CE044 |
+| 3 | 1. Problema y alcance | Explicar la necesidad analítica, las fuentes de datos y el alcance del sistema. | CE042 |
+| 4 | Arquitectura Big Data | Mostrar ingesta, procesamiento, almacenamiento, consumo y observabilidad. | CE042 |
+| 5 | Procesamiento batch | Explicar el pipeline Spark, transformaciones, calidad de datos y salidas en Parquet. | CE043 |
+| 6 | Ingesta y streaming | Mostrar el flujo de eventos con Kafka y el procesamiento con Spark Structured Streaming. | CE043 |
+| 7 | Observabilidad y costos | Presentar métricas, paneles, logs y estimación de costos operacionales. | CE044 |
+| 8 | Resultados BI/ML | Mostrar el modelo, la inferencia o el tablero BI generado para la toma de decisiones. | CE043 + CE044 |
+| 9 | Demo end-to-end | Ejecutar o evidenciar el flujo batch/streaming completo del sistema. | CE043 + CE044 |
+| 10 | 4. Aporte individual | Indicar qué hizo cada integrante. | CE044 |
+| 11 | 5. Repositorio y estándares | Mostrar repositorio, topics, estructura, documentación publicada en MkDocs o equivalente, y forma de ejecución. | CE044 |
+| 12 | Limitaciones y mejoras | Reconocer límites del producto y mejoras posibles. | CE044 |
 
 ## Anexo. Plantilla mínima de documentación MkDocs o equivalente
 
@@ -229,7 +229,7 @@ El informe debe documentar el producto de manera breve, verificable y alineada a
 |---|---|---|
 | Portada | Nombre del proyecto, curso, sección, integrantes, docente y semestre. | Datos completos del equipo. |
 | Resumen del proyecto | Problema de datos, solución Big Data y valor analítico. | Síntesis de 8 a 12 líneas. |
-| Competencia y alcance | Competencia/capacidad del proyecto y competencias relacionadas. | CE022, CE023 y CE024 vinculadas al producto. |
+| Competencia y alcance | Competencia/capacidad del proyecto y competencias relacionadas. | CE042, CE043 y CE044 vinculadas al producto. |
 | Problema y datos | Necesidad analítica, fuentes, alcance y restricciones. | Descripción del problema y dataset. |
 | Arquitectura Big Data | Componentes de ingesta, procesamiento, almacenamiento, consumo y observabilidad. | Diagrama y decisiones técnicas. |
 | Procesamiento batch | Jobs, transformaciones, validaciones de calidad y salidas en Parquet. | Notebooks, comandos, salidas y capturas. |
