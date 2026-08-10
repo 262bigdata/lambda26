@@ -1,5 +1,7 @@
-site_name: Lambda26 - Big Data
+site_name: Big Data
 site_url: https://262bigdata.github.io/lambda26/
+repo_url: https://github.com/262bigdata/lambda26
+repo_name: 262bigdata/lambda26
 docs_dir: docs
 
 nav:
@@ -9,6 +11,8 @@ nav:
   - Silabos:
       - Silabo 2026-1: silabo_bigdata_2026_1.md
       - Silabo 2026-2: silabo_bigdata_2026_2.md
+  - 1. Arquitecturas Big Data y ETL batch distribuido:
+      - "S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming": sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md
 
 theme:
   name: material
