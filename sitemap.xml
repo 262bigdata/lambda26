@@ -2,14 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://262bigdata.github.io/lambda26/</loc>
-         <lastmod>2026-08-09</lastmod>
+         <lastmod>2026-08-10</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/silabo_bigdata_2026_1/</loc>
-         <lastmod>2026-08-09</lastmod>
+         <lastmod>2026-08-10</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/silabo_bigdata_2026_2/</loc>
-         <lastmod>2026-08-09</lastmod>
+         <lastmod>2026-08-10</lastmod>
+    </url>
+    <url>
+         <loc>https://262bigdata.github.io/lambda26/proyecto-sello/</loc>
+         <lastmod>2026-08-10</lastmod>
     </url>
 </urlset>
