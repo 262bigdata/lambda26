@@ -1,0 +1,1948 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa/">
+      
+      
+        <link rel="prev" href="../../silabo_bigdata_2026_2/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming - Big Data</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s1-arquitectura-big-data-lambda-y-kappa-batch-vs-streaming" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-contexto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Contexto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-plataforma-de-streaming-de-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: plataforma de streaming de video
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-ecosistema-y-arquitectura-big-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Ecosistema y arquitectura Big Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-batch-vs-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Batch vs. Streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-arquitectura-lambda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Arquitectura Lambda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-arquitectura-kappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Arquitectura Kappa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 Arquitectura Kappa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-regla-de-decision-y-comparacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.1 Regla de decisión y comparación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reconocer-el-ecosistema-de-lambda26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reconocer el ecosistema de lambda26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-analizar-el-caso-guiado-y-clasificar-batchstreaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Analizar el caso guiado y clasificar batch/streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-aplicar-la-regla-de-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Aplicar la regla de decisión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-proponer-tecnologias-y-diagrama-de-flujo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Proponer tecnologías y diagrama de flujo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-completar-la-plantilla-de-propuesta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Completar la plantilla de propuesta
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-plantilla-de-evidencia-individual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Plantilla de evidencia individual
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 Plantilla de evidencia individual">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411-datos-del-estudiante" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.1 Datos del estudiante
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#412-trabajo-autonomo-realizado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.2 Trabajo autónomo realizado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413-evidencia-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.3 Evidencia técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#414-error-o-hallazgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.4 Error o hallazgo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#415-reflexion-tecnica-breve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.5 Reflexión técnica breve
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre-evaluativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre evaluativo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Cierre evaluativo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-resultados-esperados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Resultados esperados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-evidencia-del-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Evidencia del producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-preguntas-de-defensa-y-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Preguntas de defensa y reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-contexto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Contexto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-plataforma-de-streaming-de-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: plataforma de streaming de video
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-ecosistema-y-arquitectura-big-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Ecosistema y arquitectura Big Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-batch-vs-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Batch vs. Streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-arquitectura-lambda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Arquitectura Lambda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-arquitectura-kappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Arquitectura Kappa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 Arquitectura Kappa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-regla-de-decision-y-comparacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.1 Regla de decisión y comparación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reconocer-el-ecosistema-de-lambda26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reconocer el ecosistema de lambda26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-analizar-el-caso-guiado-y-clasificar-batchstreaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Analizar el caso guiado y clasificar batch/streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-aplicar-la-regla-de-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Aplicar la regla de decisión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-proponer-tecnologias-y-diagrama-de-flujo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Proponer tecnologías y diagrama de flujo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-completar-la-plantilla-de-propuesta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Completar la plantilla de propuesta
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-plantilla-de-evidencia-individual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Plantilla de evidencia individual
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 Plantilla de evidencia individual">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411-datos-del-estudiante" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.1 Datos del estudiante
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#412-trabajo-autonomo-realizado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.2 Trabajo autónomo realizado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413-evidencia-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.3 Evidencia técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#414-error-o-hallazgo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.4 Error o hallazgo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#415-reflexion-tecnica-breve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.5 Reflexión técnica breve
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre-evaluativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre evaluativo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Cierre evaluativo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-resultados-esperados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Resultados esperados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-evidencia-del-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Evidencia del producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-preguntas-de-defensa-y-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Preguntas de defensa y reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s1-arquitectura-big-data-lambda-y-kappa-batch-vs-streaming">S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming</h1>
+<h2 id="1-introduccion">1. Introducción</h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-contexto">1.1 Contexto</h3>
+<p>Big Data no empieza eligiendo Spark o Kafka. Empieza decidiendo qué arquitectura resuelve el problema real: ¿el caso necesita solo el pasado (batch), solo el presente (streaming), o ambos? Esta sesión construye esa primera decisión arquitectónica para el laboratorio <code>lambda26</code>.</p>
+<h3 id="12-indice">1.2 Índice</h3>
+<ol>
+<li>Ecosistema y arquitectura Big Data.</li>
+<li>Batch vs. Streaming.</li>
+<li>Arquitectura Lambda.</li>
+<li>Arquitectura Kappa.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje</h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Identificar</strong> los componentes del ecosistema Big Data y <strong>decidir</strong> qué arquitectura (Lambda o Kappa) conviene aplicar a un problema real de negocio, justificando la elección entre procesamiento batch y streaming.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión</h3>
+<p>Diagrama de arquitectura Big Data (Lambda o Kappa) para un caso de negocio, con decisiones técnicas, tecnologías propuestas, supuestos y riesgos.</p>
+<h3 id="15-metodologia">1.5 Metodología</h3>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Actividades</th>
+<th>Orientaciones</th>
+<th>Material</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Leer el sílabo de la Unidad 1 y el caso de la plataforma de streaming de video (ver 1.6).</td>
+<td>Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión.</td>
+<td>Sílabo Big Data U1.</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada de la decisión arquitectónica: ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo.</td>
+<td>Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema.</td>
+<td>Pasos 3.1 a 3.5 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de la arquitectura seleccionada y su justificación.</td>
+<td>La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.2.</td>
+<td>Plantilla de evidencia individual (4.1), rúbrica de evaluación (5.4).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión</h3>
+<h4 id="161-caso-plataforma-de-streaming-de-video">1.6.1 Caso: plataforma de streaming de video</h4>
+<p>Una plataforma similar a Netflix recibe miles de eventos por segundo: reproducciones, búsquedas, clics en recomendaciones y errores de reproducción. La empresa necesita analizar datos históricos y eventos en tiempo real para mejorar su servicio.</p>
+<p>Pregunta guía:</p>
+<pre><code class="language-text">¿Qué arquitectura Big Data debería utilizar esta plataforma: Lambda o Kappa?
+</code></pre>
+<p>Preguntas para los estudiantes:</p>
+<ol>
+<li>¿Qué problemas tendría esta plataforma si solo analizara datos históricos (batch)?</li>
+<li>¿Qué problemas tendría si solo procesara eventos en tiempo real (streaming), sin histórico?</li>
+<li>¿Qué arquitectura elegirías tú para este caso y por qué?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso</h3>
+<ul>
+<li>Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.</li>
+<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio.</li>
+</ul>
+<p>Roadmap del producto de unidad:</p>
+<pre><code class="language-mermaid">flowchart TB
+    Arquitectura[&quot;Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;HOY&quot;]
+    PySpark[&quot;Fundamentos PySpark&lt;br/&gt;S2&quot;]
+    HDFS[&quot;Formatos analíticos y calidad&lt;br/&gt;S3&quot;]
+    ML[&quot;ML distribuido&lt;br/&gt;S4&quot;]
+    Evaluacion[&quot;Evaluación U1&lt;br/&gt;S5&quot;]
+
+    Arquitectura --&gt; PySpark --&gt; HDFS --&gt; ML --&gt; Evaluacion
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Arquitectura today;
+</code></pre>
+<p>Hoy se decide el primer componente real de la U1: la arquitectura Big Data. En las siguientes sesiones se construye el pipeline batch con PySpark, se cargan formatos analíticos en HDFS y se entrena un primer modelo distribuido. La evaluación U1 valida el pipeline batch completo construido sobre esa arquitectura.</p>
+<h2 id="2-explica">2. Explica</h2>
+<p>Tiempo: 25 min.</p>
+<h3 id="21-ecosistema-y-arquitectura-big-data">2.1 Ecosistema y arquitectura Big Data</h3>
+<p>Big Data se refiere al procesamiento de grandes volúmenes de datos que no pueden manejarse eficientemente con herramientas tradicionales. Se resume con las <strong>5V</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>V</th>
+<th>Significa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Volumen</td>
+<td>Cantidad de datos generados.</td>
+</tr>
+<tr>
+<td>Variedad</td>
+<td>Diversidad de formatos y fuentes.</td>
+</tr>
+<tr>
+<td>Velocidad</td>
+<td>Rapidez con la que se generan y deben procesarse.</td>
+</tr>
+<tr>
+<td>Veracidad</td>
+<td>Confiabilidad y calidad del dato.</td>
+</tr>
+<tr>
+<td>Valor</td>
+<td>Utilidad real que aporta a una decisión.</td>
+</tr>
+</tbody>
+</table>
+<p>Una solución Big Data es un flujo de trabajo con 5 etapas:</p>
+<pre><code class="language-text">Fuente de datos -&gt; Ingesta / extracción -&gt; Almacenamiento -&gt; Procesamiento -&gt; Visualización / consumo
+</code></pre>
+<p>En <code>lambda26</code>, ese flujo se implementa con esta secuencia de tecnologías:</p>
+<pre><code class="language-mermaid">flowchart LR
+    Usuarios[&quot;Usuarios /&lt;br/&gt;eventos&quot;]
+    Kafka[&quot;Kafka&lt;br/&gt;ingesta&quot;]
+    Spark[&quot;Spark&lt;br/&gt;procesamiento distribuido&quot;]
+    DataLake[&quot;Data Lake /&lt;br/&gt;base de datos&quot;]
+    Dashboard[&quot;Dashboard /&lt;br/&gt;aplicaciones&quot;]
+
+    Usuarios --&gt; Kafka --&gt; Spark --&gt; DataLake --&gt; Dashboard
+</code></pre>
+<h3 id="22-batch-vs-streaming">2.2 Batch vs. Streaming</h3>
+<table>
+<thead>
+<tr>
+<th>Enfoque</th>
+<th>Cómo trabaja</th>
+<th>Ejemplos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Batch</td>
+<td>Trabaja con datos acumulados y se procesa periódicamente.</td>
+<td>Reportes diarios, logs históricos, entrenamiento de modelos.</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>Procesa los datos conforme llegan al sistema.</td>
+<td>Detección de fraude, recomendaciones en tiempo real, monitoreo.</td>
+</tr>
+</tbody>
+</table>
+<p>Esta distinción es la base de la decisión arquitectónica de la sesión: no se elige Lambda o Kappa por preferencia técnica, sino según si el problema necesita batch, streaming o ambos.</p>
+<h3 id="23-arquitectura-lambda">2.3 Arquitectura Lambda</h3>
+<p>Lambda combina tres capas:</p>
+<ul>
+<li><strong>Batch layer</strong>: procesamiento histórico.</li>
+<li><strong>Speed layer</strong>: procesamiento en tiempo real.</li>
+<li><strong>Serving layer</strong>: consulta de resultados combinados.</li>
+</ul>
+<p><strong>Ventaja:</strong> alta precisión al combinar histórico y tiempo real.</p>
+<p><strong>Desventaja:</strong> mayor complejidad (tres capas que mantener).</p>
+<h3 id="24-arquitectura-kappa">2.4 Arquitectura Kappa</h3>
+<p>Kappa procesa todo como streaming, incluido el reprocesamiento histórico (reproduciendo el stream desde el origen).</p>
+<p><strong>Ventaja:</strong> arquitectura más simple, una sola capa.</p>
+<p><strong>Desventaja:</strong> menos optimizada para consultas puramente históricas.</p>
+<h4 id="241-regla-de-decision-y-comparacion">2.4.1 Regla de decisión y comparación</h4>
+<p>Regla de decisión:</p>
+<ul>
+<li>Si el caso necesita histórico + tiempo real -&gt; <strong>Lambda</strong>.</li>
+<li>Si todo el caso son eventos en tiempo real -&gt; <strong>Kappa</strong>.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>Lambda</th>
+<th>Kappa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Histórico</td>
+<td>Sí (batch layer)</td>
+<td>No como capa separada</td>
+</tr>
+<tr>
+<td>Tiempo real</td>
+<td>Sí (speed layer)</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td>Complejidad</td>
+<td>Alta</td>
+<td>Menor</td>
+</tr>
+<tr>
+<td>Capas</td>
+<td>Batch + Speed + Serving</td>
+<td>Solo streaming</td>
+</tr>
+<tr>
+<td>Reprocesamiento</td>
+<td>Desde la capa batch</td>
+<td>Reproduciendo el stream</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada</h2>
+<p>Tiempo: 2h.</p>
+<p>El docente guía el análisis del caso de la plataforma de streaming y los estudiantes construyen la primera propuesta de arquitectura Big Data.</p>
+<p>Hoja de ruta de la sesión práctica:</p>
+<ul>
+<li>3.1 Reconocer el ecosistema de <code>lambda26</code>.</li>
+<li>3.2 Analizar el caso guiado y clasificar batch/streaming.</li>
+<li>3.3 Aplicar la regla de decisión.</li>
+<li>3.4 Proponer tecnologías y diagrama de flujo.</li>
+<li>3.5 Completar la plantilla de propuesta.</li>
+</ul>
+<h3 id="31-reconocer-el-ecosistema-de-lambda26">3.1 Reconocer el ecosistema de <code>lambda26</code></h3>
+<p><strong>Producto del paso:</strong> mapa del flujo tecnológico del laboratorio.</p>
+<p>Registra el flujo base del ecosistema:</p>
+<pre><code class="language-text">Usuarios -&gt; Kafka -&gt; Spark Processing -&gt; Data Lake / Base de datos -&gt; Dashboard / Aplicaciones
+</code></pre>
+<p>Responde:</p>
+<ol>
+<li>¿Dónde nacen los eventos?</li>
+<li>¿Qué componente ingesta los eventos?</li>
+<li>¿Qué componente procesa los datos a escala?</li>
+<li>¿Dónde se consumen los resultados?</li>
+</ol>
+<h3 id="32-analizar-el-caso-guiado-y-clasificar-batchstreaming">3.2 Analizar el caso guiado y clasificar batch/streaming</h3>
+<p><strong>Producto del paso:</strong> clasificación justificada del caso.</p>
+<p>Retoma el caso de 1.6.1 (plataforma de streaming de video), que necesita:</p>
+<ul>
+<li>Datos históricos.</li>
+<li>Eventos en tiempo real.</li>
+<li>Recomendaciones y monitoreo.</li>
+</ul>
+<p>Responde: ¿el caso requiere batch, streaming o ambos? Justifica con al menos dos razones tomadas del caso.</p>
+<h3 id="33-aplicar-la-regla-de-decision">3.3 Aplicar la regla de decisión</h3>
+<p><strong>Producto del paso:</strong> arquitectura seleccionada y justificada.</p>
+<p>Aplicando la regla de decisión de 2.4.1 al caso de 3.2, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.</p>
+<h3 id="34-proponer-tecnologias-y-diagrama-de-flujo">3.4 Proponer tecnologías y diagrama de flujo</h3>
+<p><strong>Producto del paso:</strong> lista de tecnologías y diagrama de flujo simple.</p>
+<p>Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Dashboard/Power BI, etc.) y construye el diagrama:</p>
+<pre><code class="language-text">Usuarios -&gt; Kafka -&gt; Spark Streaming + Batch -&gt; Data Lake / DW -&gt; Dashboard
+</code></pre>
+<h3 id="35-completar-la-plantilla-de-propuesta">3.5 Completar la plantilla de propuesta</h3>
+<p><strong>Producto del paso:</strong> ficha de propuesta arquitectónica completa.</p>
+<p>Completa:</p>
+<pre><code class="language-text">Caso analizado:
+Tipo de procesamiento:
+Arquitectura seleccionada:
+Justificación:
+Tecnologías propuestas:
+Diagrama simple:
+</code></pre>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma</h2>
+<p>Tiempo: 2h fuera del aula.</p>
+<h3 id="41-plantilla-de-evidencia-individual">4.1 Plantilla de evidencia individual</h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<pre><code class="language-text">S01_Equipo##_ApellidoNombre.pdf
+</code></pre>
+<p>El PDF debe usar esta estructura. La primera sección define el trabajo autónomo; completa las demás con tus evidencias.</p>
+<h4 id="411-datos-del-estudiante">4.1.1 Datos del estudiante</h4>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S01 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming</li>
+<li>Rol o aporte realizado:</li>
+<li>Link del repositorio:</li>
+</ul>
+<h4 id="412-trabajo-autonomo-realizado">4.1.2 Trabajo autónomo realizado</h4>
+<p>Elige uno de estos casos, distinto al trabajado en clase:</p>
+<ul>
+<li>Comercio electrónico.</li>
+<li>Sensores IoT.</li>
+<li>Red social.</li>
+<li>Transporte inteligente.</li>
+</ul>
+<p>Luego define:</p>
+<ol>
+<li>Qué datos genera.</li>
+<li>Si necesita batch, streaming o ambos.</li>
+<li>Si conviene Lambda o Kappa.</li>
+<li>Qué tecnologías propones.</li>
+<li>Qué riesgos o supuestos observas.</li>
+</ol>
+<h4 id="413-evidencia-tecnica">4.1.3 Evidencia técnica</h4>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno:</p>
+<ul>
+<li>Clasificación batch/streaming del caso elegido, con justificación (equivalente a 3.2).</li>
+<li>Arquitectura seleccionada y regla de decisión aplicada (equivalente a 3.3).</li>
+<li>Tecnologías propuestas y diagrama de flujo simple (equivalente a 3.4).</li>
+<li>Plantilla de propuesta completa (equivalente a 3.5).</li>
+</ul>
+<h4 id="414-error-o-hallazgo">4.1.4 Error o hallazgo</h4>
+<p>Describe al menos un riesgo o supuesto que identificaste al analizar tu caso:</p>
+<ul>
+<li>Qué ocurrió o qué limitación encontraste.</li>
+<li>Cómo lo identificaste.</li>
+<li>Cómo lo documentaste o qué supuesto tomaste.</li>
+</ul>
+<h4 id="415-reflexion-tecnica-breve">4.1.5 Reflexión técnica breve</h4>
+<p>Responde en 5 a 8 líneas:</p>
+<pre><code class="language-text">¿Qué arquitectura usarías para un sistema de sensores IoT y por qué?
+</code></pre>
+<h3 id="42-criterios-minimos-de-aceptacion">4.2 Criterios mínimos de aceptación</h3>
+<p>La evidencia individual se considera completa si:</p>
+<ul>
+<li>El caso elegido está delimitado y es distinto al trabajado en clase.</li>
+<li>La clasificación batch/streaming está justificada con datos del caso.</li>
+<li>La arquitectura seleccionada aplica correctamente la regla de decisión.</li>
+<li>Las tecnologías propuestas son coherentes con la arquitectura elegida.</li>
+<li>La evidencia identifica un aporte individual verificable.</li>
+</ul>
+<h2 id="5-cierre-evaluativo">5. Cierre evaluativo</h2>
+<p>Tiempo: 20 min.</p>
+<p>Esta sección conecta el resultado de aprendizaje de la sesión con el producto que debe evidenciar cada estudiante.</p>
+<h3 id="51-resultados-esperados">5.1 Resultados esperados</h3>
+<p>Al finalizar la sesión, el estudiante debe demostrar que:</p>
+<ul>
+<li>Explica el ecosistema Big Data (5V y flujo de trabajo).</li>
+<li>Distingue batch de streaming con ejemplos.</li>
+<li>Explica las arquitecturas Lambda y Kappa (capas, ventajas, desventajas).</li>
+<li>Aplica la regla de decisión a un caso real.</li>
+<li>Propone tecnologías coherentes con la arquitectura elegida.</li>
+</ul>
+<h3 id="52-evidencia-del-producto-de-sesion">5.2 Evidencia del producto de sesión</h3>
+<p>Cada estudiante entrega un PDF individual siguiendo la plantilla de la sección 4.1.</p>
+<p>Nombre del archivo:</p>
+<pre><code class="language-text">S01_Equipo##_ApellidoNombre.pdf
+</code></pre>
+<p>La evidencia debe demostrar:</p>
+<ul>
+<li>Arquitectura Big Data seleccionada y justificada.</li>
+<li>Aporte individual verificable.</li>
+<li>Tecnologías propuestas y diagrama de flujo.</li>
+<li>Reflexión técnica breve.</li>
+</ul>
+<p>La revisión se realiza con los criterios mínimos de aceptación de la sección 4.2 y la rúbrica de la sección 5.4.</p>
+<h3 id="53-preguntas-de-defensa-y-reflexion">5.3 Preguntas de defensa y reflexión</h3>
+<ol>
+<li>¿En qué casos una empresa necesitaría procesamiento en tiempo real?</li>
+<li>¿Qué ventajas tiene combinar batch y streaming?</li>
+<li>¿Qué arquitectura usarías para un sistema de sensores IoT y por qué?</li>
+<li>¿Qué desventaja tiene Lambda frente a Kappa?</li>
+<li>¿Qué tecnología usarías para la ingesta de eventos y por qué?</li>
+</ol>
+<h3 id="54-rubrica-de-evaluacion">5.4 Rúbrica de evaluación</h3>
+<table>
+<thead>
+<tr>
+<th>Dimensión</th>
+<th style="text-align: right;">Peso</th>
+<th>3 - Logro destacado</th>
+<th>2 - Logro</th>
+<th>1 - Proceso</th>
+<th>0 - Inicio</th>
+<th style="text-align: right;">Puntuación obtenida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Ecosistema Big Data</td>
+<td style="text-align: right;">2</td>
+<td>Explica con precisión las 5V y el flujo de trabajo completo.</td>
+<td>Explica el flujo de trabajo de forma correcta.</td>
+<td>Explicación parcial del ecosistema.</td>
+<td>No explica el ecosistema.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Clasificación batch/streaming</td>
+<td style="text-align: right;">2</td>
+<td>Clasifica el caso con justificación clara y basada en el caso.</td>
+<td>Clasifica el caso correctamente.</td>
+<td>Clasificación imprecisa o sin justificar.</td>
+<td>No clasifica el caso.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Arquitectura Lambda y Kappa</td>
+<td style="text-align: right;">2</td>
+<td>Explica capas, ventajas y desventajas de ambas arquitecturas.</td>
+<td>Explica correctamente ambas arquitecturas.</td>
+<td>Explicación parcial de una arquitectura.</td>
+<td>No explica las arquitecturas.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Aplicación de la regla de decisión</td>
+<td style="text-align: right;">2</td>
+<td>Aplica la regla correctamente y justifica con solidez técnica.</td>
+<td>Aplica la regla correctamente.</td>
+<td>Aplica la regla con justificación débil.</td>
+<td>No aplica la regla de decisión.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>5. Aporte individual</td>
+<td style="text-align: right;">1</td>
+<td>Aporte verificable y bien documentado.</td>
+<td>Aporte identificable.</td>
+<td>Aporte mencionado de forma general.</td>
+<td>Sin aporte individual.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>6. Orden y reflexión</td>
+<td style="text-align: right;">1</td>
+<td>Evidencia clara, ordenada y reflexión técnica precisa.</td>
+<td>Evidencia comprensible.</td>
+<td>Evidencia desordenada o superficial.</td>
+<td>Sin evidencia suficiente.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>Puntuación acumulada = suma de (<code>Peso</code> * <code>Puntuación obtenida</code>) = ____.</p>
+<p>Nota final = (<code>Puntuación acumulada</code> / 30) * 20 = ____.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<pre><code class="language-text">Evalúa el PDF usando la rúbrica de la sesión.
+Para cada dimensión selecciona la puntuación obtenida usando la escala Inicio=0, Proceso=1, Logro=2, Logro destacado=3.
+Justifica brevemente cada puntuación.
+Calcula la puntuación acumulada con la fórmula: suma de (Peso * Puntuación obtenida).
+Calcula la nota final sobre 20 con la fórmula: (Puntuación acumulada / 30) * 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
