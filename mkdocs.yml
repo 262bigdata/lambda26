@@ -4,10 +4,11 @@ docs_dir: docs
 
 nav:
   - Inicio: index.md
-  - Sílabos:
-      - Sílabo Big Data 2026-1: silabo_bigdata_2026_1.md
-      - Sílabo Big Data 2026-2: silabo_bigdata_2026_2.md
-  - Repositorio 2026-1 (lambdalab): https://github.com/261bigdata/lambdalab/
+  - Guía de Proyecto Sello:
+      - Guía del proyecto: proyecto-sello/index.md
+  - Silabos:
+      - Silabo 2026-1: silabo_bigdata_2026_1.md
+      - Silabo 2026-2: silabo_bigdata_2026_2.md
 
 theme:
   name: material
