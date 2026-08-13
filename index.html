@@ -795,18 +795,18 @@
   
 
 
-<h1 id="big-data-2026-2">Big Data 2026-2</h1>
+<h1 id="big-data-2026-2">Big Data 2026-2<a class="headerlink" href="#big-data-2026-2" title="Permanent link">&para;</a></h1>
 <p>Curso teórico-práctico de Big Data: arquitecturas Lambda/Kappa, procesamiento batch y streaming, observabilidad, analítica/ML distribuida y visualización BI.</p>
 <p><a href="https://github.com/262bigdata/lambda26"><code>lambda26</code></a> es un entorno integrado de procesamiento distribuido en batch y streaming con Spark y Kafka, con laboratorios reproducibles basados en Docker. El curso construye pipelines de datos, gestiona almacenamiento analítico en Parquet, aplica observabilidad y desarrolla soluciones BI/ML distribuidas.</p>
-<h2 id="producto-del-curso">Producto del curso</h2>
+<h2 id="producto-del-curso">Producto del curso<a class="headerlink" href="#producto-del-curso" title="Permanent link">&para;</a></h2>
 <p>Producto del curso = Producto U3:</p>
-<pre><code class="language-text">Sistema Big Data distribuido end-to-end para procesamiento batch y streaming,
+<div class="highlight"><pre><span></span><code>Sistema Big Data distribuido end-to-end para procesamiento batch y streaming,
 analítica/ML, observabilidad y visualización BI para la toma de decisiones.
-</code></pre>
+</code></pre></div>
 <p>Resultado esperado del curso:</p>
 <p>Al finalizar el curso, el estudiante implementa, integra y sustenta una solución Big Data end-to-end que combina pipelines batch distribuidos, ingesta y procesamiento de eventos en tiempo real, analítica/ML a escala, observabilidad técnica y una capa de visualización BI, demostrando valor para la toma de decisiones. El producto se presenta en equipo, pero cada estudiante evidencia y defiende su aporte individual.</p>
-<h2 id="contenido">Contenido</h2>
-<h3 id="u1-arquitecturas-big-data-y-etl-batch-distribuido">U1: Arquitecturas Big Data y ETL batch distribuido</h3>
+<h2 id="contenido">Contenido<a class="headerlink" href="#contenido" title="Permanent link">&para;</a></h2>
+<h3 id="u1-arquitecturas-big-data-y-etl-batch-distribuido">U1: Arquitecturas Big Data y ETL batch distribuido<a class="headerlink" href="#u1-arquitecturas-big-data-y-etl-batch-distribuido" title="Permanent link">&para;</a></h3>
 <p>Producto U1: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</p>
 <p>Resultado esperado U1: el estudiante construye un pipeline batch reproducible con procesamiento distribuido, aplica transformaciones sobre datos a escala, valida la calidad básica de los datos, organiza salidas en formatos analíticos como Parquet y deja un dataset preparado para consumo BI/ML.</p>
 <table>
@@ -851,7 +851,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 </tr>
 </tbody>
 </table>
-<h3 id="u2-sistema-big-data-en-tiempo-real-ingesta-streaming-observabilidad-y-biml">U2: Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML</h3>
+<h3 id="u2-sistema-big-data-en-tiempo-real-ingesta-streaming-observabilidad-y-biml">U2: Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML<a class="headerlink" href="#u2-sistema-big-data-en-tiempo-real-ingesta-streaming-observabilidad-y-biml" title="Permanent link">&para;</a></h3>
 <p>Producto U2: pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.</p>
 <p>Resultado esperado U2: el estudiante implementa un pipeline Big Data en tiempo real que integra ingesta de eventos mediante Kafka, procesamiento distribuido con Spark Structured Streaming, observabilidad con Grafana y estimación de costos operacionales, y prepara salidas BI/ML distribuidas con series de tiempo e inferencia.</p>
 <table>
@@ -908,7 +908,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 </tr>
 </tbody>
 </table>
-<h3 id="u3-integracion-dataops-y-despliegue-del-sistema-final">U3: Integración, DataOps y despliegue del sistema final</h3>
+<h3 id="u3-integracion-dataops-y-despliegue-del-sistema-final">U3: Integración, DataOps y despliegue del sistema final<a class="headerlink" href="#u3-integracion-dataops-y-despliegue-del-sistema-final" title="Permanent link">&para;</a></h3>
 <p>Producto U3 / producto del curso: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</p>
 <p>Resultado esperado U3: el estudiante integra los componentes desarrollados en las unidades anteriores, despliega o empaqueta el sistema mediante prácticas de DataOps/DevOps, prepara una demo end-to-end, documenta la operación del sistema, valida resultados técnicos y analíticos, y sustenta una solución final orientada a la toma de decisiones.</p>
 <table>
@@ -947,80 +947,79 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 </tr>
 </tbody>
 </table>
-<h2 id="arquitectura-lambda26-v2026-1">Arquitectura Lambda26 v2026-1</h2>
-<pre><code class="language-mermaid">flowchart LR
-    subgraph PySparkModule[&quot;uso pyspark&quot;]
+<h2 id="arquitectura-lambda26-v2026-1">Arquitectura Lambda26 v2026-1<a class="headerlink" href="#arquitectura-lambda26-v2026-1" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    subgraph PySparkModule["uso pyspark"]
         direction TB
-        Notebooks[&quot;notebooks/*.ipynb&quot;]
-        Jupyter[&quot;Jupyter&lt;br/&gt;localhost:4488&quot;]
-        Spark[&quot;Spark / PySpark&lt;br/&gt;localhost:4040&quot;]
-        Data[&quot;data/*.csv&quot;]
-        Artifacts[&quot;artifacts/&quot;]
+        Notebooks["notebooks/*.ipynb"]
+        Jupyter["Jupyter&lt;br/&gt;localhost:4488"]
+        Spark["Spark / PySpark&lt;br/&gt;localhost:4040"]
+        Data["data/*.csv"]
+        Artifacts["artifacts/"]
         Notebooks --&gt; Jupyter --&gt; Spark
         Data --&gt; Spark --&gt; Artifacts
     end
 
-    subgraph UseFast[&quot;uso-rapido&quot;]
-        PyQuick[&quot;ec-orden-py&lt;br/&gt;publica / consume&lt;br/&gt;orden-eventos&quot;]
+    subgraph UseFast["uso-rapido"]
+        PyQuick["ec-orden-py&lt;br/&gt;publica / consume&lt;br/&gt;orden-eventos"]
     end
 
-    subgraph UseMS[&quot;uso-ms-sb&quot;]
+    subgraph UseMS["uso-ms-sb"]
         direction TB
-        OrdenMS[&quot;ec-orden-ms&lt;br/&gt;API de ordenes&lt;br/&gt;publica orden-eventos&quot;]
-        OrdenDB[&quot;postgres ordenes dev&lt;br/&gt;localhost:49020&quot;]
-        PagoMS[&quot;ec-pago-ms&lt;br/&gt;API de pagos&lt;br/&gt;consume orden-eventos&lt;br/&gt;publica pago-eventos&quot;]
-        PagoDB[&quot;postgres pagos dev&lt;br/&gt;localhost:49030&quot;]
+        OrdenMS["ec-orden-ms&lt;br/&gt;API de ordenes&lt;br/&gt;publica orden-eventos"]
+        OrdenDB["postgres ordenes dev&lt;br/&gt;localhost:49020"]
+        PagoMS["ec-pago-ms&lt;br/&gt;API de pagos&lt;br/&gt;consume orden-eventos&lt;br/&gt;publica pago-eventos"]
+        PagoDB["postgres pagos dev&lt;br/&gt;localhost:49030"]
         OrdenMS --&gt; OrdenDB
         PagoMS --&gt; PagoDB
     end
 
-    subgraph UseIoT[&quot;uso-atmos&quot;]
-        IoT[&quot;pendiente&quot;]
+    subgraph UseIoT["uso-atmos"]
+        IoT["pendiente"]
     end
 
-    subgraph UseCDC[&quot;uso-replica-cdc&quot;]
-        CDC[&quot;pendiente&lt;br/&gt;MySQL -&gt; Debezium -&gt; Kafka -&gt; PostgreSQL RAW&lt;br/&gt;migración / Spark BI-ML&quot;]
+    subgraph UseCDC["uso-replica-cdc"]
+        CDC["pendiente&lt;br/&gt;MySQL -&gt; Debezium -&gt; Kafka -&gt; PostgreSQL RAW&lt;br/&gt;migración / Spark BI-ML"]
     end
 
-    subgraph KafkaModule[&quot;kafka&quot;]
+    subgraph KafkaModule["kafka"]
         direction TB
-        subgraph KafkaStack[&quot; &quot;]
+        subgraph KafkaStack[" "]
             direction TB
-            Kafka[&quot;Apache Kafka&lt;br/&gt;kafka:9092&lt;br/&gt;localhost:49092&quot;]
-            KafkaUI[&quot;Kafka UI&lt;br/&gt;localhost:48085&quot;]
-            KafkaExporter[&quot;Kafka Exporter&lt;br/&gt;localhost:49308&quot;]
+            Kafka["Apache Kafka&lt;br/&gt;kafka:9092&lt;br/&gt;localhost:49092"]
+            KafkaUI["Kafka UI&lt;br/&gt;localhost:48085"]
+            KafkaExporter["Kafka Exporter&lt;br/&gt;localhost:49308"]
             Kafka --&gt; KafkaUI
             Kafka --&gt; KafkaExporter
         end
     end
 
-    subgraph ObsModule[&quot;obs&quot;]
+    subgraph ObsModule["obs"]
         direction TB
-        subgraph ObsStack[&quot; &quot;]
+        subgraph ObsStack[" "]
             direction TB
-            Prometheus[&quot;Prometheus&lt;br/&gt;localhost:49090&quot;]
-            Grafana[&quot;Grafana&lt;br/&gt;localhost:43000&quot;]
+            Prometheus["Prometheus&lt;br/&gt;localhost:49090"]
+            Grafana["Grafana&lt;br/&gt;localhost:43000"]
             Prometheus --&gt; Grafana
         end
     end
 
-    PySparkModule --&gt;|&quot;U2: streaming consumer&quot;| Kafka
-    UseFast --&gt;|&quot;orden-eventos&quot;| Kafka
-    UseMS --&gt;|&quot;orden-eventos / pago-eventos&quot;| Kafka
-    UseIoT -. &quot;futuro&quot; .-&gt; Kafka
-    UseCDC -. &quot;futuro: migracion CDC&quot; .-&gt; Kafka
-    KafkaExporter --&gt;|&quot;métricas&quot;| Prometheus
+    PySparkModule --&gt;|"U2: streaming consumer"| Kafka
+    UseFast --&gt;|"orden-eventos"| Kafka
+    UseMS --&gt;|"orden-eventos / pago-eventos"| Kafka
+    UseIoT -. "futuro" .-&gt; Kafka
+    UseCDC -. "futuro: migracion CDC" .-&gt; Kafka
+    KafkaExporter --&gt;|"métricas"| Prometheus
 
     style KafkaStack fill:transparent,stroke:transparent,color:transparent
-    style ObsStack fill:transparent,stroke:transparent,color:transparent
-</code></pre>
+    style ObsStack fill:transparent,stroke:transparent,color:transparent</code></pre>
 <ul>
 <li><code>uso-pyspark</code> es el módulo base (U1): notebooks, Jupyter y Spark local, con datos en <code>data/</code> y salidas en <code>artifacts/</code>.</li>
 <li><code>uso-rapido</code> y <code>uso-ms-sb</code> publican y consumen eventos de negocio (<code>orden-eventos</code>, <code>pago-eventos</code>) contra Kafka — se activan desde S6.</li>
 <li><code>uso-atmos</code> (eventos IoT/sensores) y <code>uso-replica-cdc</code> (migración CDC) quedan pendientes como extensiones del laboratorio; se retoman según el alcance de cada equipo.</li>
 <li><code>kafka</code> es la columna vertebral de ingesta y <code>obs</code> (Prometheus/Grafana) da observabilidad sobre el Kafka Exporter — ambos se integran desde U2.</li>
 </ul>
-<h2 id="flujo-de-trabajo">Flujo de trabajo</h2>
+<h2 id="flujo-de-trabajo">Flujo de trabajo<a class="headerlink" href="#flujo-de-trabajo" title="Permanent link">&para;</a></h2>
 <ol>
 <li>El equipo decide la arquitectura Big Data (Lambda o Kappa) para su propio caso de negocio, apoyándose en el módulo <code>uso-pyspark</code> para reconocer el ecosistema (S1).</li>
 <li>El procesamiento batch se construye con PySpark sobre <code>uso-pyspark</code>: extracción, transformaciones, particionamiento, formatos analíticos y un primer modelo ML distribuido (S2-S5).</li>
@@ -1028,7 +1027,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 <li>El procesamiento streaming con Spark Structured Streaming, la observabilidad (<code>obs</code>) y las salidas BI/ML distribuidas se integran en U2 (S8-S12).</li>
 <li>El sistema completo se integra, se estabiliza con prácticas DataOps/DevOps y se defiende técnicamente en U3 (S13-S16).</li>
 </ol>
-<h2 id="enlaces">Enlaces</h2>
+<h2 id="enlaces">Enlaces<a class="headerlink" href="#enlaces" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="silabo_bigdata_2026_2/">Sílabo 2026-2</a></li>
 <li><a href="sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa/">S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming</a></li>
