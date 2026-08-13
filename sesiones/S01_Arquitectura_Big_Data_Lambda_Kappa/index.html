@@ -1702,7 +1702,7 @@ services:
 <pre><code class="language-powershell">docker compose up -d
 </code></pre>
 <p>Accede igual por <code>http://localhost:4488/lab?token=sintoken</code> (JupyterLab) o <code>http://localhost:4488/?token=sintoken</code> (Jupyter Notebook).</p>
-<p>Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas, en S2 empiezas a escribir PySpark directamente sobre él, sin perder tiempo de clase configurando nada.</p>
+<p>Este es el único entorno que se instala en la Unidad 1: <code>pyspark/compose.yml</code> corre PySpark y Jupyter solos, sin Kafka. El módulo <code>kafka</code> y el override <code>pyspark/compose.kafka.yml</code> (que conecta PySpark a la red de Kafka) se instalan recién en la Unidad 2 (S6), cuando el curso pasa de batch a streaming — no hace falta levantarlos ahora. Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas, en S2 empiezas a escribir PySpark directamente sobre él, sin perder tiempo de clase configurando nada.</p>
 <h3 id="32-reconocer-el-ecosistema-de-lambda26">3.2 Reconocer el ecosistema de <code>lambda26</code></h3>
 <p><strong>Producto del paso:</strong> mapa del flujo tecnológico del laboratorio.</p>
 <p>Registra el flujo base del ecosistema:</p>
@@ -1717,7 +1717,7 @@ services:
 </ol>
 <h3 id="33-analizar-el-caso-guiado-y-clasificar-batchstreaming">3.3 Analizar el caso guiado y clasificar batch/streaming</h3>
 <p><strong>Producto del paso:</strong> clasificación justificada del caso.</p>
-<p>Retoma los casos de uso propios de <code>lambda26</code>:</p>
+<p>Retoma los casos de uso propios de <code>lambda26</code> (los analizas por su documentación, no los ejecutas hoy — <code>uso-rapido</code> y <code>uso-ms-sb</code> necesitan Kafka, que recién se instala en la Unidad 2):</p>
 <ul>
 <li><code>uso-rapido</code>: <code>ec-orden-py</code> publica y consume <code>orden-eventos</code> por Kafka.</li>
 <li><code>uso-ms-sb</code>: <code>ec-orden-ms</code> publica <code>orden-eventos</code>; <code>ec-pago-ms</code> consume <code>orden-eventos</code> y publica <code>pago-eventos</code>; cada microservicio guarda su propio histórico en su base Postgres.</li>
