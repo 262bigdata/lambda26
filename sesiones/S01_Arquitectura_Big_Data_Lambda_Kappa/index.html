@@ -560,10 +560,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#11-contexto" class="md-nav__link">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.1 Contexto
+        1.1 Presentación de la sesión
       
     </span>
   </a>
@@ -627,10 +627,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#161-caso-plataforma-de-streaming-de-video" class="md-nav__link">
+  <a href="#161-caso-uber-y-el-almacenamiento-por-niveles-con-kafka" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.6.1 Caso: plataforma de streaming de video
+        1.6.1 Caso: Uber y el almacenamiento por niveles con Kafka
       
     </span>
   </a>
@@ -985,10 +985,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#11-contexto" class="md-nav__link">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.1 Contexto
+        1.1 Presentación de la sesión
       
     </span>
   </a>
@@ -1052,10 +1052,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#161-caso-plataforma-de-streaming-de-video" class="md-nav__link">
+  <a href="#161-caso-uber-y-el-almacenamiento-por-niveles-con-kafka" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.6.1 Caso: plataforma de streaming de video
+        1.6.1 Caso: Uber y el almacenamiento por niveles con Kafka
       
     </span>
   </a>
@@ -1378,8 +1378,8 @@
 <h1 id="s1-arquitectura-big-data-lambda-y-kappa-batch-vs-streaming">S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming</h1>
 <h2 id="1-introduccion">1. Introducción</h2>
 <p>Tiempo: 20 min.</p>
-<h3 id="11-contexto">1.1 Contexto</h3>
-<p>Big Data no empieza eligiendo Spark o Kafka. Empieza decidiendo qué arquitectura resuelve el problema real: ¿el caso necesita solo el pasado (batch), solo el presente (streaming), o ambos? Esta sesión construye esa primera decisión arquitectónica para el laboratorio <code>lambda26</code>.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión</h3>
+<p>Esta sesión abre la Unidad 1 del proyecto del curso: se decide la primera arquitectura Big Data (Lambda o Kappa). Con esa decisión queda establecida la regla batch/streaming que ordena el pipeline construido en las sesiones siguientes de la unidad. El porqué de decidir la arquitectura antes de elegir herramientas se desarrolla en 1.6, a partir del caso de la plataforma de streaming de video — esta sesión resuelve solo esa primera decisión, no el pipeline completo.</p>
 <h3 id="12-indice">1.2 Índice</h3>
 <ol>
 <li>Ecosistema y arquitectura Big Data.</li>
@@ -1423,30 +1423,33 @@
 </tbody>
 </table>
 <h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión</h3>
-<h4 id="161-caso-plataforma-de-streaming-de-video">1.6.1 Caso: plataforma de streaming de video</h4>
-<p>Una plataforma similar a Netflix recibe miles de eventos por segundo: reproducciones, búsquedas, clics en recomendaciones y errores de reproducción. La empresa necesita analizar datos históricos y eventos en tiempo real para mejorar su servicio.</p>
-<p>Pregunta guía:</p>
-<pre><code class="language-text">¿Qué arquitectura Big Data debería utilizar esta plataforma: Lambda o Kappa?
-</code></pre>
+<h4 id="161-caso-uber-y-el-almacenamiento-por-niveles-con-kafka">1.6.1 Caso: Uber y el almacenamiento por niveles con Kafka</h4>
+<p>Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de sus sistemas en tiempo real: la misma plataforma alimenta el procesamiento histórico y el procesamiento de eventos en vivo, como dos sistemas separados. Para sostener esa escala sin encarecer el clúster, aplica almacenamiento por niveles (<em>tiered storage</em>): los eventos recientes quedan en el disco local de los brokers (horas), mientras el histórico se mueve a almacenamiento remoto más barato (S3/GCS/HDFS) por días o meses, sin perder la capacidad de leerlo directamente desde Kafka. La idea de <code>lambda26</code> es construir un pipeline con ese mismo espíritu: batch y tiempo real como sistemas separados, ambos alimentados por Kafka.</p>
+<p><strong>Figura 1. Arquitectura de Kafka en Uber: productores, pipeline batch y pipeline en tiempo real</strong></p>
+<p><img alt="Arquitectura de Kafka en Uber: productores, pipeline batch y pipeline en tiempo real" src="https://lh7-us.googleusercontent.com/docsz/AD_4nXePSpSp72unfaVqK7tofbbbOpMaZLJ7qYJ2Es-Chg3CHBeZ9kcJDZ9ouvPRYs-CarI8bAqXs2459rJ0_QrsgBaUwqikE5fwYSianNkl1u6Ehbjz_yH6XuWJGn54P5kCaRSaBrCgeVPN4q2QC_RDu9ag1YgU?key=kis14CJAvWJjUiCdmN0jHg" /></p>
+<p><strong>Productores</strong> (generan los eventos hacia Kafka): Rider App, Driver App, API/Servicios, Dispatch, Mapping &amp; Logistics, y las bases de datos operacionales (Schemaless MySQL, Cassandra).</p>
+<p><strong>Consumidores</strong> (leen desde Kafka, ya separados en dos pipelines): el pipeline en tiempo real (Pub/Sub, Flink, ELK) alimenta la app móvil, alertas/dashboards, analítica en tiempo real y debugging; el pipeline batch (Hadoop) alimenta aplicaciones de ciencia de datos, exploración ad-hoc y reportes analíticos. Ambos pipelines leen del mismo Kafka, pero son sistemas separados — por eso es Lambda.</p>
+<p>Fuente: <a href="https://www.uber.com/us/en/blog/kafka-tiered-storage/">Kafka tiered storage at Uber</a>.</p>
 <p><strong>Preguntas de análisis</strong></p>
 <p><strong>Activación de conocimientos previos</strong></p>
 <ol>
-<li>¿Qué problemas tendría esta plataforma si solo analizara datos históricos (batch)?</li>
-<li>¿Qué problemas tendría si solo procesara eventos en tiempo real (streaming), sin histórico?</li>
+<li>¿Qué problema resuelve separar el almacenamiento reciente (rápido, en el broker) del histórico (barato, remoto) dentro de la misma plataforma Kafka?</li>
+<li>¿Qué pasaría si Uber tuviera que guardar todo el histórico en el disco local de los brokers, sin niveles de almacenamiento?</li>
 </ol>
 <p><strong>Comprensión de arquitecturas Big Data</strong></p>
 <ol>
-<li>¿Qué arquitectura elegirías tú para este caso y por qué?</li>
+<li>¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.4.1.</li>
+<li>¿En qué escenario convendría eliminar la capa batch separada y reprocesar todo desde Kafka (Kappa) en vez de mantener ambos sistemas?</li>
 </ol>
 <h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso</h3>
 <ul>
 <li>Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.</li>
-<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
 <li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
 <li>Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio.</li>
 </ul>
 <p>Roadmap del producto de unidad:</p>
-<p><strong>Figura 1. Roadmap del producto de la unidad U1</strong></p>
+<p><strong>Figura 2. Roadmap del producto de la unidad U1</strong></p>
 <pre><code class="language-mermaid">flowchart TB
     Arquitectura[&quot;Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;HOY&quot;]
     PySpark[&quot;Fundamentos PySpark&lt;br/&gt;S2&quot;]
@@ -1498,17 +1501,7 @@
 <p>Una solución Big Data es un flujo de trabajo con 5 etapas:</p>
 <pre><code class="language-text">Fuente de datos -&gt; Ingesta / extracción -&gt; Almacenamiento -&gt; Procesamiento -&gt; Visualización / consumo
 </code></pre>
-<p>En <code>lambda26</code>, ese flujo se implementa con esta secuencia de tecnologías:</p>
-<p><strong>Figura 2. Ecosistema tecnológico de lambda26, de los eventos de usuario al dashboard</strong></p>
-<pre><code class="language-mermaid">flowchart LR
-    Usuarios[&quot;Usuarios /&lt;br/&gt;eventos&quot;]
-    Kafka[&quot;Kafka&lt;br/&gt;ingesta&quot;]
-    Spark[&quot;Spark&lt;br/&gt;procesamiento distribuido&quot;]
-    DataLake[&quot;Data Lake /&lt;br/&gt;base de datos&quot;]
-    Dashboard[&quot;Dashboard /&lt;br/&gt;aplicaciones&quot;]
-
-    Usuarios --&gt; Kafka --&gt; Spark --&gt; DataLake --&gt; Dashboard
-</code></pre>
+<p>En <code>lambda26</code>, ese flujo se implementa con el entorno reproducible LambdaLab: procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana — arquitectura completa en <a href="../../#arquitectura-lambda26-v2026-1">Arquitectura Lambda26 v2026-1</a>, en el índice del curso. Hoy usamos solo el módulo <code>uso-pyspark</code> para reconocer el ecosistema; los módulos <code>uso-rapido</code> y <code>uso-ms-sb</code> (eventos vía Kafka) se retoman a partir de S6-S7, y <code>uso-atmos</code>/<code>uso-replica-cdc</code> quedan pendientes como extensiones futuras del laboratorio.</p>
 <h3 id="22-batch-vs-streaming">2.2 Batch vs. Streaming</h3>
 <p><strong>Tabla 3. Batch vs. streaming</strong></p>
 <table>
