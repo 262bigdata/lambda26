@@ -749,10 +749,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#31-configurar-y-verificar-el-entorno-lambdalab-uso-pyspark" class="md-nav__link">
+  <a href="#31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3.1 Configurar y verificar el entorno LambdaLab (uso-pyspark)
+        3.1 Configurar y verificar el entorno lambda26 (uso-pyspark)
       
     </span>
   </a>
@@ -1185,10 +1185,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#31-configurar-y-verificar-el-entorno-lambdalab-uso-pyspark" class="md-nav__link">
+  <a href="#31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3.1 Configurar y verificar el entorno LambdaLab (uso-pyspark)
+        3.1 Configurar y verificar el entorno lambda26 (uso-pyspark)
       
     </span>
   </a>
@@ -1434,7 +1434,7 @@
 </tr>
 <tr>
 <td>Clase presencial</td>
-<td>Construcción guiada de la decisión arquitectónica: entorno LambdaLab, ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema.</td>
+<td>Construcción guiada de la decisión arquitectónica: entorno <code>lambda26</code>, ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema.</td>
 <td>Pasos 3.1 a 3.6 de esta guía.</td>
 </tr>
 <tr>
@@ -1522,8 +1522,8 @@
 <p>Una solución Big Data es un flujo de trabajo con 5 etapas:</p>
 <div class="highlight"><pre><span></span><code>Fuente de datos -&gt; Ingesta / extracción -&gt; Almacenamiento -&gt; Procesamiento -&gt; Visualización / consumo
 </code></pre></div>
-<p>En <code>lambda26</code>, ese flujo se implementa con el entorno reproducible LambdaLab, que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:</p>
-<p><strong>Figura 3. Arquitectura Lambda26 v2026-1</strong></p>
+<p>En <code>lambda26</code>, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:</p>
+<p><strong>Figura 3. Arquitectura <code>lambda26</code></strong></p>
 <pre class="mermaid"><code>flowchart LR
     subgraph PySparkModule["uso pyspark"]
         direction TB
@@ -1667,15 +1667,15 @@
 <p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía el análisis de los casos de uso propios de <code>lambda26</code> y la aplicación de la regla de decisión paso a paso frente a la clase; los estudiantes replican cada paso sobre el mismo caso, verificando su clasificación batch/streaming y su elección de arquitectura antes de proponer tecnologías y el diagrama de flujo.</p>
 <p><strong>Actividades para realizar:</strong></p>
 <ul>
-<li><strong>3.1</strong> Configurar y verificar el entorno LambdaLab (<code>uso-pyspark</code>).</li>
+<li><strong>3.1</strong> Configurar y verificar el entorno <code>lambda26</code> (<code>uso-pyspark</code>).</li>
 <li><strong>3.2</strong> Reconocer el ecosistema de <code>lambda26</code>.</li>
 <li><strong>3.3</strong> Analizar el caso guiado y clasificar batch/streaming.</li>
 <li><strong>3.4</strong> Aplicar la regla de decisión.</li>
 <li><strong>3.5</strong> Proponer tecnologías y diagrama de flujo.</li>
 <li><strong>3.6</strong> Completar la plantilla de propuesta.</li>
 </ul>
-<h3 id="31-configurar-y-verificar-el-entorno-lambdalab-uso-pyspark">3.1 Configurar y verificar el entorno LambdaLab (<code>uso-pyspark</code>)<a class="headerlink" href="#31-configurar-y-verificar-el-entorno-lambdalab-uso-pyspark" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> entorno LambdaLab funcionando y verificado (Jupyter + Spark).</p>
+<h3 id="31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark">3.1 Configurar y verificar el entorno <code>lambda26</code> (<code>uso-pyspark</code>)<a class="headerlink" href="#31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando y verificado (Jupyter + Spark).</p>
 <p>Requisito previo: Docker Desktop instalado y corriendo, y el repositorio <code>lambda26</code> clonado en tu equipo.</p>
 <p>Desde la raíz del repositorio, levanta el laboratorio PySpark:</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="p">-</span><span class="n">-build</span>
