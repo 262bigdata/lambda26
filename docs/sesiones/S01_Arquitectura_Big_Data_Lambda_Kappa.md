@@ -4,9 +4,9 @@
 
 Tiempo: 20 min.
 
-### 1.1 Contexto
+### 1.1 Presentación de la sesión
 
-Big Data no empieza eligiendo Spark o Kafka. Empieza decidiendo qué arquitectura resuelve el problema real: ¿el caso necesita solo el pasado (batch), solo el presente (streaming), o ambos? Esta sesión construye esa primera decisión arquitectónica para el laboratorio `lambda26`.
+Esta sesión abre la Unidad 1 del proyecto del curso: se decide la primera arquitectura Big Data (Lambda o Kappa). Con esa decisión queda establecida la regla batch/streaming que ordena el pipeline construido en las sesiones siguientes de la unidad. El porqué de decidir la arquitectura antes de elegir herramientas se desarrolla en 1.6, a partir del caso de la plataforma de streaming de video — esta sesión resuelve solo esa primera decisión, no el pipeline completo.
 
 ### 1.2 Índice
 
@@ -37,37 +37,42 @@ Diagrama de arquitectura Big Data (Lambda o Kappa) para un caso de negocio, con 
 
 ### 1.6 Motivación de la sesión
 
-#### 1.6.1 Caso: plataforma de streaming de video
+#### 1.6.1 Caso: Uber y el almacenamiento por niveles con Kafka
 
-Una plataforma similar a Netflix recibe miles de eventos por segundo: reproducciones, búsquedas, clics en recomendaciones y errores de reproducción. La empresa necesita analizar datos históricos y eventos en tiempo real para mejorar su servicio.
+Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de sus sistemas en tiempo real: la misma plataforma alimenta el procesamiento histórico y el procesamiento de eventos en vivo, como dos sistemas separados. Para sostener esa escala sin encarecer el clúster, aplica almacenamiento por niveles (*tiered storage*): los eventos recientes quedan en el disco local de los brokers (horas), mientras el histórico se mueve a almacenamiento remoto más barato (S3/GCS/HDFS) por días o meses, sin perder la capacidad de leerlo directamente desde Kafka. La idea de `lambda26` es construir un pipeline con ese mismo espíritu: batch y tiempo real como sistemas separados, ambos alimentados por Kafka.
 
-Pregunta guía:
+**Figura 1. Arquitectura de Kafka en Uber: productores, pipeline batch y pipeline en tiempo real**
 
-```text
-¿Qué arquitectura Big Data debería utilizar esta plataforma: Lambda o Kappa?
-```
+![Arquitectura de Kafka en Uber: productores, pipeline batch y pipeline en tiempo real](https://lh7-us.googleusercontent.com/docsz/AD_4nXePSpSp72unfaVqK7tofbbbOpMaZLJ7qYJ2Es-Chg3CHBeZ9kcJDZ9ouvPRYs-CarI8bAqXs2459rJ0_QrsgBaUwqikE5fwYSianNkl1u6Ehbjz_yH6XuWJGn54P5kCaRSaBrCgeVPN4q2QC_RDu9ag1YgU?key=kis14CJAvWJjUiCdmN0jHg)
+
+**Productores** (generan los eventos hacia Kafka): Rider App, Driver App, API/Servicios, Dispatch, Mapping & Logistics, y las bases de datos operacionales (Schemaless MySQL, Cassandra).
+
+**Consumidores** (leen desde Kafka, ya separados en dos pipelines): el pipeline en tiempo real (Pub/Sub, Flink, ELK) alimenta la app móvil, alertas/dashboards, analítica en tiempo real y debugging; el pipeline batch (Hadoop) alimenta aplicaciones de ciencia de datos, exploración ad-hoc y reportes analíticos. Ambos pipelines leen del mismo Kafka, pero son sistemas separados — por eso es Lambda.
+
+Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tiered-storage/).
 
 **Preguntas de análisis**
 
 **Activación de conocimientos previos**
 
-1. ¿Qué problemas tendría esta plataforma si solo analizara datos históricos (batch)?
-2. ¿Qué problemas tendría si solo procesara eventos en tiempo real (streaming), sin histórico?
+1. ¿Qué problema resuelve separar el almacenamiento reciente (rápido, en el broker) del histórico (barato, remoto) dentro de la misma plataforma Kafka?
+2. ¿Qué pasaría si Uber tuviera que guardar todo el histórico en el disco local de los brokers, sin niveles de almacenamiento?
 
 **Comprensión de arquitecturas Big Data**
 
-1. ¿Qué arquitectura elegirías tú para este caso y por qué?
+1. ¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.4.1.
+2. ¿En qué escenario convendría eliminar la capa batch separada y reprocesar todo desde Kafka (Kappa) en vez de mantener ambos sistemas?
 
 ### 1.7 Ubicación en el curso
 
 - Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.
-- Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.
 - Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.
+- Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.
 - Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio.
 
 Roadmap del producto de unidad:
 
-**Figura 1. Roadmap del producto de la unidad U1**
+**Figura 2. Roadmap del producto de la unidad U1**
 
 ```mermaid
 flowchart TB
@@ -109,20 +114,7 @@ Una solución Big Data es un flujo de trabajo con 5 etapas:
 Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo
 ```
 
-En `lambda26`, ese flujo se implementa con esta secuencia de tecnologías:
-
-**Figura 2. Ecosistema tecnológico de lambda26, de los eventos de usuario al dashboard**
-
-```mermaid
-flowchart LR
-    Usuarios["Usuarios /<br/>eventos"]
-    Kafka["Kafka<br/>ingesta"]
-    Spark["Spark<br/>procesamiento distribuido"]
-    DataLake["Data Lake /<br/>base de datos"]
-    Dashboard["Dashboard /<br/>aplicaciones"]
-
-    Usuarios --> Kafka --> Spark --> DataLake --> Dashboard
-```
+En `lambda26`, ese flujo se implementa con el entorno reproducible LambdaLab: procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana — arquitectura completa en [Arquitectura Lambda26 v2026-1](../index.md#arquitectura-lambda26-v2026-1), en el índice del curso. Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; los módulos `uso-rapido` y `uso-ms-sb` (eventos vía Kafka) se retoman a partir de S6-S7, y `uso-atmos`/`uso-replica-cdc` quedan pendientes como extensiones futuras del laboratorio.
 
 ### 2.2 Batch vs. Streaming
 
