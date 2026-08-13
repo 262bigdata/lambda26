@@ -27,11 +27,13 @@ Diagrama de arquitectura Big Data (Lambda o Kappa) para un caso de negocio, con 
 
 ### 1.5 Metodología
 
-| Fase | Actividades | Orientaciones | Material |
-|---|---|---|---|
-| Revisión previa individual | Leer el sílabo de la Unidad 1 y el caso de la plataforma de streaming de video (ver 1.6). | Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión. | Sílabo Big Data U1. |
-| Clase presencial | Construcción guiada de la decisión arquitectónica: ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. | Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.5 de esta guía. |
-| Evaluación formativa | Revisión en clase de la arquitectura seleccionada y su justificación. | La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.2. | Plantilla de evidencia individual (4.1), rúbrica de evaluación (5.4). |
+**Tabla 1. Metodología de la sesión**
+
+| Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
+|---|---|---|
+| Revisión previa individual | Leer el sílabo de la Unidad 1 y el caso de la plataforma de streaming de video (ver 1.6). Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión. | Sílabo Big Data U1. |
+| Clase presencial | Construcción guiada de la decisión arquitectónica: ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.5 de esta guía. |
+| Evaluación formativa | Revisión en clase de la arquitectura seleccionada y su justificación. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
 
@@ -45,11 +47,16 @@ Pregunta guía:
 ¿Qué arquitectura Big Data debería utilizar esta plataforma: Lambda o Kappa?
 ```
 
-Preguntas para los estudiantes:
+**Preguntas de análisis**
+
+**Activación de conocimientos previos**
 
 1. ¿Qué problemas tendría esta plataforma si solo analizara datos históricos (batch)?
 2. ¿Qué problemas tendría si solo procesara eventos en tiempo real (streaming), sin histórico?
-3. ¿Qué arquitectura elegirías tú para este caso y por qué?
+
+**Comprensión de arquitecturas Big Data**
+
+1. ¿Qué arquitectura elegirías tú para este caso y por qué?
 
 ### 1.7 Ubicación en el curso
 
@@ -59,6 +66,8 @@ Preguntas para los estudiantes:
 - Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio.
 
 Roadmap del producto de unidad:
+
+**Figura 1. Roadmap del producto de la unidad U1**
 
 ```mermaid
 flowchart TB
@@ -84,6 +93,8 @@ Tiempo: 25 min.
 
 Big Data se refiere al procesamiento de grandes volúmenes de datos que no pueden manejarse eficientemente con herramientas tradicionales. Se resume con las **5V**:
 
+**Tabla 2. Las 5V del Big Data**
+
 | V | Significa |
 |---|---|
 | Volumen | Cantidad de datos generados. |
@@ -100,6 +111,8 @@ Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> V
 
 En `lambda26`, ese flujo se implementa con esta secuencia de tecnologías:
 
+**Figura 2. Ecosistema tecnológico de lambda26, de los eventos de usuario al dashboard**
+
 ```mermaid
 flowchart LR
     Usuarios["Usuarios /<br/>eventos"]
@@ -112,6 +125,8 @@ flowchart LR
 ```
 
 ### 2.2 Batch vs. Streaming
+
+**Tabla 3. Batch vs. streaming**
 
 | Enfoque | Cómo trabaja | Ejemplos |
 |---|---|---|
@@ -147,6 +162,8 @@ Regla de decisión:
 - Si el caso necesita histórico + tiempo real -> **Lambda**.
 - Si todo el caso son eventos en tiempo real -> **Kappa**.
 
+**Tabla 4. Comparación entre arquitectura Lambda y Kappa**
+
 | Aspecto | Lambda | Kappa |
 |---|---|---|
 | Histórico | Sí (batch layer) | No como capa separada |
@@ -159,15 +176,19 @@ Regla de decisión:
 
 Tiempo: 2h.
 
-El docente guía el análisis del caso de la plataforma de streaming y los estudiantes construyen la primera propuesta de arquitectura Big Data.
+**Actividad:** propuesta guiada de arquitectura Big Data (Lambda o Kappa) para el caso de la plataforma de streaming de video.
 
-Hoja de ruta de la sesión práctica:
+**Propósito de la actividad:** aplicar la regla de decisión batch/streaming al caso de la plataforma de streaming de video para seleccionar y justificar una arquitectura Big Data, y proponer las tecnologías coherentes con esa elección.
 
-- 3.1 Reconocer el ecosistema de `lambda26`.
-- 3.2 Analizar el caso guiado y clasificar batch/streaming.
-- 3.3 Aplicar la regla de decisión.
-- 3.4 Proponer tecnologías y diagrama de flujo.
-- 3.5 Completar la plantilla de propuesta.
+**Orientaciones metodológicas:** en clase, el docente guía el análisis del caso de la plataforma de streaming y la aplicación de la regla de decisión paso a paso frente a la clase; los estudiantes replican cada paso sobre el mismo caso, verificando su clasificación batch/streaming y su elección de arquitectura antes de proponer tecnologías y el diagrama de flujo.
+
+**Actividades para realizar:**
+
+- **3.1** Reconocer el ecosistema de `lambda26`.
+- **3.2** Analizar el caso guiado y clasificar batch/streaming.
+- **3.3** Aplicar la regla de decisión.
+- **3.4** Proponer tecnologías y diagrama de flujo.
+- **3.5** Completar la plantilla de propuesta.
 
 ### 3.1 Reconocer el ecosistema de `lambda26`
 
@@ -233,7 +254,25 @@ Diagrama simple:
 
 Tiempo: 2h fuera del aula.
 
-### 4.1 Plantilla de evidencia individual
+### 4.1 Actividad
+
+Replicación autónoma de la decisión arquitectónica Big Data (clasificación batch/streaming, regla de decisión, arquitectura Lambda o Kappa) sobre un caso de negocio propio, documentada en evidencia individual.
+
+Completa y evidencia estas tareas:
+
+1. Elegir un caso de negocio distinto al trabajado en clase (por ejemplo: comercio electrónico, sensores IoT, red social o transporte inteligente).
+2. Describir qué datos genera el caso elegido y clasificarlo como batch, streaming o ambos, con justificación (equivalente a 3.2).
+3. Aplicar la regla de decisión y seleccionar la arquitectura (Lambda o Kappa), justificando la elección (equivalente a 3.3).
+4. Proponer tecnologías coherentes con la arquitectura elegida y construir el diagrama de flujo (equivalente a 3.4).
+5. Completar la plantilla de propuesta arquitectónica, incluyendo riesgos y supuestos observados (equivalente a 3.5).
+
+### 4.2 Propósito
+
+Que cada estudiante demuestre, de forma individual y fuera del aula, que puede reproducir el patrón de decisión arquitectónica construido en clase sin el acompañamiento del docente.
+
+Cada estudiante aplica la clasificación batch/streaming y la regla de decisión Lambda/Kappa a un caso de negocio propio, distinto al trabajado en clase.
+
+### 4.3 Indicaciones
 
 Entrega un PDF con el siguiente nombre:
 
@@ -241,43 +280,32 @@ Entrega un PDF con el siguiente nombre:
 S01_Equipo##_ApellidoNombre.pdf
 ```
 
-El PDF debe usar esta estructura. La primera sección define el trabajo autónomo; completa las demás con tus evidencias.
+Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.
 
-#### 4.1.1 Datos del estudiante
+#### 4.3.1 Estructura del informe
+
+**Datos del estudiante**
 
 - Nombre:
 - Equipo:
 - Sesión: S01 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
 - Rol o aporte realizado:
-- Link del repositorio:
+- Link de GitHub:
 
-#### 4.1.2 Trabajo autónomo realizado
+**Evidencia técnica**
 
-Elige uno de estos casos, distinto al trabajado en clase:
+Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6) — así queda claro qué evidencia corresponde a cada criterio evaluado:
 
-- Comercio electrónico.
-- Sensores IoT.
-- Red social.
-- Transporte inteligente.
+1. *Clasificación batch/streaming*
+    - Clasificación batch/streaming del caso elegido, con justificación (equivalente a 3.2).
+2. *Arquitectura seleccionada y regla de decisión aplicada*
+    - Arquitectura seleccionada (Lambda o Kappa) y regla de decisión aplicada, con justificación (equivalente a 3.3).
+3. *Tecnologías propuestas y diagrama de flujo*
+    - Tecnologías propuestas y diagrama de flujo simple (equivalente a 3.4).
+4. *Plantilla de propuesta completa*
+    - Plantilla de propuesta arquitectónica completa, incluyendo riesgos y supuestos (equivalente a 3.5).
 
-Luego define:
-
-1. Qué datos genera.
-2. Si necesita batch, streaming o ambos.
-3. Si conviene Lambda o Kappa.
-4. Qué tecnologías propones.
-5. Qué riesgos o supuestos observas.
-
-#### 4.1.3 Evidencia técnica
-
-Incluye capturas o extractos con una breve explicación debajo de cada uno:
-
-- Clasificación batch/streaming del caso elegido, con justificación (equivalente a 3.2).
-- Arquitectura seleccionada y regla de decisión aplicada (equivalente a 3.3).
-- Tecnologías propuestas y diagrama de flujo simple (equivalente a 3.4).
-- Plantilla de propuesta completa (equivalente a 3.5).
-
-#### 4.1.4 Error o hallazgo
+**Error o hallazgo**
 
 Describe al menos un riesgo o supuesto que identificaste al analizar tu caso:
 
@@ -285,7 +313,7 @@ Describe al menos un riesgo o supuesto que identificaste al analizar tu caso:
 - Cómo lo identificaste.
 - Cómo lo documentaste o qué supuesto tomaste.
 
-#### 4.1.5 Reflexión técnica breve
+**Reflexión técnica breve**
 
 Responde en 5 a 8 líneas:
 
@@ -293,7 +321,7 @@ Responde en 5 a 8 líneas:
 ¿Qué arquitectura usarías para un sistema de sensores IoT y por qué?
 ```
 
-### 4.2 Criterios mínimos de aceptación
+### 4.4 Criterios mínimos de aceptación
 
 La evidencia individual se considera completa si:
 
@@ -301,44 +329,12 @@ La evidencia individual se considera completa si:
 - La clasificación batch/streaming está justificada con datos del caso.
 - La arquitectura seleccionada aplica correctamente la regla de decisión.
 - Las tecnologías propuestas son coherentes con la arquitectura elegida.
-- La evidencia identifica un aporte individual verificable.
+- Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.
+- Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.
+- Incluye un error o hallazgo técnico diagnosticado.
+- Incluye la reflexión técnica breve solicitada.
 
-## 5. Cierre evaluativo
-
-Tiempo: 20 min.
-
-Esta sección conecta el resultado de aprendizaje de la sesión con el producto que debe evidenciar cada estudiante.
-
-### 5.1 Resultados esperados
-
-Al finalizar la sesión, el estudiante debe demostrar que:
-
-- Explica el ecosistema Big Data (5V y flujo de trabajo).
-- Distingue batch de streaming con ejemplos.
-- Explica las arquitecturas Lambda y Kappa (capas, ventajas, desventajas).
-- Aplica la regla de decisión a un caso real.
-- Propone tecnologías coherentes con la arquitectura elegida.
-
-### 5.2 Evidencia del producto de sesión
-
-Cada estudiante entrega un PDF individual siguiendo la plantilla de la sección 4.1.
-
-Nombre del archivo:
-
-```text
-S01_Equipo##_ApellidoNombre.pdf
-```
-
-La evidencia debe demostrar:
-
-- Arquitectura Big Data seleccionada y justificada.
-- Aporte individual verificable.
-- Tecnologías propuestas y diagrama de flujo.
-- Reflexión técnica breve.
-
-La revisión se realiza con los criterios mínimos de aceptación de la sección 4.2 y la rúbrica de la sección 5.4.
-
-### 5.3 Preguntas de defensa y reflexión
+### 4.5 Preguntas de defensa
 
 1. ¿En qué casos una empresa necesitaría procesamiento en tiempo real?
 2. ¿Qué ventajas tiene combinar batch y streaming?
@@ -346,28 +342,47 @@ La revisión se realiza con los criterios mínimos de aceptación de la sección
 4. ¿Qué desventaja tiene Lambda frente a Kappa?
 5. ¿Qué tecnología usarías para la ingesta de eventos y por qué?
 
-### 5.4 Rúbrica de evaluación
+### 4.6 Rúbrica de evaluación
 
-| Dimensión | Peso | 3 - Logro destacado | 2 - Logro | 1 - Proceso | 0 - Inicio | Puntuación obtenida |
+**Tabla 5. Rúbrica de evaluación**
+
+| Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
-| 1. Ecosistema Big Data | 2 | Explica con precisión las 5V y el flujo de trabajo completo. | Explica el flujo de trabajo de forma correcta. | Explicación parcial del ecosistema. | No explica el ecosistema. | |
-| 2. Clasificación batch/streaming | 2 | Clasifica el caso con justificación clara y basada en el caso. | Clasifica el caso correctamente. | Clasificación imprecisa o sin justificar. | No clasifica el caso. | |
-| 3. Arquitectura Lambda y Kappa | 2 | Explica capas, ventajas y desventajas de ambas arquitecturas. | Explica correctamente ambas arquitecturas. | Explicación parcial de una arquitectura. | No explica las arquitecturas. | |
-| 4. Aplicación de la regla de decisión | 2 | Aplica la regla correctamente y justifica con solidez técnica. | Aplica la regla correctamente. | Aplica la regla con justificación débil. | No aplica la regla de decisión. | |
-| 5. Aporte individual | 1 | Aporte verificable y bien documentado. | Aporte identificable. | Aporte mencionado de forma general. | Sin aporte individual. | |
-| 6. Orden y reflexión | 1 | Evidencia clara, ordenada y reflexión técnica precisa. | Evidencia comprensible. | Evidencia desordenada o superficial. | Sin evidencia suficiente. | |
+| 1. Clasificación batch/streaming* | 25 | Clasifica el caso propio (batch, streaming o ambos) con justificación clara y basada en los datos reales que genera. | Clasifica correctamente el caso propio, con justificación breve. | Clasificación imprecisa o sin justificar. | No clasifica el caso propio. | |
+| 2. Arquitectura seleccionada y regla de decisión aplicada* | 25 | Aplica la regla de decisión con solidez técnica y selecciona y justifica Lambda o Kappa para el caso propio. | Aplica la regla de decisión correctamente y selecciona una arquitectura para el caso propio. | Aplica la regla de decisión con justificación débil. | No aplica la regla de decisión ni selecciona arquitectura. | |
+| 3. Tecnologías propuestas y diagrama de flujo* | 25 | Propone tecnologías coherentes con la arquitectura elegida y un diagrama de flujo claro y completo del caso propio. | Propone tecnologías coherentes y un diagrama de flujo comprensible. | Tecnologías o diagrama incompletos o poco coherentes. | No propone tecnologías ni diagrama. | |
+| 4. Plantilla de propuesta completa* | 25 | Completa todos los campos de la plantilla (caso, tipo de procesamiento, arquitectura, justificación, tecnologías, diagrama, riesgos y supuestos), coherentes entre sí. | Completa la plantilla con campos suficientes, con detalles menores pendientes. | Plantilla incompleta o con campos relevantes vacíos. | No presenta la plantilla. | |
 
-Puntuación acumulada = suma de (`Peso` * `Puntuación obtenida`) = ____.
+\* Agregado manual.
 
-Nota final = (`Puntuación acumulada` / 30) * 20 = ____.
+Nota final = suma de (`Peso` / 100 × `Puntos del nivel obtenido`) = ____ / 20.
 
 Para usar la rúbrica con IA, solicita:
 
 ```text
 Evalúa el PDF usando la rúbrica de la sesión.
-Para cada dimensión selecciona la puntuación obtenida usando la escala Inicio=0, Proceso=1, Logro=2, Logro destacado=3.
-Justifica brevemente cada puntuación.
-Calcula la puntuación acumulada con la fórmula: suma de (Peso * Puntuación obtenida).
-Calcula la nota final sobre 20 con la fórmula: (Puntuación acumulada / 30) * 20.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
 Indica 2 fortalezas y 2 recomendaciones.
 ```
+
+## 5. Cierre
+
+Tiempo: 5 min.
+
+**Resumen breve:** hoy se construyó la primera decisión arquitectónica real del laboratorio `lambda26`: clasificación batch/streaming del caso de la plataforma de streaming de video, aplicación de la regla de decisión, selección justificada de Lambda o Kappa, tecnologías propuestas y diagrama de flujo.
+
+**Dinámica participativa:** en una ronda rápida (o con una herramienta digital tipo formulario o encuesta en vivo), cada estudiante comparte en una frase qué arquitectura (Lambda o Kappa) eligió para el caso guiado y por qué.
+
+**Metacognición:** cada estudiante responde en voz alta o por escrito: ¿qué parte de la sesión te costó más entender, y cómo la resolviste?
+
+**Proyección:** la arquitectura seleccionada hoy se retoma en S2, cuando se construye el pipeline batch con PySpark sobre esa decisión, y aplica en cualquier proyecto profesional donde primero hay que decidir qué arquitectura resuelve el problema real antes de elegir herramientas.
+
+## Bibliografía
+
+1. Marz, N., & Warren, J. (2015). *Big Data: Principles and best practices of scalable real-time data systems*. Manning Publications.
+2. Kreps, J. (2014, July 2). *Questioning the Lambda architecture*. O'Reilly Radar. https://www.oreilly.com/radar/questioning-the-lambda-architecture/
+3. Apache Software Foundation. (2024). *Apache Kafka documentation*. https://kafka.apache.org/documentation/
+4. Apache Software Foundation. (2024). *Apache Spark documentation*. https://spark.apache.org/docs/latest/
