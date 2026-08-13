@@ -286,7 +286,7 @@ docker compose up -d
 
 Accede igual por `http://localhost:4488/lab?token=sintoken` (JupyterLab) o `http://localhost:4488/?token=sintoken` (Jupyter Notebook).
 
-Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas, en S2 empiezas a escribir PySpark directamente sobre él, sin perder tiempo de clase configurando nada.
+Este es el único entorno que se instala en la Unidad 1: `pyspark/compose.yml` corre PySpark y Jupyter solos, sin Kafka. El módulo `kafka` y el override `pyspark/compose.kafka.yml` (que conecta PySpark a la red de Kafka) se instalan recién en la Unidad 2 (S6), cuando el curso pasa de batch a streaming — no hace falta levantarlos ahora. Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas, en S2 empiezas a escribir PySpark directamente sobre él, sin perder tiempo de clase configurando nada.
 
 ### 3.2 Reconocer el ecosistema de `lambda26`
 
@@ -309,7 +309,7 @@ Responde:
 
 **Producto del paso:** clasificación justificada del caso.
 
-Retoma los casos de uso propios de `lambda26`:
+Retoma los casos de uso propios de `lambda26` (los analizas por su documentación, no los ejecutas hoy — `uso-rapido` y `uso-ms-sb` necesitan Kafka, que recién se instala en la Unidad 2):
 
 - `uso-rapido`: `ec-orden-py` publica y consume `orden-eventos` por Kafka.
 - `uso-ms-sb`: `ec-orden-ms` publica `orden-eventos`; `ec-pago-ms` consume `orden-eventos` y publica `pago-eventos`; cada microservicio guarda su propio histórico en su base Postgres.
