@@ -6,7 +6,7 @@ Tiempo: 20 min.
 
 ### 1.1 Presentación de la sesión
 
-Esta sesión abre la Unidad 1 del proyecto del curso: se decide la primera arquitectura Big Data (Lambda o Kappa). Con esa decisión queda establecida la regla batch/streaming que ordena el pipeline construido en las sesiones siguientes de la unidad. El porqué de decidir la arquitectura antes de elegir herramientas se desarrolla en 1.6, a partir del caso de la plataforma de streaming de video — esta sesión resuelve solo esa primera decisión, no el pipeline completo.
+Esta sesión abre la Unidad 1 del proyecto del curso: se decide la primera arquitectura Big Data (Lambda o Kappa). Con esa decisión queda establecida la regla batch/streaming que ordena el pipeline construido en las sesiones siguientes de la unidad. El porqué de decidir la arquitectura antes de elegir herramientas se desarrolla en 1.6, a partir del caso de Uber — esta sesión resuelve solo esa primera decisión, no el pipeline completo.
 
 ### 1.2 Índice
 
@@ -23,7 +23,7 @@ Al concluir la clase, estarás en condiciones de:
 
 ### 1.4 Producto de sesión
 
-Diagrama de arquitectura Big Data (Lambda o Kappa) para un caso de negocio, con decisiones técnicas, tecnologías propuestas, supuestos y riesgos.
+Diagrama de arquitectura Big Data (Lambda o Kappa) para el Proyecto Sello del equipo, con decisiones técnicas, tecnologías propuestas, supuestos y riesgos.
 
 ### 1.5 Metodología
 
@@ -31,8 +31,8 @@ Diagrama de arquitectura Big Data (Lambda o Kappa) para un caso de negocio, con 
 
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
-| Revisión previa individual | Leer el sílabo de la Unidad 1 y el caso de la plataforma de streaming de video (ver 1.6). Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión. | Sílabo Big Data U1. |
-| Clase presencial | Construcción guiada de la decisión arquitectónica: ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.5 de esta guía. |
+| Revisión previa individual | Leer el sílabo de la Unidad 1 y el caso de Uber (ver 1.6). Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión. | Sílabo Big Data U1. |
+| Clase presencial | Construcción guiada de la decisión arquitectónica: entorno LambdaLab, ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.6 de esta guía. |
 | Evaluación formativa | Revisión en clase de la arquitectura seleccionada y su justificación. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -68,7 +68,7 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 - Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.
 - Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 - Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.
-- Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio.
+- Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para el Proyecto Sello del equipo.
 
 Roadmap del producto de unidad:
 
@@ -114,7 +114,69 @@ Una solución Big Data es un flujo de trabajo con 5 etapas:
 Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo
 ```
 
-En `lambda26`, ese flujo se implementa con el entorno reproducible LambdaLab: procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana — arquitectura completa en [Arquitectura Lambda26 v2026-1](../index.md#arquitectura-lambda26-v2026-1), en el índice del curso. Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; los módulos `uso-rapido` y `uso-ms-sb` (eventos vía Kafka) se retoman a partir de S6-S7, y `uso-atmos`/`uso-replica-cdc` quedan pendientes como extensiones futuras del laboratorio.
+En `lambda26`, ese flujo se implementa con el entorno reproducible LambdaLab, que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:
+
+**Figura 3. Arquitectura Lambda26 v2026-1**
+
+```mermaid
+flowchart LR
+    subgraph PySparkModule["uso pyspark"]
+        direction TB
+        Notebooks["notebooks/*.ipynb"]
+        Jupyter["Jupyter<br/>localhost:4488"]
+        Spark["Spark / PySpark<br/>localhost:4040"]
+        Data["data/*.csv"]
+        Artifacts["artifacts/"]
+        Notebooks --> Jupyter --> Spark
+        Data --> Spark --> Artifacts
+    end
+
+    subgraph UseMS["uso-ms-sb"]
+        direction TB
+        OrdenMS["ec-orden-ms<br/>API de ordenes<br/>publica orden-eventos"]
+        OrdenDB["postgres ordenes dev<br/>localhost:49020"]
+        PagoMS["ec-pago-ms<br/>API de pagos<br/>consume orden-eventos<br/>publica pago-eventos"]
+        PagoDB["postgres pagos dev<br/>localhost:49030"]
+        OrdenMS --> OrdenDB
+        PagoMS --> PagoDB
+    end
+
+    subgraph UseIoT["uso-atmos"]
+        IoT["pendiente"]
+    end
+
+    subgraph KafkaModule["kafka"]
+        direction TB
+        subgraph KafkaStack[" "]
+            direction TB
+            Kafka["Apache Kafka<br/>kafka:9092<br/>localhost:49092"]
+            KafkaUI["Kafka UI<br/>localhost:48085"]
+            KafkaExporter["Kafka Exporter<br/>localhost:49308"]
+            Kafka --> KafkaUI
+            Kafka --> KafkaExporter
+        end
+    end
+
+    subgraph ObsModule["obs"]
+        direction TB
+        subgraph ObsStack[" "]
+            direction TB
+            Prometheus["Prometheus<br/>localhost:49090"]
+            Grafana["Grafana<br/>localhost:43000"]
+            Prometheus --> Grafana
+        end
+    end
+
+    PySparkModule -->|"U2: streaming consumer"| Kafka
+    UseMS -->|"orden-eventos / pago-eventos"| Kafka
+    UseIoT -. "futuro" .-> Kafka
+    KafkaExporter -->|"métricas"| Prometheus
+
+    style KafkaStack fill:transparent,stroke:transparent,color:transparent
+    style ObsStack fill:transparent,stroke:transparent,color:transparent
+```
+
+Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-ms-sb` (eventos vía Kafka) se retoma a partir de S6, y `uso-atmos` queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos `uso-rapido` y `uso-replica-cdc` que no se usan en esta sesión, está en el índice del curso.
 
 ### 2.2 Batch vs. Streaming
 
@@ -168,21 +230,65 @@ Regla de decisión:
 
 Tiempo: 2h.
 
-**Actividad:** propuesta guiada de arquitectura Big Data (Lambda o Kappa) para el caso de la plataforma de streaming de video.
+**Actividad:** propuesta guiada de arquitectura Big Data (Lambda o Kappa) para los casos de uso propios de `lambda26` (`uso-rapido`, `uso-ms-sb`).
 
-**Propósito de la actividad:** aplicar la regla de decisión batch/streaming al caso de la plataforma de streaming de video para seleccionar y justificar una arquitectura Big Data, y proponer las tecnologías coherentes con esa elección.
+**Propósito de la actividad:** aplicar la regla de decisión batch/streaming a los eventos reales que ya genera el laboratorio (`orden-eventos`, `pago-eventos`) para seleccionar y justificar una arquitectura Big Data, y proponer las tecnologías coherentes con esa elección.
 
-**Orientaciones metodológicas:** en clase, el docente guía el análisis del caso de la plataforma de streaming y la aplicación de la regla de decisión paso a paso frente a la clase; los estudiantes replican cada paso sobre el mismo caso, verificando su clasificación batch/streaming y su elección de arquitectura antes de proponer tecnologías y el diagrama de flujo.
+**Orientaciones metodológicas:** en clase, el docente guía el análisis de los casos de uso propios de `lambda26` y la aplicación de la regla de decisión paso a paso frente a la clase; los estudiantes replican cada paso sobre el mismo caso, verificando su clasificación batch/streaming y su elección de arquitectura antes de proponer tecnologías y el diagrama de flujo.
 
 **Actividades para realizar:**
 
-- **3.1** Reconocer el ecosistema de `lambda26`.
-- **3.2** Analizar el caso guiado y clasificar batch/streaming.
-- **3.3** Aplicar la regla de decisión.
-- **3.4** Proponer tecnologías y diagrama de flujo.
-- **3.5** Completar la plantilla de propuesta.
+- **3.1** Configurar y verificar el entorno LambdaLab (`uso-pyspark`).
+- **3.2** Reconocer el ecosistema de `lambda26`.
+- **3.3** Analizar el caso guiado y clasificar batch/streaming.
+- **3.4** Aplicar la regla de decisión.
+- **3.5** Proponer tecnologías y diagrama de flujo.
+- **3.6** Completar la plantilla de propuesta.
 
-### 3.1 Reconocer el ecosistema de `lambda26`
+### 3.1 Configurar y verificar el entorno LambdaLab (`uso-pyspark`)
+
+**Producto del paso:** entorno LambdaLab funcionando y verificado (Jupyter + Spark).
+
+Requisito previo: Docker Desktop instalado y corriendo, y el repositorio `lambda26` clonado en tu equipo.
+
+Desde la raíz del repositorio, levanta el laboratorio PySpark:
+
+```powershell
+docker compose -f pyspark/compose.yml up --build
+```
+
+Verifica que responden:
+
+```text
+JupyterLab -> http://localhost:4488/lab?token=sintoken
+Spark UI   -> http://localhost:4040
+```
+
+**Alternativa con imagen oficial de Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial `jupyter/pyspark-notebook`, que trae Spark completo sin depender de la imagen personalizada de `lambda26`:
+
+```yaml
+# compose.yml
+services:
+    pyspark:
+        image: jupyter/pyspark-notebook
+        ports:
+            - 4488:8888
+            - 4040:4040
+        environment:
+            - JUPYTER_TOKEN=sintoken
+        volumes:
+            - ./:/home/jovyan
+```
+
+```powershell
+docker compose up -d
+```
+
+Accede igual por `http://localhost:4488/lab?token=sintoken` (JupyterLab) o `http://localhost:4488/?token=sintoken` (Jupyter Notebook).
+
+Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas, en S2 empiezas a escribir PySpark directamente sobre él, sin perder tiempo de clase configurando nada.
+
+### 3.2 Reconocer el ecosistema de `lambda26`
 
 **Producto del paso:** mapa del flujo tecnológico del laboratorio.
 
@@ -199,25 +305,26 @@ Responde:
 3. ¿Qué componente procesa los datos a escala?
 4. ¿Dónde se consumen los resultados?
 
-### 3.2 Analizar el caso guiado y clasificar batch/streaming
+### 3.3 Analizar el caso guiado y clasificar batch/streaming
 
 **Producto del paso:** clasificación justificada del caso.
 
-Retoma el caso de 1.6.1 (plataforma de streaming de video), que necesita:
+Retoma los casos de uso propios de `lambda26`:
 
-- Datos históricos.
-- Eventos en tiempo real.
-- Recomendaciones y monitoreo.
+- `uso-rapido`: `ec-orden-py` publica y consume `orden-eventos` por Kafka.
+- `uso-ms-sb`: `ec-orden-ms` publica `orden-eventos`; `ec-pago-ms` consume `orden-eventos` y publica `pago-eventos`; cada microservicio guarda su propio histórico en su base Postgres.
+
+El laboratorio necesita decidir cómo construir su capa analítica sobre esos eventos: ¿guarda el histórico en un almacenamiento separado (batch), reprocesa todo directamente desde Kafka (streaming), o necesita ambos?
 
 Responde: ¿el caso requiere batch, streaming o ambos? Justifica con al menos dos razones tomadas del caso.
 
-### 3.3 Aplicar la regla de decisión
+### 3.4 Aplicar la regla de decisión
 
 **Producto del paso:** arquitectura seleccionada y justificada.
 
-Aplicando la regla de decisión de 2.4.1 al caso de 3.2, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.
+Aplicando la regla de decisión de 2.4.1 al caso de 3.3, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.
 
-### 3.4 Proponer tecnologías y diagrama de flujo
+### 3.5 Proponer tecnologías y diagrama de flujo
 
 **Producto del paso:** lista de tecnologías y diagrama de flujo simple.
 
@@ -227,7 +334,7 @@ Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data L
 Usuarios -> Kafka -> Spark Streaming + Batch -> Data Lake / DW -> Dashboard
 ```
 
-### 3.5 Completar la plantilla de propuesta
+### 3.6 Completar la plantilla de propuesta
 
 **Producto del paso:** ficha de propuesta arquitectónica completa.
 
@@ -248,21 +355,21 @@ Tiempo: 2h fuera del aula.
 
 ### 4.1 Actividad
 
-Replicación autónoma de la decisión arquitectónica Big Data (clasificación batch/streaming, regla de decisión, arquitectura Lambda o Kappa) sobre un caso de negocio propio, documentada en evidencia individual.
+Replicación autónoma de la decisión arquitectónica Big Data (clasificación batch/streaming, regla de decisión, arquitectura Lambda o Kappa) sobre el caso de negocio real del Proyecto Sello del equipo, documentada en evidencia individual. El diagrama resultante no es un ejercicio desechable: es el entorno de desarrollo que el equipo va a configurar y usar durante el resto del curso.
 
 Completa y evidencia estas tareas:
 
-1. Elegir un caso de negocio distinto al trabajado en clase (por ejemplo: comercio electrónico, sensores IoT, red social o transporte inteligente).
-2. Describir qué datos genera el caso elegido y clasificarlo como batch, streaming o ambos, con justificación (equivalente a 3.2).
-3. Aplicar la regla de decisión y seleccionar la arquitectura (Lambda o Kappa), justificando la elección (equivalente a 3.3).
-4. Proponer tecnologías coherentes con la arquitectura elegida y construir el diagrama de flujo (equivalente a 3.4).
-5. Completar la plantilla de propuesta arquitectónica, incluyendo riesgos y supuestos observados (equivalente a 3.5).
+1. Definir el caso de negocio del Proyecto Sello de tu equipo: el problema real que el sistema Big Data del semestre va a resolver.
+2. Describir qué datos genera ese caso y clasificarlo como batch, streaming o ambos, con justificación (equivalente a 3.3).
+3. Aplicar la regla de decisión y seleccionar la arquitectura (Lambda o Kappa) para el proyecto del equipo, justificando la elección (equivalente a 3.4).
+4. Proponer las tecnologías que el equipo va a configurar (Kafka, Spark y, si aplica, otras herramientas adicionales al ecosistema de `lambda26`) y construir el diagrama de flujo — este diagrama es el que el equipo configurará en las siguientes sesiones (equivalente a 3.5).
+5. Completar la plantilla de propuesta arquitectónica, incluyendo riesgos y supuestos observados (equivalente a 3.6).
 
 ### 4.2 Propósito
 
-Que cada estudiante demuestre, de forma individual y fuera del aula, que puede reproducir el patrón de decisión arquitectónica construido en clase sin el acompañamiento del docente.
+Que cada estudiante demuestre, de forma individual y fuera del aula, que puede reproducir el patrón de decisión arquitectónica construido en clase sin el acompañamiento del docente — aplicándolo directamente al Proyecto Sello real de su equipo, no a un caso desconectado.
 
-Cada estudiante aplica la clasificación batch/streaming y la regla de decisión Lambda/Kappa a un caso de negocio propio, distinto al trabajado en clase.
+Cada estudiante aplica la clasificación batch/streaming y la regla de decisión Lambda/Kappa al caso de negocio del Proyecto Sello de su equipo — la arquitectura y las tecnologías que resulten de este análisis son las que el equipo configurará realmente, no una elección hipotética.
 
 ### 4.3 Indicaciones
 
@@ -289,13 +396,13 @@ Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del si
 Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6) — así queda claro qué evidencia corresponde a cada criterio evaluado:
 
 1. *Clasificación batch/streaming*
-    - Clasificación batch/streaming del caso elegido, con justificación (equivalente a 3.2).
+    - Clasificación batch/streaming del caso del Proyecto Sello, con justificación (equivalente a 3.3).
 2. *Arquitectura seleccionada y regla de decisión aplicada*
-    - Arquitectura seleccionada (Lambda o Kappa) y regla de decisión aplicada, con justificación (equivalente a 3.3).
+    - Arquitectura seleccionada (Lambda o Kappa) y regla de decisión aplicada, con justificación (equivalente a 3.4).
 3. *Tecnologías propuestas y diagrama de flujo*
-    - Tecnologías propuestas y diagrama de flujo simple (equivalente a 3.4).
+    - Tecnologías propuestas y diagrama de flujo simple (equivalente a 3.5).
 4. *Plantilla de propuesta completa*
-    - Plantilla de propuesta arquitectónica completa, incluyendo riesgos y supuestos (equivalente a 3.5).
+    - Plantilla de propuesta arquitectónica completa, incluyendo riesgos y supuestos (equivalente a 3.6).
 
 **Error o hallazgo**
 
@@ -317,7 +424,7 @@ Responde en 5 a 8 líneas:
 
 La evidencia individual se considera completa si:
 
-- El caso elegido está delimitado y es distinto al trabajado en clase.
+- El caso de negocio del Proyecto Sello está delimitado y descrito con claridad.
 - La clasificación batch/streaming está justificada con datos del caso.
 - La arquitectura seleccionada aplica correctamente la regla de decisión.
 - Las tecnologías propuestas son coherentes con la arquitectura elegida.
@@ -340,9 +447,9 @@ La evidencia individual se considera completa si:
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
-| 1. Clasificación batch/streaming* | 25 | Clasifica el caso propio (batch, streaming o ambos) con justificación clara y basada en los datos reales que genera. | Clasifica correctamente el caso propio, con justificación breve. | Clasificación imprecisa o sin justificar. | No clasifica el caso propio. | |
-| 2. Arquitectura seleccionada y regla de decisión aplicada* | 25 | Aplica la regla de decisión con solidez técnica y selecciona y justifica Lambda o Kappa para el caso propio. | Aplica la regla de decisión correctamente y selecciona una arquitectura para el caso propio. | Aplica la regla de decisión con justificación débil. | No aplica la regla de decisión ni selecciona arquitectura. | |
-| 3. Tecnologías propuestas y diagrama de flujo* | 25 | Propone tecnologías coherentes con la arquitectura elegida y un diagrama de flujo claro y completo del caso propio. | Propone tecnologías coherentes y un diagrama de flujo comprensible. | Tecnologías o diagrama incompletos o poco coherentes. | No propone tecnologías ni diagrama. | |
+| 1. Clasificación batch/streaming* | 25 | Clasifica el caso del Proyecto Sello (batch, streaming o ambos) con justificación clara y basada en los datos reales que genera. | Clasifica correctamente el caso del Proyecto Sello, con justificación breve. | Clasificación imprecisa o sin justificar. | No clasifica el caso del Proyecto Sello. | |
+| 2. Arquitectura seleccionada y regla de decisión aplicada* | 25 | Aplica la regla de decisión con solidez técnica y selecciona y justifica Lambda o Kappa para el Proyecto Sello. | Aplica la regla de decisión correctamente y selecciona una arquitectura para el Proyecto Sello. | Aplica la regla de decisión con justificación débil. | No aplica la regla de decisión ni selecciona arquitectura. | |
+| 3. Tecnologías propuestas y diagrama de flujo* | 25 | Propone tecnologías coherentes con la arquitectura elegida y un diagrama de flujo claro y completo del Proyecto Sello. | Propone tecnologías coherentes y un diagrama de flujo comprensible. | Tecnologías o diagrama incompletos o poco coherentes. | No propone tecnologías ni diagrama. | |
 | 4. Plantilla de propuesta completa* | 25 | Completa todos los campos de la plantilla (caso, tipo de procesamiento, arquitectura, justificación, tecnologías, diagrama, riesgos y supuestos), coherentes entre sí. | Completa la plantilla con campos suficientes, con detalles menores pendientes. | Plantilla incompleta o con campos relevantes vacíos. | No presenta la plantilla. | |
 
 \* Agregado manual.
@@ -364,7 +471,7 @@ Indica 2 fortalezas y 2 recomendaciones.
 
 Tiempo: 5 min.
 
-**Resumen breve:** hoy se construyó la primera decisión arquitectónica real del laboratorio `lambda26`: clasificación batch/streaming del caso de la plataforma de streaming de video, aplicación de la regla de decisión, selección justificada de Lambda o Kappa, tecnologías propuestas y diagrama de flujo.
+**Resumen breve:** hoy se construyó la primera decisión arquitectónica real del laboratorio `lambda26`: clasificación batch/streaming de los casos de uso propios (`uso-rapido`, `uso-ms-sb`), aplicación de la regla de decisión, selección justificada de Lambda o Kappa, tecnologías propuestas y diagrama de flujo — cada equipo aplicó el mismo análisis a su propio Proyecto Sello.
 
 **Dinámica participativa:** en una ronda rápida (o con una herramienta digital tipo formulario o encuesta en vivo), cada estudiante comparte en una frase qué arquitectura (Lambda o Kappa) eligió para el caso guiado y por qué.
 
