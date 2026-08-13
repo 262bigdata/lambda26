@@ -67,7 +67,7 @@ Este alineamiento muestra cómo el sistema Big Data crece desde el procesamiento
 
 | Sesiones | Contenido central | Avance del proyecto |
 |---|---|---|
-| S1-S2 | Arquitectura Big Data (Lambda/Kappa) y fundamentos PySpark: extracción, transformaciones, RDD y evaluación perezosa. | Brief técnico-analítico, entorno reproducible (LambdaLab) y primeras transformaciones distribuidas validadas. |
+| S1-S2 | Arquitectura Big Data (Lambda/Kappa) y fundamentos PySpark: extracción, transformaciones, RDD y evaluación perezosa. | Brief técnico-analítico, entorno reproducible (`lambda26`) y primeras transformaciones distribuidas validadas. |
 | S3-S4 | Procesamiento distribuido con carga particionada en HDFS/formatos analíticos, validación de calidad de datos y ML distribuido con Spark MLlib (regresión). | Pipeline batch con datos transformados, validados, almacenados en Parquet y primer modelo de regresión distribuida. |
 | S5 | Evaluación U1. | Producto U1: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML. |
 | S6-S7 | Ingesta de eventos empresariales y de eventos IoT/sensores en tiempo real con Kafka. | Contratos de evento, tópicos y flujo de ingesta publicando y consumiendo datos reales del proyecto. |

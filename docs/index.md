@@ -25,7 +25,7 @@ Producto U1: pipeline batch de ETL distribuido con salidas analíticas en Parque
 
 Resultado esperado U1: el estudiante construye un pipeline batch reproducible con procesamiento distribuido, aplica transformaciones sobre datos a escala, valida la calidad básica de los datos, organiza salidas en formatos analíticos como Parquet y deja un dataset preparado para consumo BI/ML.
 
-| Sesión | Tema (sílabo) | Módulo LambdaLab | Trabajo principal |
+| Sesión | Tema (sílabo) | Módulo `lambda26` | Trabajo principal |
 |---|---|---|---|
 | [S1](sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md) | Arquitectura Big Data: arquitecturas Lambda y Kappa, batch vs. streaming. | `uso-pyspark` | Arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio propio. |
 | S2 | Fundamentos PySpark: extracción, transformaciones, funciones, agrupaciones, agregaciones, RDD y evaluación perezosa (lazy evaluation). | `uso-pyspark` | Transformaciones distribuidas documentadas, con evidencia del plan de ejecución (`explain()`). |
@@ -39,7 +39,7 @@ Producto U2: pipeline en tiempo real con ingesta de eventos empresariales e IoT/
 
 Resultado esperado U2: el estudiante implementa un pipeline Big Data en tiempo real que integra ingesta de eventos mediante Kafka, procesamiento distribuido con Spark Structured Streaming, observabilidad con Grafana y estimación de costos operacionales, y prepara salidas BI/ML distribuidas con series de tiempo e inferencia.
 
-| Sesión | Tema (sílabo) | Módulo LambdaLab | Trabajo principal |
+| Sesión | Tema (sílabo) | Módulo `lambda26` | Trabajo principal |
 |---|---|---|---|
 | S6 | Ingesta de eventos empresariales en tiempo real. | `uso-rapido` / `uso-ms-sb` + `kafka` | Publicación y consumo de eventos empresariales por Kafka, con contrato de evento documentado. |
 | S7 | Ingesta de eventos IoT/sensores en tiempo real. | `uso-atmos` + `kafka` | Simulación de eventos de sensores integrada al pipeline de Kafka. |
@@ -55,14 +55,14 @@ Producto U3 / producto del curso: sistema Big Data distribuido end-to-end para p
 
 Resultado esperado U3: el estudiante integra los componentes desarrollados en las unidades anteriores, despliega o empaqueta el sistema mediante prácticas de DataOps/DevOps, prepara una demo end-to-end, documenta la operación del sistema, valida resultados técnicos y analíticos, y sustenta una solución final orientada a la toma de decisiones.
 
-| Sesión | Tema (sílabo) | Módulo LambdaLab | Trabajo principal |
+| Sesión | Tema (sílabo) | Módulo `lambda26` | Trabajo principal |
 |---|---|---|---|
 | S13 | Integración del sistema, DataOps y BI. | todos | Demo end-to-end de batch, streaming, observabilidad y BI/ML integrados. |
 | S14 | Revisión técnica final y hardening. | todos | Checklist de hardening, guion de demostración y documentación operativa. |
 | S15 | Integración del sistema Big Data end-to-end: procesamiento batch y streaming, DataOps, observabilidad, BI/ML, documentación y despliegue. | — | **Producto final:** sistema Big Data distribuido end-to-end, defendido técnicamente. |
 | S16 | Integración de sistemas Big Data: evaluación final. | — | Evaluación final individual: demostración y preguntas técnicas pendientes. |
 
-## Arquitectura Lambda26 v2026-1
+## Arquitectura `lambda26`
 
 ```mermaid
 flowchart LR

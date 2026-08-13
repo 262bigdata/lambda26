@@ -32,7 +32,7 @@ Diagrama de arquitectura Big Data (Lambda o Kappa) para el Proyecto Sello del eq
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
 | Revisión previa individual | Leer el sílabo de la Unidad 1 y el caso de Uber (ver 1.6). Trabajo individual, antes de clase; sin instalación previa requerida para esta sesión. | Sílabo Big Data U1. |
-| Clase presencial | Construcción guiada de la decisión arquitectónica: entorno LambdaLab, ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.6 de esta guía. |
+| Clase presencial | Construcción guiada de la decisión arquitectónica: entorno `lambda26`, ecosistema, batch vs. streaming, regla de decisión, tecnologías y diagrama de flujo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas sobre Lambda, Kappa o el ecosistema. | Pasos 3.1 a 3.6 de esta guía. |
 | Evaluación formativa | Revisión en clase de la arquitectura seleccionada y su justificación. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -114,9 +114,9 @@ Una solución Big Data es un flujo de trabajo con 5 etapas:
 Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo
 ```
 
-En `lambda26`, ese flujo se implementa con el entorno reproducible LambdaLab, que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:
+En `lambda26`, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:
 
-**Figura 3. Arquitectura Lambda26 v2026-1**
+**Figura 3. Arquitectura `lambda26`**
 
 ```mermaid
 flowchart LR
@@ -238,16 +238,16 @@ Tiempo: 2h.
 
 **Actividades para realizar:**
 
-- **3.1** Configurar y verificar el entorno LambdaLab (`uso-pyspark`).
+- **3.1** Configurar y verificar el entorno `lambda26` (`uso-pyspark`).
 - **3.2** Reconocer el ecosistema de `lambda26`.
 - **3.3** Analizar el caso guiado y clasificar batch/streaming.
 - **3.4** Aplicar la regla de decisión.
 - **3.5** Proponer tecnologías y diagrama de flujo.
 - **3.6** Completar la plantilla de propuesta.
 
-### 3.1 Configurar y verificar el entorno LambdaLab (`uso-pyspark`)
+### 3.1 Configurar y verificar el entorno `lambda26` (`uso-pyspark`)
 
-**Producto del paso:** entorno LambdaLab funcionando y verificado (Jupyter + Spark).
+**Producto del paso:** entorno `lambda26` funcionando y verificado (Jupyter + Spark).
 
 Requisito previo: Docker Desktop instalado y corriendo, y el repositorio `lambda26` clonado en tu equipo.
 
