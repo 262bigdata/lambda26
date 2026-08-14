@@ -349,6 +349,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Arquitectura lambda26">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nivel-1-contexto-vista-simple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nivel 1: Contexto (vista simple)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nivel-2-detalle-de-contenedores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nivel 2: Detalle de contenedores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -751,6 +779,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Arquitectura lambda26">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nivel-1-contexto-vista-simple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nivel 1: Contexto (vista simple)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nivel-2-detalle-de-contenedores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nivel 2: Detalle de contenedores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -898,7 +954,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 <td>S11</td>
 <td>BI/ML distribuido con Spark: KPIs del BI y visualización de la predicción de series de tiempo.</td>
 <td><code>uso-pyspark</code> + <code>obs</code></td>
-<td>KPIs del flujo de eventos y predicción de series de tiempo visualizados en el BI.</td>
+<td>KPIs del flujo de eventos y predicción de series de tiempo visualizados en Grafana.</td>
 </tr>
 <tr>
 <td>S12</td>
@@ -948,38 +1004,79 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 </tbody>
 </table>
 <h2 id="arquitectura-lambda26">Arquitectura <code>lambda26</code><a class="headerlink" href="#arquitectura-lambda26" title="Permanent link">&para;</a></h2>
+<h3 id="nivel-1-contexto-vista-simple">Nivel 1: Contexto (vista simple)<a class="headerlink" href="#nivel-1-contexto-vista-simple" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>flowchart LR
-    subgraph PySparkModule["uso pyspark"]
+    subgraph Fuentes["Fuentes de eventos"]
         direction TB
-        Notebooks["notebooks/*.ipynb"]
+        IoTSensors["uso-atmos&lt;br/&gt;ESP32: sensores atmosféricos"]
+        MS1["uso-ms-sb&lt;br/&gt;(secundario: monitoreo de MS)"]
+        Fast1["uso-rapido&lt;br/&gt;(secundario: aprender Kafka)"]
+    end
+
+    Kafka1["kafka"]
+
+    subgraph Procesamiento["uso-pyspark"]
+        direction TB
+        Batch["batch, interactivo"]
+        Streaming["streaming + inferencia ML"]
+    end
+
+    subgraph BatchAnalitico["Analítica batch"]
+        direction LR
+        CDC1["uso-replica-cdc"]
+        DW1[("Data warehouse&lt;br/&gt;PostgreSQL")]
+        BITR1["uso-bi-tiempo-real&lt;br/&gt;(dbt)"]
+        CDC1 --&gt; DW1 --&gt; BITR1
+    end
+
+    Obs1["obs&lt;br/&gt;Prometheus + Grafana"]
+
+    IoTSensors --&gt; Kafka1
+    Fast1 -.-&gt; Kafka1
+    MS1 -.-&gt; Kafka1
+    MS1 -.-&gt;|"logs, estado"| Obs1
+    Kafka1 --&gt; Streaming
+    Batch -.-&gt;|"modelo entrenado"| Streaming
+    CDC1 -.-&gt; Kafka1
+    BITR1 --&gt; Obs1
+    Streaming --&gt; Obs1
+    Kafka1 --&gt; Obs1
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Batch today;</code></pre>
+<p><code>uso-pyspark</code> (batch) es el único componente activo en S1 — el resto se retoma progresivamente desde S6 en adelante. <code>uso-atmos</code> es la fuente principal de la inferencia ML en streaming de S10: un ESP32 con sensores captura variables atmosféricas (temperatura, humedad, presión) y las publica como <code>atmos-eventos</code> en Kafka; <code>uso-pyspark</code> (streaming) las consume, les aplica el modelo entrenado en S4 (<code>.transform()</code> por micro-batch) y genera la predicción del siguiente paso de tiempo, que Grafana muestra por polling. Predecir el siguiente valor de una variable continua es un caso de series de tiempo natural. <code>uso-rapido</code> y <code>uso-ms-sb</code> son casos de uso secundarios: el primero para aprender Kafka, el segundo para monitorear logs/estado de microservicios en Grafana — ninguno es la fuente de la predicción. El detalle completo de cada módulo, puertos y conexiones internas está en el Nivel 2.</p>
+<h3 id="nivel-2-detalle-de-contenedores">Nivel 2: Detalle de contenedores<a class="headerlink" href="#nivel-2-detalle-de-contenedores" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    subgraph PySparkModule["uso pyspark - batch, interactivo"]
+        direction TB
+        Notebooks["notebooks/*.ipynb&lt;br/&gt;ETL, entrenamiento ML"]
         Jupyter["Jupyter&lt;br/&gt;localhost:4488"]
         Spark["Spark / PySpark&lt;br/&gt;localhost:4040"]
         Data["data/*.csv"]
-        Artifacts["artifacts/"]
+        Artifacts["artifacts/&lt;br/&gt;modelos entrenados"]
         Notebooks --&gt; Jupyter --&gt; Spark
         Data --&gt; Spark --&gt; Artifacts
     end
 
-    subgraph UseFast["uso-rapido"]
-        PyQuick["ec-orden-py&lt;br/&gt;publica / consume&lt;br/&gt;orden-eventos"]
+    subgraph StreamingModule["uso-pyspark - streaming, contenedor propio"]
+        Scripts["scripts/*.py&lt;br/&gt;consumer + inferencia&lt;br/&gt;spark-submit"]
     end
 
-    subgraph UseMS["uso-ms-sb"]
-        direction TB
-        OrdenMS["ec-orden-ms&lt;br/&gt;API de ordenes&lt;br/&gt;publica orden-eventos"]
-        OrdenDB["postgres ordenes dev&lt;br/&gt;localhost:49020"]
-        PagoMS["ec-pago-ms&lt;br/&gt;API de pagos&lt;br/&gt;consume orden-eventos&lt;br/&gt;publica pago-eventos"]
-        PagoDB["postgres pagos dev&lt;br/&gt;localhost:49030"]
-        OrdenMS --&gt; OrdenDB
-        PagoMS --&gt; PagoDB
-    end
+    Artifacts -.-&gt;|"modelo (volumen compartido)"| Scripts
 
-    subgraph UseIoT["uso-atmos"]
-        IoT["pendiente"]
+    subgraph UseIoT["uso-atmos (fuente principal ML)"]
+        IoT["pendiente&lt;br/&gt;ESP32: temperatura,&lt;br/&gt;humedad, presión&lt;br/&gt;publica atmos-eventos"]
     end
 
     subgraph UseCDC["uso-replica-cdc"]
-        CDC["pendiente&lt;br/&gt;MySQL -&gt; Debezium -&gt; Kafka -&gt; PostgreSQL RAW&lt;br/&gt;migración / Spark BI-ML"]
+        CDC["pendiente&lt;br/&gt;MySQL -&gt; Debezium -&gt; Kafka -&gt; PostgreSQL RAW&lt;br/&gt;solo migración/replica"]
+    end
+
+    subgraph UseBITR["uso-bi-tiempo-real"]
+        direction TB
+        Listener["pendiente&lt;br/&gt;escucha nuevos registros&lt;br/&gt;en el data warehouse"]
+        DBT["dbt: staging -&gt; intermediate -&gt; marts&lt;br/&gt;transforma RAW -&gt; modelos BI"]
+        Listener --&gt; DBT
     end
 
     subgraph KafkaModule["kafka"]
@@ -1004,27 +1101,31 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
         end
     end
 
-    PySparkModule --&gt;|"U2: streaming consumer"| Kafka
-    UseFast --&gt;|"orden-eventos"| Kafka
-    UseMS --&gt;|"orden-eventos / pago-eventos"| Kafka
-    UseIoT -. "futuro" .-&gt; Kafka
+    StreamingModule --&gt;|"U2: streaming consumer"| Kafka
+    UseIoT -. "futuro: atmos-eventos" .-&gt; Kafka
     UseCDC -. "futuro: migracion CDC" .-&gt; Kafka
+    UseCDC -. "nuevo registro en el DW" .-&gt; UseBITR
+    DBT -. "Grafana consulta marts cada 1s (polling)" .-&gt; Grafana
+    Grafana -. "consulta predicción (según granularidad del modelo)" .-&gt; Scripts
     KafkaExporter --&gt;|"métricas"| Prometheus
 
     style KafkaStack fill:transparent,stroke:transparent,color:transparent
     style ObsStack fill:transparent,stroke:transparent,color:transparent</code></pre>
 <ul>
-<li><code>uso-pyspark</code> es el módulo base (U1): notebooks, Jupyter y Spark local, con datos en <code>data/</code> y salidas en <code>artifacts/</code>.</li>
-<li><code>uso-rapido</code> y <code>uso-ms-sb</code> publican y consumen eventos de negocio (<code>orden-eventos</code>, <code>pago-eventos</code>) contra Kafka — se activan desde S6.</li>
-<li><code>uso-atmos</code> (eventos IoT/sensores) y <code>uso-replica-cdc</code> (migración CDC) quedan pendientes como extensiones del laboratorio; se retoman según el alcance de cada equipo.</li>
+<li><code>uso-pyspark</code> tiene dos partes, en <strong>contenedores separados</strong> (no se mezcla lo interactivo con lo que corre en producción): la parte batch/interactiva (U1) — notebooks, Jupyter y Spark local, con datos en <code>data/</code> y salidas en <code>artifacts/</code> — y la parte streaming (<code>scripts/*.py</code>, S8 y S10), un contenedor propio que reutiliza la misma imagen con PySpark pero ejecuta <code>spark-submit</code> en vez de Jupyter, como proceso persistente. Un notebook no es apto para un job que debe correr sin parar; y un job de producción no debería competir por recursos con el contenedor de exploración. El entrenamiento de un modelo ML es siempre batch (MLlib no soporta aprendizaje incremental) y ocurre en el contenedor interactivo (S4); la <em>inferencia</em> sí puede aplicarse en streaming — el contenedor de <code>scripts/*.py</code> monta <code>artifacts/</code> como volumen compartido (de solo lectura) para cargar el modelo ya entrenado y le aplica <code>.transform()</code> a cada micro-batch que llega por Kafka, sin reentrenar.</li>
+<li>La predicción de <code>scripts/*.py</code> (S10) se escribe en una tabla de Postgres (no en un archivo ni en memoria del proceso), para que Grafana la consulte igual que consulta <code>marts</code>. Grafana muestra la predicción del siguiente paso de tiempo (minuto, hora, u otra granularidad, según con qué haya sido entrenado el modelo en S4) — no un valor fijo, se actualiza en cada corrida del script. No se usa Streamlit para esto: Streamlit sirve para una app ML interactiva (carga el modelo, tiene incluso una nube gratuita para desplegarla), pero no es un dashboard en vivo — no encaja con el requisito de mostrar la inferencia en streaming.</li>
+<li><code>uso-rapido</code> y <code>uso-ms-sb</code> son casos de uso <strong>secundarios</strong>, con propósitos distintos entre sí: <code>uso-rapido</code> (<code>ec-orden-py</code>) es el ejercicio más simple para aprender Kafka — publicar y consumir eventos sin la complejidad de microservicios completos. <code>uso-ms-sb</code> (<code>ec-orden-ms</code>, <code>ec-pago-ms</code>) es para <strong>monitorear la aplicación</strong>: logs y estado de los microservicios, expuestos vía Actuator + Micrometer y scrapeados por el mismo Prometheus de <code>obs</code>, visualizados en Grafana — no es solo un ejemplo de eventos de negocio, es el caso de uso de observabilidad a nivel de aplicación (<code>obs</code> observa Kafka; <code>uso-ms-sb</code> observa los propios microservicios). Ninguno de los dos alimenta la inferencia ML de S10.</li>
+<li><code>uso-atmos</code> es el caso de uso <strong>principal para la inferencia ML en streaming</strong> (S10): sensores de variables atmosféricas (temperatura, humedad, presión) publicando <code>atmos-eventos</code> — predecir el siguiente valor de una serie de tiempo continua encaja de forma natural con este tipo de dato, a diferencia de eventos de negocio discretos. <code>uso-replica-cdc</code> (solo migración/replica CDC) también queda pendiente. Ambos se retoman según el alcance de cada equipo.</li>
+<li><code>uso-bi-tiempo-real</code> es un módulo aparte de <code>uso-replica-cdc</code>: <code>uso-replica-cdc</code> únicamente replica (MySQL -&gt; Debezium -&gt; Kafka -&gt; PostgreSQL RAW), no transforma. <code>uso-bi-tiempo-real</code> escucha los nuevos registros que llegan al data warehouse (por ejemplo con <code>LISTEN</code>/<code>NOTIFY</code> de PostgreSQL) y dispara un proyecto dbt (mismas capas que BI: <code>staging</code> → <code>intermediate</code> como views, <code>marts</code> como tables, con su propio <code>profile: lambda26</code> apuntando por <code>type: postgres</code> al mismo RAW) para generar los modelos BI — sin esto, las tablas <code>marts</code> quedarían desactualizadas. Grafana no recibe un aviso de dbt: <strong>consulta</strong> (polling) las tablas <code>marts</code> en su propio intervalo de refresco (configurable, hasta cada 1 segundo), así que ve el dato transformado en cuanto dbt termina de correr.</li>
 <li><code>kafka</code> es la columna vertebral de ingesta y <code>obs</code> (Prometheus/Grafana) da observabilidad sobre el Kafka Exporter — ambos se integran desde U2.</li>
+<li>El curso no usa una herramienta de BI aparte (como Power BI): <strong>Grafana</strong> cumple ese rol — además de observabilidad técnica, visualiza los KPIs de negocio (ya transformados por <code>uso-bi-tiempo-real</code>) en tiempo real (refresco configurable, hasta cada 1 segundo).</li>
 </ul>
 <h2 id="flujo-de-trabajo">Flujo de trabajo<a class="headerlink" href="#flujo-de-trabajo" title="Permanent link">&para;</a></h2>
 <ol>
 <li>El equipo decide la arquitectura Big Data (Lambda o Kappa) para su propio caso de negocio, apoyándose en el módulo <code>uso-pyspark</code> para reconocer el ecosistema (S1).</li>
 <li>El procesamiento batch se construye con PySpark sobre <code>uso-pyspark</code>: extracción, transformaciones, particionamiento, formatos analíticos y un primer modelo ML distribuido (S2-S5).</li>
-<li>La ingesta en tiempo real se activa sobre <code>kafka</code>, primero con eventos de negocio (<code>uso-rapido</code>/<code>uso-ms-sb</code>, S6) y luego con eventos IoT/sensores (<code>uso-atmos</code>, S7).</li>
-<li>El procesamiento streaming con Spark Structured Streaming, la observabilidad (<code>obs</code>) y las salidas BI/ML distribuidas se integran en U2 (S8-S12).</li>
+<li>La ingesta en tiempo real se activa sobre <code>kafka</code>: primero con eventos de negocio (<code>uso-rapido</code>/<code>uso-ms-sb</code>, S6 — caso secundario, práctica del patrón pub/sub) y luego con eventos IoT/sensores de variables atmosféricas (<code>uso-atmos</code>, S7 — caso principal, es la fuente que alimenta la inferencia ML de S10).</li>
+<li>El procesamiento streaming con Spark Structured Streaming corre como <code>scripts/*.py</code> (<code>spark-submit</code>, proceso persistente, no notebook) sobre <code>uso-pyspark</code>: el consumer de Kafka (S8) y la inferencia en vivo sobre los <code>atmos-eventos</code> de <code>uso-atmos</code>, con el modelo entrenado en S4 (S10). La observabilidad (<code>obs</code>) y las salidas BI/ML distribuidas se integran en el resto de U2 (S9, S11-S12).</li>
 <li>El sistema completo se integra, se estabiliza con prácticas DataOps/DevOps y se defiende técnicamente en U3 (S13-S16).</li>
 </ol>
 <h2 id="enlaces">Enlaces<a class="headerlink" href="#enlaces" title="Permanent link">&para;</a></h2>

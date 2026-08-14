@@ -1452,6 +1452,37 @@
 <p><strong>Productores</strong> (generan los eventos hacia Kafka): Rider App, Driver App, API/Servicios, Dispatch, Mapping &amp; Logistics, y las bases de datos operacionales (Schemaless MySQL, Cassandra).</p>
 <p><strong>Consumidores</strong> (leen desde Kafka, ya separados en dos pipelines): el pipeline en tiempo real (Pub/Sub, Flink, ELK) alimenta la app móvil, alertas/dashboards, analítica en tiempo real y debugging; el pipeline batch (Hadoop) alimenta aplicaciones de ciencia de datos, exploración ad-hoc y reportes analíticos. Ambos pipelines leen del mismo Kafka, pero son sistemas separados — por eso es Lambda.</p>
 <p>Fuente: <a href="https://www.uber.com/us/en/blog/kafka-tiered-storage/">Kafka tiered storage at Uber</a>.</p>
+<p><code>lambda26</code> sigue el mismo patrón, con sus propios componentes en vez de los de Uber:</p>
+<p><strong>Figura 2. <code>lambda26</code> con el mismo patrón de Uber: productores, pipeline en tiempo real y pipeline batch</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Producers["Productores"]
+        direction TB
+        P1["uso-atmos&lt;br/&gt;ESP32: sensores atmosféricos"]
+        P2["uso-rapido, uso-ms-sb&lt;br/&gt;(secundario)"]
+        P3["uso-replica-cdc&lt;br/&gt;MySQL"]
+    end
+
+    K[("kafka")]
+
+    subgraph RT["Realtime Pipeline"]
+        direction TB
+        RT1["uso-pyspark&lt;br/&gt;streaming + inferencia ML"]
+    end
+
+    subgraph BP["Batch Pipeline"]
+        direction TB
+        BP1["uso-pyspark&lt;br/&gt;batch, interactivo"]
+        BP2["Data warehouse +&lt;br/&gt;uso-bi-tiempo-real (dbt)"]
+    end
+
+    Grafana["obs&lt;br/&gt;Prometheus + Grafana"]
+
+    Producers --&gt; K
+    K --&gt; RT
+    K -.-&gt; BP
+    RT1 --&gt; Grafana
+    BP2 --&gt; Grafana
+    BP1 -.-&gt;|"modelo entrenado"| RT1</code></pre>
 <p><strong>Preguntas de análisis</strong></p>
 <p><strong>Activación de conocimientos previos</strong></p>
 <ol>
@@ -1471,7 +1502,7 @@
 <li>Avance del producto en esta sesión: arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para el Proyecto Sello del equipo.</li>
 </ul>
 <p>Roadmap del producto de unidad:</p>
-<p><strong>Figura 2. Roadmap del producto de la unidad U1</strong></p>
+<p><strong>Figura 3. Roadmap del producto de la unidad U1</strong></p>
 <pre class="mermaid"><code>flowchart TB
     Arquitectura["Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;HOY"]
     PySpark["Fundamentos PySpark&lt;br/&gt;S2"]
@@ -1523,18 +1554,24 @@
 <div class="highlight"><pre><span></span><code>Fuente de datos -&gt; Ingesta / extracción -&gt; Almacenamiento -&gt; Procesamiento -&gt; Visualización / consumo
 </code></pre></div>
 <p>En <code>lambda26</code>, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:</p>
-<p><strong>Figura 3. Arquitectura <code>lambda26</code></strong></p>
+<p><strong>Figura 4. Arquitectura <code>lambda26</code></strong></p>
 <pre class="mermaid"><code>flowchart LR
-    subgraph PySparkModule["uso pyspark"]
+    subgraph PySparkModule["uso pyspark - batch, interactivo"]
         direction TB
-        Notebooks["notebooks/*.ipynb"]
+        Notebooks["notebooks/*.ipynb&lt;br/&gt;ETL, entrenamiento ML"]
         Jupyter["Jupyter&lt;br/&gt;localhost:4488"]
         Spark["Spark / PySpark&lt;br/&gt;localhost:4040"]
         Data["data/*.csv"]
-        Artifacts["artifacts/"]
+        Artifacts["artifacts/&lt;br/&gt;modelos entrenados"]
         Notebooks --&gt; Jupyter --&gt; Spark
         Data --&gt; Spark --&gt; Artifacts
     end
+
+    subgraph StreamingModule["uso-pyspark - streaming, contenedor propio"]
+        Scripts["scripts/*.py&lt;br/&gt;consumer + inferencia&lt;br/&gt;spark-submit"]
+    end
+
+    Artifacts -.-&gt;|"modelo (volumen compartido)"| Scripts
 
     subgraph UseMS["uso-ms-sb"]
         direction TB
@@ -1572,14 +1609,15 @@
         end
     end
 
-    PySparkModule --&gt;|"U2: streaming consumer"| Kafka
+    StreamingModule --&gt;|"U2: streaming consumer"| Kafka
     UseMS --&gt;|"orden-eventos / pago-eventos"| Kafka
     UseIoT -. "futuro" .-&gt; Kafka
+    Grafana -. "consulta predicción (según granularidad del modelo)" .-&gt; Scripts
     KafkaExporter --&gt;|"métricas"| Prometheus
 
     style KafkaStack fill:transparent,stroke:transparent,color:transparent
     style ObsStack fill:transparent,stroke:transparent,color:transparent</code></pre>
-<p>Hoy usamos solo el módulo <code>uso-pyspark</code> para reconocer el ecosistema; <code>uso-ms-sb</code> (eventos vía Kafka) se retoma a partir de S6, y <code>uso-atmos</code> queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos <code>uso-rapido</code> y <code>uso-replica-cdc</code> que no se usan en esta sesión, está en el índice del curso.</p>
+<p>Hoy usamos solo el módulo <code>uso-pyspark</code> para reconocer el ecosistema; <code>uso-ms-sb</code> (eventos vía Kafka) se retoma a partir de S6, y <code>uso-atmos</code> queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos <code>uso-rapido</code>, <code>uso-replica-cdc</code> y <code>uso-bi-tiempo-real</code> que no se usan en esta sesión, está en el índice del curso.</p>
 <h3 id="22-batch-vs-streaming">2.2 Batch vs. Streaming<a class="headerlink" href="#22-batch-vs-streaming" title="Permanent link">&para;</a></h3>
 <p><strong>Tabla 3. Batch vs. streaming</strong></p>
 <table>
@@ -1727,8 +1765,8 @@ Spark UI   -&gt; http://localhost:4040
 <p>Aplicando la regla de decisión de 2.4.1 al caso de 3.3, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.</p>
 <h3 id="35-proponer-tecnologias-y-diagrama-de-flujo">3.5 Proponer tecnologías y diagrama de flujo<a class="headerlink" href="#35-proponer-tecnologias-y-diagrama-de-flujo" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> lista de tecnologías y diagrama de flujo simple.</p>
-<p>Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Dashboard/Power BI, etc.) y construye el diagrama:</p>
-<div class="highlight"><pre><span></span><code>Usuarios -&gt; Kafka -&gt; Spark Streaming + Batch -&gt; Data Lake / DW -&gt; Dashboard
+<p>Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Grafana para BI en tiempo real, etc.) y construye el diagrama:</p>
+<div class="highlight"><pre><span></span><code>Usuarios -&gt; Kafka -&gt; Spark Streaming + Batch -&gt; Data Lake / DW -&gt; Grafana
 </code></pre></div>
 <h3 id="36-completar-la-plantilla-de-propuesta">3.6 Completar la plantilla de propuesta<a class="headerlink" href="#36-completar-la-plantilla-de-propuesta" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> ficha de propuesta arquitectónica completa.</p>
