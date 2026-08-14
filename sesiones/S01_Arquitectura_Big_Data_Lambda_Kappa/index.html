@@ -671,10 +671,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#21-ecosistema-y-arquitectura-big-data" class="md-nav__link">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.1 Ecosistema y arquitectura Big Data
+        2.1 Arquitectura de la sesión
       
     </span>
   </a>
@@ -682,10 +682,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#22-batch-vs-streaming" class="md-nav__link">
+  <a href="#22-ecosistema-y-arquitectura-big-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.2 Batch vs. Streaming
+        2.2 Ecosistema y arquitectura Big Data
       
     </span>
   </a>
@@ -693,10 +693,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#23-arquitectura-lambda" class="md-nav__link">
+  <a href="#23-batch-vs-streaming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.3 Arquitectura Lambda
+        2.3 Batch vs. Streaming
       
     </span>
   </a>
@@ -704,22 +704,33 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#24-arquitectura-kappa" class="md-nav__link">
+  <a href="#24-arquitectura-lambda" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.4 Arquitectura Kappa
+        2.4 Arquitectura Lambda
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2.4 Arquitectura Kappa">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-arquitectura-kappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Arquitectura Kappa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 Arquitectura Kappa">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#241-regla-de-decision-y-comparacion" class="md-nav__link">
+  <a href="#251-regla-de-decision-y-comparacion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.4.1 Regla de decisión y comparación
+        2.5.1 Regla de decisión y comparación
       
     </span>
   </a>
@@ -1118,10 +1129,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#21-ecosistema-y-arquitectura-big-data" class="md-nav__link">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.1 Ecosistema y arquitectura Big Data
+        2.1 Arquitectura de la sesión
       
     </span>
   </a>
@@ -1129,10 +1140,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#22-batch-vs-streaming" class="md-nav__link">
+  <a href="#22-ecosistema-y-arquitectura-big-data" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.2 Batch vs. Streaming
+        2.2 Ecosistema y arquitectura Big Data
       
     </span>
   </a>
@@ -1140,10 +1151,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#23-arquitectura-lambda" class="md-nav__link">
+  <a href="#23-batch-vs-streaming" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.3 Arquitectura Lambda
+        2.3 Batch vs. Streaming
       
     </span>
   </a>
@@ -1151,22 +1162,33 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#24-arquitectura-kappa" class="md-nav__link">
+  <a href="#24-arquitectura-lambda" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.4 Arquitectura Kappa
+        2.4 Arquitectura Lambda
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2.4 Arquitectura Kappa">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-arquitectura-kappa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Arquitectura Kappa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 Arquitectura Kappa">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#241-regla-de-decision-y-comparacion" class="md-nav__link">
+  <a href="#251-regla-de-decision-y-comparacion" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.4.1 Regla de decisión y comparación
+        2.5.1 Regla de decisión y comparación
       
     </span>
   </a>
@@ -1514,7 +1536,7 @@
 </ol>
 <p><strong>Comprensión de arquitecturas Big Data</strong></p>
 <ol>
-<li>¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.4.1.</li>
+<li>¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.5.1.</li>
 <li>¿En qué escenario convendría eliminar la capa batch separada y reprocesar todo desde Kafka (Kappa) en vez de mantener ambos sistemas?</li>
 </ol>
 <h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
@@ -1540,7 +1562,20 @@
 <p>Hoy se decide el primer componente real de la U1: la arquitectura Big Data. En las siguientes sesiones se construye el pipeline batch con PySpark, se cargan formatos analíticos en HDFS y se entrena un primer modelo distribuido. La evaluación U1 valida el pipeline batch completo construido sobre esa arquitectura.</p>
 <h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
 <p>Tiempo: 25 min.</p>
-<h3 id="21-ecosistema-y-arquitectura-big-data">2.1 Ecosistema y arquitectura Big Data<a class="headerlink" href="#21-ecosistema-y-arquitectura-big-data" title="Permanent link">&para;</a></h3>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 4. Arquitectura de la sesión: entorno <code>lambda26</code> (<code>uso-pyspark</code>)</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph BP["Batch Pipeline"]
+        subgraph BP1["uso-pyspark&lt;br/&gt;batch, interactivo"]
+            direction LR
+            E["Extracción o captura&lt;br/&gt;spark.read.csv()"] --&gt; L["Load / almacenamiento&lt;br/&gt;DataFrame distribuido en memoria"]
+            L --&gt; T["Transformación / procesamiento&lt;br/&gt;select() — análisis/ML desde S4"]
+            T --&gt; V["Visualización&lt;br/&gt;show() + Spark UI"]
+        end
+    end</code></pre>
+<p>A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en <code>lambda26</code> el módulo <code>uso-pyspark</code> cubre las 4 etapas dentro de un solo componente, sobre una <code>SparkSession</code> común (<code>local[*]</code>) corriendo en el contenedor <code>lambda26-pyspark</code>. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4040); la transformación real y el análisis ML se profundizan desde S2 y S4.</p>
+<p>Estos son los componentes que instalas y verificas en 3.1-3.2, antes de pasar al análisis conceptual (ecosistema, batch/streaming, Lambda o Kappa) que desarrolla el resto de esta sección.</p>
+<h3 id="22-ecosistema-y-arquitectura-big-data">2.2 Ecosistema y arquitectura Big Data<a class="headerlink" href="#22-ecosistema-y-arquitectura-big-data" title="Permanent link">&para;</a></h3>
 <p>Big Data se refiere al procesamiento de grandes volúmenes de datos que no pueden manejarse eficientemente con herramientas tradicionales. Se resume con las <strong>5V</strong>:</p>
 <p><strong>Tabla 2. Las 5V del Big Data</strong></p>
 <table>
@@ -1577,17 +1612,17 @@
 <div class="highlight"><pre><span></span><code>Fuente de datos -&gt; Ingesta / extracción -&gt; Almacenamiento -&gt; Procesamiento -&gt; Visualización / consumo
 </code></pre></div>
 <p>BI y Big Data comparten ese mismo flujo ETL de base (extracción, transformación/procesamiento, carga/almacenamiento, visualización); lo que cambia es la escala y las herramientas:</p>
-<p><strong>Figura 4. Ciclo de vida de los datos: BI vs. Big Data</strong></p>
-<p><img alt="Ciclo de vida de los datos: BI vs. Big Data" src="../img/s01-2.1-ciclo-vida-datos-bi-bigdata.png" /></p>
+<p><strong>Figura 5. Ciclo de vida de los datos: BI vs. Big Data</strong></p>
+<p><img alt="Ciclo de vida de los datos: BI vs. Big Data" src="../img/s01-2.2-ciclo-vida-datos-bi-bigdata.png" /></p>
 <p>En BI, el almacenamiento y el procesamiento no son distribuidos; en Big Data sí — con etapas explícitas de preparación de datos, modelado y evaluación (típicas de un flujo de Machine Learning) sobre almacenamiento y procesamiento distribuidos.</p>
-<p><strong>Figura 5. Arquitectura base de una solución BI</strong></p>
-<p><img alt="Arquitectura base de una solución BI" src="../img/s01-2.1-arquitectura-bi.png" /></p>
+<p><strong>Figura 6. Arquitectura base de una solución BI</strong></p>
+<p><img alt="Arquitectura base de una solución BI" src="../img/s01-2.2-arquitectura-bi.png" /></p>
 <p>Una solución BI típica resuelve esas 4 etapas con herramientas de un solo nodo: extracción con ETL como Pentaho, procesamiento con SQL, almacenamiento en PostgreSQL/MySQL y visualización en Power BI.</p>
-<p><strong>Figura 6. Arquitectura de una solución BI &amp; Big Data</strong></p>
-<p><img alt="Arquitectura de una solución BI &amp; Big Data" src="../img/s01-2.1-arquitectura-bigdata.png" /></p>
+<p><strong>Figura 7. Arquitectura de una solución BI &amp; Big Data</strong></p>
+<p><img alt="Arquitectura de una solución BI &amp; Big Data" src="../img/s01-2.2-arquitectura-bigdata.png" /></p>
 <p>Al escalar a Big Data, el almacenamiento pasa por un Data Lake antes del Data Warehouse, y el procesamiento se distribuye entre un nodo master y varios workers, cada uno con su RDD (<em>Resilient Distributed Dataset</em>) — así es como Spark paraleliza el trabajo. <code>lambda26</code> implementa ese mismo patrón con sus propios componentes: PySpark en el procesamiento distribuido, casos de uso que publican y consumen eventos, Kafka como columna vertebral de ingesta y observabilidad con Prometheus/Grafana — el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la <strong>Figura 2</strong> (ver 1.6), aplicado al laboratorio del curso.</p>
 <p>Hoy usamos solo el módulo <code>uso-pyspark</code> para reconocer el ecosistema; <code>uso-atmos</code>, <code>uso-replica-cdc</code>, <code>uso-bi-tiempo-real</code> y los casos secundarios <code>uso-rapido</code>/<code>uso-ms-sb</code> quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.</p>
-<h3 id="22-batch-vs-streaming">2.2 Batch vs. Streaming<a class="headerlink" href="#22-batch-vs-streaming" title="Permanent link">&para;</a></h3>
+<h3 id="23-batch-vs-streaming">2.3 Batch vs. Streaming<a class="headerlink" href="#23-batch-vs-streaming" title="Permanent link">&para;</a></h3>
 <p><strong>Tabla 3. Batch vs. streaming</strong></p>
 <table>
 <thead>
@@ -1611,24 +1646,24 @@
 </tbody>
 </table>
 <p>Esta distinción es la base de la decisión arquitectónica de la sesión: no se elige Lambda o Kappa por preferencia técnica, sino según si el problema necesita batch, streaming o ambos.</p>
-<h3 id="23-arquitectura-lambda">2.3 Arquitectura Lambda<a class="headerlink" href="#23-arquitectura-lambda" title="Permanent link">&para;</a></h3>
+<h3 id="24-arquitectura-lambda">2.4 Arquitectura Lambda<a class="headerlink" href="#24-arquitectura-lambda" title="Permanent link">&para;</a></h3>
 <p>Lambda combina tres capas:</p>
 <ul>
 <li><strong>Batch layer</strong>: procesamiento histórico.</li>
 <li><strong>Speed layer</strong>: procesamiento en tiempo real.</li>
 <li><strong>Serving layer</strong>: consulta de resultados combinados.</li>
 </ul>
-<p><strong>Figura 7. Arquitectura Lambda - Spark &amp; Hadoop</strong></p>
+<p><strong>Figura 8. Arquitectura Lambda - Spark &amp; Hadoop</strong></p>
 <p><img alt="Arquitectura Lambda - Spark &amp; Hadoop" src="https://cazton.com/images/consulting/lambda-architecture/lambda-architecture-spark-hadoop-cazton.webp" /></p>
 <p>El nombre "Lambda" viene de la letra griega λ: la fuente de datos se bifurca hacia la batch layer (histórico, Hadoop/MapReduce) y la speed layer (tiempo real, Spark) en paralelo, y ambos resultados convergen en la serving layer, que es lo que consultan las aplicaciones — esa bifurcación y reconvergencia es la que dibuja la forma de la lambda.</p>
 <p>Fuente: <a href="https://cazton.com/consulting/enterprise/lambda-architecture">Lambda Architecture - Cazton</a>.</p>
 <p><strong>Ventaja:</strong> alta precisión al combinar histórico y tiempo real.</p>
 <p><strong>Desventaja:</strong> mayor complejidad (tres capas que mantener).</p>
-<h3 id="24-arquitectura-kappa">2.4 Arquitectura Kappa<a class="headerlink" href="#24-arquitectura-kappa" title="Permanent link">&para;</a></h3>
+<h3 id="25-arquitectura-kappa">2.5 Arquitectura Kappa<a class="headerlink" href="#25-arquitectura-kappa" title="Permanent link">&para;</a></h3>
 <p>Kappa procesa todo como streaming, incluido el reprocesamiento histórico (reproduciendo el stream desde el origen).</p>
 <p><strong>Ventaja:</strong> arquitectura más simple, una sola capa.</p>
 <p><strong>Desventaja:</strong> menos optimizada para consultas puramente históricas.</p>
-<h4 id="241-regla-de-decision-y-comparacion">2.4.1 Regla de decisión y comparación<a class="headerlink" href="#241-regla-de-decision-y-comparacion" title="Permanent link">&para;</a></h4>
+<h4 id="251-regla-de-decision-y-comparacion">2.5.1 Regla de decisión y comparación<a class="headerlink" href="#251-regla-de-decision-y-comparacion" title="Permanent link">&para;</a></h4>
 <p>Regla de decisión:</p>
 <ul>
 <li>Si el caso necesita histórico + tiempo real -&gt; <strong>Lambda</strong>.</li>
@@ -1671,7 +1706,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Figura 8. Comparación de pipelines: Lambda (capas en paralelo) vs. Kappa (una sola capa de streaming)</strong></p>
+<p><strong>Figura 9. Comparación de pipelines: Lambda (capas en paralelo) vs. Kappa (una sola capa de streaming)</strong></p>
 <pre class="mermaid"><code>flowchart LR
     subgraph Lambda["Arquitectura Lambda"]
         direction TB
@@ -1717,6 +1752,29 @@
 <h3 id="31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark">3.1 Configurar y verificar el entorno <code>lambda26</code> (<code>uso-pyspark</code>)<a class="headerlink" href="#31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando y verificado (Jupyter + Spark).</p>
 <p>Requisito previo: Docker Desktop instalado y corriendo, y el repositorio <code>lambda26</code> clonado en tu equipo.</p>
+<p>Esto es lo que vas a levantar y verificar en este paso:</p>
+<p><strong>Figura 10. Componentes del entorno <code>lambda26</code> (<code>uso-pyspark</code>) y sus dependencias</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph BP["Batch Pipeline"]
+        subgraph BP1["uso-pyspark&lt;br/&gt;batch, interactivo"]
+            direction TB
+            Notebook["Notebook&lt;br/&gt;notebooks/"] --&gt; Jupyter["JupyterLab&lt;br/&gt;localhost:4488"]
+            Jupyter --&gt; Container["Contenedor lambda26-pyspark&lt;br/&gt;Jupyter + Spark"]
+            Container --&gt; Compose["docker compose&lt;br/&gt;pyspark/compose.yml"]
+            Notebook --&gt; Session["SparkSession&lt;br/&gt;local[*]"]
+            DF["DataFrame&lt;br/&gt;printSchema / show"] --&gt; Session
+            DF --&gt; Data["data/*.csv&lt;br/&gt;(volumen -&gt; /opt/data)"]
+            UI["Spark UI&lt;br/&gt;localhost:4040"] --&gt; Session
+        end
+    end</code></pre>
+<p>Lectura del diagrama (las flechas indican dependencia: A → B significa "A depende de B", igual que en LP2/DIST):</p>
+<ul>
+<li>El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor <code>lambda26-pyspark</code> (levantado por el <code>docker compose</code> de <code>pyspark/compose.yml</code>) — no son piezas sueltas que haya que conectar.</li>
+<li>El notebook depende de una <code>SparkSession</code> activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.</li>
+<li>El DataFrame depende de dos cosas a la vez: la <code>SparkSession</code> (el motor que lo construye) y el archivo <code>data/*.csv</code> (montado como volumen en <code>/opt/data</code>, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).</li>
+<li>Spark UI depende de que exista una <code>SparkSession</code> activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.</li>
+</ul>
+<p>Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la <code>SparkSession</code>, el <code>DataFrame</code> y verifica Spark UI — completando así todas las dependencias de este diagrama.</p>
 <p>Desde la raíz del repositorio, levanta el laboratorio PySpark:</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="p">-</span><span class="n">-build</span>
 </code></pre></div>
@@ -1804,7 +1862,7 @@ Spark UI   -&gt; http://localhost:4040
 <p>Responde: ¿el caso requiere batch, streaming o ambos? Justifica con al menos dos razones tomadas del caso.</p>
 <h3 id="35-aplicar-la-regla-de-decision">3.5 Aplicar la regla de decisión<a class="headerlink" href="#35-aplicar-la-regla-de-decision" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> arquitectura seleccionada y justificada.</p>
-<p>Aplicando la regla de decisión de 2.4.1 al caso de 3.4, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.</p>
+<p>Aplicando la regla de decisión de 2.5.1 al caso de 3.4, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.</p>
 <h3 id="36-proponer-tecnologias-y-diagrama-de-flujo">3.6 Proponer tecnologías y diagrama de flujo<a class="headerlink" href="#36-proponer-tecnologias-y-diagrama-de-flujo" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> lista de tecnologías y diagrama de flujo simple.</p>
 <p>Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Grafana para BI en tiempo real, etc.) y construye el diagrama:</p>
