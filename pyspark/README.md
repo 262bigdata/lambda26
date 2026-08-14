@@ -2,6 +2,13 @@
 
 Entorno local para ejecutar los notebooks del curso con Spark y Jupyter.
 
+## Clonar
+
+```bash
+git clone https://github.com/262bigdata/lambda26.git
+cd lambda26/pyspark
+```
+
 ## Carpetas
 
 - `notebooks/`: cuadernos fuente ejecutables.
@@ -12,10 +19,10 @@ Entorno local para ejecutar los notebooks del curso con Spark y Jupyter.
 
 ## Uso
 
-Desde la raiz del repositorio:
+Desde `lambda26/pyspark`:
 
 ```powershell
-docker compose -f pyspark/compose.yml up --build
+docker compose up -d
 ```
 
 La integración con Kafka (módulo `kafka/` y el override
@@ -55,7 +62,9 @@ Los artefactos generados se escriben en:
 ### Alternativa con imagen oficial de PySpark + Jupyter
 
 Tambien puedes levantar un entorno PySpark directamente con la imagen oficial
-[`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook):
+[`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook). Diferencia de peso: la imagen
+personalizada de `lambda26` pesa ~1.9 GB, mientras que `jupyter/pyspark-notebook`
+pesa ~6.9 GB — considera tu espacio en disco antes de elegir esta alternativa:
 
 ```yaml
 # compose.yml

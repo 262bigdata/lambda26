@@ -311,7 +311,12 @@ Tiempo: 2h.
 
 **Producto del paso:** entorno `lambda26` funcionando y verificado (Jupyter + Spark).
 
-Requisito previo: Docker Desktop instalado y corriendo, y el repositorio `lambda26` clonado en tu equipo.
+Requisito previo: Docker Desktop instalado y corriendo. Clona el repositorio `lambda26` en tu equipo:
+
+```bash
+git clone https://github.com/262bigdata/lambda26.git
+cd lambda26/pyspark
+```
 
 Esto es lo que vas a levantar y verificar en este paso:
 
@@ -342,20 +347,23 @@ Lectura del diagrama (las flechas indican dependencia: A → B significa "A depe
 
 Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la `SparkSession`, el `DataFrame` y verifica Spark UI — completando así todas las dependencias de este diagrama.
 
-Desde la raíz del repositorio, levanta el laboratorio PySpark:
+A partir de aquí trabajamos con el contenedor `lambda26-pyspark` (la imagen personalizada de este repositorio) durante todo el curso — es el entorno de referencia que usa el resto de esta guía. La alternativa con la imagen oficial (al final de este paso) solo es necesaria si tu equipo no puede correr `lambda26-pyspark`.
+
+Desde `lambda26/pyspark`, levanta el laboratorio:
 
 ```powershell
-docker compose -f pyspark/compose.yml up --build
+docker compose up -d
 ```
 
-Verifica que responden:
+Verifica que responde:
 
 ```text
 JupyterLab -> http://localhost:4488/lab?token=sintoken
-Spark UI   -> http://localhost:4040
 ```
 
-**Alternativa con imagen oficial de PySpark + Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial [`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook), que trae Spark completo sin depender de la imagen personalizada de `lambda26`:
+Spark UI (`http://localhost:4040`) todavía no responde en este punto: solo se levanta cuando creas una `SparkSession` activa, en 3.2 — no al levantar el contenedor.
+
+**Alternativa con imagen oficial de PySpark + Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial [`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook), que trae Spark completo sin depender de la imagen personalizada de `lambda26`. Diferencia de peso a tener en cuenta: la imagen personalizada de `lambda26` pesa **~1.9 GB**, mientras que `jupyter/pyspark-notebook` pesa **~6.9 GB** — considera tu espacio en disco y velocidad de conexión antes de elegir esta alternativa:
 
 ```yaml
 # compose.yml
