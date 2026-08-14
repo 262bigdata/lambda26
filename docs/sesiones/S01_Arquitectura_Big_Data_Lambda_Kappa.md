@@ -150,76 +150,9 @@ Una solución Big Data es un flujo de trabajo con 5 etapas:
 Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo
 ```
 
-En `lambda26`, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:
+En `lambda26`, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana: es el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la **Figura 2** (ver 1.6), aplicado al laboratorio del curso.
 
-**Figura 4. Arquitectura `lambda26`**
-
-```mermaid
-flowchart LR
-    subgraph PySparkModule["uso pyspark - batch, interactivo"]
-        direction TB
-        Notebooks["notebooks/*.ipynb<br/>ETL, entrenamiento ML"]
-        Jupyter["Jupyter<br/>localhost:4488"]
-        Spark["Spark / PySpark<br/>localhost:4040"]
-        Data["data/*.csv"]
-        Artifacts["artifacts/<br/>modelos entrenados"]
-        Notebooks --> Jupyter --> Spark
-        Data --> Spark --> Artifacts
-    end
-
-    subgraph StreamingModule["uso-pyspark - streaming, contenedor propio"]
-        Scripts["scripts/*.py<br/>consumer + inferencia<br/>spark-submit"]
-    end
-
-    Artifacts -.->|"modelo (volumen compartido)"| Scripts
-
-    subgraph UseMS["uso-ms-sb"]
-        direction TB
-        OrdenMS["ec-orden-ms<br/>API de ordenes<br/>publica orden-eventos"]
-        OrdenDB["postgres ordenes dev<br/>localhost:49020"]
-        PagoMS["ec-pago-ms<br/>API de pagos<br/>consume orden-eventos<br/>publica pago-eventos"]
-        PagoDB["postgres pagos dev<br/>localhost:49030"]
-        OrdenMS --> OrdenDB
-        PagoMS --> PagoDB
-    end
-
-    subgraph UseIoT["uso-atmos"]
-        IoT["pendiente"]
-    end
-
-    subgraph KafkaModule["kafka"]
-        direction TB
-        subgraph KafkaStack[" "]
-            direction TB
-            Kafka["Apache Kafka<br/>kafka:9092<br/>localhost:49092"]
-            KafkaUI["Kafka UI<br/>localhost:48085"]
-            KafkaExporter["Kafka Exporter<br/>localhost:49308"]
-            Kafka --> KafkaUI
-            Kafka --> KafkaExporter
-        end
-    end
-
-    subgraph ObsModule["obs"]
-        direction TB
-        subgraph ObsStack[" "]
-            direction TB
-            Prometheus["Prometheus<br/>localhost:49090"]
-            Grafana["Grafana<br/>localhost:43000"]
-            Prometheus --> Grafana
-        end
-    end
-
-    StreamingModule -->|"U2: streaming consumer"| Kafka
-    UseMS -->|"orden-eventos / pago-eventos"| Kafka
-    UseIoT -. "futuro" .-> Kafka
-    Grafana -. "consulta predicción (según granularidad del modelo)" .-> Scripts
-    KafkaExporter -->|"métricas"| Prometheus
-
-    style KafkaStack fill:transparent,stroke:transparent,color:transparent
-    style ObsStack fill:transparent,stroke:transparent,color:transparent
-```
-
-Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-ms-sb` (eventos vía Kafka) se retoma a partir de S6, y `uso-atmos` queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos `uso-rapido`, `uso-replica-cdc` y `uso-bi-tiempo-real` que no se usan en esta sesión, está en el índice del curso.
+Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmos`, `uso-replica-cdc`, `uso-bi-tiempo-real` y los casos secundarios `uso-rapido`/`uso-ms-sb` quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.
 
 ### 2.2 Batch vs. Streaming
 
@@ -316,19 +249,21 @@ services:
     pyspark:
         image: jupyter/pyspark-notebook
         ports:
-            - 4488:8888
-            - 4040:4040
+            - 4489:8888
+            - 4041:4040
         environment:
             - JUPYTER_TOKEN=sintoken
         volumes:
             - ./:/home/jovyan
 ```
 
+Puertos distintos a los de `pyspark/compose.yml` (4488/4040) para no chocar si ambos entornos quedan levantados a la vez.
+
 ```powershell
 docker compose up -d
 ```
 
-Accede igual por `http://localhost:4488/lab?token=sintoken` (JupyterLab) o `http://localhost:4488/?token=sintoken` (Jupyter Notebook).
+Accede igual por `http://localhost:4489/lab?token=sintoken` (JupyterLab) o `http://localhost:4489/?token=sintoken` (Jupyter Notebook).
 
 Este es el único entorno que se instala en la Unidad 1: `pyspark/compose.yml` corre PySpark y Jupyter solos, sin Kafka. El módulo `kafka` y el override `pyspark/compose.kafka.yml` (que conecta PySpark a la red de Kafka) se instalan recién en la Unidad 2 (S6), cuando el curso pasa de batch a streaming — no hace falta levantarlos ahora. Este entorno queda corriendo durante toda la unidad: hoy solo lo verificas con un notebook mínimo (3.2), en S2 lo usas a fondo, sin perder tiempo de clase configurando nada.
 
@@ -354,7 +289,7 @@ spark = (
 spark
 ```
 
-2. Cargar un dataset como DataFrame:
+2. Cargar un dataset como DataFrame. Descargar `biblia_ntv_.csv` desde [Kaggle: Biblia NTV (Spanish Bible NTV)](https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download) y copiarlo a `data/` (montado como `/opt/data/` en el contenedor):
 
 ```python
 df = spark.read.csv("/opt/data/biblia_ntv_.csv", header=True, inferSchema=True)
