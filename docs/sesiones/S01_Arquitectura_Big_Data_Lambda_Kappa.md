@@ -98,7 +98,7 @@ flowchart LR
 
 **Comprensión de arquitecturas Big Data**
 
-1. ¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.4.1.
+1. ¿Por qué el diseño de Uber (sistemas batch y en tiempo real separados, ambos sobre Kafka) corresponde a Lambda y no a Kappa? Justifica con la regla de decisión que se explica en 2.5.1.
 2. ¿En qué escenario convendría eliminar la capa batch separada y reprocesar todo desde Kafka (Kappa) en vez de mantener ambos sistemas?
 
 ### 1.7 Ubicación en el curso
@@ -132,7 +132,27 @@ Hoy se decide el primer componente real de la U1: la arquitectura Big Data. En l
 
 Tiempo: 25 min.
 
-### 2.1 Ecosistema y arquitectura Big Data
+### 2.1 Arquitectura de la sesión
+
+**Figura 4. Arquitectura de la sesión: entorno `lambda26` (`uso-pyspark`)**
+
+```mermaid
+flowchart LR
+    subgraph BP["Batch Pipeline"]
+        subgraph BP1["uso-pyspark<br/>batch, interactivo"]
+            direction LR
+            E["Extracción o captura<br/>spark.read.csv()"] --> L["Load / almacenamiento<br/>DataFrame distribuido en memoria"]
+            L --> T["Transformación / procesamiento<br/>select() — análisis/ML desde S4"]
+            T --> V["Visualización<br/>show() + Spark UI"]
+        end
+    end
+```
+
+A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en `lambda26` el módulo `uso-pyspark` cubre las 4 etapas dentro de un solo componente, sobre una `SparkSession` común (`local[*]`) corriendo en el contenedor `lambda26-pyspark`. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4040); la transformación real y el análisis ML se profundizan desde S2 y S4.
+
+Estos son los componentes que instalas y verificas en 3.1-3.2, antes de pasar al análisis conceptual (ecosistema, batch/streaming, Lambda o Kappa) que desarrolla el resto de esta sección.
+
+### 2.2 Ecosistema y arquitectura Big Data
 
 Big Data se refiere al procesamiento de grandes volúmenes de datos que no pueden manejarse eficientemente con herramientas tradicionales. Se resume con las **5V**:
 
@@ -154,27 +174,27 @@ Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> V
 
 BI y Big Data comparten ese mismo flujo ETL de base (extracción, transformación/procesamiento, carga/almacenamiento, visualización); lo que cambia es la escala y las herramientas:
 
-**Figura 4. Ciclo de vida de los datos: BI vs. Big Data**
+**Figura 5. Ciclo de vida de los datos: BI vs. Big Data**
 
-![Ciclo de vida de los datos: BI vs. Big Data](img/s01-2.1-ciclo-vida-datos-bi-bigdata.png)
+![Ciclo de vida de los datos: BI vs. Big Data](img/s01-2.2-ciclo-vida-datos-bi-bigdata.png)
 
 En BI, el almacenamiento y el procesamiento no son distribuidos; en Big Data sí — con etapas explícitas de preparación de datos, modelado y evaluación (típicas de un flujo de Machine Learning) sobre almacenamiento y procesamiento distribuidos.
 
-**Figura 5. Arquitectura base de una solución BI**
+**Figura 6. Arquitectura base de una solución BI**
 
-![Arquitectura base de una solución BI](img/s01-2.1-arquitectura-bi.png)
+![Arquitectura base de una solución BI](img/s01-2.2-arquitectura-bi.png)
 
 Una solución BI típica resuelve esas 4 etapas con herramientas de un solo nodo: extracción con ETL como Pentaho, procesamiento con SQL, almacenamiento en PostgreSQL/MySQL y visualización en Power BI.
 
-**Figura 6. Arquitectura de una solución BI & Big Data**
+**Figura 7. Arquitectura de una solución BI & Big Data**
 
-![Arquitectura de una solución BI & Big Data](img/s01-2.1-arquitectura-bigdata.png)
+![Arquitectura de una solución BI & Big Data](img/s01-2.2-arquitectura-bigdata.png)
 
 Al escalar a Big Data, el almacenamiento pasa por un Data Lake antes del Data Warehouse, y el procesamiento se distribuye entre un nodo master y varios workers, cada uno con su RDD (*Resilient Distributed Dataset*) — así es como Spark paraleliza el trabajo. `lambda26` implementa ese mismo patrón con sus propios componentes: PySpark en el procesamiento distribuido, casos de uso que publican y consumen eventos, Kafka como columna vertebral de ingesta y observabilidad con Prometheus/Grafana — el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la **Figura 2** (ver 1.6), aplicado al laboratorio del curso.
 
 Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmos`, `uso-replica-cdc`, `uso-bi-tiempo-real` y los casos secundarios `uso-rapido`/`uso-ms-sb` quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.
 
-### 2.2 Batch vs. Streaming
+### 2.3 Batch vs. Streaming
 
 **Tabla 3. Batch vs. streaming**
 
@@ -185,7 +205,7 @@ Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmo
 
 Esta distinción es la base de la decisión arquitectónica de la sesión: no se elige Lambda o Kappa por preferencia técnica, sino según si el problema necesita batch, streaming o ambos.
 
-### 2.3 Arquitectura Lambda
+### 2.4 Arquitectura Lambda
 
 Lambda combina tres capas:
 
@@ -193,7 +213,7 @@ Lambda combina tres capas:
 - **Speed layer**: procesamiento en tiempo real.
 - **Serving layer**: consulta de resultados combinados.
 
-**Figura 7. Arquitectura Lambda - Spark & Hadoop**
+**Figura 8. Arquitectura Lambda - Spark & Hadoop**
 
 ![Arquitectura Lambda - Spark & Hadoop](https://cazton.com/images/consulting/lambda-architecture/lambda-architecture-spark-hadoop-cazton.webp)
 
@@ -205,7 +225,7 @@ Fuente: [Lambda Architecture - Cazton](https://cazton.com/consulting/enterprise/
 
 **Desventaja:** mayor complejidad (tres capas que mantener).
 
-### 2.4 Arquitectura Kappa
+### 2.5 Arquitectura Kappa
 
 Kappa procesa todo como streaming, incluido el reprocesamiento histórico (reproduciendo el stream desde el origen).
 
@@ -213,7 +233,7 @@ Kappa procesa todo como streaming, incluido el reprocesamiento histórico (repro
 
 **Desventaja:** menos optimizada para consultas puramente históricas.
 
-#### 2.4.1 Regla de decisión y comparación
+#### 2.5.1 Regla de decisión y comparación
 
 Regla de decisión:
 
@@ -230,7 +250,7 @@ Regla de decisión:
 | Capas | Batch + Speed + Serving | Solo streaming |
 | Reprocesamiento | Desde la capa batch | Reproduciendo el stream |
 
-**Figura 8. Comparación de pipelines: Lambda (capas en paralelo) vs. Kappa (una sola capa de streaming)**
+**Figura 9. Comparación de pipelines: Lambda (capas en paralelo) vs. Kappa (una sola capa de streaming)**
 
 ```mermaid
 flowchart LR
@@ -288,6 +308,35 @@ Tiempo: 2h.
 **Producto del paso:** entorno `lambda26` funcionando y verificado (Jupyter + Spark).
 
 Requisito previo: Docker Desktop instalado y corriendo, y el repositorio `lambda26` clonado en tu equipo.
+
+Esto es lo que vas a levantar y verificar en este paso:
+
+**Figura 10. Componentes del entorno `lambda26` (`uso-pyspark`) y sus dependencias**
+
+```mermaid
+flowchart LR
+    subgraph BP["Batch Pipeline"]
+        subgraph BP1["uso-pyspark<br/>batch, interactivo"]
+            direction TB
+            Notebook["Notebook<br/>notebooks/"] --> Jupyter["JupyterLab<br/>localhost:4488"]
+            Jupyter --> Container["Contenedor lambda26-pyspark<br/>Jupyter + Spark"]
+            Container --> Compose["docker compose<br/>pyspark/compose.yml"]
+            Notebook --> Session["SparkSession<br/>local[*]"]
+            DF["DataFrame<br/>printSchema / show"] --> Session
+            DF --> Data["data/*.csv<br/>(volumen -> /opt/data)"]
+            UI["Spark UI<br/>localhost:4040"] --> Session
+        end
+    end
+```
+
+Lectura del diagrama (las flechas indican dependencia: A → B significa "A depende de B", igual que en LP2/DIST):
+
+- El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor `lambda26-pyspark` (levantado por el `docker compose` de `pyspark/compose.yml`) — no son piezas sueltas que haya que conectar.
+- El notebook depende de una `SparkSession` activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.
+- El DataFrame depende de dos cosas a la vez: la `SparkSession` (el motor que lo construye) y el archivo `data/*.csv` (montado como volumen en `/opt/data`, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).
+- Spark UI depende de que exista una `SparkSession` activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.
+
+Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la `SparkSession`, el `DataFrame` y verifica Spark UI — completando así todas las dependencias de este diagrama.
 
 Desde la raíz del repositorio, levanta el laboratorio PySpark:
 
@@ -412,7 +461,7 @@ Responde: ¿el caso requiere batch, streaming o ambos? Justifica con al menos do
 
 **Producto del paso:** arquitectura seleccionada y justificada.
 
-Aplicando la regla de decisión de 2.4.1 al caso de 3.4, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.
+Aplicando la regla de decisión de 2.5.1 al caso de 3.4, selecciona Lambda o Kappa y justifica tu elección en 2-3 líneas.
 
 ### 3.6 Proponer tecnologías y diagrama de flujo
 
