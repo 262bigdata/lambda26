@@ -51,6 +51,42 @@ Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de
 
 Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tiered-storage/).
 
+`lambda26` sigue el mismo patrón, con sus propios componentes en vez de los de Uber:
+
+**Figura 2. `lambda26` con el mismo patrón de Uber: productores, pipeline en tiempo real y pipeline batch**
+
+```mermaid
+flowchart LR
+    subgraph Producers["Productores"]
+        direction TB
+        P1["uso-atmos<br/>ESP32: sensores atmosféricos"]
+        P2["uso-rapido, uso-ms-sb<br/>(secundario)"]
+        P3["uso-replica-cdc<br/>MySQL"]
+    end
+
+    K[("kafka")]
+
+    subgraph RT["Realtime Pipeline"]
+        direction TB
+        RT1["uso-pyspark<br/>streaming + inferencia ML"]
+    end
+
+    subgraph BP["Batch Pipeline"]
+        direction TB
+        BP1["uso-pyspark<br/>batch, interactivo"]
+        BP2["Data warehouse +<br/>uso-bi-tiempo-real (dbt)"]
+    end
+
+    Grafana["obs<br/>Prometheus + Grafana"]
+
+    Producers --> K
+    K --> RT
+    K -.-> BP
+    RT1 --> Grafana
+    BP2 --> Grafana
+    BP1 -.->|"modelo entrenado"| RT1
+```
+
 **Preguntas de análisis**
 
 **Activación de conocimientos previos**
@@ -72,7 +108,7 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 
 Roadmap del producto de unidad:
 
-**Figura 2. Roadmap del producto de la unidad U1**
+**Figura 3. Roadmap del producto de la unidad U1**
 
 ```mermaid
 flowchart TB
@@ -116,20 +152,26 @@ Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> V
 
 En `lambda26`, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana:
 
-**Figura 3. Arquitectura `lambda26`**
+**Figura 4. Arquitectura `lambda26`**
 
 ```mermaid
 flowchart LR
-    subgraph PySparkModule["uso pyspark"]
+    subgraph PySparkModule["uso pyspark - batch, interactivo"]
         direction TB
-        Notebooks["notebooks/*.ipynb"]
+        Notebooks["notebooks/*.ipynb<br/>ETL, entrenamiento ML"]
         Jupyter["Jupyter<br/>localhost:4488"]
         Spark["Spark / PySpark<br/>localhost:4040"]
         Data["data/*.csv"]
-        Artifacts["artifacts/"]
+        Artifacts["artifacts/<br/>modelos entrenados"]
         Notebooks --> Jupyter --> Spark
         Data --> Spark --> Artifacts
     end
+
+    subgraph StreamingModule["uso-pyspark - streaming, contenedor propio"]
+        Scripts["scripts/*.py<br/>consumer + inferencia<br/>spark-submit"]
+    end
+
+    Artifacts -.->|"modelo (volumen compartido)"| Scripts
 
     subgraph UseMS["uso-ms-sb"]
         direction TB
@@ -167,16 +209,17 @@ flowchart LR
         end
     end
 
-    PySparkModule -->|"U2: streaming consumer"| Kafka
+    StreamingModule -->|"U2: streaming consumer"| Kafka
     UseMS -->|"orden-eventos / pago-eventos"| Kafka
     UseIoT -. "futuro" .-> Kafka
+    Grafana -. "consulta predicción (según granularidad del modelo)" .-> Scripts
     KafkaExporter -->|"métricas"| Prometheus
 
     style KafkaStack fill:transparent,stroke:transparent,color:transparent
     style ObsStack fill:transparent,stroke:transparent,color:transparent
 ```
 
-Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-ms-sb` (eventos vía Kafka) se retoma a partir de S6, y `uso-atmos` queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos `uso-rapido` y `uso-replica-cdc` que no se usan en esta sesión, está en el índice del curso.
+Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-ms-sb` (eventos vía Kafka) se retoma a partir de S6, y `uso-atmos` queda pendiente como extensión futura del laboratorio. La arquitectura completa del laboratorio, con los módulos `uso-rapido`, `uso-replica-cdc` y `uso-bi-tiempo-real` que no se usan en esta sesión, está en el índice del curso.
 
 ### 2.2 Batch vs. Streaming
 
@@ -328,10 +371,10 @@ Aplicando la regla de decisión de 2.4.1 al caso de 3.3, selecciona Lambda o Kap
 
 **Producto del paso:** lista de tecnologías y diagrama de flujo simple.
 
-Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Dashboard/Power BI, etc.) y construye el diagrama:
+Propón tecnologías del ecosistema (Kafka, Spark Streaming, Spark Batch, Data Lake, Grafana para BI en tiempo real, etc.) y construye el diagrama:
 
 ```text
-Usuarios -> Kafka -> Spark Streaming + Batch -> Data Lake / DW -> Dashboard
+Usuarios -> Kafka -> Spark Streaming + Batch -> Data Lake / DW -> Grafana
 ```
 
 ### 3.6 Completar la plantilla de propuesta
