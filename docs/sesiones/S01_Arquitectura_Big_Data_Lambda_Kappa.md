@@ -89,6 +89,10 @@ flowchart LR
     BP1 -.->|"modelo entrenado"| RT1
 ```
 
+`uso-pyspark` aparece dos veces en la Figura 2: son dos **contenedores separados de la misma imagen**, no dos tecnologías distintas. El de Batch Pipeline corre Jupyter (notebooks, exploración/entrenamiento), y el de Realtime Pipeline ejecuta `spark-submit` sobre un script `.py` como proceso persistente (streaming + inferencia). Se separan porque un notebook no es apto para un job que debe correr sin parar, y un job de producción no debería competir por recursos con el contenedor de exploración — por eso, aunque comparten la misma base tecnológica, Lambda los trata como dos sistemas independientes.
+
+Es el mismo patrón que usa **Databricks** (la plataforma que suelen usar las certificaciones de ingeniería de datos): **All-Purpose Clusters** para notebooks/exploración (equivalente al contenedor batch/interactivo de la Figura 2) y **Job Clusters** — efímeros, creados solo para correr un Job y destruidos al terminar — para todo proceso productivo, incluido streaming. Databricks incluso recomienda explícitamente correr Structured Streaming como Job sobre Job Compute y no en un cluster interactivo, por las mismas dos razones: no competir por recursos con la exploración, y que un Job reintenta/reinicia automáticamente si el proceso se cae, algo que un notebook "dejado corriendo" no garantiza. `lambda26` reproduce esa misma separación con Docker, a escala de laboratorio. En la industria, Databricks corre sobre AWS, Azure o GCP (no es una nube en sí misma); su principal competidor, **Snowflake**, no usa Spark — es un data warehouse SQL-first. Muchas empresas usan ambos: Snowflake para BI/reportes, Databricks para ML e ingeniería de datos pesada.
+
 **Preguntas de análisis**
 
 **Activación de conocimientos previos**
