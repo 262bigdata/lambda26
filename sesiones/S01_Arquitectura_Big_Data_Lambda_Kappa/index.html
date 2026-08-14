@@ -1753,7 +1753,10 @@
 </ul>
 <h3 id="31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark">3.1 Configurar y verificar el entorno <code>lambda26</code> (<code>uso-pyspark</code>)<a class="headerlink" href="#31-configurar-y-verificar-el-entorno-lambda26-uso-pyspark" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando y verificado (Jupyter + Spark).</p>
-<p>Requisito previo: Docker Desktop instalado y corriendo, y el repositorio <code>lambda26</code> clonado en tu equipo.</p>
+<p>Requisito previo: Docker Desktop instalado y corriendo. Clona el repositorio <code>lambda26</code> en tu equipo:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/262bigdata/lambda26.git
+<span class="nb">cd</span><span class="w"> </span>lambda26/pyspark
+</code></pre></div>
 <p>Esto es lo que vas a levantar y verificar en este paso:</p>
 <p><strong>Figura 10. Componentes del entorno <code>lambda26</code> (<code>uso-pyspark</code>) y sus dependencias</strong></p>
 <pre class="mermaid"><code>flowchart LR
@@ -1777,14 +1780,15 @@
 <li>Spark UI depende de que exista una <code>SparkSession</code> activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.</li>
 </ul>
 <p>Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la <code>SparkSession</code>, el <code>DataFrame</code> y verifica Spark UI — completando así todas las dependencias de este diagrama.</p>
-<p>Desde la raíz del repositorio, levanta el laboratorio PySpark:</p>
-<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="p">-</span><span class="n">-build</span>
+<p>A partir de aquí trabajamos con el contenedor <code>lambda26-pyspark</code> (la imagen personalizada de este repositorio) durante todo el curso — es el entorno de referencia que usa el resto de esta guía. La alternativa con la imagen oficial (al final de este paso) solo es necesaria si tu equipo no puede correr <code>lambda26-pyspark</code>.</p>
+<p>Desde <code>lambda26/pyspark</code>, levanta el laboratorio:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
 </code></pre></div>
-<p>Verifica que responden:</p>
+<p>Verifica que responde:</p>
 <div class="highlight"><pre><span></span><code>JupyterLab -&gt; http://localhost:4488/lab?token=sintoken
-Spark UI   -&gt; http://localhost:4040
 </code></pre></div>
-<p><strong>Alternativa con imagen oficial de PySpark + Jupyter:</strong> si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial <a href="https://hub.docker.com/r/jupyter/pyspark-notebook"><code>jupyter/pyspark-notebook</code></a>, que trae Spark completo sin depender de la imagen personalizada de <code>lambda26</code>:</p>
+<p>Spark UI (<code>http://localhost:4040</code>) todavía no responde en este punto: solo se levanta cuando creas una <code>SparkSession</code> activa, en 3.2 — no al levantar el contenedor.</p>
+<p><strong>Alternativa con imagen oficial de PySpark + Jupyter:</strong> si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial <a href="https://hub.docker.com/r/jupyter/pyspark-notebook"><code>jupyter/pyspark-notebook</code></a>, que trae Spark completo sin depender de la imagen personalizada de <code>lambda26</code>. Diferencia de peso a tener en cuenta: la imagen personalizada de <code>lambda26</code> pesa <strong>~1.9 GB</strong>, mientras que <code>jupyter/pyspark-notebook</code> pesa <strong>~6.9 GB</strong> — considera tu espacio en disco y velocidad de conexión antes de elegir esta alternativa:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># compose.yml</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">pyspark</span><span class="p">:</span>
