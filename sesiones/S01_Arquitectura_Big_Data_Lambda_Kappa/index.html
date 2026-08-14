@@ -1723,7 +1723,7 @@
 <div class="highlight"><pre><span></span><code>JupyterLab -&gt; http://localhost:4488/lab?token=sintoken
 Spark UI   -&gt; http://localhost:4040
 </code></pre></div>
-<p><strong>Alternativa con imagen oficial de Jupyter:</strong> si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial <code>jupyter/pyspark-notebook</code>, que trae Spark completo sin depender de la imagen personalizada de <code>lambda26</code>:</p>
+<p><strong>Alternativa con imagen oficial de PySpark + Jupyter:</strong> si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial <a href="https://hub.docker.com/r/jupyter/pyspark-notebook"><code>jupyter/pyspark-notebook</code></a>, que trae Spark completo sin depender de la imagen personalizada de <code>lambda26</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># compose.yml</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">pyspark</span><span class="p">:</span>
@@ -1854,6 +1854,12 @@ Spark UI   -&gt; http://localhost:4040
 </tr>
 </tbody>
 </table>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Entorno <code>lambda26</code> (<code>uso-pyspark</code>) funcionando y verificado, con un notebook que muestra Spark UI activo.</li>
+<li>Clasificación batch/streaming y arquitectura (Lambda o Kappa) seleccionada, con justificación.</li>
+<li>Ficha de propuesta arquitectónica completa (tecnologías, diagrama de flujo, supuestos y riesgos).</li>
+</ul>
 <h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
 <p>Tiempo: 2h fuera del aula.</p>
 <h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
