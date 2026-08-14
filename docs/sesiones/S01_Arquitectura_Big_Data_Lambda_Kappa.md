@@ -1,5 +1,7 @@
 # S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
 
+*Por: Angel Sullon Macalupu @asullom - 2026*
+
 ## 1. Introducción
 
 Tiempo: 20 min.
