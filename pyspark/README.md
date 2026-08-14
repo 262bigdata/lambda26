@@ -52,10 +52,10 @@ Los artefactos generados se escriben en:
 /opt/artifacts
 ```
 
-### Alternativa con imagen oficial de Jupyter
+### Alternativa con imagen oficial de PySpark + Jupyter
 
 Tambien puedes levantar un entorno PySpark directamente con la imagen oficial
-`jupyter/pyspark-notebook`:
+[`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook):
 
 ```yaml
 # compose.yml

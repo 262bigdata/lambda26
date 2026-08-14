@@ -300,7 +300,7 @@ JupyterLab -> http://localhost:4488/lab?token=sintoken
 Spark UI   -> http://localhost:4040
 ```
 
-**Alternativa con imagen oficial de Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial `jupyter/pyspark-notebook`, que trae Spark completo sin depender de la imagen personalizada de `lambda26`:
+**Alternativa con imagen oficial de PySpark + Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial [`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook), que trae Spark completo sin depender de la imagen personalizada de `lambda26`:
 
 ```yaml
 # compose.yml
@@ -438,6 +438,12 @@ Completa la ficha de arquitectura Big Data:
 | **Diagrama de arquitectura** | `Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo` | `Usuarios -> Kafka -> Spark Processing -> Data Lake / BD -> Dashboard / Aplicaciones` |
 | **Tecnologías propuestas** | Ingesta / Procesamiento / Almacenamiento / Visualización. | Kafka (ingesta) → Data Lake / RAW (almacenamiento) → Spark (procesamiento) → Grafana (visualización). |
 | **Supuestos y riesgos** | Supuestos / Riesgos o limitaciones. | Supuestos: gran volumen de datos, eventos generados continuamente, necesidad de análisis en tiempo real. Riesgos: alta complejidad de la arquitectura, costo de infraestructura, latencia en el procesamiento. |
+
+**Evidencia de aprendizaje:**
+
+- Entorno `lambda26` (`uso-pyspark`) funcionando y verificado, con un notebook que muestra Spark UI activo.
+- Clasificación batch/streaming y arquitectura (Lambda o Kappa) seleccionada, con justificación.
+- Ficha de propuesta arquitectónica completa (tecnologías, diagrama de flujo, supuestos y riesgos).
 
 ## 4. Crea: actividad autónoma
 
