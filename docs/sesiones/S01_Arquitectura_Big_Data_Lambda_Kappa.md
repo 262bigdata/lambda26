@@ -150,7 +150,25 @@ Una solución Big Data es un flujo de trabajo con 5 etapas:
 Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo
 ```
 
-En `lambda26`, ese flujo se implementa con un entorno reproducible que integra procesamiento con PySpark, casos de uso que publican y consumen eventos, Kafka como columna vertebral y observabilidad con Prometheus/Grafana: es el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la **Figura 2** (ver 1.6), aplicado al laboratorio del curso.
+BI y Big Data comparten ese mismo flujo ETL de base (extracción, transformación/procesamiento, carga/almacenamiento, visualización); lo que cambia es la escala y las herramientas:
+
+**Figura 4. Ciclo de vida de los datos: BI vs. Big Data**
+
+![Ciclo de vida de los datos: BI vs. Big Data](img/s01-2.1-ciclo-vida-datos-bi-bigdata.png)
+
+En BI, el almacenamiento y el procesamiento no son distribuidos; en Big Data sí — con etapas explícitas de preparación de datos, modelado y evaluación (típicas de un flujo de Machine Learning) sobre almacenamiento y procesamiento distribuidos.
+
+**Figura 5. Arquitectura base de una solución BI**
+
+![Arquitectura base de una solución BI](img/s01-2.1-arquitectura-bi.png)
+
+Una solución BI típica resuelve esas 4 etapas con herramientas de un solo nodo: extracción con ETL como Pentaho, procesamiento con SQL, almacenamiento en PostgreSQL/MySQL y visualización en Power BI.
+
+**Figura 6. Arquitectura de una solución BI & Big Data**
+
+![Arquitectura de una solución BI & Big Data](img/s01-2.1-arquitectura-bigdata.png)
+
+Al escalar a Big Data, el almacenamiento pasa por un Data Lake antes del Data Warehouse, y el procesamiento se distribuye entre un nodo master y varios workers, cada uno con su RDD (*Resilient Distributed Dataset*) — así es como Spark paraleliza el trabajo. `lambda26` implementa ese mismo patrón con sus propios componentes: PySpark en el procesamiento distribuido, casos de uso que publican y consumen eventos, Kafka como columna vertebral de ingesta y observabilidad con Prometheus/Grafana — el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la **Figura 2** (ver 1.6), aplicado al laboratorio del curso.
 
 Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmos`, `uso-replica-cdc`, `uso-bi-tiempo-real` y los casos secundarios `uso-rapido`/`uso-ms-sb` quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.
 
@@ -172,6 +190,14 @@ Lambda combina tres capas:
 - **Batch layer**: procesamiento histórico.
 - **Speed layer**: procesamiento en tiempo real.
 - **Serving layer**: consulta de resultados combinados.
+
+**Figura 7. Arquitectura Lambda - Spark & Hadoop**
+
+![Arquitectura Lambda - Spark & Hadoop](https://cazton.com/images/consulting/lambda-architecture/lambda-architecture-spark-hadoop-cazton.webp)
+
+El nombre "Lambda" viene de la letra griega λ: la fuente de datos se bifurca hacia la batch layer (histórico, Hadoop/MapReduce) y la speed layer (tiempo real, Spark) en paralelo, y ambos resultados convergen en la serving layer, que es lo que consultan las aplicaciones — esa bifurcación y reconvergencia es la que dibuja la forma de la lambda.
+
+Fuente: [Lambda Architecture - Cazton](https://cazton.com/consulting/enterprise/lambda-architecture).
 
 **Ventaja:** alta precisión al combinar histórico y tiempo real.
 
@@ -201,6 +227,39 @@ Regla de decisión:
 | Complejidad | Alta | Menor |
 | Capas | Batch + Speed + Serving | Solo streaming |
 | Reprocesamiento | Desde la capa batch | Reproduciendo el stream |
+
+**Figura 8. Comparación de pipelines: Lambda (capas en paralelo) vs. Kappa (una sola capa de streaming)**
+
+```mermaid
+flowchart LR
+    subgraph Lambda["Arquitectura Lambda"]
+        direction TB
+        DS1["Fuente de datos"]
+        Batch["Batch layer<br/>procesamiento histórico"]
+        Speed["Speed layer<br/>procesamiento en tiempo real"]
+        Serving1["Serving layer<br/>consulta de resultados combinados"]
+        Risk1["⚠ Drift risk"]
+        DS1 --> Batch --> Serving1
+        DS1 --> Speed --> Serving1
+        Serving1 -.- Risk1
+    end
+
+    subgraph Kappa["Arquitectura Kappa"]
+        direction TB
+        DS2["Fuente de datos<br/>(topic de Kafka)"]
+        Stream["Stream processing layer<br/>un solo codebase"]
+        Serving2["Serving layer<br/>vistas calculadas"]
+        Consistent2["✔ Consistente"]
+        DS2 --> Stream --> Serving2
+        DS2 -. "reprocesar: replay desde<br/>el inicio del topic" .-> Stream
+        Serving2 -.- Consistent2
+    end
+
+    style Risk1 fill:transparent,stroke:transparent,color:#9a6b00
+    style Consistent2 fill:transparent,stroke:transparent,color:#1a7a3c
+```
+
+En Lambda, la fuente alimenta dos capas en paralelo (batch y speed) que convergen en la serving layer; al ser dos codebases separados que se combinan, existe **riesgo de deriva** (*drift risk*) entre lo que calcula cada capa. En Kappa, todo pasa por una sola capa de streaming (un solo codebase, una sola fuente de verdad: **consistente**); para recalcular resultados no hay una capa batch aparte, se reproduce (*replay*) el topic de Kafka desde el origen sobre un nuevo procesador. El trade-off no es gratis: Lambda ofrece capas flexibles (se puede optimizar cada una por separado), pero Kappa exige mayor expertise en streaming — todo el equipo, incluido el reprocesamiento histórico, corre sobre la misma tecnología de streaming. Diagrama propio, basado en la comparación conceptual de [System Design Roadmap: Kappa vs Lambda Architecture Evolution](https://systemdr.systemdrd.com/p/kappa-vs-lambda-architecture-evolution).
 
 ## 3. Aplica: actividad práctica guiada
 
@@ -367,16 +426,18 @@ Usuarios -> Kafka -> Spark Streaming + Batch -> Data Lake / DW -> Grafana
 
 **Producto del paso:** ficha de propuesta arquitectónica completa.
 
-Completa:
+Completa la ficha de arquitectura Big Data:
 
-```text
-Caso analizado:
-Tipo de procesamiento:
-Arquitectura seleccionada:
-Justificación:
-Tecnologías propuestas:
-Diagrama simple:
-```
+**Tabla 5. Ficha de propuesta arquitectónica**
+
+| Campo | Completa | Ejemplo de referencia |
+|---|---|---|
+| **Caso analizado** | Breve descripción del sistema: qué genera los datos y con qué frecuencia. | Plataforma de streaming: cada segundo llegan eventos de reproducciones, búsquedas y recomendaciones de los usuarios. |
+| **Tipo de procesamiento** | Marca uno — Batch / Streaming / Ambos — y justifica. | — |
+| **Arquitectura seleccionada** | Marca una — Lambda / Kappa — y justifica. | — |
+| **Diagrama de arquitectura** | `Fuente de datos -> Ingesta / extracción -> Almacenamiento -> Procesamiento -> Visualización / consumo` | `Usuarios -> Kafka -> Spark Processing -> Data Lake / BD -> Dashboard / Aplicaciones` |
+| **Tecnologías propuestas** | Ingesta / Procesamiento / Almacenamiento / Visualización. | Kafka (ingesta) → Data Lake / RAW (almacenamiento) → Spark (procesamiento) → Grafana (visualización). |
+| **Supuestos y riesgos** | Supuestos / Riesgos o limitaciones. | Supuestos: gran volumen de datos, eventos generados continuamente, necesidad de análisis en tiempo real. Riesgos: alta complejidad de la arquitectura, costo de infraestructura, latencia en el procesamiento. |
 
 ## 4. Crea: actividad autónoma
 
@@ -472,7 +533,7 @@ La evidencia individual se considera completa si:
 
 ### 4.6 Rúbrica de evaluación
 
-**Tabla 5. Rúbrica de evaluación**
+**Tabla 6. Rúbrica de evaluación**
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
