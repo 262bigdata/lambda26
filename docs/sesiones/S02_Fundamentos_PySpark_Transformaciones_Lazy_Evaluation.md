@@ -488,9 +488,10 @@ Declara también la ruta del dataset como variable global, una sola vez:
 
 ```python
 ORIGEN_DATOS = "/opt/s02-fundamentos/data"
+ARTIFACTS = "/opt/s02-fundamentos/artifacts"
 ```
 
-Úsala en cada lectura del resto de la guía (`f"{ORIGEN_DATOS}/articles.csv"`, etc.) en vez de repetir la ruta completa — si algún día cambia dónde vive el dataset, solo corriges esta línea, no cada celda de lectura.
+Úsalas en cada lectura/escritura del resto de la guía (`f"{ORIGEN_DATOS}/articles.csv"`, `f"{ARTIFACTS}/..."`, etc.) en vez de repetir la ruta completa — si algún día cambia dónde vive el dataset o las salidas, solo corriges esta línea, no cada celda.
 
 ### 3.3 Cargar y explorar `articles.csv`
 
@@ -606,6 +607,15 @@ df_customers_muestra.head(3)
 ```python
 df_customers_muestra.tail(3)
 ```
+
+**Guardar la muestra en CSV y Parquet:** un adelanto de lo que S3 formaliza a fondo (particionamiento, calidad de datos antes de guardar) — por ahora, solo la mecánica básica de escribir un resultado a disco:
+
+```python
+df_customers_muestra.write.mode("overwrite").csv(f"{ARTIFACTS}/customers_muestra_csv", header=True)
+df_customers_muestra.write.mode("overwrite").parquet(f"{ARTIFACTS}/customers_muestra_parquet")
+```
+
+Spark no escribe un solo archivo — escribe una **carpeta**, con un archivo por partición adentro (por eso los nombres `customers_muestra_csv`/`customers_muestra_parquet` son carpetas, no archivos). `mode("overwrite")` reemplaza la carpeta si ya existe, en vez de fallar por que ya está ahí — útil mientras estás probando y corres la celda varias veces.
 
 ### 3.5 Aplicar transformaciones y verificar la evaluación perezosa
 
