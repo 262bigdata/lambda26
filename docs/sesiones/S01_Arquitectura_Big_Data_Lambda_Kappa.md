@@ -349,9 +349,10 @@ Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook
 
 A partir de aquí trabajamos con el contenedor `lambda26-pyspark` (la imagen personalizada de este repositorio) durante todo el curso — es el entorno de referencia que usa el resto de esta guía. La alternativa con la imagen oficial (al final de este paso) solo es necesaria si tu equipo no puede correr `lambda26-pyspark`.
 
-Desde `lambda26/pyspark`, levanta el laboratorio:
+Desde `lambda26/pyspark`, copia las variables de entorno (una sola vez) y levanta el laboratorio:
 
 ```powershell
+cp .env.example .env
 docker compose up -d
 ```
 
