@@ -28,7 +28,7 @@ Resultado esperado U1: el estudiante construye un pipeline batch reproducible co
 | Sesión | Tema (sílabo) | Módulo `lambda26` | Trabajo principal |
 |---|---|---|---|
 | [S1](sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md) | Arquitectura Big Data: arquitecturas Lambda y Kappa, batch vs. streaming. | `uso-pyspark` | Arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio propio. |
-| S2 | Fundamentos PySpark: extracción, transformaciones, funciones, agrupaciones, agregaciones, RDD y evaluación perezosa (lazy evaluation). | `uso-pyspark` | Transformaciones distribuidas documentadas, con evidencia del plan de ejecución (`explain()`). |
+| [S2](sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation.md) | Fundamentos PySpark: extracción, transformaciones, funciones, agrupaciones, agregaciones, RDD y evaluación perezosa (lazy evaluation). | `uso-pyspark` | Transformaciones distribuidas documentadas, con evidencia del plan de ejecución (`explain()`). |
 | S3 | Procesamiento distribuido y carga de datos particionada en HDFS y formatos analíticos, con validación de calidad de datos. | `uso-pyspark` | Salida analítica particionada en formato columnar, con controles de calidad (esquema, nulos, duplicados). |
 | S4 | ML distribuido con Spark MLlib (Regresión). | `uso-pyspark` | Modelo de regresión distribuida entrenado, con métricas iniciales documentadas. |
 | S5 | Integración del procesamiento batch distribuido: arquitectura, PySpark, HDFS, formatos analíticos, particionamiento y ML distribuido. | — | **Producto U1:** pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML. |

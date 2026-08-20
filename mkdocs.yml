@@ -13,6 +13,7 @@ nav:
       - Silabo 2026-2: silabo_bigdata_2026_2.md
   - 1. Arquitecturas Big Data y ETL batch distribuido:
       - "S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming": sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md
+      - "S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa": sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation.md
 
 theme:
   name: material
