@@ -832,21 +832,25 @@ df_transactions = df_transactions.withColumn(
 )
 ```
 
-**Fin de semana vs. laborable** (`date_format()` + `.isin()`):
+**Fin de semana vs. laborable** (`dayofweek()` + `.isin()`):
 
 ```python
-from pyspark.sql.functions import date_format
+from pyspark.sql.functions import dayofweek
 
-df_transactions = df_transactions.withColumn("dia_semana", date_format(col("t_dat"), "u"))
-# "u" = día ISO de la semana (1=lunes ... 7=domingo) — no confundir con "d" (día del mes).
+df_transactions = df_transactions.withColumn("dia_semana", dayofweek(col("t_dat")))
+# dayofweek(): 1=domingo ... 7=sábado (convención propia de Spark, no ISO).
 
 df_transactions = df_transactions.withColumn(
     "tipo_dia",
-    when(col("dia_semana").isin("6", "7"), "Fin de semana").otherwise("Laborable")
+    when(col("dia_semana").isin(1, 7), "Fin de semana").otherwise("Laborable")
 )
 ```
 
-`date_format()` necesita una columna de tipo fecha real, no texto — por eso este bloque va después de haber corregido `t_dat` con `to_date()` más arriba, no antes. `.isin("6", "7")` verifica si el valor de la columna está dentro de esa lista — aquí, si el día ISO corresponde a sábado o domingo.
+`dayofweek()` necesita una columna de tipo fecha real, no texto — por eso este bloque va después de haber corregido `t_dat` con `to_date()` más arriba, no antes. `.isin(1, 7)` verifica si el valor numérico de la columna está dentro de esa lista — aquí, si el día corresponde a domingo (1) o sábado (7).
+
+**Por qué no `date_format(col, "u")`:** una versión anterior de esta guía usaba `date_format(col("t_dat"), "u")` para obtener el día ISO de la semana. Es un patrón de texto, y desde Spark 3.0 el parser de fechas cambió de `java.text.SimpleDateFormat` a `java.time.format.DateTimeFormatter` — en el parser nuevo, la letra `"u"` significa **año** (numeración astronómica), no día de la semana; en el viejo significaba día de la semana. Como el significado cambió entre versiones, Spark no ejecuta el patrón en silencio: lanza `SparkUpgradeException` (`INCONSISTENT_BEHAVIOR_CROSS_VERSION.DATETIME_PATTERN_RECOGNITION`) para forzar una decisión explícita, en vez de arriesgarse a un resultado distinto al esperado. `dayofweek()` evita el problema de raíz porque no depende de un patrón de texto ambiguo.
+
+**Por qué el error aparece recién en 3.9 y no en esta celda:** por evaluación perezosa. `date_format()`/`dayofweek()` son transformaciones — Spark solo arma el plan, no lo ejecuta. El error se dispara recién en la primera acción (`.show()`, `.count()`, etc.) que fuerza a evaluar toda la cadena de transformaciones sobre `df_transactions`, sin importar en qué celda esa acción esté escrita.
 
 ### 3.9 Aplicar agrupaciones y agregaciones (`transactions.parquet`)
 
