@@ -591,7 +591,7 @@ print(f"Filas: {num_rows}, Columnas: {num_cols}")
 ```python
 df_customers_muestra = df_customers.sample(
     withReplacement=False,  # sin reemplazo: cada fila se elige como máximo una vez
-    fraction=0.1,           # ~10% del dataset
+    fraction=0.01,          # ~1% del dataset
     seed=None,              # sin semilla fija: cada corrida da una muestra distinta
 )
 ```
@@ -633,6 +633,14 @@ df_customers_muestra.coalesce(1).write.mode("overwrite").parquet(f"{ARTIFACTS}/c
 ```
 
 Esto sigue creando una carpeta (con un único `part-00000-...` adentro, más `_SUCCESS`) — el archivo real a compartir es ese `part-00000-...` de dentro; puedes renombrarlo o descargarlo directo desde el explorador de archivos de Jupyter.
+
+**¿Y si quiero un `.csv` de verdad, con nombre exacto, sin carpeta?** Spark no lo hace — su API de escritura está pensada para carpetas, ni siquiera `.coalesce(1)` cambia eso (sigue generando `part-00000-...` dentro de una carpeta, no un archivo suelto con el nombre que tú elijas). Para eso hay que salir de Spark: como la muestra ya es chica (~1%, cabe cómoda en memoria), conviértela a pandas y usa su `.to_csv()`, que sí escribe un único archivo con el nombre exacto:
+
+```python
+df_customers_muestra.toPandas().to_csv(f"{ARTIFACTS}/customers_muestra.csv", index=False)
+```
+
+`index=False` evita que pandas agregue una columna extra con el número de fila. Esta ruta solo es segura para datos que caben en la memoria del driver — para el dataset completo (millones de filas) seguiría siendo `.coalesce(1)` + `.write.csv()` de Spark, no `.toPandas()`.
 
 **Leer de vuelta, tenga uno o varios archivos:** Spark lee la carpeta completa como un solo DataFrame — no importa si adentro hay un `part-00000` o veinte, la lectura es igual de simple:
 
