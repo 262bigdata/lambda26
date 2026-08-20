@@ -19,7 +19,13 @@ cd lambda26/pyspark
 
 ## Uso
 
-Desde `lambda26/pyspark`:
+Desde `lambda26/pyspark`, copia las variables de entorno (una sola vez):
+
+```powershell
+cp .env.example .env
+```
+
+Luego levanta el laboratorio:
 
 ```powershell
 docker compose up -d

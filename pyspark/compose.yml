@@ -10,8 +10,6 @@ services:
       - "4488:8888"
       - "4042:4040"
     volumes:
-      - ./notebooks:/opt/notebooks
-      - ./data:/opt/data
-      - ./artifacts:/opt/artifacts
+      - ./:/opt
     environment:
-      - JUPYTER_TOKEN=sintoken
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}

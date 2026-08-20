@@ -10,6 +10,9 @@ __pycache__/
 # VS Code
 .vscode/
 
+# Variables de entorno (contiene el token real; .env.example sí se versiona)
+.env
+
 # Entornos virtuales
 .env/
 .venv/
