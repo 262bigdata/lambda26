@@ -707,6 +707,15 @@ Usamos `explain()` para observar cómo Spark organiza el procesamiento antes de 
 df_activos.explain(True)
 ```
 
+**Cómo leer esto, plan por plan.** Cada plan se lee de **abajo hacia arriba** (lo de más abajo es lo primero que pasa):
+
+- **`Parsed Logical Plan`:** tu código tal cual lo escribiste, sin revisar nada todavía. De abajo hacia arriba: `Relation ... csv` (lee el archivo) → `Project [...]` (tu `select()`) → `Filter ...` (tu `filter()`) — el mismo orden en que escribiste `.select().filter()`. Las comillas simples (`'Filter`, `` `club_member_status` ``) significan "todavía no verificado": Spark ni confirmó que esas columnas existan.
+- **`Analyzed Logical Plan`:** misma estructura, ninguna línea cambia de lugar. Spark solo confirmó que las columnas existen y les asignó tipo (`age: int`, `club_member_status: string`) — es un chequeo, no una optimización.
+- **`Optimized Logical Plan`:** acá sí cambia algo — compáralo contra el *Parsed*. `Filter` y `Project` **se intercambian de posición**: ahora el filtro va justo después de leer el archivo, y el `select()` al final. Tu código dice "selecciona, después filtra"; Catalyst ejecuta "filtra primero, selecciona después", porque descartar filas cuanto antes reduce lo que el resto del plan tiene que procesar — es *predicate pushdown*. Además aparece `isnotnull(club_member_status)`, que tú nunca escribiste: Catalyst lo agrega solo, porque una igualdad (`= ACTIVE`) nunca es cierta para un valor nulo, así que de paso descarta los nulos.
+- **`Physical Plan`:** la receta final de ejecución. `PushedFilters` confirma que el filtro se empujó hasta el propio lector del CSV; `ReadSchema` muestra que solo se leen las columnas que realmente usaste (4 de las 7 de `customers.csv`) — las demás ni se tocan.
+
+**La idea en una frase:** tu código pide "trae estas columnas, después filtra"; Spark ejecuta "filtra (leyendo solo esas columnas) primero, presenta después" — mismo resultado, procesando muchísimo menos dato en el camino.
+
 Identifica en tu propio resultado: ¿el `Filter` quedó antes o después del `Project` en el *Optimized Logical Plan*? Relaciónalo con la Tabla 5 y el ejemplo de 2.5.
 
 ### 3.7 Aplicar funciones y crear columnas con `withColumn()`
