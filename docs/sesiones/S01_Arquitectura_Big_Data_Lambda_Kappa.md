@@ -332,7 +332,7 @@ flowchart LR
             Container --> Compose["docker compose<br/>pyspark/compose.yml"]
             Notebook --> Session["SparkSession<br/>local[*]"]
             DF["DataFrame<br/>printSchema / show"] --> Session
-            DF --> Data["s01-arquitectura/*.csv<br/>(volumen -> /opt/s01-arquitectura)"]
+            DF --> Data["s01-arquitectura/data/*.csv<br/>(volumen -> /opt/s01-arquitectura/data)"]
             UI["Spark UI<br/>localhost:4042"] --> Session
         end
     end
@@ -342,7 +342,7 @@ Lectura del diagrama (las flechas indican dependencia: A → B significa "A depe
 
 - El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor `lambda26-pyspark` (levantado por el `docker compose` de `pyspark/compose.yml`) — no son piezas sueltas que haya que conectar.
 - El notebook depende de una `SparkSession` activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.
-- El DataFrame depende de dos cosas a la vez: la `SparkSession` (el motor que lo construye) y el archivo `s01-arquitectura/*.csv` (montado como volumen en `/opt/s01-arquitectura`, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).
+- El DataFrame depende de dos cosas a la vez: la `SparkSession` (el motor que lo construye) y el archivo `s01-arquitectura/data/*.csv` (montado como volumen en `/opt/s01-arquitectura/data`, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).
 - Spark UI depende de que exista una `SparkSession` activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 dentro del contenedor (expuesto en tu máquina como `localhost:4042`) — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.
 
 Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la `SparkSession`, el `DataFrame` y verifica Spark UI — completando así todas las dependencias de este diagrama.
@@ -414,10 +414,10 @@ spark = (
 spark
 ```
 
-2. Cargar un dataset como DataFrame. Descargar `biblia_ntv_.csv` desde [Kaggle: Biblia NTV (Spanish Bible NTV)](https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download) y copiarlo a `lambda26/pyspark/sesiones/s01-arquitectura/` (montado como `/opt/s01-arquitectura/` en el contenedor):
+2. Cargar un dataset como DataFrame. Descargar `biblia_ntv_.csv` desde [Kaggle: Biblia NTV (Spanish Bible NTV)](https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download) y copiarlo a `lambda26/pyspark/sesiones/s01-arquitectura/data/` (montado como `/opt/s01-arquitectura/data/` en el contenedor):
 
 ```python
-df = spark.read.csv("/opt/s01-arquitectura/biblia_ntv_.csv", header=True, inferSchema=True)
+df = spark.read.csv("/opt/s01-arquitectura/data/biblia_ntv_.csv", header=True, inferSchema=True)
 df
 ```
 

@@ -26,7 +26,7 @@ carpeta autocontenida (`sXX-nombre/`): el notebook, sus datos de entrada
 (`artifacts/`, si la sesión genera resultados). No hay una carpeta
 `data/`/`artifacts/` compartida entre sesiones — cada una tiene la suya.
 
-- `sesiones/s01-arquitectura/`: notebook y dataset (`biblia_ntv_.csv`) de S1.
+- `sesiones/s01-arquitectura/`: notebook y dataset (`data/biblia_ntv_.csv`) de S1.
 - `sesiones/s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
 - Sesiones futuras agregan su propia carpeta (`sesiones/s03-...`,
   `sesiones/s04-...`) a medida que el curso avanza.
