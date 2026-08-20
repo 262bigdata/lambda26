@@ -617,6 +617,32 @@ df_customers_muestra.write.mode("overwrite").parquet(f"{ARTIFACTS}/customers_mue
 
 Spark no escribe un solo archivo — escribe una **carpeta**, con un archivo por partición adentro (por eso los nombres `customers_muestra_csv`/`customers_muestra_parquet` son carpetas, no archivos). `mode("overwrite")` reemplaza la carpeta si ya existe, en vez de fallar por que ya está ahí — útil mientras estás probando y corres la celda varias veces.
 
+**¿Cuántos archivos quedaron?** `.rdd.getNumPartitions()` te dice cuántas particiones tiene el DataFrame — y por lo tanto, cuántos `part-0000X-...` va a escribir:
+
+```python
+df_customers_muestra.rdd.getNumPartitions()
+```
+
+**¿Por qué salen tantos archivos `part-0000X-...` si la muestra es pequeña?** `df_customers_muestra` hereda el número de particiones de la lectura original de `customers.csv` (no se reduce solo porque `.sample()` deje menos filas), y cada partición se escribe en paralelo como su propio archivo — así es como Spark escala a datasets reales, sin depender de un solo nodo para juntar todo antes de guardar.
+
+**Para compartir un solo archivo** (por ejemplo con estudiantes cuya laptop tiene pocos recursos, en vez de una carpeta con ~20 partes): junta las particiones en una sola antes de escribir con `.coalesce(1)`:
+
+```python
+df_customers_muestra.coalesce(1).write.mode("overwrite").csv(f"{ARTIFACTS}/customers_muestra_csv_unico", header=True)
+df_customers_muestra.coalesce(1).write.mode("overwrite").parquet(f"{ARTIFACTS}/customers_muestra_parquet_unico")
+```
+
+Esto sigue creando una carpeta (con un único `part-00000-...` adentro, más `_SUCCESS`) — el archivo real a compartir es ese `part-00000-...` de dentro; puedes renombrarlo o descargarlo directo desde el explorador de archivos de Jupyter.
+
+**Leer de vuelta, tenga uno o varios archivos:** Spark lee la carpeta completa como un solo DataFrame — no importa si adentro hay un `part-00000` o veinte, la lectura es igual de simple:
+
+```python
+df_leido_csv = spark.read.csv(f"{ARTIFACTS}/customers_muestra_csv", header=True, inferSchema=True)
+df_leido_parquet = spark.read.parquet(f"{ARTIFACTS}/customers_muestra_parquet")
+
+df_leido_csv.count(), df_leido_parquet.count()
+```
+
 ### 3.5 Aplicar transformaciones y verificar la evaluación perezosa
 
 **Producto del paso:** evidencia de que el plan se construye antes de ejecutarse.
