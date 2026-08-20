@@ -35,7 +35,7 @@ Notebook `02_fundamentos_practica.ipynb` con transformaciones y funciones docume
 
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
-| Revisión previa individual | Repasar el notebook de verificación de S1 (entorno `lambda26` ya debe estar funcionando), leer el caso de Catalyst Optimizer (ver 1.6) y **descargar el dataset H&M de Kaggle antes de clase** (ver 3.1) — pesa varios GB, no conviene descargarlo durante la sesión presencial. | Sílabo Big Data U1, guía S1. |
+| Revisión previa individual | Repasar el notebook de verificación de S1 (entorno `lambda26` ya debe estar funcionando, no la imagen oficial `jupyter/pyspark-notebook`), leer el caso de Catalyst Optimizer (ver 1.6) y **descargar el dataset H&M de Kaggle antes de clase** (ver 3.1) — pesa 625 MB, más de 1.3 millones de registros, no conviene descargarlo durante la sesión presencial. | Guía S1 (notebook de verificación), guía S2 — secciones 1.6 y 3.1. |
 | Clase presencial | Construcción guiada del notebook `02_fundamentos_practica.ipynb`: extracción, transformaciones, evaluación perezosa, funciones, agrupaciones/agregaciones y RDD, sobre el dataset real H&M. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Pasos 3.1 a 3.11 de esta guía. |
 | Evaluación formativa | Revisión en clase de las transformaciones documentadas y la evidencia del plan de ejecución. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
@@ -430,7 +430,7 @@ Tiempo: 2h.
 
 **Producto del paso:** dataset H&M disponible en `pyspark/sesiones/s02-fundamentos/data/`, entorno `lambda26` funcionando.
 
-Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa varios GB — no se sube al repositorio (`pyspark/.gitignore` ya excluye `s02-fundamentos/data/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
+Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa 625 MB comprimido, con más de 1.3 millones de registros solo en `customers.csv` — no se sube al repositorio (`pyspark/.gitignore` ya excluye `s02-fundamentos/data/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
 
 1. Descarga `Datos HM.zip` desde: <https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing>
 2. Extráelo dentro de `lambda26/pyspark/sesiones/s02-fundamentos/data/`, de modo que quede `s02-fundamentos/data/articles.csv`, `s02-fundamentos/data/customers.csv` y `s02-fundamentos/data/transactions.parquet`.
