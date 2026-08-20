@@ -1811,8 +1811,9 @@
 </ul>
 <p>Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la <code>SparkSession</code>, el <code>DataFrame</code> y verifica Spark UI — completando así todas las dependencias de este diagrama.</p>
 <p>A partir de aquí trabajamos con el contenedor <code>lambda26-pyspark</code> (la imagen personalizada de este repositorio) durante todo el curso — es el entorno de referencia que usa el resto de esta guía. La alternativa con la imagen oficial (al final de este paso) solo es necesaria si tu equipo no puede correr <code>lambda26-pyspark</code>.</p>
-<p>Desde <code>lambda26/pyspark</code>, levanta el laboratorio:</p>
-<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
+<p>Desde <code>lambda26/pyspark</code>, copia las variables de entorno (una sola vez) y levanta el laboratorio:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cp </span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">example</span> <span class="p">.</span><span class="n">env</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
 </code></pre></div>
 <p>Verifica que responde:</p>
 <div class="highlight"><pre><span></span><code>JupyterLab -&gt; http://localhost:4488/lab?token=sintoken
