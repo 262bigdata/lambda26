@@ -1624,8 +1624,8 @@
 <tbody>
 <tr>
 <td>Revisión previa individual</td>
-<td>Repasar el notebook de verificación de S1 (entorno <code>lambda26</code> ya debe estar funcionando), leer el caso de Catalyst Optimizer (ver 1.6) y <strong>descargar el dataset H&amp;M de Kaggle antes de clase</strong> (ver 3.1) — pesa varios GB, no conviene descargarlo durante la sesión presencial.</td>
-<td>Sílabo Big Data U1, guía S1.</td>
+<td>Repasar el notebook de verificación de S1 (entorno <code>lambda26</code> ya debe estar funcionando, no la imagen oficial <code>jupyter/pyspark-notebook</code>), leer el caso de Catalyst Optimizer (ver 1.6) y <strong>descargar el dataset H&amp;M de Kaggle antes de clase</strong> (ver 3.1) — pesa 625 MB, más de 1.3 millones de registros, no conviene descargarlo durante la sesión presencial.</td>
+<td>Guía S1 (notebook de verificación), guía S2 — secciones 1.6 y 3.1.</td>
 </tr>
 <tr>
 <td>Clase presencial</td>
@@ -2092,7 +2092,7 @@
 </ul>
 <h3 id="31-descargar-el-dataset-hm-y-reanudar-el-entorno-lambda26">3.1 Descargar el dataset H&amp;M y reanudar el entorno <code>lambda26</code><a class="headerlink" href="#31-descargar-el-dataset-hm-y-reanudar-el-entorno-lambda26" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> dataset H&amp;M disponible en <code>pyspark/sesiones/s02-fundamentos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
-<p>Este dataset (<em>H&amp;M Personalized Fashion Recommendations</em> — fuente original: Kaggle, <a href="https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data">https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data</a>) pesa varios GB — no se sube al repositorio (<code>pyspark/.gitignore</code> ya excluye <code>s02-fundamentos/data/</code>). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:</p>
+<p>Este dataset (<em>H&amp;M Personalized Fashion Recommendations</em> — fuente original: Kaggle, <a href="https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data">https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data</a>) pesa 625 MB comprimido, con más de 1.3 millones de registros solo en <code>customers.csv</code> — no se sube al repositorio (<code>pyspark/.gitignore</code> ya excluye <code>s02-fundamentos/data/</code>). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:</p>
 <ol>
 <li>Descarga <code>Datos HM.zip</code> desde: <a href="https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing">https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing</a></li>
 <li>Extráelo dentro de <code>lambda26/pyspark/sesiones/s02-fundamentos/data/</code>, de modo que quede <code>s02-fundamentos/data/articles.csv</code>, <code>s02-fundamentos/data/customers.csv</code> y <code>s02-fundamentos/data/transactions.parquet</code>.</li>
