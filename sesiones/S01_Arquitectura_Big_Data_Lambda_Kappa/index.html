@@ -1605,7 +1605,7 @@
             T --&gt; V["Visualización&lt;br/&gt;show() + Spark UI"]
         end
     end</code></pre>
-<p>A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en <code>lambda26</code> el módulo <code>uso-pyspark</code> cubre las 4 etapas dentro de un solo componente, sobre una <code>SparkSession</code> común (<code>local[*]</code>) corriendo en el contenedor <code>lambda26-pyspark</code>. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4040); la transformación real y el análisis ML se profundizan desde S2 y S4.</p>
+<p>A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en <code>lambda26</code> el módulo <code>uso-pyspark</code> cubre las 4 etapas dentro de un solo componente, sobre una <code>SparkSession</code> común (<code>local[*]</code>) corriendo en el contenedor <code>lambda26-pyspark</code>. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4042); la transformación real y el análisis ML se profundizan desde S2 y S4.</p>
 <p>Estos son los componentes que instalas y verificas en 3.1-3.2, antes de pasar al análisis conceptual (ecosistema, batch/streaming, Lambda o Kappa) que desarrolla el resto de esta sección.</p>
 <h3 id="22-ecosistema-y-arquitectura-big-data">2.2 Ecosistema y arquitectura Big Data<a class="headerlink" href="#22-ecosistema-y-arquitectura-big-data" title="Permanent link">&para;</a></h3>
 <p>Big Data se refiere al procesamiento de grandes volúmenes de datos que no pueden manejarse eficientemente con herramientas tradicionales. Se resume con las <strong>5V</strong>:</p>
@@ -1799,7 +1799,7 @@
             Notebook --&gt; Session["SparkSession&lt;br/&gt;local[*]"]
             DF["DataFrame&lt;br/&gt;printSchema / show"] --&gt; Session
             DF --&gt; Data["data/*.csv&lt;br/&gt;(volumen -&gt; /opt/data)"]
-            UI["Spark UI&lt;br/&gt;localhost:4040"] --&gt; Session
+            UI["Spark UI&lt;br/&gt;localhost:4042"] --&gt; Session
         end
     end</code></pre>
 <p>Lectura del diagrama (las flechas indican dependencia: A → B significa "A depende de B", igual que en LP2/DIST):</p>
@@ -1807,7 +1807,7 @@
 <li>El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor <code>lambda26-pyspark</code> (levantado por el <code>docker compose</code> de <code>pyspark/compose.yml</code>) — no son piezas sueltas que haya que conectar.</li>
 <li>El notebook depende de una <code>SparkSession</code> activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.</li>
 <li>El DataFrame depende de dos cosas a la vez: la <code>SparkSession</code> (el motor que lo construye) y el archivo <code>data/*.csv</code> (montado como volumen en <code>/opt/data</code>, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).</li>
-<li>Spark UI depende de que exista una <code>SparkSession</code> activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.</li>
+<li>Spark UI depende de que exista una <code>SparkSession</code> activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 dentro del contenedor (expuesto en tu máquina como <code>localhost:4042</code>) — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.</li>
 </ul>
 <p>Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la <code>SparkSession</code>, el <code>DataFrame</code> y verifica Spark UI — completando así todas las dependencias de este diagrama.</p>
 <p>A partir de aquí trabajamos con el contenedor <code>lambda26-pyspark</code> (la imagen personalizada de este repositorio) durante todo el curso — es el entorno de referencia que usa el resto de esta guía. La alternativa con la imagen oficial (al final de este paso) solo es necesaria si tu equipo no puede correr <code>lambda26-pyspark</code>.</p>
@@ -1817,7 +1817,8 @@
 <p>Verifica que responde:</p>
 <div class="highlight"><pre><span></span><code>JupyterLab -&gt; http://localhost:4488/lab?token=sintoken
 </code></pre></div>
-<p>Spark UI (<code>http://localhost:4040</code>) todavía no responde en este punto: solo se levanta cuando creas una <code>SparkSession</code> activa, en 3.2 — no al levantar el contenedor.</p>
+<p><strong>Nota:</strong> el contenedor arranca con <code>jupyter notebook</code>, no <code>jupyter lab</code> — igual puedes entrar a <code>/lab</code> porque <code>notebook</code> 7.x viene construido sobre el mismo servidor de JupyterLab y sirve ambas interfaces (<code>/lab</code> y <code>/tree</code>) desde el mismo proceso. No hace falta cambiar ningún comando para usar <code>/lab</code>.</p>
+<p>Spark UI (<code>http://localhost:4042</code>) todavía no responde en este punto: solo se levanta cuando creas una <code>SparkSession</code> activa, en 3.2 — no al levantar el contenedor. Spark usa el puerto 4040 por defecto dentro del contenedor; <code>compose.yml</code> lo expone en tu máquina como <code>4042</code> (<code>"4042:4040"</code>) para evitar choques con otros servicios que puedan estar usando el 4040 en tu equipo.</p>
 <p><strong>Alternativa con imagen oficial de PySpark + Jupyter:</strong> si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial <a href="https://hub.docker.com/r/jupyter/pyspark-notebook"><code>jupyter/pyspark-notebook</code></a>, que trae Spark completo sin depender de la imagen personalizada de <code>lambda26</code>. Diferencia de peso a tener en cuenta: la imagen personalizada de <code>lambda26</code> pesa <strong>~1.9 GB</strong>, mientras que <code>jupyter/pyspark-notebook</code> pesa <strong>~6.9 GB</strong> — considera tu espacio en disco y velocidad de conexión antes de elegir esta alternativa:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># compose.yml</span>
 <span class="nt">services</span><span class="p">:</span>
@@ -1831,7 +1832,7 @@
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./:/home/jovyan</span>
 </code></pre></div>
-<p>Puertos distintos a los de <code>pyspark/compose.yml</code> (4488/4040) para no chocar si ambos entornos quedan levantados a la vez.</p>
+<p>Puertos distintos a los de <code>pyspark/compose.yml</code> (4488/4042) para no chocar si ambos entornos quedan levantados a la vez.</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
 </code></pre></div>
 <p>Accede igual por <code>http://localhost:4489/lab?token=sintoken</code> (JupyterLab) o <code>http://localhost:4489/?token=sintoken</code> (Jupyter Notebook).</p>
@@ -1872,7 +1873,7 @@
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"libro"</span><span class="p">,</span> <span class="s2">"capitulo"</span><span class="p">,</span> <span class="s2">"verso"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
 <p>Verifica que:</p>
-<div class="highlight"><pre><span></span><code>Spark UI -&gt; http://localhost:4040
+<div class="highlight"><pre><span></span><code>Spark UI -&gt; http://localhost:4042
 </code></pre></div>
 <p>muestra el job que se acaba de ejecutar (la lectura del CSV y el <code>show()</code>).</p>
 <h3 id="33-reconocer-el-ecosistema-de-lambda26">3.3 Reconocer el ecosistema de <code>lambda26</code><a class="headerlink" href="#33-reconocer-el-ecosistema-de-lambda26" title="Permanent link">&para;</a></h3>
