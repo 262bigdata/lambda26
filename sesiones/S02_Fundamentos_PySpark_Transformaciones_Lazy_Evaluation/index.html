@@ -2123,12 +2123,14 @@
     <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.memory"</span><span class="p">,</span> <span class="s2">"4g"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 
 <span class="n">spark</span>
 </code></pre></div>
 <p><code>spark.sql.shuffle.partitions</code> se fija en 8 (en vez del valor por defecto, 200 — pensado para clústeres con muchos nodos) porque seguimos en un único contenedor local: con 200 particiones, el overhead de coordinar cientos de particiones pequeñas sería mayor que el propio cómputo en tu máquina.</p>
+<p><code>spark.driver.memory</code> se fija en <code>"4g"</code> porque en modo <code>local[*]</code> el driver y el executor comparten un mismo proceso JVM, y sin esta configuración Spark usa el default de <strong>1g</strong> — sin importar cuánta RAM tenga tu servidor. Con varias lecturas/escrituras y agrupaciones encadenadas en el mismo notebook (como en 3.9), 1g se queda corto y la JVM puede terminar cayéndose con <code>ConnectionRefusedError</code> del lado de Python (el símbolo de que la JVM detrás de Py4J ya no está viva) — el heap se agota aunque el servidor tenga memoria de sobra sin usar. Si tu servidor tiene bastante RAM disponible, puedes subir este valor más (<code>"8g"</code>, <code>"16g"</code>); si el notebook sigue cayéndose con <code>4g</code>, reinicia el kernel y sube el valor antes de reintentar.</p>
 <p>Declara también la ruta del dataset como variable global, una sola vez:</p>
 <div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s02-fundamentos/data"</span>
 <span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s02-fundamentos/artifacts"</span>
