@@ -13,8 +13,8 @@ En S1 se decidió la arquitectura Big Data (Lambda o Kappa) del Proyecto Sello y
 ### 1.2 Índice
 
 1. Introducción a PySpark: qué es, objetos fundamentales y `SparkSession`.
-2. DataFrames: extracción y estructura.
-3. Transformaciones, acciones y evaluación perezosa.
+2. DataFrames: extracción, estructura y escritura de resultados (CSV/Parquet, particiones).
+3. Transformaciones, acciones, evaluación perezosa y análisis del plan de ejecución (`explain()`).
 4. Funciones de `pyspark.sql.functions`.
 5. Agrupaciones, agregaciones y funciones ventana.
 6. RDD: el modelo debajo de los DataFrames.
@@ -701,6 +701,8 @@ Los resultados de `.show()`/`.count()` (y, en 3.6, el texto de `explain()`) apar
 
 **Producto del paso:** plan de ejecución interpretado con al menos una optimización identificada.
 
+Usamos `explain()` para observar cómo Spark organiza el procesamiento antes de ejecutarlo — es la base para entender rendimiento y optimización, no solo curiosidad interna: el mismo comando te sirve más adelante para diagnosticar por qué una consulta es lenta o si Catalyst está aplicando las optimizaciones que esperás (predicate pushdown, column pruning).
+
 ```python
 df_activos.explain(True)
 ```
@@ -861,7 +863,7 @@ Reutiliza `df_transactions` (preparado en 3.8) para las siguientes agregaciones,
 - **Agrupación** — `groupBy("customer_id")`: junta las filas que comparten el mismo valor en esa columna (todas las transacciones de un mismo cliente quedan en un solo grupo). Por sí sola, no calcula nada — solo define los grupos.
 - **Agregación** — `sum()`, `avg()`, `count()`, `min()`, `max()`, `countDistinct()` (Tabla 6, dentro de `.agg()`): calculan un valor resumen *por cada grupo* ya formado por `groupBy()`. Sin un `groupBy()` antes, no hay "por cada grupo" — `.agg()` sin `groupBy()` resumiría todo el DataFrame en una sola fila.
 
-En cada bloque de abajo, `groupBy("customer_id")` es la agrupación (siempre la misma); lo que cambia es qué función de agregación va dentro de `.agg()`.
+En cada bloque de abajo, `groupBy("customer_id")` es la agrupación (siempre la misma); lo que cambia es qué función de agregación va dentro de `.agg()`. Todos estos `.show()` usan `truncate=False`: `customer_id` es un hash largo, y con el truncado por defecto (20 caracteres) dos clientes distintos pueden lucir idénticos en pantalla — sin `truncate=False` no podrías confirmar si dos filas son del mismo cliente o de dos distintos.
 
 **Total gastado por cliente** (`sum`):
 
@@ -871,7 +873,7 @@ from pyspark.sql.functions import sum
 df_total_por_cliente = df_transactions.groupBy("customer_id").agg(
     sum("price").alias("total_normalizado")
 )
-df_total_por_cliente.show(5)
+df_total_por_cliente.show(5, truncate=False)
 ```
 
 **Promedio de gasto por cliente** (`avg`):
@@ -882,7 +884,7 @@ from pyspark.sql.functions import avg
 df_avg_por_cliente = df_transactions.groupBy("customer_id").agg(
     avg("price").alias("promedio_normalizado")
 )
-df_avg_por_cliente.show(5)
+df_avg_por_cliente.show(5, truncate=False)
 ```
 
 **Número de transacciones por cliente** (`count`):
@@ -893,7 +895,7 @@ from pyspark.sql.functions import count
 df_count_por_cliente = df_transactions.groupBy("customer_id").agg(
     count("*").alias("num_transacciones")
 )
-df_count_por_cliente.show(5)
+df_count_por_cliente.show(5, truncate=False)
 ```
 
 `count("*")` cuenta todas las filas del grupo (incluye valores nulos en otras columnas); `count("una_columna")` cuenta solo las filas donde esa columna específica no es nula — la diferencia importa cuando una columna tiene datos faltantes.
@@ -919,7 +921,7 @@ df_agg_multi = df_transactions.groupBy("customer_id").agg(
     sum("price").alias("total_normalizado"),
     avg("price").alias("promedio_normalizado")
 )
-df_agg_multi.show(5)
+df_agg_multi.show(5, truncate=False)
 ```
 
 **Agrupar por múltiples columnas** — agrupa por la combinación de ambas, no por cada una por separado:
@@ -940,7 +942,7 @@ df_agg_dict = (
     .withColumnRenamed("sum(price)", "total_normalizado")
     .withColumnRenamed("count(article_id)", "num_articulos")
 )
-df_agg_dict.show(5)
+df_agg_dict.show(5, truncate=False)
 ```
 
 Con un diccionario, Spark nombra las columnas resultantes automáticamente (`sum(price)`, `count(article_id)`) — por eso hace falta `withColumnRenamed()` después si quieres nombres más claros. Es una sintaxis más compacta, pero menos explícita que encadenar `.alias()`.
@@ -966,24 +968,40 @@ df_con_total_cliente = df_transactions.withColumn(
     "total_gastado_cliente",
     sum("price").over(window_cliente)
 )
+df_con_total_cliente.show(5, truncate=False)
 ```
 
-Cada fila de `df_con_total_cliente` sigue siendo una transacción individual, pero ahora trae una columna extra (`total_gastado_cliente`) con el total del cliente al que pertenece esa fila — útil cuando necesitas el detalle y el resumen a la vez, algo que `groupBy().agg()` no te da.
+Cada fila de `df_con_total_cliente` sigue siendo una transacción individual, pero ahora trae una columna extra (`total_gastado_cliente`) con el total del cliente al que pertenece esa fila — útil cuando necesitas el detalle y el resumen a la vez, algo que `groupBy().agg()` no te da. `truncate=False` es clave acá: `customer_id` es un hash largo, y con el truncado por defecto de `.show()` (20 caracteres) dos IDs distintos pueden lucir idénticos en pantalla — sin `truncate=False` no podrías confirmar si dos filas realmente pertenecen al mismo cliente o no, que es justo lo que esta función ventana busca mostrar.
 
 **Advertencia de dominio:** la columna `price` de este dataset está **normalizada por Kaggle a un rango [0, 1]** — no representa el precio real en ninguna moneda (H&M anonimizó los montos antes de publicar el dataset). `sum("price")`/`avg("price")` son agregaciones técnicamente correctas, pero leerlas como "gasto en soles/dólares/coronas" sería un error de dominio — exactamente el chequeo de **veracidad** (una de las 5V de Big Data, S1) que 2.6 te advirtió que hicieras antes de calcular con una columna cuyo significado no confirmaste.
 
 ### 3.10 Convertir a RDD y procesar texto (`detail_desc` de `articles.csv`)
 
-**Producto del paso:** conteo de palabras distribuido sobre descripciones de producto, con las 10 más frecuentes.
+**Producto del paso:** conteo de palabras distribuido sobre descripciones de producto, con las 10 más frecuentes, más una exploración con `filter()` y un reto de práctica.
 
-Reutiliza `df_articles` (cargado en 3.3) — aplica el patrón RDD de 2.8 sobre `detail_desc`, las ~105 000 descripciones de producto reales:
+Reutiliza `df_articles` (cargado en 3.3) — aplica el patrón RDD de 2.8 sobre `detail_desc`, las ~105 000 descripciones de producto reales. Se hace por partes, para ver el resultado intermedio de cada operación antes de llegar al conteo completo.
+
+**Paso 1: pasar de DataFrame a RDD.** Toma solo la columna de texto y descarta los valores nulos (no todos los artículos tienen descripción):
+
+```python
+rdd = df_articles.select("detail_desc").rdd.map(lambda x: x.detail_desc)
+rdd = rdd.filter(lambda texto: texto is not None)  # algunos artículos no tienen descripción — el mismo filtro de nulos que 2.8 advirtió
+
+rdd.take(5)
+```
+
+**Paso 2: filtrar descripciones por palabra clave.** Antes de ir al conteo completo, una operación más simple sobre el mismo RDD — quedarte solo con las descripciones que mencionan un material real y frecuente en el catálogo, `"cotton"`:
+
+```python
+textos_algodon = rdd.filter(lambda texto: "cotton" in texto.lower())
+textos_algodon.take(5)
+```
+
+**Paso 3: `flatMap` + `map` + `reduceByKey` — conteo distribuido completo:**
 
 ```python
 import re
 from operator import add
-
-rdd = df_articles.select("detail_desc").rdd.map(lambda x: x.detail_desc)
-rdd = rdd.filter(lambda texto: texto is not None)  # algunos artículos no tienen descripción — el mismo filtro de nulos que 2.8 advirtió
 
 palabras = rdd.flatMap(
     lambda linea: re.sub(r"[^\wáéíóúñüÁÉÍÓÚÑÜ]", " ", linea.lower()).split()
@@ -995,7 +1013,20 @@ conteo = pares.reduceByKey(add)
 conteo.takeOrdered(10, key=lambda x: -x[1])
 ```
 
-Compara tu resultado contra lo discutido en 2.8: ¿qué palabras dominan un catálogo de moda frente a las que dominarían un texto narrativo? Documenta ese contraste como parte de tu evidencia (4.3.1).
+**Lee tu propio resultado, no solo el número:** vas a ver algo como `('and', 163384), ('a', 152403), ('with', 150704), ('the', 136096), ('in', 109801), ('at', 80690)` dominando el top, y recién a partir de ahí (`back`, `front`, `soft`, `waist`) aparece vocabulario real del catálogo. Es esperado, no un error: un conteo de palabras sin quitar *stopwords* (artículos, preposiciones, conjunciones) siempre lo van a dominar palabras funcionales del idioma, sin importar el dominio del texto — recién después aparece el vocabulario que sí describe el negocio (en moda: `back`/`front`/`waist` son partes de la prenda, no personajes ni lugares). Compara esto contra 2.8: en un texto narrativo (la Biblia usada en S1), después de las mismas stopwords aparecerían nombres propios o palabras temáticas distintas — el contraste depende del dominio del texto, no del algoritmo.
+
+**Reto de práctica** (documenta tus respuestas en 3.11, con evidencia real de tu propia corrida):
+
+```python
+# 1. ¿Cuántas veces aparece "cotton" en el conteo distribuido?
+conteo.filter(lambda x: x[0] == "cotton").collect()
+
+# 2. Extrae 5 descripciones que mencionen "sustainable" (moda sostenible)
+rdd.filter(lambda texto: "sustainable" in texto.lower()).take(5)
+
+# 3. De las 10 palabras más frecuentes de tu propia corrida, ¿cuántas son stopwords
+#    (sin significado de dominio) y en qué posición empieza el vocabulario real del catálogo?
+```
 
 ### 3.11 Documentar hallazgos y responder preguntas de reflexión
 
