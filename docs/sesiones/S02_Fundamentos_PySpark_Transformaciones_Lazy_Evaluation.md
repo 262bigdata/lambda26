@@ -428,12 +428,12 @@ Tiempo: 2h.
 
 ### 3.1 Descargar el dataset H&M y reanudar el entorno `lambda26`
 
-**Producto del paso:** dataset H&M disponible en `pyspark/data/hm/Origen/`, entorno `lambda26` funcionando.
+**Producto del paso:** dataset H&M disponible en `pyspark/s02-fundamentos/data/`, entorno `lambda26` funcionando.
 
-Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa varios GB — no se sube al repositorio (`pyspark/.gitignore` ya excluye `data/hm/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
+Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa varios GB — no se sube al repositorio (`pyspark/.gitignore` ya excluye `s02-fundamentos/data/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
 
 1. Descarga `Origen.rar` desde: <https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing>
-2. Extráelo dentro de `lambda26/pyspark/data/hm/`, de modo que quede `data/hm/Origen/articles.csv`, `data/hm/Origen/customers.csv` y `data/hm/Origen/transactions.parquet`.
+2. Extráelo dentro de `lambda26/pyspark/s02-fundamentos/data/`, de modo que quede `s02-fundamentos/data/articles.csv`, `s02-fundamentos/data/customers.csv` y `s02-fundamentos/data/transactions.parquet`.
 
 No descargues todavía `Calidad de Datos y Solucion.rar` de esa misma carpeta de Drive — es material de S3, no de esta sesión.
 
@@ -442,7 +442,7 @@ No descargues todavía `Calidad de Datos y Solucion.rar` de esa misma carpeta de
 Estructura esperada:
 
 ```text
-lambda26/pyspark/data/hm/Origen/
+lambda26/pyspark/s02-fundamentos/data/
 ├── articles.csv
 ├── customers.csv
 └── transactions.parquet
@@ -465,7 +465,7 @@ JupyterLab -> http://localhost:4488/lab?token=sintoken
 
 **Producto del paso:** notebook `02_fundamentos_practica.ipynb` con una `SparkSession` activa.
 
-Desde JupyterLab, crea el notebook dentro de `notebooks/`:
+Desde JupyterLab, crea el notebook dentro de la carpeta `s02-fundamentos/`:
 
 ```python
 from pyspark.sql import SparkSession
@@ -487,7 +487,7 @@ spark
 Declara también la ruta del dataset como variable global, una sola vez:
 
 ```python
-ORIGEN_DATOS = "/opt/data/hm/Origen"
+ORIGEN_DATOS = "/opt/s02-fundamentos/data"
 ```
 
 Úsala en cada lectura del resto de la guía (`f"{ORIGEN_DATOS}/articles.csv"`, etc.) en vez de repetir la ruta completa — si algún día cambia dónde vive el dataset, solo corriges esta línea, no cada celda de lectura.

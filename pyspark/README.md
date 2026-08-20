@@ -11,10 +11,17 @@ cd lambda26/pyspark
 
 ## Carpetas
 
-- `notebooks/`: cuadernos fuente ejecutables.
-- `data/`: archivos de entrada para las practicas.
-- `artifacts/`: resultados generados por Spark, como salidas Parquet,
-  checkpoints y modelos.
+Cada sesión que necesita datos reales tiene su propia carpeta autocontenida
+(`sXX-nombre/`): ahí viven juntos el notebook, sus datos de entrada
+(`data/`, si el dataset viene de varios archivos) y sus salidas (`artifacts/`,
+si la sesión genera resultados). No hay una carpeta `data/`/`artifacts/`
+compartida entre sesiones — cada una tiene la suya, dentro de su propia
+carpeta de sesión.
+
+- `s01-arquitectura/`: notebook y dataset (`biblia_ntv_.csv`) de S1.
+- `s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
+- Sesiones futuras agregan su propia carpeta (`s03-...`, `s04-...`) a medida
+  que el curso avanza.
 - `Dockerfile`: imagen base del laboratorio.
 
 ## Uso
@@ -58,22 +65,11 @@ http://localhost:4042
 
 **Nota:** Spark usa el puerto 4040 por defecto, pero `compose.yml` lo expone en tu máquina como `4042` (`"4042:4040"`) — dentro del contenedor sigue siendo 4040, solo cambia el puerto con el que accedes desde el navegador. Esto evita choques con otros servicios que puedan estar usando el 4040 en tu máquina.
 
-Los notebooks quedan montados dentro del contenedor en:
-```text
-/opt/notebooks
-```
-
-Los datos quedan disponibles en:
-
-```text
-/opt/data
-```
-
-Los artefactos generados se escriben en:
-
-```text
-/opt/artifacts
-```
+Toda la carpeta `pyspark/` se monta de una sola vez dentro del contenedor en
+`/opt` (`compose.yml`: `./:/opt`) — por eso cada carpeta de sesión aparece
+directamente como `/opt/sXX-nombre/`, sin mounts adicionales que configurar
+cuando agregas una sesión nueva. Por ejemplo, `s02-fundamentos/data/` queda
+disponible en `/opt/s02-fundamentos/data/`.
 
 ### Alternativa con imagen oficial de PySpark + Jupyter
 
@@ -118,7 +114,9 @@ http://localhost:4489/?token=sintoken
 
 ## Notebooks
 
-La carpeta `notebooks/` empieza vacía: los cuadernos se crean progresivamente,
-uno por sesión, a medida que el curso avanza (verificación mínima en S1,
-ETL y formatos analíticos en S2-S3, ML distribuido en S4, streaming e
-inferencia desde S8-S10).
+Los notebooks se crean progresivamente, uno por sesión, a medida que el
+curso avanza (verificación mínima en S1, fundamentos en S2, formatos
+analíticos en S3, ML distribuido en S4, streaming e inferencia desde
+S8-S10) — cada uno dentro de la carpeta de su propia sesión (`sXX-nombre/`),
+junto a sus datos de entrada. Las sesiones que todavía no tienen contenido
+no tienen carpeta creada.

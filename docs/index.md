@@ -116,11 +116,11 @@ flowchart LR
 flowchart LR
     subgraph PySparkModule["uso pyspark - batch, interactivo"]
         direction TB
-        Notebooks["notebooks/*.ipynb<br/>ETL, entrenamiento ML"]
+        Notebooks["sXX-nombre/*.ipynb<br/>ETL, entrenamiento ML"]
         Jupyter["Jupyter<br/>localhost:4488"]
         Spark["Spark / PySpark<br/>localhost:4042"]
-        Data["data/*.csv"]
-        Artifacts["artifacts/<br/>modelos entrenados"]
+        Data["sXX-nombre/data/*.csv"]
+        Artifacts["sXX-nombre/<br/>modelos entrenados"]
         Notebooks --> Jupyter --> Spark
         Data --> Spark --> Artifacts
     end
@@ -180,7 +180,7 @@ flowchart LR
     style ObsStack fill:transparent,stroke:transparent,color:transparent
 ```
  
-- `uso-pyspark` tiene dos partes, en **contenedores separados** (no se mezcla lo interactivo con lo que corre en producción): la parte batch/interactiva (U1) — notebooks, Jupyter y Spark local, con datos en `data/` y salidas en `artifacts/` — y la parte streaming (`scripts/*.py`, S8 y S10), un contenedor propio que reutiliza la misma imagen con PySpark pero ejecuta `spark-submit` en vez de Jupyter, como proceso persistente. Un notebook no es apto para un job que debe correr sin parar; y un job de producción no debería competir por recursos con el contenedor de exploración. El entrenamiento de un modelo ML es siempre batch (MLlib no soporta aprendizaje incremental) y ocurre en el contenedor interactivo (S4); la *inferencia* sí puede aplicarse en streaming — el contenedor de `scripts/*.py` monta `artifacts/` como volumen compartido (de solo lectura) para cargar el modelo ya entrenado y le aplica `.transform()` a cada micro-batch que llega por Kafka, sin reentrenar.
+- `uso-pyspark` tiene dos partes, en **contenedores separados** (no se mezcla lo interactivo con lo que corre en producción): la parte batch/interactiva (U1) — notebooks, Jupyter y Spark local, con datos y salidas dentro de la carpeta de cada sesión (`sXX-nombre/`) — y la parte streaming (`scripts/*.py`, S8 y S10), un contenedor propio que reutiliza la misma imagen con PySpark pero ejecuta `spark-submit` en vez de Jupyter, como proceso persistente. Un notebook no es apto para un job que debe correr sin parar; y un job de producción no debería competir por recursos con el contenedor de exploración. El entrenamiento de un modelo ML es siempre batch (MLlib no soporta aprendizaje incremental) y ocurre en el contenedor interactivo (S4); la *inferencia* sí puede aplicarse en streaming — el contenedor de `scripts/*.py` monta como volumen compartido (de solo lectura) el modelo ya entrenado en S4, y le aplica `.transform()` a cada micro-batch que llega por Kafka, sin reentrenar.
 - La predicción de `scripts/*.py` (S10) se escribe en una tabla de Postgres (no en un archivo ni en memoria del proceso), para que Grafana la consulte igual que consulta `marts`. Grafana muestra la predicción del siguiente paso de tiempo (minuto, hora, u otra granularidad, según con qué haya sido entrenado el modelo en S4) — no un valor fijo, se actualiza en cada corrida del script. No se usa Streamlit para esto: Streamlit sirve para una app ML interactiva (carga el modelo, tiene incluso una nube gratuita para desplegarla), pero no es un dashboard en vivo — no encaja con el requisito de mostrar la inferencia en streaming.
 - `uso-rapido` y `uso-ms-sb` son casos de uso **secundarios**, con propósitos distintos entre sí: `uso-rapido` (`ec-orden-py`) es el ejercicio más simple para aprender Kafka — publicar y consumir eventos sin la complejidad de microservicios completos. `uso-ms-sb` (`ec-orden-ms`, `ec-pago-ms`) es para **monitorear la aplicación**: logs y estado de los microservicios, expuestos vía Actuator + Micrometer y scrapeados por el mismo Prometheus de `obs`, visualizados en Grafana — no es solo un ejemplo de eventos de negocio, es el caso de uso de observabilidad a nivel de aplicación (`obs` observa Kafka; `uso-ms-sb` observa los propios microservicios). Ninguno de los dos alimenta la inferencia ML de S10.
 - `uso-atmos` es el caso de uso **principal para la inferencia ML en streaming** (S10): sensores de variables atmosféricas (temperatura, humedad, presión) publicando `atmos-eventos` — predecir el siguiente valor de una serie de tiempo continua encaja de forma natural con este tipo de dato, a diferencia de eventos de negocio discretos. `uso-replica-cdc` (solo migración/replica CDC) también queda pendiente. Ambos se retoman según el alcance de cada equipo.
