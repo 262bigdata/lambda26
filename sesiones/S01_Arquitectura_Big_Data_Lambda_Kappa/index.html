@@ -1798,7 +1798,7 @@
             Container --&gt; Compose["docker compose&lt;br/&gt;pyspark/compose.yml"]
             Notebook --&gt; Session["SparkSession&lt;br/&gt;local[*]"]
             DF["DataFrame&lt;br/&gt;printSchema / show"] --&gt; Session
-            DF --&gt; Data["s01-arquitectura/*.csv&lt;br/&gt;(volumen -&gt; /opt/s01-arquitectura)"]
+            DF --&gt; Data["s01-arquitectura/data/*.csv&lt;br/&gt;(volumen -&gt; /opt/s01-arquitectura/data)"]
             UI["Spark UI&lt;br/&gt;localhost:4042"] --&gt; Session
         end
     end</code></pre>
@@ -1806,7 +1806,7 @@
 <ul>
 <li>El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor <code>lambda26-pyspark</code> (levantado por el <code>docker compose</code> de <code>pyspark/compose.yml</code>) — no son piezas sueltas que haya que conectar.</li>
 <li>El notebook depende de una <code>SparkSession</code> activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.</li>
-<li>El DataFrame depende de dos cosas a la vez: la <code>SparkSession</code> (el motor que lo construye) y el archivo <code>s01-arquitectura/*.csv</code> (montado como volumen en <code>/opt/s01-arquitectura</code>, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).</li>
+<li>El DataFrame depende de dos cosas a la vez: la <code>SparkSession</code> (el motor que lo construye) y el archivo <code>s01-arquitectura/data/*.csv</code> (montado como volumen en <code>/opt/s01-arquitectura/data</code>, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).</li>
 <li>Spark UI depende de que exista una <code>SparkSession</code> activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 dentro del contenedor (expuesto en tu máquina como <code>localhost:4042</code>) — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.</li>
 </ul>
 <p>Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la <code>SparkSession</code>, el <code>DataFrame</code> y verifica Spark UI — completando así todas las dependencias de este diagrama.</p>
@@ -1857,9 +1857,9 @@
 <span class="n">spark</span>
 </code></pre></div>
 <ol>
-<li>Cargar un dataset como DataFrame. Descargar <code>biblia_ntv_.csv</code> desde <a href="https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download">Kaggle: Biblia NTV (Spanish Bible NTV)</a> y copiarlo a <code>lambda26/pyspark/sesiones/s01-arquitectura/</code> (montado como <code>/opt/s01-arquitectura/</code> en el contenedor):</li>
+<li>Cargar un dataset como DataFrame. Descargar <code>biblia_ntv_.csv</code> desde <a href="https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download">Kaggle: Biblia NTV (Spanish Bible NTV)</a> y copiarlo a <code>lambda26/pyspark/sesiones/s01-arquitectura/data/</code> (montado como <code>/opt/s01-arquitectura/data/</code> en el contenedor):</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/s01-arquitectura/biblia_ntv_.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/s01-arquitectura/data/biblia_ntv_.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">df</span>
 </code></pre></div>
 <ol>
