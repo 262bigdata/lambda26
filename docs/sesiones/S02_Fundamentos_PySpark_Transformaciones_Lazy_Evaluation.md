@@ -432,10 +432,8 @@ Tiempo: 2h.
 
 Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa varios GB — no se sube al repositorio (`pyspark/.gitignore` ya excluye `s02-fundamentos/data/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
 
-1. Descarga `Origen.rar` desde: <https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing>
+1. Descarga `Datos HM.zip` desde: <https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing>
 2. Extráelo dentro de `lambda26/pyspark/sesiones/s02-fundamentos/data/`, de modo que quede `s02-fundamentos/data/articles.csv`, `s02-fundamentos/data/customers.csv` y `s02-fundamentos/data/transactions.parquet`.
-
-No descargues todavía `Calidad de Datos y Solucion.rar` de esa misma carpeta de Drive — es material de S3, no de esta sesión.
 
 `transactions.parquet` ya viene convertido a formato columnar; el archivo original de Kaggle es un CSV de varios GB sin comprimir (`transactions_train.csv`) — la conversión CSV → Parquet es justamente el tipo de tarea que formalizas en S3.
 
@@ -576,6 +574,8 @@ Genera el resumen estadístico:
 df_customers.describe().show()
 ```
 
+Fíjate en la fila `count` de cada columna: en una corrida real, `customer_id` da 1 371 980 (todas las filas), pero `FN` y `Active` dan bastante menos — cerca de dos tercios de los valores son nulos en esas dos columnas. No es un error de lectura: así llega el dato real de Kaggle. Profundizar en por qué y qué hacer con esos nulos es justamente lo que S3 formaliza como control de calidad de datos — acá basta con que lo notes.
+
 Consulta los nombres de columna:
 
 ```python
@@ -589,7 +589,7 @@ num_rows, num_cols = df_customers.count(), len(df_customers.columns)
 print(f"Filas: {num_rows}, Columnas: {num_cols}")
 ```
 
-**Muestra aleatoria** (`.sample()`): con un dataset real de este tamaño (~1.37 millones de filas), trabajar con todo el dataset en una laptop se vuelve pesado — para explorar y validar tu lógica alcanza con una muestra aleatoria. La carga del dataset completo queda para cuando el procesamiento corra en un servidor con más recursos, no en tu equipo local.
+**Muestra aleatoria** (`.sample()`): con un dataset real de este tamaño (1 371 980 filas — confírmalo tú mismo con `.count()` arriba), trabajar con todo el dataset en una laptop se vuelve pesado — para explorar y validar tu lógica alcanza con una muestra aleatoria. La carga del dataset completo queda para cuando el procesamiento corra en un servidor con más recursos, no en tu equipo local.
 
 ```python
 df_customers_muestra = df_customers.sample(
@@ -626,7 +626,7 @@ Spark no escribe un solo archivo — escribe una **carpeta**, con un archivo por
 df_customers_muestra.rdd.getNumPartitions()
 ```
 
-**¿Por qué salen tantos archivos `part-0000X-...` si la muestra es pequeña?** `df_customers_muestra` hereda el número de particiones de la lectura original de `customers.csv` (no se reduce solo porque `.sample()` deje menos filas), y cada partición se escribe en paralelo como su propio archivo — así es como Spark escala a datasets reales, sin depender de un solo nodo para juntar todo antes de guardar.
+**¿Por qué salen tantos archivos `part-0000X-...` si la muestra es pequeña?** `df_customers_muestra` hereda el número de particiones de la lectura original de `customers.csv` (no se reduce solo porque `.sample()` deje menos filas), y cada partición se escribe en paralelo como su propio archivo — así es como Spark escala a datasets reales, sin depender de un solo nodo para juntar todo antes de guardar. En una corrida real sobre este dataset, `.rdd.getNumPartitions()` dio **50** — confirma el número exacto en tu propia corrida, puede variar según la configuración del clúster.
 
 **Para compartir un solo archivo** (por ejemplo con estudiantes cuya laptop tiene pocos recursos, en vez de una carpeta con ~20 partes): junta las particiones en una sola antes de escribir con `.coalesce(1)`:
 
@@ -991,6 +991,8 @@ rdd = rdd.filter(lambda texto: texto is not None)  # algunos artículos no tiene
 
 rdd.take(5)
 ```
+
+No te sorprendas si varias de las 5 descripciones salen **idénticas** (en una corrida real, las primeras 3 fueron la misma línea repetida) — H&M cataloga cada combinación de color/talla como un artículo distinto, pero muchos comparten la misma descripción de producto. No es un bug del filtro ni de `.take()`, es así el dato real.
 
 **Paso 2: filtrar descripciones por palabra clave.** Antes de ir al conteo completo, una operación más simple sobre el mismo RDD — quedarte solo con las descripciones que mencionan un material real y frecuente en el catálogo, `"cotton"`:
 
