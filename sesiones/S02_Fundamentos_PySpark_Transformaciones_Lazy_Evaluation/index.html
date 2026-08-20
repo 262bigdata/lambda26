@@ -2091,16 +2091,16 @@
 <li><strong>3.11</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
 </ul>
 <h3 id="31-descargar-el-dataset-hm-y-reanudar-el-entorno-lambda26">3.1 Descargar el dataset H&amp;M y reanudar el entorno <code>lambda26</code><a class="headerlink" href="#31-descargar-el-dataset-hm-y-reanudar-el-entorno-lambda26" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> dataset H&amp;M disponible en <code>pyspark/s02-fundamentos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
+<p><strong>Producto del paso:</strong> dataset H&amp;M disponible en <code>pyspark/sesiones/s02-fundamentos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
 <p>Este dataset (<em>H&amp;M Personalized Fashion Recommendations</em> — fuente original: Kaggle, <a href="https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data">https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data</a>) pesa varios GB — no se sube al repositorio (<code>pyspark/.gitignore</code> ya excluye <code>s02-fundamentos/data/</code>). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:</p>
 <ol>
 <li>Descarga <code>Origen.rar</code> desde: <a href="https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing">https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing</a></li>
-<li>Extráelo dentro de <code>lambda26/pyspark/s02-fundamentos/data/</code>, de modo que quede <code>s02-fundamentos/data/articles.csv</code>, <code>s02-fundamentos/data/customers.csv</code> y <code>s02-fundamentos/data/transactions.parquet</code>.</li>
+<li>Extráelo dentro de <code>lambda26/pyspark/sesiones/s02-fundamentos/data/</code>, de modo que quede <code>s02-fundamentos/data/articles.csv</code>, <code>s02-fundamentos/data/customers.csv</code> y <code>s02-fundamentos/data/transactions.parquet</code>.</li>
 </ol>
 <p>No descargues todavía <code>Calidad de Datos y Solucion.rar</code> de esa misma carpeta de Drive — es material de S3, no de esta sesión.</p>
 <p><code>transactions.parquet</code> ya viene convertido a formato columnar; el archivo original de Kaggle es un CSV de varios GB sin comprimir (<code>transactions_train.csv</code>) — la conversión CSV → Parquet es justamente el tipo de tarea que formalizas en S3.</p>
 <p>Estructura esperada:</p>
-<div class="highlight"><pre><span></span><code>lambda26/pyspark/s02-fundamentos/data/
+<div class="highlight"><pre><span></span><code>lambda26/pyspark/sesiones/s02-fundamentos/data/
 ├── articles.csv
 ├── customers.csv
 └── transactions.parquet
