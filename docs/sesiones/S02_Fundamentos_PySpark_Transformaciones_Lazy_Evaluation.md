@@ -476,6 +476,7 @@ spark = (
     .master("local[*]")
     .config("spark.ui.port", "4040")
     .config("spark.sql.shuffle.partitions", "8")
+    .config("spark.driver.memory", "4g")
     .getOrCreate()
 )
 
@@ -483,6 +484,8 @@ spark
 ```
 
 `spark.sql.shuffle.partitions` se fija en 8 (en vez del valor por defecto, 200 — pensado para clústeres con muchos nodos) porque seguimos en un único contenedor local: con 200 particiones, el overhead de coordinar cientos de particiones pequeñas sería mayor que el propio cómputo en tu máquina.
+
+`spark.driver.memory` se fija en `"4g"` porque en modo `local[*]` el driver y el executor comparten un mismo proceso JVM, y sin esta configuración Spark usa el default de **1g** — sin importar cuánta RAM tenga tu servidor. Con varias lecturas/escrituras y agrupaciones encadenadas en el mismo notebook (como en 3.9), 1g se queda corto y la JVM puede terminar cayéndose con `ConnectionRefusedError` del lado de Python (el símbolo de que la JVM detrás de Py4J ya no está viva) — el heap se agota aunque el servidor tenga memoria de sobra sin usar. Si tu servidor tiene bastante RAM disponible, puedes subir este valor más (`"8g"`, `"16g"`); si el notebook sigue cayéndose con `4g`, reinicia el kernel y sube el valor antes de reintentar.
 
 Declara también la ruta del dataset como variable global, una sola vez:
 
