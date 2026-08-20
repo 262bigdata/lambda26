@@ -175,8 +175,8 @@ spark = (
 ```
 
 - `.master("...")`: define dónde se ejecuta Spark. `"local[*]"` corre en modo local usando todos los núcleos disponibles en tu máquina; `"local[2]"` limitaría el trabajo a solo 2 núcleos. En un clúster real, `.master()` apuntaría a un *cluster manager* (YARN, Kubernetes, el propio Spark standalone) en vez de `"local[...]"` — ese cambio no toca ni una línea del resto del código, solo esta configuración.
-- `.appName("...")`: el nombre que identifica tu aplicación en Spark UI (`localhost:4040`) — útil para distinguir sesiones cuando hay varias corriendo a la vez.
-- `.config("spark.ui.port", "4040")`: fija el puerto de Spark UI. Por defecto Spark usa el 4040, pero si ese puerto ya está ocupado (por ejemplo, por otro notebook con una `SparkSession` activa), hay que cambiarlo aquí.
+- `.appName("...")`: el nombre que identifica tu aplicación en Spark UI (`localhost:4042` en este entorno — ver nota abajo) — útil para distinguir sesiones cuando hay varias corriendo a la vez.
+- `.config("spark.ui.port", "4040")`: fija el puerto de Spark UI *dentro del contenedor*. Por defecto Spark usa el 4040, pero si ese puerto ya está ocupado (por ejemplo, por otro notebook con una `SparkSession` activa), hay que cambiarlo aquí. En `lambda26`, `compose.yml` expone ese 4040 interno en tu máquina como `4042` (`"4042:4040"`), para evitar choques con otros servicios locales — por eso accedes por `localhost:4042`, no `:4040`.
 - `.getOrCreate()`: crea la `SparkSession` si no existe una, o **reutiliza** la que ya está activa en el proceso — evita el error (y el desperdicio de recursos) de crear varias sesiones de Spark dentro del mismo entorno.
 
 ### 2.4 Extracción y estructura de un DataFrame
@@ -646,7 +646,7 @@ df_activos.count()
 
 Confirma que la celda anterior (transformación) no mostró ningún dato, y que esta celda (acción) sí — esa diferencia es la evaluación perezosa en la práctica, no solo en la teoría de 1.6.
 
-Los resultados de `.show()`/`.count()` (y, en 3.6, el texto de `explain()`) aparecen directamente debajo de la celda que los ejecuta, dentro del propio notebook — no en Spark UI. `localhost:4040` es una pestaña aparte del navegador que muestra los **jobs** que Spark ejecutó (uno por cada acción), con sus etapas y tareas: sirve para confirmar que la acción realmente disparó trabajo distribuido y para inspeccionar el rendimiento (shuffles, tiempo por etapa), pero no muestra tus datos ni el texto del plan — eso solo aparece en la celda del notebook.
+Los resultados de `.show()`/`.count()` (y, en 3.6, el texto de `explain()`) aparecen directamente debajo de la celda que los ejecuta, dentro del propio notebook — no en Spark UI. `localhost:4042` es una pestaña aparte del navegador que muestra los **jobs** que Spark ejecutó (uno por cada acción), con sus etapas y tareas: sirve para confirmar que la acción realmente disparó trabajo distribuido y para inspeccionar el rendimiento (shuffles, tiempo por etapa), pero no muestra tus datos ni el texto del plan — eso solo aparece en la celda del notebook.
 
 ### 3.6 Analizar el plan de ejecución con `explain()`
 

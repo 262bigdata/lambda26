@@ -42,6 +42,16 @@ Tambien puedes entrar a Jupyter Notebook:
 http://localhost:4488/?token=sintoken
 ```
 
+**Nota:** el `Dockerfile` arranca el contenedor con `jupyter notebook`, no `jupyter lab` — igual puedes entrar a `/lab` porque `notebook` 7.x viene construido sobre el mismo servidor de JupyterLab y sirve ambas interfaces (`/lab` y `/tree`) desde el mismo proceso. No es necesario cambiar el comando para usar `/lab`.
+
+Spark UI queda en:
+
+```text
+http://localhost:4042
+```
+
+**Nota:** Spark usa el puerto 4040 por defecto, pero `compose.yml` lo expone en tu máquina como `4042` (`"4042:4040"`) — dentro del contenedor sigue siendo 4040, solo cambia el puerto con el que accedes desde el navegador. Esto evita choques con otros servicios que puedan estar usando el 4040 en tu máquina.
+
 Los notebooks quedan montados dentro del contenedor en:
 ```text
 /opt/notebooks
@@ -80,7 +90,7 @@ services:
             - ./:/home/jovyan
 ```
 
-Puertos distintos a los de `compose.yml` (4488/4040) para poder levantar ambos entornos sin conflicto si hiciera falta.
+Puertos distintos a los de `compose.yml` (4488/4042) para poder levantar ambos entornos sin conflicto si hiciera falta.
 
 Para levantar este entorno:
 

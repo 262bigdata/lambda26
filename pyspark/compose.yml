@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     ports:
       - "4488:8888"
-      - "4040:4040"
+      - "4042:4040"
     volumes:
       - ./notebooks:/opt/notebooks
       - ./data:/opt/data

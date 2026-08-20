@@ -152,7 +152,7 @@ flowchart LR
     end
 ```
 
-A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en `lambda26` el módulo `uso-pyspark` cubre las 4 etapas dentro de un solo componente, sobre una `SparkSession` común (`local[*]`) corriendo en el contenedor `lambda26-pyspark`. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4040); la transformación real y el análisis ML se profundizan desde S2 y S4.
+A diferencia de una solución BI o Big Data típica (Figuras 6 y 7), donde cada etapa del ciclo de vida del dato suele ser una herramienta distinta, en `lambda26` el módulo `uso-pyspark` cubre las 4 etapas dentro de un solo componente, sobre una `SparkSession` común (`local[*]`) corriendo en el contenedor `lambda26-pyspark`. Hoy (S1) solo verificas que ese ciclo completo funciona de punta a punta con un caso mínimo — leer un CSV y mostrarlo, con el job visible en Spark UI (localhost:4042); la transformación real y el análisis ML se profundizan desde S2 y S4.
 
 Estos son los componentes que instalas y verificas en 3.1-3.2, antes de pasar al análisis conceptual (ecosistema, batch/streaming, Lambda o Kappa) que desarrolla el resto de esta sección.
 
@@ -333,7 +333,7 @@ flowchart LR
             Notebook --> Session["SparkSession<br/>local[*]"]
             DF["DataFrame<br/>printSchema / show"] --> Session
             DF --> Data["data/*.csv<br/>(volumen -> /opt/data)"]
-            UI["Spark UI<br/>localhost:4040"] --> Session
+            UI["Spark UI<br/>localhost:4042"] --> Session
         end
     end
 ```
@@ -343,7 +343,7 @@ Lectura del diagrama (las flechas indican dependencia: A → B significa "A depe
 - El notebook depende de JupyterLab para ejecutarse, y JupyterLab depende del contenedor `lambda26-pyspark` (levantado por el `docker compose` de `pyspark/compose.yml`) — no son piezas sueltas que haya que conectar.
 - El notebook depende de una `SparkSession` activa para poder procesar datos: sin ella, el código Spark no tiene motor sobre el cual correr.
 - El DataFrame depende de dos cosas a la vez: la `SparkSession` (el motor que lo construye) y el archivo `data/*.csv` (montado como volumen en `/opt/data`, no copiado dentro de la imagen — cambiarlo no exige reconstruir el contenedor).
-- Spark UI depende de que exista una `SparkSession` activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.
+- Spark UI depende de que exista una `SparkSession` activa: no es un servicio aparte, se levanta junto con la sesión en el puerto 4040 dentro del contenedor (expuesto en tu máquina como `localhost:4042`) — por eso sirve para verificar que el motor realmente corrió, no solo que Jupyter respondió.
 
 Este paso (3.1) levanta el contenedor y JupyterLab; el paso 3.2 crea el notebook, la `SparkSession`, el `DataFrame` y verifica Spark UI — completando así todas las dependencias de este diagrama.
 
@@ -361,7 +361,9 @@ Verifica que responde:
 JupyterLab -> http://localhost:4488/lab?token=sintoken
 ```
 
-Spark UI (`http://localhost:4040`) todavía no responde en este punto: solo se levanta cuando creas una `SparkSession` activa, en 3.2 — no al levantar el contenedor.
+**Nota:** el contenedor arranca con `jupyter notebook`, no `jupyter lab` — igual puedes entrar a `/lab` porque `notebook` 7.x viene construido sobre el mismo servidor de JupyterLab y sirve ambas interfaces (`/lab` y `/tree`) desde el mismo proceso. No hace falta cambiar ningún comando para usar `/lab`.
+
+Spark UI (`http://localhost:4042`) todavía no responde en este punto: solo se levanta cuando creas una `SparkSession` activa, en 3.2 — no al levantar el contenedor. Spark usa el puerto 4040 por defecto dentro del contenedor; `compose.yml` lo expone en tu máquina como `4042` (`"4042:4040"`) para evitar choques con otros servicios que puedan estar usando el 4040 en tu equipo.
 
 **Alternativa con imagen oficial de PySpark + Jupyter:** si tu equipo tiene buenos recursos de cómputo, puedes usar directamente la imagen oficial [`jupyter/pyspark-notebook`](https://hub.docker.com/r/jupyter/pyspark-notebook), que trae Spark completo sin depender de la imagen personalizada de `lambda26`. Diferencia de peso a tener en cuenta: la imagen personalizada de `lambda26` pesa **~1.9 GB**, mientras que `jupyter/pyspark-notebook` pesa **~6.9 GB** — considera tu espacio en disco y velocidad de conexión antes de elegir esta alternativa:
 
@@ -379,7 +381,7 @@ services:
             - ./:/home/jovyan
 ```
 
-Puertos distintos a los de `pyspark/compose.yml` (4488/4040) para no chocar si ambos entornos quedan levantados a la vez.
+Puertos distintos a los de `pyspark/compose.yml` (4488/4042) para no chocar si ambos entornos quedan levantados a la vez.
 
 ```powershell
 docker compose up -d
@@ -434,7 +436,7 @@ df.select("libro", "capitulo", "verso").show(5)
 Verifica que:
 
 ```text
-Spark UI -> http://localhost:4040
+Spark UI -> http://localhost:4042
 ```
 
 muestra el job que se acaba de ejecutar (la lectura del CSV y el `show()`).

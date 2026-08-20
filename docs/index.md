@@ -118,7 +118,7 @@ flowchart LR
         direction TB
         Notebooks["notebooks/*.ipynb<br/>ETL, entrenamiento ML"]
         Jupyter["Jupyter<br/>localhost:4488"]
-        Spark["Spark / PySpark<br/>localhost:4040"]
+        Spark["Spark / PySpark<br/>localhost:4042"]
         Data["data/*.csv"]
         Artifacts["artifacts/<br/>modelos entrenados"]
         Notebooks --> Jupyter --> Spark
