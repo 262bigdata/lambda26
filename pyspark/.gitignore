@@ -21,7 +21,7 @@ ENV/
 
 # Dataset H&M (Kaggle): demasiado grande para git (transactions.parquet > 100MB,
 # límite duro de GitHub). Se descarga manualmente, ver guía de S2.
-s02-fundamentos/data/
+sesiones/s02-fundamentos/data/
 
 # Docker
 *.log

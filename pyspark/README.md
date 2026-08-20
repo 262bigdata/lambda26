@@ -11,18 +11,25 @@ cd lambda26/pyspark
 
 ## Carpetas
 
-Cada sesión que necesita datos reales tiene su propia carpeta autocontenida
-(`sXX-nombre/`): ahí viven juntos el notebook, sus datos de entrada
-(`data/`, si el dataset viene de varios archivos) y sus salidas (`artifacts/`,
-si la sesión genera resultados). No hay una carpeta `data/`/`artifacts/`
-compartida entre sesiones — cada una tiene la suya, dentro de su propia
-carpeta de sesión.
+`pyspark/` separa la **configuración** (lo que arma el entorno) del
+**contenido** (lo que el curso produce):
 
-- `s01-arquitectura/`: notebook y dataset (`biblia_ntv_.csv`) de S1.
-- `s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
-- Sesiones futuras agregan su propia carpeta (`s03-...`, `s04-...`) a medida
-  que el curso avanza.
-- `Dockerfile`: imagen base del laboratorio.
+- `Dockerfile`, `compose.yml`, `.env`/`.env.example`, `README.md`: solo se
+  usan desde el host, para levantar el contenedor — no se montan dentro de
+  él, así que nunca aparecen en el explorador de archivos de Jupyter.
+- `sesiones/`: la única carpeta que se monta dentro del contenedor (en
+  `/opt`). Ahí vive todo lo demás.
+
+Dentro de `sesiones/`, cada sesión que necesita datos reales tiene su propia
+carpeta autocontenida (`sXX-nombre/`): el notebook, sus datos de entrada
+(`data/`, si el dataset viene de varios archivos) y sus salidas
+(`artifacts/`, si la sesión genera resultados). No hay una carpeta
+`data/`/`artifacts/` compartida entre sesiones — cada una tiene la suya.
+
+- `sesiones/s01-arquitectura/`: notebook y dataset (`biblia_ntv_.csv`) de S1.
+- `sesiones/s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
+- Sesiones futuras agregan su propia carpeta (`sesiones/s03-...`,
+  `sesiones/s04-...`) a medida que el curso avanza.
 
 ## Uso
 
@@ -65,11 +72,14 @@ http://localhost:4042
 
 **Nota:** Spark usa el puerto 4040 por defecto, pero `compose.yml` lo expone en tu máquina como `4042` (`"4042:4040"`) — dentro del contenedor sigue siendo 4040, solo cambia el puerto con el que accedes desde el navegador. Esto evita choques con otros servicios que puedan estar usando el 4040 en tu máquina.
 
-Toda la carpeta `pyspark/` se monta de una sola vez dentro del contenedor en
-`/opt` (`compose.yml`: `./:/opt`) — por eso cada carpeta de sesión aparece
-directamente como `/opt/sXX-nombre/`, sin mounts adicionales que configurar
-cuando agregas una sesión nueva. Por ejemplo, `s02-fundamentos/data/` queda
-disponible en `/opt/s02-fundamentos/data/`.
+La carpeta `sesiones/` se monta de una sola vez dentro del contenedor en
+`/opt` (`compose.yml`: `./sesiones:/opt`) — por eso cada carpeta de sesión
+aparece directamente como `/opt/sXX-nombre/`, sin mounts adicionales que
+configurar cuando agregas una sesión nueva. Por ejemplo,
+`sesiones/s02-fundamentos/data/` queda disponible en
+`/opt/s02-fundamentos/data/`. Los archivos de configuración (`Dockerfile`,
+`compose.yml`, etc.) se quedan fuera de este mount a propósito, para que no
+aparezcan en el explorador de archivos de Jupyter.
 
 ### Alternativa con imagen oficial de PySpark + Jupyter
 
@@ -117,6 +127,6 @@ http://localhost:4489/?token=sintoken
 Los notebooks se crean progresivamente, uno por sesión, a medida que el
 curso avanza (verificación mínima en S1, fundamentos en S2, formatos
 analíticos en S3, ML distribuido en S4, streaming e inferencia desde
-S8-S10) — cada uno dentro de la carpeta de su propia sesión (`sXX-nombre/`),
-junto a sus datos de entrada. Las sesiones que todavía no tienen contenido
-no tienen carpeta creada.
+S8-S10) — cada uno dentro de la carpeta de su propia sesión
+(`sesiones/sXX-nombre/`), junto a sus datos de entrada. Las sesiones que
+todavía no tienen contenido no tienen carpeta creada.

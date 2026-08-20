@@ -428,12 +428,12 @@ Tiempo: 2h.
 
 ### 3.1 Descargar el dataset H&M y reanudar el entorno `lambda26`
 
-**Producto del paso:** dataset H&M disponible en `pyspark/s02-fundamentos/data/`, entorno `lambda26` funcionando.
+**Producto del paso:** dataset H&M disponible en `pyspark/sesiones/s02-fundamentos/data/`, entorno `lambda26` funcionando.
 
 Este dataset (*H&M Personalized Fashion Recommendations* — fuente original: Kaggle, <https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data>) pesa varios GB — no se sube al repositorio (`pyspark/.gitignore` ya excluye `s02-fundamentos/data/`). El docente ya lo empaquetó y lo comparte por Drive, así que no hace falta crear cuenta en Kaggle ni aceptar las reglas de la competencia. Descárgalo una sola vez, antes de clase:
 
 1. Descarga `Origen.rar` desde: <https://drive.google.com/drive/folders/1EhNp6jRzSvT9bFWX_w5fHaSy4fG535aA?usp=sharing>
-2. Extráelo dentro de `lambda26/pyspark/s02-fundamentos/data/`, de modo que quede `s02-fundamentos/data/articles.csv`, `s02-fundamentos/data/customers.csv` y `s02-fundamentos/data/transactions.parquet`.
+2. Extráelo dentro de `lambda26/pyspark/sesiones/s02-fundamentos/data/`, de modo que quede `s02-fundamentos/data/articles.csv`, `s02-fundamentos/data/customers.csv` y `s02-fundamentos/data/transactions.parquet`.
 
 No descargues todavía `Calidad de Datos y Solucion.rar` de esa misma carpeta de Drive — es material de S3, no de esta sesión.
 
@@ -442,7 +442,7 @@ No descargues todavía `Calidad de Datos y Solucion.rar` de esa misma carpeta de
 Estructura esperada:
 
 ```text
-lambda26/pyspark/s02-fundamentos/data/
+lambda26/pyspark/sesiones/s02-fundamentos/data/
 ├── articles.csv
 ├── customers.csv
 └── transactions.parquet

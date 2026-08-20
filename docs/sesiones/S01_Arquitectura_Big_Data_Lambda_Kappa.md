@@ -414,7 +414,7 @@ spark = (
 spark
 ```
 
-2. Cargar un dataset como DataFrame. Descargar `biblia_ntv_.csv` desde [Kaggle: Biblia NTV (Spanish Bible NTV)](https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download) y copiarlo a `lambda26/pyspark/s01-arquitectura/` (montado como `/opt/s01-arquitectura/` en el contenedor):
+2. Cargar un dataset como DataFrame. Descargar `biblia_ntv_.csv` desde [Kaggle: Biblia NTV (Spanish Bible NTV)](https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download) y copiarlo a `lambda26/pyspark/sesiones/s01-arquitectura/` (montado como `/opt/s01-arquitectura/` en el contenedor):
 
 ```python
 df = spark.read.csv("/opt/s01-arquitectura/biblia_ntv_.csv", header=True, inferSchema=True)
