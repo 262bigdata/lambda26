@@ -1,0 +1,1716 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation%20copy/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s2-fundamentos-pyspark-transformaciones-funciones-agrupaciones-y-evaluacion-perezosa" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-por-que-spark-no-ejecuta-tu-codigo-de-inmediato-el-optimizador-catalyst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: por qué Spark no ejecuta tu código de inmediato — el optimizador Catalyst
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-extraccion-y-estructura-de-un-dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Extracción y estructura de un DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-transformaciones-acciones-y-evaluacion-perezosa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Transformaciones, acciones y evaluación perezosa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-funciones-de-pysparksqlfunctions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Funciones de pyspark.sql.functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-agrupaciones-y-agregaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Agrupaciones y agregaciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-rdd-el-modelo-debajo-de-los-dataframes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 RDD: el modelo debajo de los DataFrames
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-lambda26-uso-pyspark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno lambda26 (uso-pyspark)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-cargar-y-explorar-el-dataframe-biblia_ntv_csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Cargar y explorar el DataFrame (biblia_ntv_.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-aplicar-transformaciones-y-verificar-la-evaluacion-perezosa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Aplicar transformaciones y verificar la evaluación perezosa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-analizar-el-plan-de-ejecucion-con-explain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Analizar el plan de ejecución con explain()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-aplicar-agrupaciones-y-agregaciones-ventascsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Aplicar agrupaciones y agregaciones (ventas.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-convertir-a-rdd-y-procesar-con-mapflatmapfilterreducebykey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Convertir a RDD y procesar con map/flatMap/filter/reduceByKey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-documentar-hallazgos-y-responder-preguntas-de-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Documentar hallazgos y responder preguntas de reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s2-fundamentos-pyspark-transformaciones-funciones-agrupaciones-y-evaluacion-perezosa">S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa<a class="headerlink" href="#s2-fundamentos-pyspark-transformaciones-funciones-agrupaciones-y-evaluacion-perezosa" title="Permanent link">&para;</a></h1>
+<p><em>Por: Angel Sullon Macalupu @asullom - 2026</em></p>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>En S1 se decidió la arquitectura Big Data (Lambda o Kappa) del Proyecto Sello y se verificó que el entorno <code>lambda26</code> (<code>uso-pyspark</code>) funciona de punta a punta. Esta sesión entra a fondo en la primera etapa real del pipeline batch: extracción, transformaciones, funciones, agrupaciones/agregaciones y el modelo RDD, todo bajo el concepto que explica por qué Spark procesa datos a esa escala sin colapsar — la evaluación perezosa (<em>lazy evaluation</em>). El porqué se desarrolla en 1.6, a partir de cómo Spark SQL optimiza tu código antes de ejecutarlo; esta sesión no llega todavía a particionar ni guardar en formatos analíticos (eso es S3).</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>DataFrames: extracción y estructura.</li>
+<li>Transformaciones, acciones y evaluación perezosa.</li>
+<li>Funciones, agrupaciones y agregaciones.</li>
+<li>RDD: el modelo debajo de los DataFrames.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Ejecutar</strong> transformaciones distribuidas con PySpark sobre DataFrames y RDD, <strong>identificar</strong> el momento exacto en que Spark ejecuta realmente el cálculo, y <strong>aplicar</strong> funciones, agrupaciones y agregaciones para resumir datos a escala.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>02_fundamentos_practica.ipynb</code> con transformaciones y funciones documentadas, agrupaciones/agregaciones aplicadas, procesamiento RDD y evidencia del plan de ejecución (<code>explain()</code>).</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Repasar el notebook de verificación de S1 (entorno <code>lambda26</code> ya debe estar funcionando) y leer el caso de Catalyst Optimizer (ver 1.6). Trabajo individual, antes de clase.</td>
+<td>Sílabo Big Data U1, guía S1.</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>02_fundamentos_practica.ipynb</code>: extracción, transformaciones, evaluación perezosa, funciones, agrupaciones/agregaciones y RDD. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas.</td>
+<td>Pasos 3.1 a 3.8 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de las transformaciones documentadas y la evidencia del plan de ejecución. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-por-que-spark-no-ejecuta-tu-codigo-de-inmediato-el-optimizador-catalyst">1.6.1 Caso: por qué Spark no ejecuta tu código de inmediato — el optimizador Catalyst<a class="headerlink" href="#161-caso-por-que-spark-no-ejecuta-tu-codigo-de-inmediato-el-optimizador-catalyst" title="Permanent link">&para;</a></h4>
+<p>Cuando escribes <code>df.select(...).filter(...)</code> en PySpark, Spark <strong>no ejecuta nada todavía</strong>: solo construye un plan. Recién cuando llamas a una acción (<code>show()</code>, <code>count()</code>, <code>collect()</code>), el motor <strong>Catalyst</strong> de Spark SQL toma ese plan y lo optimiza antes de tocar un solo byte de datos, en cuatro fases: <em>Analysis</em> (resuelve nombres de columnas y tipos), <em>Logical optimization</em> (aplica reglas como <em>predicate pushdown</em>, <em>column pruning</em> y reordenamiento de joins), <em>Physical planning</em> (elige la estrategia física de ejecución) y <em>Code generation</em> (compila partes del plan a bytecode de Java). Catalyst se diseñó explícitamente con dos objetivos: que el equipo de Spark pudiera agregar nuevas técnicas de optimización con facilidad, y que desarrolladores externos pudieran extender el optimizador. Esa es la razón técnica de fondo por la que este notebook trabaja con DataFrames (<code>select()</code>, <code>filter()</code>, <code>groupBy()</code>) en vez de un bucle manual: le da a Spark la libertad de reordenar, podar columnas y elegir el plan más barato antes de ejecutar — algo que un bucle secuencial no le permite.</p>
+<p><strong>Figura 1. De la transformación a la ejecución: las 4 fases de Catalyst</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    Code["Código PySpark&lt;br/&gt;df.select().filter()"] --&gt;|"transformación:&lt;br/&gt;solo construye plan"| Plan["Plan lógico&lt;br/&gt;(sin ejecutar)"]
+    Plan --&gt;|"acción: show(), count(), collect()"| A["Analysis&lt;br/&gt;resuelve nombres y tipos"]
+    A --&gt; B["Logical optimization&lt;br/&gt;predicate pushdown,&lt;br/&gt;column pruning, join reordering"]
+    B --&gt; C["Physical planning&lt;br/&gt;elige estrategia física"]
+    C --&gt; D["Code generation&lt;br/&gt;compila a bytecode Java"]
+    D --&gt; Exec["Ejecución distribuida&lt;br/&gt;sobre los workers"]
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Plan today;</code></pre>
+<p><em>Nota.</em> Adaptado de <em>What is a Catalyst Optimizer?</em>, por Databricks, 2024, Databricks Blog (<a href="https://www.databricks.com/blog/what-is-catalyst-optimizer">https://www.databricks.com/blog/what-is-catalyst-optimizer</a>).</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>En Python normal (sin Spark), cuando escribes <code>resultado = filtrar(datos); resultado2 = seleccionar(resultado)</code>, ¿en qué momento se ejecuta cada línea? ¿En qué se diferencia eso de lo que hace Spark con <code>df.filter(...).select(...)</code>?</li>
+<li>¿Qué ventaja tendría para Spark "esperar" a ver todas las transformaciones encadenadas antes de decidir cómo ejecutarlas, en vez de ejecutar cada una apenas se escribe?</li>
+</ol>
+<p><strong>Comprensión de evaluación perezosa</strong></p>
+<ol>
+<li>Según el caso, ¿qué ocurre exactamente cuando llamas a una acción como <code>show()</code> o <code>count()</code>? Nombra las 4 fases que atraviesa el plan.</li>
+<li>¿Por qué sería más difícil para el equipo de Spark agregar nuevas reglas de optimización (como <em>predicate pushdown</em>) si Spark ejecutara cada transformación de inmediato, apenas se escribe?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
+<li>Avance del producto en esta sesión: transformaciones distribuidas documentadas sobre datos del Proyecto Sello, con evidencia del plan de ejecución.</li>
+</ul>
+<p>Roadmap del producto de unidad:</p>
+<p><strong>Figura 2. Roadmap del producto de la unidad U1</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Arquitectura["Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;S1"]
+    PySpark["Fundamentos PySpark&lt;br/&gt;HOY"]
+    HDFS["Formatos analíticos y calidad&lt;br/&gt;S3"]
+    ML["ML distribuido&lt;br/&gt;S4"]
+    Evaluacion["Evaluación U1&lt;br/&gt;S5"]
+
+    Arquitectura --&gt; PySpark --&gt; HDFS --&gt; ML --&gt; Evaluacion
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class PySpark today;</code></pre>
+<p>Hoy se construye la base técnica que usa el resto de la unidad: sin dominar transformaciones, funciones, agrupaciones y evaluación perezosa, S3 (carga particionada y calidad de datos) y S4 (ML distribuido) no tienen sobre qué apoyarse. La evaluación U1 valida el pipeline batch completo construido sobre esta base.</p>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 25 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 3. Arquitectura de la sesión: extracción, DataFrame, RDD y evaluación perezosa sobre <code>uso-pyspark</code></strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph BP["Batch Pipeline"]
+        subgraph BP1["uso-pyspark&lt;br/&gt;batch, interactivo"]
+            direction LR
+            E["Extracción&lt;br/&gt;spark.read.csv()&lt;br/&gt;header + inferSchema"] --&gt; DF["DataFrame&lt;br/&gt;select() / filter() / withColumn()&lt;br/&gt;funciones de pyspark.sql.functions"]
+            DF --&gt; GA["Agrupación / Agregación&lt;br/&gt;groupBy().agg()"]
+            DF --&gt; R["RDD&lt;br/&gt;df.rdd -&gt; map() / flatMap() / reduceByKey()"]
+            GA --&gt; Acc["Acción&lt;br/&gt;show() / count() / collect()"]
+            R --&gt; Acc
+            Acc --&gt; UI["Spark UI + explain()&lt;br/&gt;plan de ejecución"]
+        end
+    end</code></pre>
+<p>A diferencia de S1, donde solo verificabas que el ciclo completo funcionara de punta a punta con un caso mínimo, hoy trabajas a fondo dentro de la etapa de transformación: extracción con control de esquema, transformaciones y funciones sobre DataFrame, agrupaciones/agregaciones, y el modelo RDD que corre por debajo. La visualización sigue siendo <code>show()</code> + Spark UI; la persistencia en formatos analíticos particionados (Parquet) recién se construye en S3 — hoy el resultado vive solo en memoria distribuida, dentro de la sesión de Spark.</p>
+<h3 id="22-extraccion-y-estructura-de-un-dataframe">2.2 Extracción y estructura de un DataFrame<a class="headerlink" href="#22-extraccion-y-estructura-de-un-dataframe" title="Permanent link">&para;</a></h3>
+<p><code>spark.read.csv()</code> acepta parámetros que cambian cómo Spark interpreta el archivo:</p>
+<p><strong>Tabla 2. Parámetros usados en esta sesión para <code>spark.read.csv()</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Qué hace</th>
+<th>Costo/riesgo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header=True</code></td>
+<td>Usa la primera fila del archivo como nombres de columna.</td>
+<td>Si el header real no calza con el orden de columnas del schema inferido, Spark emite una advertencia en vez de fallar — hay que revisarla, no ignorarla (ver recuadro abajo).</td>
+</tr>
+<tr>
+<td><code>inferSchema=True</code></td>
+<td>Spark lee el archivo una vez completa para deducir el tipo de cada columna (<code>int</code>, <code>string</code>, <code>date</code>, etc.).</td>
+<td>Cuesta una pasada extra sobre los datos antes de la real; en un archivo de producción grande, se reemplaza por un <code>StructType</code> explícito para evitar ese costo y cualquier ambigüedad de tipos.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Error frecuente:</strong> al leer <code>biblia_ntv_.csv</code> con <code>header=True</code> e <code>inferSchema=True</code>, Spark muestra esta advertencia real:</p>
+<div class="highlight"><pre><span></span><code>WARN CSVHeaderChecker: CSV header does not conform to the schema.
+ Header: , libro, capitulo, verso, texto
+ Schema: _c0, libro, capitulo, verso, texto
+ Expected: _c0 but found:
+</code></pre></div>
+<p>No es un error que detenga la ejecución — Spark sigue leyendo el archivo — pero indica que la primera columna del CSV no tiene nombre en el header (columna de índice sin etiquetar) y Spark la nombró <code>_c0</code> por defecto. Repórtalo como hallazgo en tu evidencia (4.3.1) si te aparece: es exactamente el tipo de inconsistencia de esquema que un <code>StructType</code> explícito habría evitado.</p>
+<p>Ese <code>StructType</code> explícito se ve así — declara cada columna con su nombre, tipo y si acepta nulos, sin que Spark tenga que inferir nada:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">StringType</span>
+
+<span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"_c0"</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"libro"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"capitulo"</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"verso"</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"texto"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/data/biblia_ntv_.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+</code></pre></div>
+<p>Con <code>schema=schema</code> explícito, Spark ya no necesita <code>inferSchema=True</code> (se ahorra la pasada extra de lectura) y la advertencia de header de arriba deja de tener margen de ambigüedad: cada columna tiene el tipo que tú declaraste, no el que Spark dedujo.</p>
+<h3 id="23-transformaciones-acciones-y-evaluacion-perezosa">2.3 Transformaciones, acciones y evaluación perezosa<a class="headerlink" href="#23-transformaciones-acciones-y-evaluacion-perezosa" title="Permanent link">&para;</a></h3>
+<p>Toda operación sobre un DataFrame es una <strong>transformación</strong> o una <strong>acción</strong>:</p>
+<p><strong>Tabla 3. Transformaciones comunes vs. acciones comunes</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Qué hace</th>
+<th>Ejemplos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transformación</td>
+<td>Construye un nuevo plan lógico; no ejecuta nada todavía.</td>
+<td><code>select()</code>, <code>filter()</code>, <code>withColumn()</code>, <code>groupBy()</code>, <code>join()</code></td>
+</tr>
+<tr>
+<td>Acción</td>
+<td>Dispara la ejecución real (las 4 fases de Catalyst, ver 1.6) y devuelve un resultado.</td>
+<td><code>show()</code>, <code>count()</code>, <code>collect()</code>, <code>take()</code>, <code>write()</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>explain(True)</code> expone las 4 fases de Catalyst como planes concretos:</p>
+<p><strong>Tabla 4. Fases del plan de ejecución mostradas por <code>explain(True)</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Fase (Catalyst)</th>
+<th>Nombre en <code>explain(True)</code></th>
+<th>Qué muestra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analysis</td>
+<td><em>Analyzed Logical Plan</em></td>
+<td>Nombres y tipos ya resueltos.</td>
+</tr>
+<tr>
+<td>Logical optimization</td>
+<td><em>Optimized Logical Plan</em></td>
+<td>El plan después de aplicar reglas como <em>predicate pushdown</em> (el <code>filter()</code> bajó antes que el <code>select()</code>, aunque en el código estuviera después).</td>
+</tr>
+<tr>
+<td>Physical planning</td>
+<td><em>Physical Plan</em></td>
+<td>La estrategia física real: qué archivo lee (<code>FileScan csv</code>), qué filtros empuja al propio lector (<code>PushedFilters</code>).</td>
+</tr>
+<tr>
+<td>Code generation</td>
+<td>(no se imprime como texto; ya es bytecode)</td>
+<td>No aparece en <code>explain()</code>, pero es el paso final antes de ejecutar en los workers.</td>
+</tr>
+</tbody>
+</table>
+<p>Ejemplo real, capturado al correr <code>explain(True)</code> sobre un <code>filter()</code> encadenado con <code>select()</code>:</p>
+<div class="highlight"><pre><span></span><code>== Parsed Logical Plan ==
+'Filter 'or('or('contains(texto#21, amor), 'contains(texto#21, fe)), 'contains(texto#21, Dios))
++- Project [libro#18, capitulo#19, verso#20, texto#21]
+   +- Relation [_c0#17,libro#18,capitulo#19,verso#20,texto#21] csv
+
+== Optimized Logical Plan ==
+Project [libro#18, capitulo#19, verso#20, texto#21]
++- Filter ((Contains(texto#21, amor) OR Contains(texto#21, fe)) OR Contains(texto#21, Dios))
+   +- Relation [_c0#17,libro#18,capitulo#19,verso#20,texto#21] csv
+</code></pre></div>
+<p>Compara el <em>Parsed</em> con el <em>Optimized</em>: en el código, el <code>select()</code> se escribió antes que el <code>filter()</code>; en el plan optimizado, Catalyst puso el <code>Filter</code> <strong>antes</strong> del <code>Project</code> — porque filtrar primero reduce cuántas filas hay que proyectar después. Eso es <em>predicate pushdown</em> en acción, no una casualidad del optimizador.</p>
+<p>Esa misma evaluación perezosa tiene un costo oculto: si llamas a dos acciones distintas (<code>show()</code> y después <code>count()</code>) sobre el mismo DataFrame transformado, Spark <strong>recalcula todo el plan dos veces</strong> — la evaluación perezosa no guarda el resultado, solo el plan. <code>cache()</code> rompe ese recálculo, guardando el resultado en memoria la primera vez que una acción lo dispara:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_transformado</span> <span class="o">=</span> <span class="n">df_transformado</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+
+<span class="n">df_transformado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>  <span class="c1"># primera acción: ejecuta el plan completo y lo guarda en memoria</span>
+<span class="n">df_transformado</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># segunda acción: reutiliza el resultado cacheado, no vuelve a leer el CSV</span>
+</code></pre></div>
+<p>Úsalo solo si vas a reutilizar el mismo DataFrame en más de una acción — cachear algo que se usa una sola vez solo gasta memoria sin ahorrar nada. Libera la memoria con <code>df_transformado.unpersist()</code> cuando ya no lo necesites.</p>
+<h3 id="24-funciones-de-pysparksqlfunctions">2.4 Funciones de <code>pyspark.sql.functions</code><a class="headerlink" href="#24-funciones-de-pysparksqlfunctions" title="Permanent link">&para;</a></h3>
+<p>Las transformaciones simples (<code>select()</code>, <code>filter()</code> con <code>.contains()</code>) alcanzan para casos básicos, pero la mayoría de transformaciones reales necesitan funciones de columna explícitas, importadas de <code>pyspark.sql.functions</code>. <code>withColumn()</code> es la forma de crear o reemplazar una columna aplicando una de esas funciones:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">lit</span><span class="p">,</span> <span class="n">current_date</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+    <span class="s2">"categoria"</span><span class="p">,</span>
+    <span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">"bajo"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">250</span><span class="p">,</span> <span class="s2">"medio"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="s2">"alto"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"moneda"</span><span class="p">,</span> <span class="n">lit</span><span class="p">(</span><span class="s2">"PEN"</span><span class="p">))</span>          <span class="c1"># columna constante</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">,</span> <span class="n">col</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"double"</span><span class="p">))</span>  <span class="c1"># cambia el tipo de una columna existente</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"fecha_procesado"</span><span class="p">,</span> <span class="n">current_date</span><span class="p">())</span>     <span class="c1"># columna calculada por Spark, no por ti</span>
+</code></pre></div>
+<p><code>col("monto")</code> referencia la columna de forma explícita (necesario para comparaciones y expresiones compuestas); <code>when()/otherwise()</code> es el equivalente de un <code>if/elif/else</code> a nivel de columna, evaluado en cada fila de forma distribuida; <code>lit()</code> inyecta un valor literal como columna (útil para banderas o constantes); <code>.cast()</code> cambia el tipo de una columna sin releer el archivo; <code>current_date()</code> es una función de Spark, no de Python — se evalúa en cada worker al momento de la acción, no una sola vez al escribir el código. Como <code>withColumn()</code> es una transformación, ninguna de estas líneas ejecuta nada todavía — el plan solo se dispara con la acción que sigue.</p>
+<h3 id="25-agrupaciones-y-agregaciones">2.5 Agrupaciones y agregaciones<a class="headerlink" href="#25-agrupaciones-y-agregaciones" title="Permanent link">&para;</a></h3>
+<p><code>groupBy()</code> agrupa filas por una o más columnas; solo tiene sentido combinado con una función de agregación en <code>.agg()</code> — sin eso, el grupo no produce ningún resumen.</p>
+<p><strong>Tabla 5. Funciones de agregación comunes</strong></p>
+<table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Qué calcula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count()</code></td>
+<td>Cantidad de filas por grupo.</td>
+</tr>
+<tr>
+<td><code>sum()</code></td>
+<td>Suma de una columna por grupo.</td>
+</tr>
+<tr>
+<td><code>avg()</code></td>
+<td>Promedio de una columna por grupo.</td>
+</tr>
+<tr>
+<td><code>min()</code> / <code>max()</code></td>
+<td>Valor mínimo/máximo por grupo.</td>
+</tr>
+<tr>
+<td><code>countDistinct()</code></td>
+<td>Cantidad de valores distintos por grupo.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">avg</span>
+
+<span class="n">ventas</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"cliente_id"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+    <span class="nb">sum</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"total"</span><span class="p">),</span>
+    <span class="n">count</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"cantidad_compras"</span><span class="p">),</span>
+    <span class="n">avg</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"promedio"</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>Sobre <code>data/ventas.csv</code> (4 filas, 3 clientes), este resultado es verificable a mano:</p>
+<div class="highlight"><pre><span></span><code>+----------+-----+----------------+--------+
+|cliente_id|total|cantidad_compras|promedio|
++----------+-----+----------------+--------+
+|       101|  300|               2|   150.0|
+|       102|  150|               1|   150.0|
+|       103|  300|               1|   300.0|
++----------+-----+----------------+--------+
+</code></pre></div>
+<p><code>groupBy()</code> en sí mismo es una transformación (no ejecuta nada); <code>.agg(...)</code> sigue siendo parte del plan; recién <code>.show()</code> dispara la acción.</p>
+<p><code>countDistinct()</code> responde una pregunta distinta a <code>count()</code>: no cuántas filas hay, sino cuántos valores <em>distintos</em> aparecen. Agrupando <code>ventas.csv</code> por <code>fecha</code> en vez de por <code>cliente_id</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">countDistinct</span>
+
+<span class="n">ventas</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"fecha"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+    <span class="n">countDistinct</span><span class="p">(</span><span class="s2">"cliente_id"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"clientes_unicos"</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>+----------+----------------+
+|     fecha|clientes_unicos|
++----------+----------------+
+|2024-01-01|               2|
+|2024-01-02|               1|
+|2024-01-03|               1|
++----------+----------------+
+</code></pre></div>
+<p>El 1 de enero tiene 2 filas de compra, pero de 2 clientes distintos (101 y 102) — por eso <code>count("*")</code> daría 2 y <code>countDistinct("cliente_id")</code> también da 2 aquí; la diferencia se nota cuando un mismo cliente compra varias veces el mismo día (como el 101, que sí tiene 2 compras en fechas distintas). <code>groupBy()</code> también acepta más de una columna a la vez — por ejemplo, <code>ventas.groupBy("cliente_id", "fecha").agg(...)</code> agrupa por la combinación de ambas, no por cada una por separado.</p>
+<h3 id="26-rdd-el-modelo-debajo-de-los-dataframes">2.6 RDD: el modelo debajo de los DataFrames<a class="headerlink" href="#26-rdd-el-modelo-debajo-de-los-dataframes" title="Permanent link">&para;</a></h3>
+<p>Un DataFrame se apoya, por debajo, en un RDD (<em>Resilient Distributed Dataset</em>) — la abstracción original de Spark: una colección distribuida e inmutable, tolerante a fallos, sobre la que se aplican operaciones funcionales (<code>map</code>, <code>filter</code>, <code>flatMap</code>, <code>reduceByKey</code>) en vez de operaciones relacionales (<code>select</code>, <code>groupBy</code>). Se accede al RDD subyacente con <code>df.rdd</code>.</p>
+<p><strong>Tabla 6. DataFrame vs. RDD</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>DataFrame</th>
+<th>RDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Optimización</td>
+<td>Pasa por Catalyst (predicate pushdown, column pruning, etc.).</td>
+<td>Sin optimización automática: Spark ejecuta las operaciones tal como se escriben.</td>
+</tr>
+<tr>
+<td>Tipado</td>
+<td>Esquema con nombres y tipos de columna.</td>
+<td>Colección de objetos Python sin esquema explícito.</td>
+</tr>
+<tr>
+<td>Caso de uso típico</td>
+<td>Datos estructurados/semi-estructurados (CSV, JSON, Parquet, SQL).</td>
+<td>Procesamiento de texto libre, lógica funcional personalizada que no encaja en operaciones relacionales.</td>
+</tr>
+<tr>
+<td>Ejemplo en esta sesión</td>
+<td><code>groupBy().agg()</code> sobre <code>ventas.csv</code>.</td>
+<td>Conteo de palabras sobre <code>biblia_ntv_.csv</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Por eso, cuando el dato ya es estructurado (como <code>ventas.csv</code>), conviene quedarse en DataFrame y dejar que Catalyst optimice; RDD se reserva para el caso en que la transformación no encaja en operaciones relacionales — como el conteo de palabras de texto libre de esta práctica.</p>
+<div class="highlight"><pre><span></span><code><span class="n">rdd</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"texto"</span><span class="p">)</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">texto</span><span class="p">)</span>
+
+<span class="n">palabras</span> <span class="o">=</span> <span class="n">rdd</span><span class="o">.</span><span class="n">flatMap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">linea</span><span class="p">:</span> <span class="n">linea</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+<span class="n">pares</span> <span class="o">=</span> <span class="n">palabras</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">palabra</span><span class="p">:</span> <span class="p">(</span><span class="n">palabra</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">conteo</span> <span class="o">=</span> <span class="n">pares</span><span class="o">.</span><span class="n">reduceByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">conteo</span><span class="o">.</span><span class="n">takeOrdered</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+<p><code>flatMap</code> aplana el resultado (una línea produce varias palabras, no una lista de listas); <code>map</code> construye pares <code>(palabra, 1)</code>; <code>reduceByKey</code> suma los <code>1</code> de cada palabra repetida — el mismo patrón MapReduce que dio origen a Spark:</p>
+<p><strong>Figura 4. El proceso MapReduce de conteo de palabras: Input, Splitting, Mapping, Shuffling, Reducing, Final result</strong></p>
+<p><img alt="El proceso MapReduce de conteo de palabras" src="../img/s02-2.6-mapreduce-word-count.png" /></p>
+<p>Mapea el diagrama contra el código: <em>Splitting</em> es el <code>flatMap</code> (cada línea de entrada se separa en palabras sueltas); <em>Mapping</em> es el <code>.map(lambda palabra: (palabra, 1))</code> (cada palabra se convierte en un par <code>(palabra, 1)</code>); <em>Shuffling</em> es el paso interno de Spark que agrupa todos los pares con la misma clave en el mismo nodo antes de reducir (no hay una línea de código explícita para esto — Spark lo hace por debajo, es la razón por la que <code>reduceByKey</code> es una operación costosa: mueve datos entre particiones); <em>Reducing</em> es el propio <code>reduceByKey(add)</code>, que suma los <code>1</code> de cada palabra repetida. Hadoop MapReduce (el origen de este patrón) implementa exactamente estos mismos pasos sobre disco; Spark los implementa en memoria, lo que evita escribir a disco entre cada etapa — esa es la razón técnica de fondo de por qué Spark es más rápido que Hadoop MapReduce para este tipo de carga de trabajo iterativa.</p>
+<p><em>Nota.</em> Adaptado de <em>¿Qué es MapReduce en Hadoop?</em>, por KeepCoding, 2022, KeepCoding Blog (<a href="https://keepcoding.io/blog/mapreduce-hadoop/">https://keepcoding.io/blog/mapreduce-hadoop/</a>).</p>
+<p>Este ejemplo, corrido sobre el texto completo de <code>biblia_ntv_.csv</code> (31 102 versículos), produjo este resultado real:</p>
+<div class="highlight"><pre><span></span><code>[('de', 40372), ('y', 27162), ('a', 22768), ('que', 22566), ('el', 22490),
+ ('la', 19948), ('los', 17711), ('en', 13823), ('se', 8717), ('señor', 8006)]
+</code></pre></div>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>02_fundamentos_practica.ipynb</code> sobre el entorno <code>lambda26</code> (<code>uso-pyspark</code>), aplicando extracción, transformaciones, funciones, agrupaciones/agregaciones, RDD y verificando en cada paso el efecto de la evaluación perezosa.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que dominas el ciclo completo de transformación distribuida en PySpark — DataFrame y RDD sobre la misma <code>SparkSession</code> — antes de avanzar a formatos analíticos particionados (S3) y ML distribuido (S4).</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, verificando el resultado (incluido el plan de <code>explain()</code>) antes de avanzar al siguiente paso.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno <code>lambda26</code> (<code>uso-pyspark</code>).</li>
+<li><strong>3.2</strong> Crear el notebook y la <code>SparkSession</code>.</li>
+<li><strong>3.3</strong> Cargar y explorar el DataFrame (<code>biblia_ntv_.csv</code>).</li>
+<li><strong>3.4</strong> Aplicar transformaciones y verificar la evaluación perezosa.</li>
+<li><strong>3.5</strong> Analizar el plan de ejecución con <code>explain()</code>.</li>
+<li><strong>3.6</strong> Aplicar agrupaciones y agregaciones (<code>ventas.csv</code>).</li>
+<li><strong>3.7</strong> Convertir a RDD y procesar con <code>map</code>/<code>flatMap</code>/<code>filter</code>/<code>reduceByKey</code>.</li>
+<li><strong>3.8</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-lambda26-uso-pyspark">3.1 Reanudar el entorno <code>lambda26</code> (<code>uso-pyspark</code>)<a class="headerlink" href="#31-reanudar-el-entorno-lambda26-uso-pyspark" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando (Jupyter + Spark), continuación directa de S1.</p>
+<p>Si el contenedor sigue corriendo desde S1, continúa directo en 3.2. Si lo detuviste, retómalo desde <code>lambda26/pyspark</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="n">up</span> <span class="n">-d</span>
+</code></pre></div>
+<p>Verifica que responde:</p>
+<div class="highlight"><pre><span></span><code>JupyterLab -&gt; http://localhost:4488/lab?token=sintoken
+</code></pre></div>
+<h3 id="32-crear-el-notebook-y-la-sparksession">3.2 Crear el notebook y la <code>SparkSession</code><a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook <code>02_fundamentos_practica.ipynb</code> con una <code>SparkSession</code> activa.</p>
+<p>Desde JupyterLab, crea el notebook dentro de <code>notebooks/</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion2-fundamentos-spark"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">spark</span>
+</code></pre></div>
+<p><code>spark.sql.shuffle.partitions</code> se fija en 8 (en vez del valor por defecto, 200) porque los datasets de esta práctica son pequeños — con 200 particiones para unas pocas filas, el overhead de coordinar particiones vacías sería mayor que el propio cómputo.</p>
+<h3 id="33-cargar-y-explorar-el-dataframe-biblia_ntv_csv">3.3 Cargar y explorar el DataFrame (<code>biblia_ntv_.csv</code>)<a class="headerlink" href="#33-cargar-y-explorar-el-dataframe-biblia_ntv_csv" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> DataFrame cargado, esquema y primeras filas verificadas.</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/data/biblia_ntv_.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Revisa si aparece la advertencia de <code>CSVHeaderChecker</code> (ver 2.2) — si aparece, es tu primer hallazgo real para 4.3.1.</p>
+<h3 id="34-aplicar-transformaciones-y-verificar-la-evaluacion-perezosa">3.4 Aplicar transformaciones y verificar la evaluación perezosa<a class="headerlink" href="#34-aplicar-transformaciones-y-verificar-la-evaluacion-perezosa" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> evidencia de que el plan se construye antes de ejecutarse.</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_transformado</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"libro"</span><span class="p">,</span> <span class="s2">"capitulo"</span><span class="p">,</span> <span class="s2">"verso"</span><span class="p">,</span> <span class="s2">"texto"</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">texto</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">"amor"</span><span class="p">)</span> <span class="o">|</span> <span class="n">df</span><span class="o">.</span><span class="n">texto</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">"fe"</span><span class="p">)</span> <span class="o">|</span> <span class="n">df</span><span class="o">.</span><span class="n">texto</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">"Dios"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c1"># Hasta aquí Spark solo construyó el plan: no hay salida, no hubo ejecución</span>
+<span class="n">df_transformado</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># Acción: aquí recién Spark ejecuta</span>
+<span class="n">df_transformado</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">df_transformado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p>Confirma que la celda anterior (transformación) no mostró ningún dato, y que esta celda (acción) sí — esa diferencia es la evaluación perezosa en la práctica, no solo en la teoría de 1.6.</p>
+<h3 id="35-analizar-el-plan-de-ejecucion-con-explain">3.5 Analizar el plan de ejecución con <code>explain()</code><a class="headerlink" href="#35-analizar-el-plan-de-ejecucion-con-explain" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> plan de ejecución interpretado con al menos una optimización identificada.</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_transformado</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>Identifica en tu propio resultado: ¿el <code>Filter</code> quedó antes o después del <code>Project</code> en el <em>Optimized Logical Plan</em>? Relaciónalo con la Tabla 4 y el ejemplo de 2.3.</p>
+<h3 id="36-aplicar-agrupaciones-y-agregaciones-ventascsv">3.6 Aplicar agrupaciones y agregaciones (<code>ventas.csv</code>)<a class="headerlink" href="#36-aplicar-agrupaciones-y-agregaciones-ventascsv" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> resumen agregado por cliente, verificado contra el cálculo manual.</p>
+<div class="highlight"><pre><span></span><code><span class="n">ventas</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/data/ventas.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">avg</span>
+
+<span class="n">resumen</span> <span class="o">=</span> <span class="n">ventas</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"cliente_id"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+    <span class="nb">sum</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"total"</span><span class="p">),</span>
+    <span class="n">count</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"cantidad_compras"</span><span class="p">),</span>
+    <span class="n">avg</span><span class="p">(</span><span class="s2">"monto"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"promedio"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">resumen</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>Verifica tu resultado contra la tabla de 2.5 (cliente 101: total 300, 2 compras, promedio 150).</p>
+<h3 id="37-convertir-a-rdd-y-procesar-con-mapflatmapfilterreducebykey">3.7 Convertir a RDD y procesar con <code>map</code>/<code>flatMap</code>/<code>filter</code>/<code>reduceByKey</code><a class="headerlink" href="#37-convertir-a-rdd-y-procesar-con-mapflatmapfilterreducebykey" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> conteo de palabras distribuido, con las 10 palabras más frecuentes.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">add</span>
+
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"texto"</span><span class="p">)</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">texto</span><span class="p">)</span>
+
+<span class="n">palabras</span> <span class="o">=</span> <span class="n">rdd</span><span class="o">.</span><span class="n">flatMap</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">linea</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^\wáéíóúñüÁÉÍÓÚÑÜ]"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">linea</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">pares</span> <span class="o">=</span> <span class="n">palabras</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">palabra</span><span class="p">:</span> <span class="p">(</span><span class="n">palabra</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">conteo</span> <span class="o">=</span> <span class="n">pares</span><span class="o">.</span><span class="n">reduceByKey</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
+
+<span class="n">conteo</span><span class="o">.</span><span class="n">takeOrdered</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+<p>Compara tu resultado contra el capturado en 2.6. Adicionalmente, responde con código:</p>
+<ol>
+<li>¿Cuántas veces aparece la palabra <code>dios</code>? (<code>conteo.filter(lambda x: x[0] == "dios").collect()</code>)</li>
+<li>Extrae 5 versículos donde aparezca <code>fe</code> (<code>rdd.filter(lambda x: "fe" in x.lower()).take(5)</code>).</li>
+</ol>
+<h3 id="38-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.8 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#38-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
+<p>Agrega celdas markdown breves debajo de cada bloque de código (3.3-3.7) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Notebook <code>02_fundamentos_practica.ipynb</code> con extracción, transformaciones, funciones, agrupaciones/agregaciones y RDD ejecutados.</li>
+<li>Plan de ejecución (<code>explain()</code>) interpretado, con al menos una optimización de Catalyst identificada.</li>
+<li>Resultado de agrupación/agregación verificado contra el cálculo manual.</li>
+<li>Conteo de palabras (RDD) con las 10 más frecuentes documentado.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Replicación autónoma del flujo de transformación construido en clase (extracción, transformaciones, funciones, agrupaciones/agregaciones, RDD y evaluación perezosa) sobre datos del Proyecto Sello del equipo — reales si el equipo ya los tiene, o una muestra representativa del caso de negocio definido en S1 si todavía no hay datos reales disponibles.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Cargar un dataset del Proyecto Sello como DataFrame, verificar esquema y primeras filas (equivalente a 3.3).</li>
+<li>Aplicar al menos tres transformaciones y una acción, evidenciando que la transformación no ejecuta nada hasta que llega la acción (equivalente a 3.4).</li>
+<li>Analizar el plan de ejecución con <code>explain()</code> e identificar al menos una optimización aplicada por Catalyst (equivalente a 3.5).</li>
+<li>Aplicar una agrupación con al menos una función de agregación relevante al caso del equipo (equivalente a 3.6).</li>
+<li>Convertir a RDD y aplicar al menos dos operaciones tipo <code>map</code>/<code>flatMap</code>/<code>filter</code>/<code>reduceByKey</code> (equivalente a 3.7).</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual y fuera del aula, que puede reproducir el flujo de transformación PySpark construido en clase sin el acompañamiento del docente — aplicándolo al caso real del Proyecto Sello de su equipo, no a un dataset desconectado.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S02_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S02 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Extracción y exploración del DataFrame</em><ul>
+<li>Dataset del Proyecto Sello cargado, esquema y primeras filas (equivalente a 3.3).</li>
+</ul>
+</li>
+<li><em>Transformaciones, acciones y evaluación perezosa</em><ul>
+<li>Transformaciones aplicadas y evidencia de que la ejecución ocurre recién con la acción (equivalente a 3.4).</li>
+</ul>
+</li>
+<li><em>Agrupaciones y agregaciones</em><ul>
+<li>Resumen agregado relevante al caso del equipo (equivalente a 3.6).</li>
+</ul>
+</li>
+<li><em>RDD y plan de ejecución</em><ul>
+<li>Procesamiento RDD y plan de <code>explain()</code> interpretado (equivalente a 3.5 y 3.7).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe al menos un error o comportamiento inesperado que encontraste al procesar tus propios datos:</p>
+<ul>
+<li>Qué ocurrió o qué limitación encontraste.</li>
+<li>Cómo lo identificaste.</li>
+<li>Cómo lo resolviste o qué decisión tomaste.</li>
+</ul>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>¿Por qué la evaluación perezosa es útil para procesar datos a escala, y qué
+riesgo tendría si Spark ejecutara cada transformación de inmediato, apenas
+se escribe?
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<p>La evidencia individual se considera completa si:</p>
+<ul>
+<li>El DataFrame del Proyecto Sello se carga y explora correctamente (esquema, primeras filas).</li>
+<li>Aplica al menos tres transformaciones y una acción, documentando el efecto de la evaluación perezosa.</li>
+<li>Aplica una agrupación con al menos una función de agregación relevante al caso.</li>
+<li>Convierte a RDD y aplica al menos dos operaciones tipo <code>map</code>/<code>flatMap</code>/<code>filter</code>/<code>reduceByKey</code>.</li>
+<li>Analiza el plan de ejecución con <code>explain()</code> y explica al menos una fase o una optimización.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Cuál es la diferencia entre una transformación y una acción en Spark? Da un ejemplo de cada una.</li>
+<li>¿Por qué Spark no ejecuta las transformaciones de inmediato? ¿Qué ventaja de rendimiento aporta eso?</li>
+<li>¿Qué información te da <code>explain()</code> sobre cómo Spark va a ejecutar tu código?</li>
+<li>¿Cuándo usarías RDD en vez de DataFrame, y por qué en la mayoría de los casos conviene usar DataFrame?</li>
+<li>¿Qué diferencia hay entre <code>groupBy().count()</code> y <code>groupBy().agg(...)</code>?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 7. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Extracción y exploración del DataFrame*</td>
+<td style="text-align: right;">25</td>
+<td>Carga el dataset del Proyecto Sello, verifica esquema y datos, e identifica cualquier inconsistencia de forma explícita.</td>
+<td>Carga el dataset y verifica esquema y datos correctamente.</td>
+<td>Carga el dataset con verificación incompleta o imprecisa.</td>
+<td>No carga o no explora el dataset.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Transformaciones, acciones y evaluación perezosa*</td>
+<td style="text-align: right;">25</td>
+<td>Aplica transformaciones y acciones con evidencia clara de la evaluación perezosa, relacionándola con Catalyst.</td>
+<td>Aplica transformaciones y acciones correctamente, con evidencia de la evaluación perezosa.</td>
+<td>Aplica transformaciones/acciones con evidencia débil o sin distinguirlas.</td>
+<td>No aplica transformaciones ni acciones.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Agrupaciones y agregaciones*</td>
+<td style="text-align: right;">25</td>
+<td>Aplica agrupaciones/agregaciones relevantes al caso, con resultado verificado.</td>
+<td>Aplica agrupaciones/agregaciones correctamente.</td>
+<td>Agrupaciones/agregaciones incompletas o poco relevantes al caso.</td>
+<td>No aplica agrupaciones ni agregaciones.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. RDD y plan de ejecución*</td>
+<td style="text-align: right;">25</td>
+<td>Aplica operaciones RDD relevantes e interpreta <code>explain()</code> identificando al menos una optimización real.</td>
+<td>Aplica operaciones RDD y analiza <code>explain()</code> correctamente.</td>
+<td>RDD o <code>explain()</code> aplicado de forma superficial.</td>
+<td>No aplica RDD ni analiza el plan de ejecución.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy se construyó el flujo de transformación distribuida en PySpark: extracción con control de esquema, transformaciones y funciones sobre DataFrame, evaluación perezosa verificada con <code>explain()</code>, agrupaciones/agregaciones y el modelo RDD por debajo — cada estudiante aplicó el mismo flujo a los datos del Proyecto Sello de su equipo.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte una optimización concreta que observó en su propio <code>explain()</code> (por ejemplo, un <code>Filter</code> que Catalyst movió antes que un <code>Project</code>).</p>
+<p><strong>Metacognición:</strong> cada estudiante responde en voz alta o por escrito: ¿qué parte de la sesión te costó más entender, y cómo la resolviste?</p>
+<p><strong>Proyección:</strong> las transformaciones construidas hoy son la entrada directa de S3, donde el resultado se carga particionado en formatos analíticos con validación de calidad de datos — y aplica en cualquier trabajo profesional con Spark, donde entender qué es transformación y qué es acción es la base para no ejecutar cálculos costosos antes de tiempo.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Databricks. (2024). <em>What is a Catalyst Optimizer?</em> Databricks Blog. https://www.databricks.com/blog/what-is-catalyst-optimizer</li>
+<li>KeepCoding. (2022). <em>¿Qué es MapReduce en Hadoop?</em> KeepCoding Blog. https://keepcoding.io/blog/mapreduce-hadoop/</li>
+<li>Zaharia, M., Chowdhury, M., Das, T., Dave, A., Ma, J., McCauly, M., Franklin, M. J., Shenker, S., &amp; Stoica, I. (2012). <em>Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing</em>. 9th USENIX Symposium on Networked Systems Design and Implementation (NSDI 12).</li>
+<li>Apache Software Foundation. (2024). <em>Apache Spark documentation</em>. https://spark.apache.org/docs/latest/</li>
+<li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.sql.functions</em>. https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

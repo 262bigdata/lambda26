@@ -14,6 +14,8 @@
         <link rel="prev" href="../../silabo_bigdata_2026_2/">
       
       
+        <link rel="next" href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/">
+      
       
         
       
@@ -972,6 +974,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1816,9 +1846,9 @@
 
 <span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
-    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;s1-verificacion&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.ui.port&quot;</span><span class="p">,</span> <span class="s2">&quot;4040&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"s1-verificacion"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 
@@ -1827,7 +1857,7 @@
 <ol>
 <li>Cargar un dataset como DataFrame. Descargar <code>biblia_ntv_.csv</code> desde <a href="https://www.kaggle.com/datasets/camesruiz/biblia-ntv-spanish-bible-ntv?resource=download">Kaggle: Biblia NTV (Spanish Bible NTV)</a> y copiarlo a <code>data/</code> (montado como <code>/opt/data/</code> en el contenedor):</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">&quot;/opt/data/biblia_ntv_.csv&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">"/opt/data/biblia_ntv_.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">df</span>
 </code></pre></div>
 <ol>
@@ -1839,7 +1869,7 @@
 <ol>
 <li>(Hasta aquí, opcional) una transformación simple:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;libro&quot;</span><span class="p">,</span> <span class="s2">&quot;capitulo&quot;</span><span class="p">,</span> <span class="s2">&quot;verso&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"libro"</span><span class="p">,</span> <span class="s2">"capitulo"</span><span class="p">,</span> <span class="s2">"verso"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
 <p>Verifica que:</p>
 <div class="highlight"><pre><span></span><code>Spark UI -&gt; http://localhost:4040

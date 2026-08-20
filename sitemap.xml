@@ -2,22 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://262bigdata.github.io/lambda26/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-20</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/silabo_bigdata_2026_1/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-20</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/silabo_bigdata_2026_2/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-20</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/proyecto-sello/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-20</lastmod>
     </url>
     <url>
          <loc>https://262bigdata.github.io/lambda26/sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa/</loc>
-         <lastmod>2026-08-14</lastmod>
+         <lastmod>2026-08-20</lastmod>
+    </url>
+    <url>
+         <loc>https://262bigdata.github.io/lambda26/sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation%20copy%202/</loc>
+         <lastmod>2026-08-20</lastmod>
+    </url>
+    <url>
+         <loc>https://262bigdata.github.io/lambda26/sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation%20copy/</loc>
+         <lastmod>2026-08-20</lastmod>
+    </url>
+    <url>
+         <loc>https://262bigdata.github.io/lambda26/sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/</loc>
+         <lastmod>2026-08-20</lastmod>
     </url>
 </urlset>
