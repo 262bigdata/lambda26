@@ -2131,8 +2131,9 @@
 <p><code>spark.sql.shuffle.partitions</code> se fija en 8 (en vez del valor por defecto, 200 — pensado para clústeres con muchos nodos) porque seguimos en un único contenedor local: con 200 particiones, el overhead de coordinar cientos de particiones pequeñas sería mayor que el propio cómputo en tu máquina.</p>
 <p>Declara también la ruta del dataset como variable global, una sola vez:</p>
 <div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s02-fundamentos/data"</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s02-fundamentos/artifacts"</span>
 </code></pre></div>
-<p>Úsala en cada lectura del resto de la guía (<code>f"{ORIGEN_DATOS}/articles.csv"</code>, etc.) en vez de repetir la ruta completa — si algún día cambia dónde vive el dataset, solo corriges esta línea, no cada celda de lectura.</p>
+<p>Úsalas en cada lectura/escritura del resto de la guía (<code>f"{ORIGEN_DATOS}/articles.csv"</code>, <code>f"{ARTIFACTS}/..."</code>, etc.) en vez de repetir la ruta completa — si algún día cambia dónde vive el dataset o las salidas, solo corriges esta línea, no cada celda.</p>
 <h3 id="33-cargar-y-explorar-articlescsv">3.3 Cargar y explorar <code>articles.csv</code><a class="headerlink" href="#33-cargar-y-explorar-articlescsv" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> DataFrame <code>df_articles</code> cargado (primera forma de lectura), con estructura, filas y estadísticas verificadas paso a paso — no en un solo bloque.</p>
 <p>Primero, la lectura:</p>
@@ -2203,6 +2204,11 @@
 <p><strong>Registros finales</strong> (<code>.tail()</code>) — trae las últimas filas. A diferencia de <code>.head()</code>, es más costoso en un DataFrame distribuido: "las últimas filas" no es barato de determinar cuando los datos están repartidos en particiones sin orden garantizado.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers_muestra</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
+<p><strong>Guardar la muestra en CSV y Parquet:</strong> un adelanto de lo que S3 formaliza a fondo (particionamiento, calidad de datos antes de guardar) — por ahora, solo la mecánica básica de escribir un resultado a disco:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers_muestra</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/customers_muestra_csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_customers_muestra</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/customers_muestra_parquet"</span><span class="p">)</span>
+</code></pre></div>
+<p>Spark no escribe un solo archivo — escribe una <strong>carpeta</strong>, con un archivo por partición adentro (por eso los nombres <code>customers_muestra_csv</code>/<code>customers_muestra_parquet</code> son carpetas, no archivos). <code>mode("overwrite")</code> reemplaza la carpeta si ya existe, en vez de fallar por que ya está ahí — útil mientras estás probando y corres la celda varias veces.</p>
 <h3 id="35-aplicar-transformaciones-y-verificar-la-evaluacion-perezosa">3.5 Aplicar transformaciones y verificar la evaluación perezosa<a class="headerlink" href="#35-aplicar-transformaciones-y-verificar-la-evaluacion-perezosa" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> evidencia de que el plan se construye antes de ejecutarse.</p>
 <p>Primero, <code>.select()</code> — elige columnas específicas del DataFrame:</p>
