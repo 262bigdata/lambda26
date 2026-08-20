@@ -54,7 +54,7 @@ Un `PushedFilters` vacío en tu propio `explain()` (Tabla 5) es la misma señal 
 **Figura 1. De la transformación a la ejecución: las 4 fases de Catalyst**
 
 ```mermaid
-flowchart LR
+flowchart TB
     Code["Código PySpark<br/>df.select().filter()"] -->|"transformación:<br/>solo construye plan"| Plan["Plan lógico<br/>(sin ejecutar)"]
     Plan -->|"acción: show(), count(), collect()"| A["Analysis<br/>resuelve nombres y tipos"]
     A --> B["Logical optimization<br/>predicate pushdown,<br/>column pruning, join reordering"]
