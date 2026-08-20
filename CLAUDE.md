@@ -1,29 +1,49 @@
 # Big Data - lambda26
 
-Workspace de documentación del curso **Big Data**, UPeU 2026-2. Este repo es
-solo de documentación (MkDocs): no hay código de referencia dentro de este
-repositorio para el ciclo 2026-2.
+Workspace del curso **Big Data**, UPeU 2026-2. Combina documentación (MkDocs,
+`docs/`) con código de referencia real (`pyspark/`): entorno Docker + Spark,
+y las guías de sesión con sus notebooks correspondientes.
 
 ## Dónde está cada cosa
 
 - `docs/silabo_bigdata_2026_2.md` — sílabo oficial **vigente** (no editar
   salvo pedido explícito). `docs/silabo_bigdata_2026_1.md` es la versión
   anterior, solo como referencia histórica.
-- `docs/index.md` — **estado actual: contiene una transcripción del sílabo
-  (no es una página de bienvenida curada** como en FP/POO/DIST). Si se pide
-  construir una página de inicio propia, seguir el patrón de
-  `2625dist/pagatu/docs/index.md` (propósito del curso + producto del
-  curso), no duplicar el contenido de `silabo_bigdata_2026_2.md`.
-- `mkdocs.yml` — nav con "Inicio", "Sílabos" (2026-1/2026-2) y un enlace
-  externo **"Repositorio 2026-1 (lambdalab)"** a
-  <https://github.com/261bigdata/lambdalab/> — el código de referencia del
-  ciclo anterior vive en ese otro repositorio, no dentro de `lambda26`.
+- `docs/index.md` — página de inicio curada (propósito del curso, producto,
+  arquitectura de `lambda26`, tabla de sesiones con hipervínculos).
+- `docs/sesiones/S0X_*.md` — guías de sesión. Existen **S01** y **S02**;
+  S03 en adelante se construyen progresivamente.
+- `mkdocs.yml` — nav con "Inicio", "Guía de Proyecto Sello", "Silabos" y las
+  unidades con sus sesiones (`docs/sesiones/S0X_*.md`).
+- `pyspark/` — entorno Docker real del laboratorio (Dockerfile, `compose.yml`,
+  `.env`/`.env.example`). La carpeta `pyspark/sesiones/` es la única que se
+  monta dentro del contenedor (`./sesiones:/opt`) — los archivos de
+  configuración (`Dockerfile`, `compose.yml`, `.env`, `README.md`) se quedan
+  fuera a propósito, para no aparecer en el explorador de Jupyter.
+- `pyspark/sesiones/sXX-nombre/` — una carpeta autocontenida por sesión con
+  datos reales: el notebook, `data/` (dataset de entrada, si aplica) y
+  `artifacts/` (salidas, si aplica). No hay carpetas `data/`/`notebooks/`
+  compartidas entre sesiones.
 
 ## Convenciones
 
 - No editar los archivos `silabo_bigdata_*.md` salvo que se pida
   explícitamente.
-- No existen todavía guías de sesión (`S0X_*.md`) ni skill de sesión
-  (`.claude/skills/`) en este repo — si se agregan, seguir el patrón ya
-  usado en otros cursos del workspace (carpeta `docs/sesiones/`, publicadas
-  en `mkdocs.yml` por unidad).
+- **Flujo de trabajo para S03 en adelante: primero el notebook, después la
+  sección 3 de la guía.** Construir y correr el notebook real
+  (`pyspark/sesiones/sXX-nombre/`) primero, verificar que el código
+  efectivamente funciona contra los datos reales, y recién ahí escribir
+  la sección 3 ("Aplica") de la guía transcribiendo lo ya probado — no al
+  revés. Motivo: en S02 se escribió la guía primero y el notebook después,
+  y aparecieron varios problemas reales solo al ejecutar (rutas rotas tras
+  reestructurar carpetas, `.describe()` ilegible con muchas columnas, un
+  bug real de formato de fecha) que obligaron a corregir la guía ya
+  publicada varias veces. Notebook primero evita ese ciclo.
+- Cada guía de sesión (`S0X_*.md`) sigue la plantilla ya establecida en
+  S01/S02: 1. Introducción (1.1-1.7) → 2. Explica (teoría genérica, sin
+  atarse a datasets específicos) → 3. Aplica (práctica guiada, aquí sí con
+  datos reales) → 4. Crea (autónoma, sobre el Proyecto Sello del equipo) →
+  5. Cierre → Bibliografía. Figuras/Tablas con numeración continua por
+  documento (APA 7).
+- El dataset real de cada sesión (si pesa demasiado para git) se distribuye
+  por Drive, no por Kaggle directo — ver el patrón de descarga en S02 (3.1).

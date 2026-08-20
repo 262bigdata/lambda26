@@ -209,7 +209,7 @@ Con `schema=schema` explícito, Spark ya no necesita `inferSchema=True` (se ahor
 
 **Nota:** `StructType` resuelve dos problemas a la vez, desde la lectura — sin él, todas las columnas llegan como `string` (el valor por defecto de `inferSchema`, ver Tabla 3); con `inferSchema=True`, una columna como `codigo` puede perder su cero inicial. `StructType` evita ambos: declaras el tipo correcto de cada columna, sin dejar que Spark adivine nada. No es la única forma de resolverlo — en 2.6 lo arreglamos de otra manera, con `.cast("string")` después de leer con `inferSchema=True`. `StructType` conviene cuando ya conoces el esquema de antemano; `.cast()` después es más rápido de escribir cuando estás explorando un archivo nuevo y todavía no sabes bien qué tipos necesitas. En 3.7 vas a encontrar este mismo problema con datos reales del dataset H&M.
 
-Antes de transformar nada, conviene explorar lo que acabas de cargar. Ya usaste `.printSchema()` (esquema: nombres, tipos, nulabilidad) y `.show()` (muestra filas en formato tabla); sus parámetros más útiles son `n` (cuántas filas mostrar — 20 por defecto), `truncate` (si es `True`, recorta textos largos — conviene `truncate=False` cuando una columna de texto largo te importa completa) y `vertical` (si es `True`, muestra cada fila como una lista de campos en vez de una tabla ancha — útil cuando hay muchas columnas). Un tercer método, `.describe()`, genera un resumen estadístico (`count`, `mean`, `stddev`, `min`, `max`) de las columnas numéricas — por ejemplo, `df.describe("una_columna_numerica").show()` te da de inmediato su rango, sin escribir ninguna agregación manual.
+Antes de transformar nada, conviene explorar lo que acabas de cargar. Ya usaste `.printSchema()` (esquema: nombres, tipos, nulabilidad) y `.show()` (muestra filas en formato tabla); sus parámetros más útiles son `n` (cuántas filas mostrar — 20 por defecto), `truncate` (si es `True`, recorta textos largos — conviene `truncate=False` cuando una columna de texto largo te importa completa) y `vertical` (si es `True`, muestra cada fila como una lista de campos en vez de una tabla ancha — útil cuando hay muchas columnas). Un tercer método, `.describe()`, genera un resumen estadístico (`count`, `mean`, `stddev`, `min`, `max`) de las columnas numéricas — por ejemplo, `df.describe("una_columna_numerica").show()` te da de inmediato su rango, sin escribir ninguna agregación manual. Sobre una tabla con muchas columnas, `.describe()` sin argumentos produce una tabla ancha genuinamente ilegible (cada valor se corta entre líneas); con decenas de columnas, ni siquiera `vertical=True` lo deja cómodo — la solución real es `.select()` primero un puñado de columnas representativas y recién ahí `.describe()`, en vez de resumir todo el ancho del DataFrame de una vez.
 
 ### 2.5 Transformaciones, acciones y evaluación perezosa
 
@@ -522,10 +522,12 @@ df_articles.show(5, truncate=False)
 df_articles.printSchema()
 ```
 
-`.describe()` — genera un resumen estadístico de las columnas numéricas (`count`, `mean`, `stddev`, `min`, `max`):
+`.describe()` — genera un resumen estadístico (`count`, `mean`, `stddev`, `min`, `max`). Con las 25 columnas de `articles.csv`, ni siquiera `vertical=True` lo deja cómodo de leer (125 líneas de resumen) — mejor selecciona antes un puñado de columnas representativas, mezclando nominales (texto) y numéricas (códigos):
 
 ```python
-df_articles.describe().show()
+df_articles.select(
+    "prod_name", "product_group_name", "colour_group_name", "department_no", "section_no"
+).describe().show()
 ```
 
 Prueba también los parámetros de `.show()` que viste en 2.4:
