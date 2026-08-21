@@ -39,12 +39,23 @@ y las guías de sesión con sus notebooks correspondientes.
   reestructurar carpetas, `.describe()` ilegible con muchas columnas, un
   bug real de formato de fecha) que obligaron a corregir la guía ya
   publicada varias veces. Notebook primero evita ese ciclo.
-  **Estado de S03:** notebook y guía se construyeron juntos (no hay forma de
-  correr Spark desde este entorno) — el código sigue el mismo patrón ya
-  probado en S1/S2, pero **todavía no se verificó con una corrida real en el
-  servidor**. Trátalo como S02 antes de su primera corrida: al ejecutarlo,
-  reporta cualquier error real para corregir notebook y guía juntos (regla
-  de sincronización de abajo).
+  **Estado de S03:** verificada con corrida real completa sin errores
+  (2026-08-21), pero **luego se reestructuró** (mismo día) para seguir la
+  secuencia exacta de `Pyspark_Introduccion.pdf` (filtrado → orden →
+  duplicados → nulos, en vez de nulos primero) e incorporar técnicas que
+  faltaban: `filter()` con expresiones SQL, `where()`, filtrar nulos/texto,
+  `orderBy()`/`sort()` con varias formas, `dropDuplicates()` completo y
+  multi-columna, identificar duplicados con `groupBy()+count()`, marcar
+  duplicados con `Window`+`row_number()` sobre `customer_id`, `fillna()`
+  como alias de `.na.fill()`, y `.na.drop()` sin argumentos como contraste.
+  Se agregaron además `.write.format()` (CSV/JSON/Parquet genérico),
+  `repartition("columna")` (particionamiento lógico vs. físico),
+  `coalesce(1)` como contraste directo de `repartition(4)`, y
+  `persist(StorageLevel.MEMORY_AND_DISK)` junto a `cache()` (del PDF,
+  secciones "5. Escritura de datos" y "6. Optimización de consultas").
+  **La reestructura NO se volvió a correr en el servidor** — solo 3.1-3.4
+  conservan verificación real; 3.5-3.12 son nuevos o reordenados y necesitan
+  una corrida real antes de darlos por cerrados.
 - Cada guía de sesión (`S0X_*.md`) sigue la plantilla ya establecida en
   S01/S02: 1. Introducción (1.1-1.7) → 2. Explica (teoría genérica, sin
   atarse a datasets específicos) → 3. Aplica (práctica guiada, aquí sí con
