@@ -53,9 +53,11 @@ y las guías de sesión con sus notebooks correspondientes.
   `coalesce(1)` como contraste directo de `repartition(4)`, y
   `persist(StorageLevel.MEMORY_AND_DISK)` junto a `cache()` (del PDF,
   secciones "5. Escritura de datos" y "6. Optimización de consultas").
-  **La reestructura NO se volvió a correr en el servidor** — solo 3.1-3.4
-  conservan verificación real; 3.5-3.12 son nuevos o reordenados y necesitan
-  una corrida real antes de darlos por cerrados.
+  **La reestructura completa ya se corrió en el servidor (2026-08-21),
+  36/36 celdas, cero errores** — incluida la confirmación real de
+  `.na.drop()` sin argumentos (462 911 de 1 371 980 filas sobreviven, 66.3%
+  descartado) y `PartitionFilters` con la sintaxis nueva `.write.format()`.
+  S3 queda verificada de punta a punta.
 - Cada guía de sesión (`S0X_*.md`) sigue la plantilla ya establecida en
   S01/S02: 1. Introducción (1.1-1.7) → 2. Explica (teoría genérica, sin
   atarse a datasets específicos) → 3. Aplica (práctica guiada, aquí sí con

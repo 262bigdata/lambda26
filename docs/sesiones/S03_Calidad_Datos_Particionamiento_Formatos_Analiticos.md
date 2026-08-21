@@ -252,7 +252,7 @@ Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son inter
 
 `.na.fill({...})` puede rellenar cualquier columna, con el tipo de valor que corresponda — pero que la sintaxis lo permita no significa que cualquier valor sea una buena decisión. Rellenar una columna de bandera (`FN`, `Active`) con `0` es razonable: el nulo ya significaba "no activado". Rellenar `age` con `0` es distinto — un cliente de "0 años" no es un dato faltante marcado como tal, es un dato **falso** que se ve como válido; peor que dejarlo nulo, porque un nulo al menos se puede detectar y un `0` se puede confundir con un valor real. Por eso el notebook de esta sesión no rellena `age`, aunque la sintaxis lo permitiría.
 
-`.na.drop()` sin argumentos es la versión más agresiva: elimina una fila si **cualquier** columna tiene un nulo. Sobre un dataset donde `FN`/`Active` tienen ~65% de nulos (S2), esto descartaría la enorme mayoría de las filas — casi siempre conviene `subset=[...]`, apuntando solo a la columna que de verdad invalida la fila.
+`.na.drop()` sin argumentos es la versión más agresiva: elimina una fila si **cualquier** columna tiene un nulo. En una corrida real sobre `customers.csv`, esto dejó **462 911** de 1 371 980 filas — un 66.3% del dataset descartado, solo por tener al menos un nulo en alguna de las 7 columnas. Casi siempre conviene `subset=[...]`, apuntando solo a la columna que de verdad invalida la fila.
 
 ### 2.7 Escritura en múltiples formatos y particionada
 
@@ -681,11 +681,13 @@ df_customers_limpio = df_customers.na.fill({
 })
 ```
 
-`.na.drop()` sin argumentos elimina toda fila con **cualquier** nulo, en cualquier columna — sobre este dataset (FN/Active ~65% nulos), eso descartaría la enorme mayoría de las filas. Pruébalo para ver la magnitud, pero no lo uses como versión final:
+`.na.drop()` sin argumentos elimina toda fila con **cualquier** nulo, en cualquier columna — sobre este dataset (FN/Active ~65% nulos), eso descarta la enorme mayoría de las filas. Pruébalo para ver la magnitud, pero no lo uses como versión final:
 
 ```python
 df_customers.na.drop().count()
 ```
+
+En una corrida real, dio **462 911** — de 1 371 980 filas, sobreviven menos de un tercio (33.7%). Compará esto contra el resultado de `na.drop(subset=["customer_id"])` de abajo, que no elimina ninguna: la diferencia entre "cualquier columna" y "solo la columna crítica" no es un matiz, es la diferencia entre destruir dos tercios del dataset o no perder nada.
 
 `customer_id` es la columna crítica de este dataset — sin identificador, la fila no sirve para nada, así que corresponde `.na.drop(subset=[...])`, apuntando solo a esa columna:
 
