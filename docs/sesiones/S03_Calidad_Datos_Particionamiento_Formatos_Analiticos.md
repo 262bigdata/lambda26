@@ -253,6 +253,15 @@ cp lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv lambda26/pyspark
 cp lambda26/pyspark/sesiones/s02-fundamentos/data/articles.csv lambda26/pyspark/sesiones/s03-calidad-datos/data/
 ```
 
+`customers.csv` pesa ~207 MB — la copia tarda unos segundos, no es instantánea. **Espera a que termine antes de abrir Jupyter y correr el notebook**: si lees el archivo mientras todavía se está copiando, Spark lee la foto parcial que existe en ese instante, sin ningún error — solo un conteo de filas mucho menor al real, silencioso. Confirma que la copia terminó comparando el número de líneas contra el original:
+
+```bash
+wc -l lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv
+wc -l lambda26/pyspark/sesiones/s03-calidad-datos/data/customers.csv
+```
+
+Ambos deben coincidir exactamente antes de seguir a 3.2.
+
 Esta sesión no necesita `transactions.parquet` — el foco es esquema, nulos y duplicados sobre datos tabulares, no sobre transacciones. Si el contenedor `lambda26` sigue corriendo desde S2, continúa directo en 3.2.
 
 ### 3.2 Crear el notebook y la `SparkSession`
@@ -372,6 +381,14 @@ df_customers_valido = df_customers_limpio.na.drop(subset=["customer_id"])
 print(f"Filas antes: {df_customers.count()}, después de na.drop(subset=['customer_id']): {df_customers_valido.count()}")
 ```
 
+En una corrida real, ambos números dieron **1 371 980** — `customer_id` nunca llega nulo en este dataset, así que `na.drop()` no elimina ninguna fila. Es el resultado esperado: confirma que la columna clave está completa, no que el paso "no sirvió de nada".
+
+`df_customers_valido` se reutiliza en casi todos los pasos que siguen (3.6-3.11), varios con su propio `.count()` — sin cachearlo, cada uno recalcularía la lectura completa de `customers.csv` más el `.na.fill()`/`.na.drop()` desde cero. `cache()` (2.5, ya usado en S2) guarda el resultado la primera vez que una acción lo dispara:
+
+```python
+df_customers_valido = df_customers_valido.cache()
+```
+
 ### 3.6 Filtrar registros que no pasan validaciones (`filter()`/`where()`)
 
 **Producto del paso:** filas fuera de rango identificadas (o confirmación de que no existen).
@@ -405,19 +422,24 @@ sin_duplicados_por_id = df_customers_valido.dropDuplicates(["customer_id"]).coun
 print(f"Total: {total}, sin duplicar (fila completa): {sin_duplicados_fila_completa}, sin duplicar (por customer_id): {sin_duplicados_por_id}")
 ```
 
+En una corrida real, las tres cifras dieron **1 371 980** — cero duplicados, en ninguna de las dos definiciones. No es un resultado "vacío": es la confirmación real de que `customer_id` es una clave limpia en este dataset.
+
 **Contraste real con `articles.csv`** (S2, 3.10): `rdd.take(5)` sobre `detail_desc` trajo descripciones idénticas repetidas. Eso **no** son duplicados de fila — cada `article_id` es distinto (variante de color/talla). Confirma cuántos `article_id` comparten la misma descripción, sin tratarlos como error:
 
 ```python
 df_articles = spark.read.csv(f"{ORIGEN_DATOS}/articles.csv", header=True, inferSchema=True)
 
 duplicados_por_descripcion = (
-    df_articles.groupBy("detail_desc")
+    df_articles.filter(col("detail_desc").isNotNull())
+    .groupBy("detail_desc")
     .count()
     .filter(col("count") > 1)
     .orderBy(col("count").desc())
 )
 duplicados_por_descripcion.show(5, truncate=False)
 ```
+
+`filter(col("detail_desc").isNotNull())` va **antes** del `groupBy()`: sin él, `groupBy()` agrupa todos los artículos sin descripción bajo un mismo grupo `NULL` — que en una corrida real salió como el "valor más repetido" (416 artículos), tapando los duplicados de contenido real que sí importan para este ejercicio. Un `NULL` que se repite no es un duplicado de descripción, es simplemente la ausencia del dato — ya lo trataste como tal en 3.4-3.5, no hace falta que reaparezca acá.
 
 ### 3.9 Deduplicar con `Window` + `row_number()`
 
@@ -440,6 +462,8 @@ df_articles_un_por_producto = (
 
 print(f"Filas originales: {df_articles.count()}, un representante por product_code: {df_articles_un_por_producto.count()}")
 ```
+
+En una corrida real sobre este dataset, la reducción fue de **105 542 filas a 47 224 representantes** — más de la mitad de `articles.csv` son variantes de color/talla de un producto que ya está representado por otra fila. Es la diferencia real entre `dropDuplicates()` (que no puede hacer esta reducción, porque cada `article_id` es único) y `Window`+`row_number()` (que sí, porque agrupa por `product_code` en vez de por `article_id`).
 
 ### 3.10 Escritura particionada en Parquet
 
@@ -482,6 +506,12 @@ Filtra por la columna particionada y revisa el plan — deberías ver `Partition
 
 ```python
 df_verificacion.filter(col("club_member_status") == "ACTIVE").explain(True)
+```
+
+Ya terminaste de reutilizar `df_customers_valido` — libera la memoria que ocupaba cacheado:
+
+```python
+df_customers_valido.unpersist()
 ```
 
 ### 3.12 Documentar hallazgos y responder preguntas de reflexión
