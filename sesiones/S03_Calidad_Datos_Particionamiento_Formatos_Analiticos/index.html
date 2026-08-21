@@ -1,0 +1,2270 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S03_Calidad_Datos_Particionamiento_Formatos_Analiticos/">
+      
+      
+        <link rel="prev" href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S3 - Calidad de Datos y Formatos Analíticos Particionados</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s3-calidad-de-datos-y-formatos-analiticos-particionados" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S3 - Calidad de Datos y Formatos Analíticos Particionados
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Calidad de Datos y Formatos Analíticos Particionados
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Calidad de Datos y Formatos Analíticos Particionados
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-las-15-841-pruebas-de-covid-19-que-excel-perdio-sin-avisar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: las 15 841 pruebas de COVID-19 que Excel perdió sin avisar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-validacion-de-esquema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Validación de esquema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-nulos-deteccion-y-tratamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Nulos: detección y tratamiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-duplicados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Duplicados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-escritura-particionada-en-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Escritura particionada en Parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-lectura-particionada-y-partition-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Lectura particionada y partition pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Preparar los datos de S3 y reanudar el entorno lambda26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-cargar-customerscsv-y-validar-el-esquema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Cargar customers.csv y validar el esquema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-explorar-nulos-por-columna" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Explorar nulos por columna
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-tratar-nulos-con-nadrop-y-nafill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Tratar nulos con .na.drop() y .na.fill()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-filtrar-registros-que-no-pasan-validaciones-filterwhere" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Filtrar registros que no pasan validaciones (filter()/where())
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-ordenar-resultados-orderbysort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Ordenar resultados (orderBy()/sort())
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-duplicados-dropduplicates-y-distinct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Duplicados: dropDuplicates() y distinct()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-deduplicar-con-window-row_number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Deduplicar con Window + row_number()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-escritura-particionada-en-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Escritura particionada en Parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-leer-de-vuelta-y-verificar-el-particionamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Leer de vuelta y verificar el particionamiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-documentar-hallazgos-y-responder-preguntas-de-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.12 Documentar hallazgos y responder preguntas de reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-las-15-841-pruebas-de-covid-19-que-excel-perdio-sin-avisar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: las 15 841 pruebas de COVID-19 que Excel perdió sin avisar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-validacion-de-esquema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Validación de esquema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-nulos-deteccion-y-tratamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Nulos: detección y tratamiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-duplicados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Duplicados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-escritura-particionada-en-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Escritura particionada en Parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-lectura-particionada-y-partition-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Lectura particionada y partition pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Preparar los datos de S3 y reanudar el entorno lambda26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-cargar-customerscsv-y-validar-el-esquema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Cargar customers.csv y validar el esquema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-explorar-nulos-por-columna" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Explorar nulos por columna
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-tratar-nulos-con-nadrop-y-nafill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Tratar nulos con .na.drop() y .na.fill()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-filtrar-registros-que-no-pasan-validaciones-filterwhere" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Filtrar registros que no pasan validaciones (filter()/where())
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-ordenar-resultados-orderbysort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Ordenar resultados (orderBy()/sort())
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-duplicados-dropduplicates-y-distinct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Duplicados: dropDuplicates() y distinct()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-deduplicar-con-window-row_number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Deduplicar con Window + row_number()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-escritura-particionada-en-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Escritura particionada en Parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-leer-de-vuelta-y-verificar-el-particionamiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Leer de vuelta y verificar el particionamiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-documentar-hallazgos-y-responder-preguntas-de-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.12 Documentar hallazgos y responder preguntas de reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s3-calidad-de-datos-y-formatos-analiticos-particionados">S3 - Calidad de Datos y Formatos Analíticos Particionados<a class="headerlink" href="#s3-calidad-de-datos-y-formatos-analiticos-particionados" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S2 cerró con un hallazgo real sin resolver: al correr <code>df_customers.describe()</code> sobre <code>customers.csv</code>, la fila <code>count</code> mostró que <code>FN</code> y <code>Active</code> tenían cerca de dos tercios de sus valores en nulo — un problema de calidad de datos genuino, encontrado en el propio dataset del curso, no inventado para la sesión. Esta sesión existe para responder la pregunta que ese hallazgo dejó abierta: ¿qué hacés, en concreto, una vez que encontraste un problema así?</p>
+<p>S3 formaliza tres controles de calidad — <strong>esquema</strong>, <strong>nulos</strong> y <strong>duplicados</strong> — como un paso explícito y repetible, no una revisión visual ocasional, antes de que cualquier dataset se considere listo para alimentar un pipeline de BI/ML. Y cierra la narrativa de ETL batch de la unidad: S1 diseñó la arquitectura, S2 construyó las transformaciones, S3 produce la salida analítica particionada real que esos dos pasos prometían — organizada en un formato (Parquet) y una estructura de carpetas pensados para volúmenes reales, no para una hoja de cálculo. Esta sesión no levanta un clúster HDFS real (queda fuera del alcance de un laboratorio en una sola máquina), pero reproduce exactamente la misma estructura de carpetas particionadas y el mismo razonamiento que un almacenamiento distribuido real exige.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Validación de esquema antes de cargar datos a un pipeline.</li>
+<li>Nulos: detección, <code>.na.drop()</code> y <code>.na.fill()</code>.</li>
+<li>Duplicados: <code>distinct()</code>, <code>dropDuplicates()</code> y deduplicación con <code>Window</code> + <code>row_number()</code>.</li>
+<li>Escritura particionada en Parquet: <code>partitionBy()</code>, <code>coalesce()</code>/<code>repartition()</code>.</li>
+<li>Lectura particionada y <em>partition pruning</em>.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Validar</strong> el esquema y la calidad (nulos, duplicados) de un dataset real antes de cargarlo a un pipeline, <strong>aplicar</strong> el tratamiento apropiado según el tipo de problema encontrado, y <strong>escribir/leer</strong> una salida analítica particionada en Parquet lista para consumo BI/ML.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>03_calidad_datos_practica.ipynb</code> con validación de esquema, tratamiento de nulos y duplicados documentado, y una salida particionada en Parquet verificada (lectura de vuelta y plan de ejecución con <em>partition pruning</em>).</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Repasar el notebook de S2 (entorno <code>lambda26</code> ya debe estar funcionando) y <strong>copiar <code>customers.csv</code>/<code>articles.csv</code> a <code>s03-calidad-datos/data/</code></strong> (ver 3.1) — no hace falta descargar nada nuevo, ya los tienes de S2.</td>
+<td>Guía S2, guía S3 — sección 3.1.</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>03_calidad_datos_practica.ipynb</code>: validación de esquema, nulos, duplicados y escritura particionada, sobre datos reales H&amp;M. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas.</td>
+<td>Pasos 3.1 a 3.12 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de los controles de calidad aplicados y la salida particionada. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-las-15-841-pruebas-de-covid-19-que-excel-perdio-sin-avisar">1.6.1 Caso: las 15 841 pruebas de COVID-19 que Excel perdió sin avisar<a class="headerlink" href="#161-caso-las-15-841-pruebas-de-covid-19-que-excel-perdio-sin-avisar" title="Permanent link">&para;</a></h4>
+<p>En octubre de 2020, Public Health England (PHE) —la agencia de salud pública de Inglaterra— descubrió que <strong>15 841 resultados positivos</strong> de pruebas de COVID-19, registrados entre el 25 de septiembre y el 2 de octubre, habían desaparecido de sus reportes diarios sin que nadie lo notara durante días. La causa no fue un virus más agresivo de lo esperado: fue un archivo Excel. El sistema automatizado que centralizaba los resultados de laboratorios privados los guardaba en plantillas con el formato antiguo <code>.xls</code>, con un límite duro de 65 536 filas por hoja — pero como cada resultado ocupaba varias filas, la capacidad práctica real era de apenas ~1400 casos por plantilla. Cuando ese límite se superaba, los resultados adicionales simplemente <strong>no se importaban</strong> — sin error, sin advertencia, sin que el proceso se detuviera.</p>
+<p>Los pacientes sí recibieron su resultado individual. Lo que se perdió fue la conexión de esos casos con el sistema de rastreo de contactos: unas <strong>48 000 personas</strong> que habían estado en contacto cercano con alguien contagiado nunca fueron notificadas ni se les pidió aislarse, durante una semana crítica de la pandemia. El gobierno calificó el problema como un tema de "tamaño de archivo" y lo resolvió dividiendo los datos en múltiples hojas más pequeñas.</p>
+<p>Fuente: Karabus, J. (2020, 5 de octubre). <a href="https://www.theregister.com/2020/10/05/excel_england_coronavirus_contact_error/"><em>What a Hancock-up: Excel spreadsheet blunder blamed after England under-reports 16,000 COVID-19 cases</em></a>. The Register.</p>
+<p>No fue una falla de Excel ni de Spark: fue que nadie validó, antes de que los datos entraran al pipeline de reporte, si el volumen esperado cabía en el formato elegido, ni si el proceso podía fallar en silencio sin dejar rastro. Esta sesión formaliza justamente ese control: antes de que un dataset llegue a una salida analítica lista para BI/ML, se valida su esquema, se cuentan y tratan sus nulos de forma explícita, y se confirma si tiene duplicados — sin dar por sentado que "si cargó sin error, está bien". Y se escribe en un formato pensado para el volumen real de los datos, no en uno con un límite artificial de filas.</p>
+<p><strong>Figura 1. Cargar datos sin validar vs. con validación explícita</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph SinValidar["Sin validación (PHE, 2020)"]
+        A1["Resultados de laboratorio"] --&gt; A2[".xls, límite práctico&lt;br/&gt;~1400 casos por hoja"]
+        A2 --&gt;|"sin alerta al superar el límite"| A3["15 841 casos perdidos&lt;br/&gt;48 000 contactos sin avisar"]
+    end
+    subgraph ConValidacion["Con validación (esta sesión)"]
+        B1["customers.csv / articles.csv"] --&gt; B2["Validar esquema, nulos&lt;br/&gt;y duplicados"]
+        B2 --&gt; B3["Parquet particionado&lt;br/&gt;listo para BI/ML"]
+    end
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class B1,B2,B3 today;</code></pre>
+<p><em>Nota.</em> Adaptado de <em>What a Hancock-up: Excel spreadsheet blunder blamed after England under-reports 16,000 COVID-19 cases</em>, por J. Karabus, 2020, The Register (<a href="https://www.theregister.com/2020/10/05/excel_england_coronavirus_contact_error/">https://www.theregister.com/2020/10/05/excel_england_coronavirus_contact_error/</a>).</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>Antes de leer la causa, ¿qué esperarías que pasara si un sistema deja de agregar filas nuevas a un archivo sin lanzar ningún error? ¿Cómo lo notarías, si nadie te avisa?</li>
+<li>¿Qué diferencia hay entre que un dato "no exista" (un nulo, que sí se ve en el dataset) y que un dato "exista pero nunca haya llegado a cargarse" (como los 15 841 casos de PHE, invisibles hasta que alguien los buscó)?</li>
+</ol>
+<p><strong>Comprensión de validación de datos</strong></p>
+<ol>
+<li>Según el caso, ¿qué control simple —aplicado <em>antes</em> de cargar los datos al pipeline de reporte— habría evitado que el límite de <code>.xls</code> causara una pérdida silenciosa? Relaciónalo con lo que vas a aplicar en 3.3-3.9.</li>
+<li>¿Por qué confirmar el conteo de filas antes y después de cada paso de limpieza (como harás en 3.5 y 3.8) es una práctica que un equipo de datos real necesita, según lo que le pasó a PHE?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
+<li>Avance del producto en esta sesión: salida analítica particionada en Parquet, con controles de calidad (esquema, nulos, duplicados) aplicados sobre datos del Proyecto Sello.</li>
+</ul>
+<p><strong>Figura 2. Roadmap del producto de la unidad U1</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Arquitectura["Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;S1"]
+    PySpark["Fundamentos PySpark&lt;br/&gt;S2"]
+    HDFS["Formatos analíticos y calidad&lt;br/&gt;HOY"]
+    ML["ML distribuido&lt;br/&gt;S4"]
+    Evaluacion["Evaluación U1&lt;br/&gt;S5"]
+
+    Arquitectura --&gt; PySpark --&gt; HDFS --&gt; ML --&gt; Evaluacion
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class HDFS today;</code></pre>
+<p>Hoy se cierra la base técnica que el resto de la unidad necesita: sin un dataset con esquema validado, nulos tratados y duplicados resueltos, S4 (ML distribuido) entrenaría un modelo sobre datos sin confiabilidad garantizada. La evaluación U1 (S5) valida el pipeline batch completo, desde la arquitectura hasta esta salida particionada.</p>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 25 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 3. Arquitectura de la sesión: validación de calidad y escritura particionada sobre <code>uso-pyspark</code></strong></p>
+<pre class="mermaid"><code>flowchart TB
+    CSV["customers.csv / articles.csv"] --&gt; Esquema["Validar esquema&lt;br/&gt;StructType explícito"]
+    Esquema --&gt; Nulos["Detectar y tratar nulos&lt;br/&gt;.na.drop() / .na.fill()"]
+    Nulos --&gt; Duplicados["Confirmar/tratar duplicados&lt;br/&gt;distinct(), dropDuplicates(),&lt;br/&gt;Window+row_number()"]
+    Duplicados --&gt; Escritura["Escribir particionado&lt;br/&gt;partitionBy(), coalesce()"]
+    Escritura --&gt; Lectura["Leer de vuelta&lt;br/&gt;partition pruning"]
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Esquema,Nulos,Duplicados,Escritura,Lectura today;</code></pre>
+<p>Cada bloque de esta cadena es un control de calidad, no un paso decorativo: si uno se salta, el problema no desaparece — solo se descubre más tarde, más caro de corregir (como en el caso de 1.6).</p>
+<h3 id="22-validacion-de-esquema">2.2 Validación de esquema<a class="headerlink" href="#22-validacion-de-esquema" title="Permanent link">&para;</a></h3>
+<p>En S2 (2.4) ya viste que <code>inferSchema=True</code> puede adivinar mal un tipo (un código postal con ceros iniciales convertido silenciosamente a número) y que un <code>StructType</code> explícito evita esa ambigüedad. En S3, esa misma técnica se usa con una intención distinta: no es solo "leer correcto", es la primera verificación formal de calidad — confirmar que el dato que llegó es el que esperabas, antes de construir nada sobre él.</p>
+<p><strong>Tabla 2. Señales de un esquema roto, y qué revisar</strong></p>
+<table>
+<thead>
+<tr>
+<th>Señal</th>
+<th>Qué puede significar</th>
+<th>Qué revisar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Una columna numérica llega como <code>string</code> (o viceversa)</td>
+<td>El archivo real no calza con el esquema que esperabas, o tiene valores mezclados (texto en una columna numérica).</td>
+<td>Compara <code>printSchema()</code> contra el esquema documentado; identifica la fila que rompe el tipo esperado.</td>
+</tr>
+<tr>
+<td><code>df.columns</code> trae menos o más columnas de las esperadas</td>
+<td>El archivo cambió de estructura (una fuente externa actualizó su formato) o el separador/header se leyó mal.</td>
+<td>Revisa <code>header=True</code> y el separador (<code>sep=","</code> por defecto); compara contra una versión anterior del archivo si existe.</td>
+</tr>
+<tr>
+<td>Un valor "normal" a simple vista rompe un tipo (<code>"05001"</code> → <code>5001</code>)</td>
+<td><code>inferSchema=True</code> adivinó mal — el mismo caso del cero inicial de S2.</td>
+<td>Usa <code>StructType</code> explícito con <code>StringType()</code> para esa columna.</td>
+</tr>
+</tbody>
+</table>
+<p><code>printSchema()</code> y <code>df.columns</code> (ya vistos en S2) son las dos herramientas mínimas para esta verificación — la diferencia en S3 es que se hace <em>siempre</em>, como primer paso, antes de cualquier transformación, no como una curiosidad ocasional.</p>
+<h3 id="23-nulos-deteccion-y-tratamiento">2.3 Nulos: detección y tratamiento<a class="headerlink" href="#23-nulos-deteccion-y-tratamiento" title="Permanent link">&para;</a></h3>
+<p>Un nulo no es automáticamente un error — puede ser un dato legítimamente ausente (una bandera que nunca se activó) o una falla real de captura. Antes de decidir qué hacer, hay que <strong>contarlos</strong>, columna por columna:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">when</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">([</span>
+    <span class="n">count</span><span class="p">(</span><span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span> <span class="n">c</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+<span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p><code>when(col(c).isNull(), c)</code> devuelve el nombre de la columna cuando el valor es nulo, y <code>None</code> cuando no lo es; <code>count()</code> sobre eso cuenta solo los casos nulos, columna por columna, en una sola pasada.</p>
+<p>Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son intercambiables:</p>
+<p><strong>Tabla 3. <code>.na.drop()</code> vs. <code>.na.fill()</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Operación</th>
+<th>Qué hace</th>
+<th>Cuándo usarla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.na.drop(subset=[...])</code></td>
+<td>Elimina las <strong>filas</strong> donde la(s) columna(s) indicada(s) son nulas.</td>
+<td>Cuando el nulo hace que la fila sea inutilizable — por ejemplo, sin un identificador (<code>customer_id</code>), la fila no se puede vincular a nada.</td>
+</tr>
+<tr>
+<td><code>.na.fill({...})</code></td>
+<td>Reemplaza los nulos por un valor por defecto, columna por columna.</td>
+<td>Cuando el nulo tiene un significado razonable (una bandera no activada, una categoría "sin dato") y la fila completa sigue siendo útil.</td>
+</tr>
+</tbody>
+</table>
+<p>Elegir mal entre ambas tiene costo real: usar <code>.na.drop()</code> en una columna con muchos nulos legítimos (como <code>FN</code>/<code>Active</code> en <code>customers.csv</code>, ~65% nulos según el hallazgo de S2) borraría la mayoría del dataset sin necesidad; usar <code>.na.fill()</code> en una columna donde el nulo de verdad invalida la fila (como <code>customer_id</code>) dejaría datos inutilizables disfrazados de completos.</p>
+<h3 id="24-duplicados">2.4 Duplicados<a class="headerlink" href="#24-duplicados" title="Permanent link">&para;</a></h3>
+<p>"Duplicado" no tiene una única definición — depende de qué columnas comparás:</p>
+<p><strong>Tabla 4. Tres formas de tratar duplicados</strong></p>
+<table>
+<thead>
+<tr>
+<th>Técnica</th>
+<th>Qué compara</th>
+<th>Qué hace con las filas repetidas</th>
+<th>Cuándo usarla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>df.distinct()</code></td>
+<td><strong>Todas</strong> las columnas de la fila.</td>
+<td>Colapsa filas idénticas en todas sus columnas a una sola.</td>
+<td>Confirmar que no hay filas exactamente repetidas de punta a punta.</td>
+</tr>
+<tr>
+<td><code>df.dropDuplicates(["col"])</code></td>
+<td>Solo la(s) columna(s) indicada(s).</td>
+<td>Se queda con <strong>una</strong> fila por cada valor único de esa columna — cuál exactamente no lo controlás.</td>
+<td>Confirmar unicidad de una clave (por ejemplo, que <code>customer_id</code> no se repita).</td>
+</tr>
+<tr>
+<td><code>Window.partitionBy("col").orderBy(...)</code> + <code>row_number()</code></td>
+<td>Solo la(s) columna(s) de partición.</td>
+<td>Igual que <code>dropDuplicates()</code>, pero <strong>vos eliges</strong> cuál fila del grupo conservar (la de menor/mayor valor de otra columna).</td>
+<td>Cuando "duplicado" significa "mismo grupo lógico, distintas variantes" y una fila cualquiera del grupo no sirve — necesitás la correcta.</td>
+</tr>
+</tbody>
+</table>
+<p>El caso real de S2 ilustra por qué esta distinción importa: en <code>articles.csv</code>, muchos <code>article_id</code> distintos comparten la misma <code>detail_desc</code> (mismo producto, distinta variante de color/talla). Eso <strong>no</strong> es un duplicado de fila — <code>distinct()</code> y <code>dropDuplicates()</code> no deberían eliminar ninguna de esas filas, porque cada <code>article_id</code> es una fila legítimamente distinta. Si en cambio quisieras un solo representante por <code>product_code</code> (el producto base, sin variantes), ahí sí corresponde <code>Window</code> + <code>row_number()</code> — porque necesitás elegir cuál variante conservar, no simplemente borrar copias.</p>
+<h3 id="25-escritura-particionada-en-parquet">2.5 Escritura particionada en Parquet<a class="headerlink" href="#25-escritura-particionada-en-parquet" title="Permanent link">&para;</a></h3>
+<p><code>partitionBy()</code> no agrega una columna al archivo — crea una <strong>subcarpeta por cada valor distinto</strong> de la columna indicada:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"columna"</span><span class="p">)</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="s2">"ruta/salida"</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>ruta/salida/
+├── columna=valor_a/
+│   └── part-00000-....parquet
+├── columna=valor_b/
+│   └── part-00000-....parquet
+└── columna=valor_c/
+    └── part-00000-....parquet
+</code></pre></div>
+<p>Esta es la estructura que hace que un formato particionado sea distinto de "guardar un CSV grande": una consulta que filtra por <code>columna = "valor_a"</code> puede ignorar por completo las carpetas <code>valor_b</code>/<code>valor_c</code>, sin siquiera abrirlas — el mismo principio que organiza datos en HDFS o en un data lake real, aunque acá corra sobre disco local.</p>
+<p><code>coalesce(N)</code>/<code>repartition(N)</code> (S2 ya usó <code>coalesce(1)</code> para forzar un solo archivo de salida) controlan cuántos archivos <code>part-0000X</code> caen <strong>dentro de cada</strong> carpeta de partición — sin fijarlo, se hereda el número de particiones del DataFrame en memoria (la misma sorpresa de las ~50 particiones que viste en S2 al guardar una muestra pequeña). <code>repartition(N)</code> siempre baraja los datos entre N particiones (más costoso, pero puede aumentar el número); <code>coalesce(N)</code> solo puede <em>reducir</em> particiones, combinando las existentes sin barajar todo — más barato cuando vas de más particiones a menos.</p>
+<h3 id="26-lectura-particionada-y-partition-pruning">2.6 Lectura particionada y <em>partition pruning</em><a class="headerlink" href="#26-lectura-particionada-y-partition-pruning" title="Permanent link">&para;</a></h3>
+<p>Al leer una salida particionada, Spark reconstruye la columna de partición a partir del <strong>nombre de la carpeta</strong>, no del contenido del archivo — <code>spark.read.parquet("ruta/salida")</code> te devuelve <code>columna</code> como si fuera una columna normal, aunque no esté guardada dentro de ningún <code>part-0000X.parquet</code>.</p>
+<p>Si filtrás por esa columna, <code>explain(True)</code> muestra una optimización que no viste en S2: <strong><code>PartitionFilters</code></strong>, junto al ya conocido <code>PushedFilters</code>. La diferencia es real, no solo de nombre:</p>
+<p><strong>Tabla 5. <code>PushedFilters</code> (S2) vs. <code>PartitionFilters</code> (S3)</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>PushedFilters</code></th>
+<th><code>PartitionFilters</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qué filtra</td>
+<td>Filas, dentro de los archivos que igual se abren.</td>
+<td><strong>Carpetas enteras</strong>, antes de abrir ningún archivo.</td>
+</tr>
+<tr>
+<td>Sobre qué actúa</td>
+<td>El contenido de las columnas dentro del archivo.</td>
+<td>El nombre de la carpeta de partición.</td>
+</tr>
+<tr>
+<td>Costo evitado</td>
+<td>Procesar filas que no cumplen el filtro.</td>
+<td>Abrir y leer archivos que ni siquiera contienen el valor buscado.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Partition pruning</em> es más barato que <em>predicate pushdown</em>: uno evita procesar filas, el otro evita abrir archivos enteros.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>03_calidad_datos_practica.ipynb</code> sobre el entorno <code>lambda26</code> (<code>uso-pyspark</code>), validando esquema, tratando nulos y duplicados, y escribiendo una salida analítica particionada en Parquet — sobre el mismo dataset real H&amp;M usado en S2 (<code>customers.csv</code>, <code>articles.csv</code>).</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que dominas los controles de calidad de datos (esquema, nulos, duplicados) y el particionamiento de salidas analíticas, antes de avanzar a ML distribuido (S4).</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, verificando el resultado (incluida la estructura de carpetas particionada) antes de avanzar al siguiente paso.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Preparar los datos de S3 y reanudar el entorno <code>lambda26</code>.</li>
+<li><strong>3.2</strong> Crear el notebook y la <code>SparkSession</code>.</li>
+<li><strong>3.3</strong> Cargar <code>customers.csv</code> y validar el esquema.</li>
+<li><strong>3.4</strong> Explorar nulos por columna.</li>
+<li><strong>3.5</strong> Tratar nulos con <code>.na.drop()</code> y <code>.na.fill()</code>.</li>
+<li><strong>3.6</strong> Filtrar registros que no pasan validaciones (<code>filter()</code>/<code>where()</code>).</li>
+<li><strong>3.7</strong> Ordenar resultados (<code>orderBy()</code>/<code>sort()</code>).</li>
+<li><strong>3.8</strong> Duplicados: <code>dropDuplicates()</code> y <code>distinct()</code>.</li>
+<li><strong>3.9</strong> Deduplicar con <code>Window</code> + <code>row_number()</code>.</li>
+<li><strong>3.10</strong> Escritura particionada en Parquet.</li>
+<li><strong>3.11</strong> Leer de vuelta y verificar el particionamiento.</li>
+<li><strong>3.12</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
+</ul>
+<h3 id="31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26">3.1 Preparar los datos de S3 y reanudar el entorno <code>lambda26</code><a class="headerlink" href="#31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>customers.csv</code> y <code>articles.csv</code> disponibles en <code>pyspark/sesiones/s03-calidad-datos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
+<p>Ya descargaste estos dos archivos en S2 — no hace falta descargarlos de nuevo, solo cópialos a la carpeta de esta sesión (desde tu máquina, no dentro del notebook):</p>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-calidad-datos/data/
+cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/articles.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-calidad-datos/data/
+</code></pre></div>
+<p>Esta sesión no necesita <code>transactions.parquet</code> — el foco es esquema, nulos y duplicados sobre datos tabulares, no sobre transacciones. Si el contenedor <code>lambda26</code> sigue corriendo desde S2, continúa directo en 3.2.</p>
+<h3 id="32-crear-el-notebook-y-la-sparksession">3.2 Crear el notebook y la <code>SparkSession</code><a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook <code>03_calidad_datos_practica.ipynb</code> con una <code>SparkSession</code> activa.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion3-calidad-datos"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.memory"</span><span class="p">,</span> <span class="s2">"4g"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">spark</span>
+</code></pre></div>
+<p><code>spark.driver.memory</code> en <code>"4g"</code> desde el arranque — en S2 la JVM se cayó por quedarse en el default de 1g; acá se fija de una vez, no se espera al primer <em>crash</em>.</p>
+<p>Declara las rutas del dataset y las salidas, una sola vez:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s03-calidad-datos/data"</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s03-calidad-datos/artifacts"</span>
+</code></pre></div>
+<h3 id="33-cargar-customerscsv-y-validar-el-esquema">3.3 Cargar <code>customers.csv</code> y validar el esquema<a class="headerlink" href="#33-cargar-customerscsv-y-validar-el-esquema" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>df_customers</code> cargado con esquema explícito, verificado contra lo esperado — control de calidad #1: esquema.</p>
+<p>Mismo esquema explícito de S2 (2.2, 2.4):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">IntegerType</span>
+
+<span class="n">schema_customers</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"FN"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"Active"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"fashion_news_frequency"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"age"</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="n">df_customers</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ORIGEN_DATOS</span><span class="si">}</span><span class="s2">/customers.csv"</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">schema</span><span class="o">=</span><span class="n">schema_customers</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df_customers</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+<p>Confirma que el esquema real coincide con el documentado — 7 columnas, en el mismo orden y tipo (Tabla 2):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">df_customers</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="34-explorar-nulos-por-columna">3.4 Explorar nulos por columna<a class="headerlink" href="#34-explorar-nulos-por-columna" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> conteo exacto de nulos por columna, con porcentaje sobre el total — control de calidad #2: nulos.</p>
+<p>En S2, <code>.describe()</code> ya insinuó el problema (la fila <code>count</code> daba menos que el total en <code>FN</code>/<code>Active</code>). Acá lo cuantificas exacto, con la técnica de 2.3:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">when</span>
+
+<span class="n">total_filas</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+<span class="n">df_customers</span><span class="o">.</span><span class="n">select</span><span class="p">([</span>
+    <span class="n">count</span><span class="p">(</span><span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span> <span class="n">c</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">columns</span>
+<span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>El mismo resultado, con porcentaje (más fácil de interpretar que el conteo crudo):</p>
+<div class="highlight"><pre><span></span><code><span class="n">nulos</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">select</span><span class="p">([</span>
+    <span class="n">count</span><span class="p">(</span><span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span> <span class="n">c</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">columns</span>
+<span class="p">])</span><span class="o">.</span><span class="n">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">asDict</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">columna</span><span class="p">,</span> <span class="n">cantidad</span> <span class="ow">in</span> <span class="n">nulos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">porcentaje</span> <span class="o">=</span> <span class="n">cantidad</span> <span class="o">/</span> <span class="n">total_filas</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">columna</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cantidad</span><span class="si">}</span><span class="s2"> nulos (</span><span class="si">{</span><span class="n">porcentaje</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="35-tratar-nulos-con-nadrop-y-nafill">3.5 Tratar nulos con <code>.na.drop()</code> y <code>.na.fill()</code><a class="headerlink" href="#35-tratar-nulos-con-nadrop-y-nafill" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>df_customers_limpio</code> con nulos tratados columna por columna, cada decisión con un criterio documentado (Tabla 3) — no "borrar todo lo que tenga un nulo" sin pensarlo.</p>
+<p><code>FN</code>/<code>Active</code> son columnas de tipo "bandera" (presente/ausente); un nulo ahí significa "la bandera no se activó", no un dato faltante que haya que adivinar — se rellenan con <code>0.0</code>, no con un promedio. <code>fashion_news_frequency</code> nulo se rellena con <code>"NONE"</code>, la misma categoría que el propio dataset ya usa explícitamente para ese caso:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers_limpio</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">na</span><span class="o">.</span><span class="n">fill</span><span class="p">({</span>
+    <span class="s2">"FN"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">"Active"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">"fashion_news_frequency"</span><span class="p">:</span> <span class="s2">"NONE"</span><span class="p">,</span>
+    <span class="s2">"club_member_status"</span><span class="p">:</span> <span class="s2">"UNKNOWN"</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div>
+<p><code>age</code> <strong>no</strong> se rellena: inventar una edad sería fabricar un dato que no existe. Se documenta como limitación conocida, no se fuerza un valor.</p>
+<p><code>customer_id</code> es la columna crítica de este dataset — sin identificador, la fila no sirve para nada, así que corresponde <code>.na.drop()</code>, no <code>.na.fill()</code>. En este dataset probablemente no elimine ninguna fila, y ese es también un resultado válido: confirmar que la columna clave nunca falta:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers_valido</span> <span class="o">=</span> <span class="n">df_customers_limpio</span><span class="o">.</span><span class="n">na</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">"customer_id"</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas antes: </span><span class="si">{</span><span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">, después de na.drop(subset=['customer_id']): </span><span class="si">{</span><span class="n">df_customers_valido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="36-filtrar-registros-que-no-pasan-validaciones-filterwhere">3.6 Filtrar registros que no pasan validaciones (<code>filter()</code>/<code>where()</code>)<a class="headerlink" href="#36-filtrar-registros-que-no-pasan-validaciones-filterwhere" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> filas fuera de rango identificadas (o confirmación de que no existen).</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_edad_invalida</span> <span class="o">=</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">))</span>
+<span class="n">df_edad_invalida</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p>Si el conteo da 0, también es un control de calidad exitoso — no un resultado "vacío" sin valor.</p>
+<h3 id="37-ordenar-resultados-orderbysort">3.7 Ordenar resultados (<code>orderBy()</code>/<code>sort()</code>)<a class="headerlink" href="#37-ordenar-resultados-orderbysort" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> resultado ordenado por una columna real.</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers_valido</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">,</span> <span class="s2">"age"</span><span class="p">,</span> <span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="38-duplicados-dropduplicates-y-distinct">3.8 Duplicados: <code>dropDuplicates()</code> y <code>distinct()</code><a class="headerlink" href="#38-duplicados-dropduplicates-y-distinct" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> confirmación (o eliminación) de filas duplicadas, con la definición correcta de qué cuenta como duplicado (Tabla 4) — control de calidad #3.</p>
+<p>Si las tres cifras de abajo coinciden con el total, no hay duplicados reales en ninguna de las dos definiciones:</p>
+<div class="highlight"><pre><span></span><code><span class="n">total</span> <span class="o">=</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">sin_duplicados_fila_completa</span> <span class="o">=</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">sin_duplicados_por_id</span> <span class="o">=</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"customer_id"</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">, sin duplicar (fila completa): </span><span class="si">{</span><span class="n">sin_duplicados_fila_completa</span><span class="si">}</span><span class="s2">, sin duplicar (por customer_id): </span><span class="si">{</span><span class="n">sin_duplicados_por_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Contraste real con <code>articles.csv</code></strong> (S2, 3.10): <code>rdd.take(5)</code> sobre <code>detail_desc</code> trajo descripciones idénticas repetidas. Eso <strong>no</strong> son duplicados de fila — cada <code>article_id</code> es distinto (variante de color/talla). Confirma cuántos <code>article_id</code> comparten la misma descripción, sin tratarlos como error:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_articles</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ORIGEN_DATOS</span><span class="si">}</span><span class="s2">/articles.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inferSchema</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">duplicados_por_descripcion</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df_articles</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"detail_desc"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<span class="p">)</span>
+<span class="n">duplicados_por_descripcion</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="39-deduplicar-con-window-row_number">3.9 Deduplicar con <code>Window</code> + <code>row_number()</code><a class="headerlink" href="#39-deduplicar-con-window-row_number" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una fila representativa por <code>product_code</code>, cuando "duplicado" significa "mismo producto base, distintas variantes" (Tabla 4) — algo que <code>dropDuplicates()</code> no puede decidir por sí solo, porque no elige <em>cuál</em> fila conservar.</p>
+<p><code>article_id</code> identifica cada variante (color/talla); <code>product_code</code> identifica el producto base. Te quedas con un representante por producto (el de menor <code>article_id</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">row_number</span>
+
+<span class="n">window_producto</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"product_code"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"article_id"</span><span class="p">)</span>
+
+<span class="n">df_articles_un_por_producto</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df_articles</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"fila"</span><span class="p">,</span> <span class="n">row_number</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">window_producto</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"fila"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"fila"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas originales: </span><span class="si">{</span><span class="n">df_articles</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">, un representante por product_code: </span><span class="si">{</span><span class="n">df_articles_un_por_producto</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="310-escritura-particionada-en-parquet">3.10 Escritura particionada en Parquet<a class="headerlink" href="#310-escritura-particionada-en-parquet" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> salida analítica particionada por <code>club_member_status</code>, lista para BI/ML — el producto que pide el sílabo de esta sesión.</p>
+<p><code>repartition(4)</code> antes de escribir controla cuántos archivos caen dentro de <strong>cada</strong> carpeta de partición (2.5) — sin esto, se hereda el número de particiones de la lectura original, la misma sorpresa de las ~50 particiones que viste en S2 al guardar la muestra de <code>customers.csv</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">(</span>
+    <span class="n">df_customers_valido</span>
+    <span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/customers_particionado"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><code>partitionBy("club_member_status")</code> crea una subcarpeta por cada valor distinto de esa columna (<code>club_member_status=ACTIVE/</code>, <code>club_member_status=LEFT CLUB/</code>, ...), como en 2.5. Verifica la estructura real:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">for</span> <span class="n">carpeta</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/customers_particionado"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">carpeta</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="311-leer-de-vuelta-y-verificar-el-particionamiento">3.11 Leer de vuelta y verificar el particionamiento<a class="headerlink" href="#311-leer-de-vuelta-y-verificar-el-particionamiento" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> confirmación de que la salida particionada se lee correctamente y que el particionamiento sí se aprovecha en consultas.</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_verificacion</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/customers_particionado"</span><span class="p">)</span>
+<span class="n">df_verificacion</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+<span class="n">df_verificacion</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p><code>club_member_status</code> reaparece en el esquema aunque no está dentro de los archivos Parquet físicos — Spark lo reconstruye a partir del nombre de la carpeta (2.6, <em>partition discovery</em>).</p>
+<p>Filtra por la columna particionada y revisa el plan — deberías ver <code>PartitionFilters</code> (Tabla 5), no solo <code>PushedFilters</code> (el que ya viste en S2, 3.6):</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_verificacion</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"ACTIVE"</span><span class="p">)</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="312-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.12 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#312-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
+<p>Agrega celdas markdown breves debajo de cada bloque de código (3.3-3.11) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
+<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué columnas rellenaste con <code>.na.fill()</code> y cuáles no, y por qué? ¿Encontraste duplicados reales en <code>customers.csv</code>? ¿Qué diferencia notaste entre <code>PushedFilters</code> (S2) y <code>PartitionFilters</code> (S3) en el plan de ejecución?</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Notebook <code>03_calidad_datos_practica.ipynb</code> con esquema validado, nulos detectados y tratados, documentado.</li>
+<li>Confirmación (o eliminación) de duplicados, con ambas técnicas aplicadas (<code>distinct()</code>/<code>dropDuplicates()</code> y <code>Window</code>+<code>row_number()</code>).</li>
+<li>Salida particionada en Parquet (<code>partitionBy()</code>) verificada por lectura, con plan de ejecución mostrando <code>PartitionFilters</code>.</li>
+<li>Reflexión técnica documentada.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Replicación autónoma de los controles de calidad de datos construidos en clase (esquema, nulos, duplicados) y de la escritura particionada, sobre datos del Proyecto Sello del equipo — reales si el equipo ya los tiene, o una muestra representativa del caso de negocio definido en S1 si todavía no hay datos reales disponibles.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Cargar un dataset del Proyecto Sello con esquema explícito y verificarlo contra lo esperado (equivalente a 3.3).</li>
+<li>Detectar y tratar nulos con <code>.na.drop()</code>/<code>.na.fill()</code>, documentando el criterio de cada decisión (equivalente a 3.4-3.5).</li>
+<li>Confirmar o tratar duplicados con al menos dos técnicas distintas (<code>distinct()</code>/<code>dropDuplicates()</code> y <code>Window</code>+<code>row_number()</code>), aplicando la definición de duplicado correcta al caso (equivalente a 3.8-3.9).</li>
+<li>Escribir una salida particionada en Parquet por una columna categórica relevante al caso del equipo, controlando el número de archivos por partición (equivalente a 3.10).</li>
+<li>Leer de vuelta la salida particionada y analizar el plan de ejecución, identificando <code>PartitionFilters</code> (equivalente a 3.11).</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual y fuera del aula, que puede reproducir los controles de calidad de datos y el particionamiento construidos en clase sin el acompañamiento del docente — aplicándolos al caso real del Proyecto Sello de su equipo, no a un dataset desconectado.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S03_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S03 - Calidad de Datos y Formatos Analíticos Particionados</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Esquema y nulos</em><ul>
+<li>Dataset del Proyecto Sello cargado con esquema explícito, nulos detectados y tratados con criterio documentado (equivalente a 3.3-3.5).</li>
+</ul>
+</li>
+<li><em>Filtrado, orden y duplicados</em><ul>
+<li>Validaciones de rango aplicadas y duplicados confirmados/tratados con al menos dos técnicas (equivalente a 3.6-3.9).</li>
+</ul>
+</li>
+<li><em>Escritura y lectura particionada</em><ul>
+<li>Salida en Parquet particionada por una columna relevante, leída de vuelta y verificada (equivalente a 3.10-3.11).</li>
+</ul>
+</li>
+<li><em>Plan de ejecución y reflexión</em><ul>
+<li><code>explain()</code> con <code>PartitionFilters</code> identificado, más la reflexión técnica (equivalente a 3.11-3.12).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe al menos un error o comportamiento inesperado que encontraste al procesar tus propios datos:</p>
+<ul>
+<li>Qué ocurrió o qué limitación encontraste.</li>
+<li>Cómo lo identificaste.</li>
+<li>Cómo lo resolviste o qué decisión tomaste.</li>
+</ul>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>¿Por qué validar esquema, nulos y duplicados antes de escribir una salida
+analítica es más barato que corregirlos después de que otro equipo (BI/ML)
+ya empezó a consumirla?
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<p>La evidencia individual se considera completa si:</p>
+<ul>
+<li>El dataset del Proyecto Sello se carga con esquema explícito, verificado contra lo esperado.</li>
+<li>Detecta y trata los nulos con <code>.na.drop()</code>/<code>.na.fill()</code>, documentando el criterio de cada columna.</li>
+<li>Confirma o trata duplicados con al menos dos técnicas distintas, aplicando una definición de duplicado coherente con el caso.</li>
+<li>Escribe una salida particionada en Parquet, controlando el número de archivos por partición.</li>
+<li>Lee de vuelta la salida particionada y analiza el plan de ejecución, identificando <code>PartitionFilters</code>.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Qué diferencia hay entre <code>.na.drop()</code> y <code>.na.fill()</code>, y cómo decidiste cuál aplicar en cada columna de tu caso?</li>
+<li>¿Por qué <code>distinct()</code> y <code>dropDuplicates()</code> pueden dar resultados distintos sobre el mismo DataFrame?</li>
+<li>¿Cuándo usarías <code>Window</code>+<code>row_number()</code> en vez de <code>dropDuplicates()</code> para tratar duplicados?</li>
+<li>¿Qué es <em>partition pruning</em>, y en qué se diferencia de <em>predicate pushdown</em> (visto en S2)?</li>
+<li>¿Por qué <code>partitionBy()</code> crea carpetas en vez de agregar una columna al archivo Parquet?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 6. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Esquema y nulos*</td>
+<td style="text-align: right;">25</td>
+<td>Valida el esquema explícitamente, detecta y trata los nulos con criterio documentado y coherente por columna.</td>
+<td>Valida esquema y trata nulos correctamente.</td>
+<td>Validación de esquema o tratamiento de nulos incompleto o sin criterio claro.</td>
+<td>No valida esquema ni trata nulos.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Filtrado, orden y duplicados*</td>
+<td style="text-align: right;">25</td>
+<td>Aplica validaciones de rango y trata duplicados con dos técnicas distintas, justificando la definición de duplicado usada.</td>
+<td>Aplica filtrado/orden y trata duplicados correctamente.</td>
+<td>Filtrado o tratamiento de duplicados incompleto o con una sola técnica.</td>
+<td>No aplica filtrado ni trata duplicados.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Escritura y lectura particionada*</td>
+<td style="text-align: right;">25</td>
+<td>Escribe una salida particionada relevante al caso, controla el número de archivos por partición y verifica la lectura.</td>
+<td>Escribe y lee la salida particionada correctamente.</td>
+<td>Escritura particionada incompleta o sin verificación de lectura.</td>
+<td>No escribe salida particionada.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Plan de ejecución y reflexión*</td>
+<td style="text-align: right;">25</td>
+<td>Identifica <code>PartitionFilters</code> en <code>explain()</code> y lo relaciona correctamente con <em>partition pruning</em>; reflexión técnica completa.</td>
+<td>Identifica <code>PartitionFilters</code> y entrega reflexión técnica.</td>
+<td>Análisis del plan superficial o reflexión incompleta.</td>
+<td>No analiza el plan de ejecución ni entrega reflexión.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy se formalizaron tres controles de calidad de datos sobre el dataset real H&amp;M — esquema (validado explícitamente), nulos (detectados y tratados con criterio, cerrando el hallazgo real de S2) y duplicados (confirmados con dos técnicas distintas, incluida deduplicación selectiva con <code>Window</code>+<code>row_number()</code>) — y se escribió una salida analítica particionada en Parquet, verificada por lectura y por <em>partition pruning</em> en el plan de ejecución.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte qué columna decidió tratar con <code>.na.fill()</code> y cuál con <code>.na.drop()</code>, y por qué.</p>
+<p><strong>Metacognición:</strong> cada estudiante responde en voz alta o por escrito: ¿qué parte de la sesión te costó más entender, y cómo la resolviste?</p>
+<p><strong>Proyección:</strong> la salida particionada de hoy es la entrada directa de S4 (ML distribuido), donde un modelo se entrena sobre datos cuya calidad ya está garantizada — y aplica en cualquier trabajo profesional con datos, donde cargar sin validar es la forma más común de que un problema pequeño se vuelva un incidente real, como el caso de PHE en 1.6.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Karabus, J. (2020, 5 de octubre). <em>What a Hancock-up: Excel spreadsheet blunder blamed after England under-reports 16,000 COVID-19 cases</em>. The Register. https://www.theregister.com/2020/10/05/excel_england_coronavirus_contact_error/</li>
+<li>Apache Software Foundation. (2024). <em>Apache Spark documentation</em>. https://spark.apache.org/docs/latest/</li>
+<li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.sql.functions</em>. https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html</li>
+<li>Apache Software Foundation. (2024). <em>Parquet files</em>. Spark SQL Guide. https://spark.apache.org/docs/latest/sql-data-sources-parquet.html</li>
+<li>H&amp;M Group. (2022). <em>H&amp;M Personalized Fashion Recommendations</em> [Data set]. Kaggle. https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
