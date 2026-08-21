@@ -28,8 +28,10 @@ carpeta autocontenida (`sXX-nombre/`): el notebook, sus datos de entrada
 
 - `sesiones/s01-arquitectura/`: notebook y dataset (`data/biblia_ntv_.csv`) de S1.
 - `sesiones/s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
-- Sesiones futuras agregan su propia carpeta (`sesiones/s03-...`,
-  `sesiones/s04-...`) a medida que el curso avanza.
+- `sesiones/s03-calidad-datos/`: notebook y dataset (`data/`, mismo H&M de S2:
+  `customers.csv`/`articles.csv`) de S3.
+- Sesiones futuras agregan su propia carpeta (`sesiones/s04-...`,
+  `sesiones/s05-...`) a medida que el curso avanza.
 
 ## Uso
 
@@ -125,8 +127,8 @@ http://localhost:4489/?token=sintoken
 ## Notebooks
 
 Los notebooks se crean progresivamente, uno por sesión, a medida que el
-curso avanza (verificación mínima en S1, fundamentos en S2, formatos
-analíticos en S3, ML distribuido en S4, streaming e inferencia desde
-S8-S10) — cada uno dentro de la carpeta de su propia sesión
-(`sesiones/sXX-nombre/`), junto a sus datos de entrada. Las sesiones que
-todavía no tienen contenido no tienen carpeta creada.
+curso avanza (verificación mínima en S1, fundamentos en S2, calidad de
+datos y formatos analíticos particionados en S3, ML distribuido en S4,
+streaming e inferencia desde S8-S10) — cada uno dentro de la carpeta de su
+propia sesión (`sesiones/sXX-nombre/`), junto a sus datos de entrada. Las
+sesiones que todavía no tienen contenido no tienen carpeta creada.

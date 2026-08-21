@@ -19,9 +19,10 @@ __pycache__/
 venv/
 ENV/
 
-# Dataset H&M (Kaggle): demasiado grande para git (transactions.parquet > 100MB,
-# límite duro de GitHub). Se descarga manualmente, ver guía de S2.
-sesiones/s02-fundamentos/data/
+# Datasets reales por sesión: demasiado grandes para git (algunos superan el
+# límite duro de GitHub de 100MB). Se descargan/copian manualmente, ver la
+# guía de cada sesión (S2, S3, ...) — aplica a cualquier sesión futura.
+sesiones/*/data/
 
 # Docker
 *.log

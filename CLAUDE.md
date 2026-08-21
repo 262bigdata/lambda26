@@ -11,8 +11,8 @@ y las guías de sesión con sus notebooks correspondientes.
   anterior, solo como referencia histórica.
 - `docs/index.md` — página de inicio curada (propósito del curso, producto,
   arquitectura de `lambda26`, tabla de sesiones con hipervínculos).
-- `docs/sesiones/S0X_*.md` — guías de sesión. Existen **S01** y **S02**;
-  S03 en adelante se construyen progresivamente.
+- `docs/sesiones/S0X_*.md` — guías de sesión. Existen **S01**, **S02** y
+  **S03**; S04 en adelante se construyen progresivamente.
 - `mkdocs.yml` — nav con "Inicio", "Guía de Proyecto Sello", "Silabos" y las
   unidades con sus sesiones (`docs/sesiones/S0X_*.md`).
 - `pyspark/` — entorno Docker real del laboratorio (Dockerfile, `compose.yml`,
@@ -39,6 +39,12 @@ y las guías de sesión con sus notebooks correspondientes.
   reestructurar carpetas, `.describe()` ilegible con muchas columnas, un
   bug real de formato de fecha) que obligaron a corregir la guía ya
   publicada varias veces. Notebook primero evita ese ciclo.
+  **Estado de S03:** notebook y guía se construyeron juntos (no hay forma de
+  correr Spark desde este entorno) — el código sigue el mismo patrón ya
+  probado en S1/S2, pero **todavía no se verificó con una corrida real en el
+  servidor**. Trátalo como S02 antes de su primera corrida: al ejecutarlo,
+  reporta cualquier error real para corregir notebook y guía juntos (regla
+  de sincronización de abajo).
 - Cada guía de sesión (`S0X_*.md`) sigue la plantilla ya establecida en
   S01/S02: 1. Introducción (1.1-1.7) → 2. Explica (teoría genérica, sin
   atarse a datasets específicos) → 3. Aplica (práctica guiada, aquí sí con
@@ -47,3 +53,10 @@ y las guías de sesión con sus notebooks correspondientes.
   documento (APA 7).
 - El dataset real de cada sesión (si pesa demasiado para git) se distribuye
   por Drive, no por Kaggle directo — ver el patrón de descarga en S02 (3.1).
+- **Sincronización permanente notebook ↔ guía:** una vez que una sesión ya
+  tiene notebook y guía publicados, cualquier corrección en uno (una ruta,
+  un parámetro, un bloque nuevo) se refleja en el otro en el mismo cambio,
+  sin excepción, en ambas direcciones.
+- `pyspark/.gitignore` excluye `sesiones/*/data/` en general (no una entrada
+  por sesión) — cualquier dataset nuevo bajo `sesiones/sXX-.../data/` ya
+  queda afuera de git automáticamente, sin tocar el `.gitignore`.
