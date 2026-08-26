@@ -41,60 +41,64 @@ Este rol es un **énfasis de coordinación a nivel de equipo** (quién profundiz
 
 ## 3. Dimensiones de análisis y fuentes previstas
 
-**Regla de asignación:** cada integrante propone (o hereda) **una dimensión** de la pregunta central de negocio declarada en la sección 2 — no una pregunta independiente propia. Una dimensión es un ángulo específico de esa misma pregunta (ej. si la pregunta central es "¿cómo optimizar la operación logística de reparto?", las dimensiones podrían ser tiempo de entrega, costo operativo, demanda por zona). Todas las dimensiones del equipo deben converger en **un solo tablero o historia final** — no en tableros sueltos por integrante. Esto evita lo que el Proyecto Sello marca como inválido: "notebooks o jobs Spark aislados sin un flujo de datos común".
+**Regla de asignación:** cada integrante propone (o hereda) **dos dimensiones** de la pregunta central de negocio declarada en la sección 2 — no una pregunta independiente propia, sino dos ángulos de esa misma pregunta. Todas las dimensiones del equipo deben converger en **un solo tablero o historia final** — no en tableros sueltos por integrante. Esto evita lo que el Proyecto Sello marca como inválido: "notebooks o jobs Spark aislados sin un flujo de datos común".
 
 Esta estructura es la misma **matriz de operacionalización de variables** de metodología de la investigación, aplicada al proyecto: la pregunta central contiene la(s) **variable(s)** de interés (ej. "operación logística", "condiciones climáticas de riesgo"); cada **dimensión** es un aspecto de esa variable; cada dimensión se mide con uno o más **indicadores** (la métrica concreta, la que termina siendo el KPI); y cada indicador se recoge con un **instrumento** — que aquí es, literalmente, la fuente batch o streaming de la ficha (el sensor, el evento, el dataset).
- 
-Para responder su dimensión, lo ideal es apoyarse en **dos fuentes**: una **batch** (histórico, para calibrar, entrenar o comparar contra el pasado) y una **streaming** (en vivo, para el estado actual) — equivalentes a `uso-pyspark` (S1-S3) y a la ingesta de eventos empresariales/IoT en `lambda26` (S6-S9), respectivamente. Ambas pueden venir del **mismo origen físico** (ver sección 2) — ej. un sensor atmosférico: la parte streaming es la lectura en vivo (temperatura, humedad, campo eléctrico, tal como llega), la parte batch es la acumulación histórica de esas mismas variables, procesada por lotes. No es obligatorio que sean fuentes distintas — sí es obligatorio que el tratamiento (streaming vs. batch) sea real y distinto entre las dos.
 
-No toda dimensión necesita las dos fuentes obligatoriamente — pero el criterio no es simplemente "tiene streaming o no", es el **tipo de pregunta**:
+De las dos dimensiones de cada integrante, **una es descriptiva/diagnóstica y la otra es predictiva con inferencia de series de tiempo** — no hay condicionales, es siempre así:
 
-- **Pregunta descriptiva o diagnóstica** (¿qué pasó?, ¿por qué pasó?, ¿cómo se compara?): encaja de forma natural en batch. También admite ML (clasificación, regresión, segmentación), pero sobre datos históricos, no en vivo.
-- **Pregunta predictiva con inferencia de series de tiempo** (¿qué va a pasar?, ¿cuándo se espera que ocurra?): es la que necesita streaming de verdad — una serie de tiempo se alimenta de datos que van llegando, no de una foto fija.
+- **Dimensión descriptiva o diagnóstica** (¿qué pasó?, ¿por qué pasó?, ¿cómo se compara?): se responde con **batch** — histórico, para calibrar, entrenar o comparar contra el pasado (equivalente a `uso-pyspark`, S1-S3, **Unidad 1**). No es en vivo: el dato se actualiza recién en la siguiente corrida del pipeline, no al instante. También admite ML (clasificación, regresión, segmentación), pero sobre datos históricos, no en vivo.
+- **Dimensión predictiva con inferencia de series de tiempo** (¿qué va a pasar?, ¿cuándo se espera que ocurra?): se responde con **streaming** — en vivo, para el estado actual (equivalente a la ingesta de eventos empresariales/IoT en `lambda26`, S6-S9, **Unidad 2**). Una serie de tiempo se alimenta de datos que van llegando, no de una foto fija.
 
-Lo obligatorio, **a nivel de cada integrante** (el curso evalúa [aporte individual](index.md#subaspectos-de-la-sustentacion-integral) — subaspecto 4 de la sustentación integral —, con evidencia de U1 y U2 por separado según el [alineamiento por sesiones](index.md#alineamiento-por-sesiones)): tu dimensión principal puede ser descriptiva/diagnóstica y quedarse en batch, sin problema. Pero si ninguna de tus dimensiones es predictiva con inferencia de series de tiempo, agregas una **segunda dimensión** (más pequeña, no hace falta tan desarrollada como la principal) que sí lo sea — con su propia fuente streaming y su modelo de series de tiempo corriendo sobre ella. Esa segunda dimensión también debe aportar a la pregunta central del equipo, no ser un tema suelto.
+Ambas pueden venir del **mismo origen físico** (ver sección 2) — ej. un sensor atmosférico: la dimensión predictiva usa la lectura en vivo (temperatura, humedad, campo eléctrico, tal como llega), la dimensión descriptiva usa la acumulación histórica de esas mismas variables, procesada por lotes. No es obligatorio que sean fuentes distintas — sí es obligatorio que el tratamiento (streaming vs. batch) sea real y distinto entre las dos.
+
+Esto es, **a nivel de cada integrante** (el curso evalúa [aporte individual](index.md#subaspectos-de-la-sustentacion-integral) — subaspecto 4 de la sustentación integral —, con evidencia de U1 y U2 por separado según el [alineamiento por sesiones](index.md#alineamiento-por-sesiones)), lo que garantiza que todos, sin excepción, construyan y defiendan ambas capas del curso — no solo que "alguien del equipo" haya tocado streaming.
 
 **Ejemplo de una pregunta central desglosada en dimensiones** (pregunta central: "¿cómo optimizar la operación logística de reparto de la empresa X?"):
 
 | Integrante | Tipo | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
 |---|---|---|---|---|---|
-| A | Descriptiva | ¿Cuál es el tiempo de entrega promedio, por zona? | Minutos promedio de entrega, por zona y por día | Histórico de tiempos de entrega por zona | Eventos de entrega completada en vivo |
-| A (secundaria) | Predictiva (series de tiempo) | ¿Cuál será el tiempo de entrega esperado en la próxima hora, por zona, según la tendencia actual? | Minutos de entrega proyectados, por zona | (mismo histórico de A, para entrenar) | Eventos de entrega en vivo (para actualizar la predicción) |
-| B | Diagnóstica (tiempo real) | ¿Qué unidades están fuera de ruta ahora mismo? | Distancia (m) entre la posición actual y la ruta planificada, por unidad | Rutas planificadas / histórico de recorridos | Ubicaciones GPS en vivo de cada unidad |
-| B (secundaria) | Predictiva (series de tiempo) | ¿Qué unidades es probable que lleguen tarde en los próximos 30 minutos, según su velocidad y trayectoria? | Probabilidad de retraso, por unidad | (mismo histórico de recorridos de B, para entrenar) | Ubicaciones y velocidad GPS en vivo (para actualizar la predicción) |
-| C | Predictiva (series de tiempo) | ¿Cuál es la demanda esperada de pedidos por zona la próxima semana? | Número de pedidos proyectados, por zona y por día | Histórico de pedidos por zona (para entrenar el modelo) | Pedidos en vivo (para contrastar contra lo predicho) |
+| A | Descriptiva | ¿Cuál es el tiempo de entrega promedio, por zona? | Minutos promedio de entrega, por zona y por día | Histórico de tiempos de entrega por zona | — |
+| A | Predictiva (series de tiempo) | ¿Cuál será el tiempo de entrega esperado en la próxima hora, por zona, según la tendencia actual? | Minutos de entrega proyectados, por zona | (mismo histórico, para entrenar) | Eventos de entrega en vivo |
+| B | Descriptiva | ¿Qué porcentaje de recorridos se desvió de la ruta planificada, históricamente? | % de recorridos con desvío, por unidad y por mes | Histórico de recorridos vs. rutas planificadas | — |
+| B | Predictiva (series de tiempo) | ¿Qué unidades es probable que lleguen tarde en los próximos 30 minutos, según su velocidad y trayectoria? | Probabilidad de retraso, por unidad | (mismo histórico, para entrenar) | Ubicaciones y velocidad GPS en vivo |
+| C | Descriptiva | ¿Cuál fue la demanda histórica de pedidos, por zona y por mes? | Número de pedidos, por zona y por mes | Histórico de pedidos por zona | — |
+| C | Predictiva (series de tiempo) | ¿Cuál es la demanda esperada de pedidos por zona la próxima semana? | Número de pedidos proyectados, por zona y por día | (mismo histórico, para entrenar el modelo) | Pedidos en vivo (para contrastar contra lo predicho) |
 
-Las dimensiones son preguntas distintas, pero todas responden a la **misma** operación logística — juntas arman un solo tablero de "salud de la operación de reparto", no proyectos sueltos. C ya es predictiva con series de tiempo por sí sola, por eso no necesita una dimensión secundaria; A y B son descriptiva/diagnóstica, por eso cada una suma su propia secundaria predictiva.
+Seis dimensiones, tres integrantes, todas responden a la **misma** operación logística — juntas arman un solo tablero de "salud de la operación de reparto", no proyectos sueltos. Cada integrante tiene su par completo: una descriptiva (batch) y una predictiva (streaming), ambas sobre el mismo ángulo de la pregunta central.
 
 **Otro ejemplo, con sensores atmosféricos** (pregunta central: "¿cómo anticipar condiciones climáticas de riesgo en la zona monitoreada?"):
 
 | Integrante | Tipo | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
 |---|---|---|---|---|---|
-| A | Predictiva (series de tiempo) | ¿Cuándo se espera que la temperatura supere el umbral de riesgo (helada o calor extremo)? | Temperatura en °C, medida cada pocos segundos | Histórico de temperatura de la estación | Lecturas en vivo del sensor de temperatura |
-| B | Predictiva (series de tiempo) | ¿Qué tan probable es una tormenta eléctrica en las próximas horas? | Intensidad de campo eléctrico y magnético, medida cada pocos segundos | Histórico de campo eléctrico y magnético asociado a tormentas pasadas | Lecturas en vivo de campo eléctrico y magnético |
-| C | Diagnóstica | ¿Cuál es el riesgo de inundación según la lluvia acumulada? | Milímetros de lluvia acumulada en las últimas 24h | Histórico de precipitación acumulada por temporada | Lecturas en vivo de lluvia y humedad |
-| C (secundaria) | Predictiva (series de tiempo) | ¿Cuánta lluvia se espera en las próximas horas, según la tendencia actual? | Milímetros de lluvia proyectados, próximas 3-6h | (mismo histórico de precipitación de C, para entrenar) | Lecturas de lluvia en vivo (para actualizar la predicción) |
+| A | Descriptiva | ¿Cuál fue la temperatura mínima y máxima registrada, por mes? | Temperatura mín./máx. en °C, por mes | Histórico de temperatura de la estación | — |
+| A | Predictiva (series de tiempo) | ¿Cuándo se espera que la temperatura supere el umbral de riesgo (helada o calor extremo)? | Temperatura proyectada en °C, próximas horas | (mismo histórico, para entrenar) | Lecturas en vivo del sensor de temperatura |
+| B | Descriptiva | ¿Con qué frecuencia ocurrieron tormentas eléctricas en la zona, históricamente? | Número de tormentas registradas, por temporada | Histórico de campo eléctrico y magnético asociado a tormentas pasadas | — |
+| B | Predictiva (series de tiempo) | ¿Qué tan probable es una tormenta eléctrica en las próximas horas? | Probabilidad de tormenta, próximas horas | (mismo histórico, para entrenar) | Lecturas en vivo de campo eléctrico y magnético |
+| C | Descriptiva | ¿Cuál es el riesgo de inundación según la lluvia acumulada esta semana? | Milímetros de lluvia acumulada en los últimos 7 días | Histórico de precipitación acumulada por temporada | — |
+| C | Predictiva (series de tiempo) | ¿Cuánta lluvia se espera en las próximas horas, según la tendencia actual? | Milímetros de lluvia proyectados, próximas 3-6h | (mismo histórico, para entrenar) | Lecturas de lluvia en vivo |
 
-Aquí las dimensiones pueden salir del **mismo sensor físico** (distintas variables que mide a la vez) — lo que las conecta no es el sensor, es que todas alimentan la misma pregunta central: el riesgo climático de la zona, visible en un solo tablero con paneles de temperatura, tormenta, inundación y su pronóstico. A y B ya son predictivas por sí solas; C es diagnóstica (mide el riesgo *actual* acumulado, no pronostica), por eso suma su propia secundaria predictiva.
+Aquí las dimensiones pueden salir del **mismo sensor físico** (distintas variables que mide a la vez) — lo que las conecta no es el sensor, es que todas alimentan la misma pregunta central: el riesgo climático de la zona, visible en un solo tablero con paneles de temperatura, tormenta, inundación y su pronóstico.
 
 **Tabla de asignación:**
 
 | Integrante | Tipo (descriptiva/diagnóstica o predictiva) | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
 |---|---|---|---|---|---|
-| | | | | | |
-| | | | | | |
-| | | | | | |
+| | Descriptiva | | | | |
+| | Predictiva (series de tiempo) | | | | |
+| | Descriptiva | | | | |
+| | Predictiva (series de tiempo) | | | | |
 
-Si la dimensión principal de algún integrante es descriptiva/diagnóstica (batch), agrega una fila más para su **dimensión secundaria**: predictiva, con inferencia de series de tiempo sobre streaming — mismo integrante repetido en la columna.
+Cada integrante ocupa dos filas seguidas — su dimensión descriptiva y su dimensión predictiva — no una fila suelta.
 
 La salida de cada dimensión tiene dos partes, **ambas obligatorias** — no son rutas alternativas, una se integra a la otra:
 
-- **Tablero BI con KPIs en Grafana.** Si la dimensión tiene streaming, el KPI se refresca por evento — cada vez que ocurre el hecho de negocio (ej. una venta, una lectura de sensor o a partir de logs), a partir del evento directamente; si el caso lo amerita, incluye alertas (ej. temperatura fuera de un rango normal). Si la dimensión es solo batch, el KPI se refresca en cada corrida del pipeline (diaria/por lote) — igual vive en el mismo Grafana, solo que no se actualiza en vivo.
-- **Machine Learning sobre esos mismos datos** — series de tiempo (predicción/inferencia) es lo más natural para dimensiones con streaming, pero no es la única opción válida (clasificación, detección de anomalías, regresión sobre datos batch, etc., también cuentan). El modelo no reemplaza el tablero BI: se integra a él — la predicción, la clasificación o la alerta que genera el modelo también se visualiza en el mismo Grafana, no aparte.
+- **Tablero BI con KPIs en Grafana**, en las dos dimensiones — Grafana refresca la pantalla en vivo (cada 1-5 segundos, configurable) para **ambos** paneles por igual; eso es del lado del dashboard, no de la fuente. Lo que sí cambia entre las dos es cada cuánto se actualiza el **dato** que ese panel muestra: en la dimensión predictiva, el dato mismo cambia por evento — cada vez que ocurre el hecho de negocio (ej. una venta, una lectura de sensor o a partir de logs); si el caso lo amerita, incluye alertas (ej. temperatura fuera de un rango normal). En la dimensión descriptiva, el dato cambia recién en cada corrida del pipeline (diaria/por lote) — Grafana lo sigue mostrando en vivo, solo que ese valor se mantiene igual hasta la siguiente corrida.
+- **Machine Learning**, obligatorio en la dimensión **predictiva** y opcional en la descriptiva (clasificación, detección de anomalías, regresión sobre datos batch, si suma valor). En la predictiva no basta con que la fuente sea streaming — la **inferencia del modelo también debe ejecutarse en tiempo real**, sobre cada dato que va llegando (ej. con Spark Structured Streaming aplicando el modelo ya entrenado a cada micro-lote), no entrenar/predecir una sola vez sobre un histórico y detenerse ahí. El modelo no reemplaza el tablero BI: se integra a él — la predicción, la clasificación o la alerta que genera el modelo también se visualiza en el mismo Grafana, no aparte.
 
 Los KPIs de todas las dimensiones del equipo se muestran en el **mismo Grafana**, no en instancias o dashboards separados por integrante — el resultado visible del proyecto es un solo tablero con varios paneles, uno por dimensión.
 
-**Ficha por dimensión** — completa un bloque como este por cada fila de la tabla anterior (repite el bloque tantas veces como filas tenga la tabla, incluidas las dimensiones secundarias):
+**Ficha por dimensión** — completa un bloque como este por cada fila de la tabla anterior (dos bloques por integrante: uno para su dimensión descriptiva, otro para la predictiva):
 
 ### Dimensión: ______ (integrante: ______)
 
@@ -103,7 +107,7 @@ Los KPIs de todas las dimensiones del equipo se muestran en el **mismo Grafana**
 - Indicador(es) — la métrica concreta que responde a la dimensión (la que se convierte en el KPI del tablero):
 - Decisión o acción que habilita (qué hace alguien distinto gracias a esta respuesta):
 - Instrumento/fuente batch — descripción, esquema (campos/columnas clave) y origen (dataset público/URL, API, exporte periódico, etc.):
-- Instrumento/fuente streaming — descripción, esquema y origen (tópico Kafka, sensor simulado, evento de negocio, etc.); si esta dimensión es solo batch, escribe "no aplica — ver justificación abajo":
+- Instrumento/fuente streaming — descripción, esquema y origen (tópico Kafka, sensor simulado, evento de negocio, etc.); en la dimensión descriptiva, escribe "no aplica — esta dimensión es batch":
 - Salida: panel(es) de BI/KPIs en el Grafana común **y** el modelo de ML que corresponda (ambos obligatorios, ver arriba) — describe los dos:
 - ¿Con qué otra(s) dimensión(es) del equipo se combina en el tablero final? (todas deben aportar a la misma historia, no quedar sueltas). Si todavía no lo sabes, escribe "por definir".
 - Lista inicial de requisitos (mínimo 3, redactados como "el sistema debe..."):
@@ -126,7 +130,7 @@ Los KPIs de todas las dimensiones del equipo se muestran en el **mismo Grafana**
     2.
     3.
 
-*(repite este bloque por cada fila restante de la tabla, hasta cubrirla completa — incluidas las dimensiones secundarias)*
+*(repite este bloque por cada fila restante de la tabla, hasta cubrirla completa — dos bloques por integrante)*
 
 - Qué SÍ cubre este proyecto en conjunto:
 - Qué NO cubre — fuera de alcance, explícito:
