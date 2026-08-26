@@ -8,6 +8,7 @@ nav:
   - Inicio: index.md
   - Guía de Proyecto Sello:
       - Guía del proyecto: proyecto-sello/index.md
+      - Brief técnico-analítico (plantilla): proyecto-sello/brief.md
   - Silabos:
       - Silabo 2026-1: silabo_bigdata_2026_1.md
       - Silabo 2026-2: silabo_bigdata_2026_2.md
