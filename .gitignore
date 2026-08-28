@@ -7,6 +7,9 @@ pyspark/sesiones/*/artifacts/
 # Jupyter
 .ipynb_checkpoints/
 
+# Carpeta de trabajo/pruebas personal, no es material de la sesión
+pyspark/sesiones/env/
+
 # Trash del contenedor (aparece si se borra un archivo desde dentro de Docker)
 .Trash-0/
 
