@@ -10,14 +10,10 @@ El porqué de formalizar esto — qué pasa cuando nadie lo hace — se desarrol
 
 ### 1.2 Índice
 
-1. Validación de esquema antes de cargar datos a un pipeline: tipos explícitos y presencia de columnas.
-2. Filtrado de datos: `filter()`/`where()`, expresiones SQL y booleanas, `.between()` vs. comparaciones estrictas, `eqNullSafe()`, nulos y contenido de texto.
-3. Orden de resultados: `orderBy()`/`sort()`, una o varias columnas, expresiones, orden de nulos, costo de *shuffle*.
-4. Duplicados: `dropDuplicates()`, `distinct()`, identificarlos sin eliminarlos, y deduplicación determinista con `Window` + `row_number()`.
-5. Nulos: detección (incluidas cadenas vacías), `.na.fill()` y `.na.drop()`.
-6. Escritura en múltiples formatos (`.write.format()`) y particionada en Parquet: `partitionBy()`, `coalesce()`/`repartition()`, elección de columna de partición.
-7. Cache y persistencia: `cache()`, `persist()`, `StorageLevel`.
-8. Lectura particionada, verificación de integridad y *partition pruning*.
+1. Validación de calidad de datos (esquema, nulos, duplicados).
+2. Procesamiento distribuido de datos: filtrado y orden.
+3. Carga particionada en formatos analíticos.
+4. Verificación de la carga particionada.
 
 ### 1.3 Propósito de aprendizaje
 
@@ -27,7 +23,7 @@ Al concluir la clase, estarás en condiciones de:
 
 ### 1.4 Producto de sesión
 
-Notebook `03_calidad_datos_practica.ipynb` con validación de esquema, tratamiento de nulos y duplicados documentado, y una salida particionada en Parquet verificada (lectura de vuelta y plan de ejecución con *partition pruning*).
+Notebook de Jupyter con: validación de esquema explícito (`StructType`, verificación de columnas obligatorias); filtrado (`filter()`/`where()`, `.between()`, `eqNullSafe()`) y orden (`orderBy()`/`sort()`) de resultados; duplicados identificados y tratados (`dropDuplicates()`, `distinct()`, deduplicación determinista con `Window` + `row_number()`); nulos detectados —incluidas cadenas vacías— y tratados (`.na.fill()`/`.na.drop()`); salida escrita en múltiples formatos y particionada en Parquet (`partitionBy()`, `coalesce()`/`repartition()`, `cache()`/`persist()` con `StorageLevel`); lectura particionada verificada (conteo de ida y vuelta, `PartitionFilters` confirmado en `explain(True)`).
 
 ### 1.5 Metodología
 
@@ -36,7 +32,7 @@ Notebook `03_calidad_datos_practica.ipynb` con validación de esquema, tratamien
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
 | Revisión previa individual | Repasar el notebook de S2 (entorno `lambda26` ya debe estar funcionando) y **copiar `customers.csv`/`articles.csv` a `s03-procesamiento-calidad-datos/data/`** (ver 3.1) — no hace falta descargar nada nuevo, ya los tienes de S2. | Guía S2, guía S3 — sección 3.1. |
-| Clase presencial | Construcción guiada del notebook `03_calidad_datos_practica.ipynb`: validación de esquema, nulos, duplicados y escritura particionada, sobre datos reales H&M. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Pasos 3.1 a 3.12 de esta guía. |
+| Clase presencial | Construcción guiada del notebook `03_procesamiento_calidad_datos_practica.ipynb`: validación de esquema, nulos, duplicados y escritura particionada, sobre datos reales H&M. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Pasos 3.1 a 3.12 de esta guía. |
 | Evaluación formativa | Revisión en clase de los controles de calidad aplicados y la salida particionada. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -130,7 +126,11 @@ flowchart TB
 
 Cada bloque de esta cadena es un control de calidad, no un paso decorativo: si uno se salta, el problema no desaparece — solo se descubre más tarde, más caro de corregir (como en el caso de 1.6).
 
-### 2.2 Validación de esquema
+### 2.2 Validación de calidad de datos: esquema, nulos y duplicados
+
+El sílabo agrupa estos tres controles bajo un mismo concepto — calidad de datos — porque comparten el mismo propósito, aunque cada uno mire un problema distinto: confirmar que el dataset es confiable *antes* de construir nada sobre él, no descubrirlo después de que el problema ya causó daño (como en el caso de 1.6).
+
+#### 2.2.1 Validación de esquema
 
 En S2 (2.4) ya viste que `inferSchema=True` puede adivinar mal un tipo (un código postal con ceros iniciales convertido silenciosamente a número) y que un `StructType` explícito evita esa ambigüedad. En S3, esa misma técnica se usa con una intención distinta: no es solo "leer correcto", es la primera verificación formal de calidad — confirmar que el dato que llegó es el que esperabas, antes de construir nada sobre él.
 
@@ -155,11 +155,84 @@ if faltantes:
 
 `raise ValueError(...)` detiene la ejecución ahí mismo, con un mensaje que dice exactamente qué falta — la diferencia frente a dejar que el pipeline siga y falle más adelante, en un paso que ya no tiene relación obvia con la causa real.
 
-### 2.3 Filtrado de datos: `filter()` y `where()`
+#### 2.2.2 Duplicados
+
+"Duplicado" no tiene una única definición — depende de qué columnas comparas, y de si necesitas *elegir* cuál fila conservar o simplemente confirmar que no hay copias:
+
+**Tabla 3. Formas de tratar duplicados**
+
+| Técnica | Qué compara | Qué hace con las filas repetidas | Cuándo usarla |
+|---|---|---|---|
+| `df.dropDuplicates()` | **Todas** las columnas de la fila. | Colapsa filas idénticas en todas sus columnas a una sola. | Confirmar que no hay filas exactamente repetidas de punta a punta. |
+| `df.dropDuplicates(["col1", "col2"])` | Solo la(s) columna(s) indicada(s). | Se queda con **una** fila por cada combinación única de esas columnas — cuál exactamente no lo controlás. | Confirmar unicidad de una clave, simple o compuesta. |
+| `df.distinct()` | **Todas** las columnas de la fila. | Igual que `dropDuplicates()` sin argumentos — es su forma corta. | Lo mismo que la primera fila de esta tabla; ambas son intercambiables. |
+| `groupBy("col").count().filter("count > 1")` | La(s) columna(s) agrupadas. | No elimina nada — **lista** los valores que aparecen más de una vez, sin decidir qué hacer con ellos todavía. | Diagnosticar *cuántos* y *cuáles* duplicados hay, antes de decidir cómo tratarlos. |
+| `Window.partitionBy("col").orderBy(...)` + `row_number()` | Solo la(s) columna(s) de partición. | Igual que `dropDuplicates()`, pero **tú eliges** cuál fila del grupo conservar (la de mayor/menor valor de otra columna). | Cuando una fila cualquiera del grupo no sirve — necesitas la correcta (la más reciente, la de mayor edad, etc.). |
+
+`dropDuplicates()`/`distinct()` deciden solas cuál copia conservar (una cualquiera); `Window`+`row_number()` te da control real sobre el criterio de selección — por ejemplo, quedarte con el registro de mayor `age` por `customer_id`. Pero un solo criterio de orden no alcanza para que el resultado sea *determinista*: si dos filas del mismo `customer_id` empatan en `age`, cuál de las dos gana el `row_number() == 1` queda librado al orden interno con el que Spark procesó esos datos — puede cambiar entre corridas del mismo dataset. Se agrega una segunda columna como desempate, para que el ganador sea siempre el mismo:
+
+```python
+from pyspark.sql.window import Window
+from pyspark.sql.functions import row_number
+
+window_spec = Window.partitionBy("customer_id").orderBy(
+    col("age").desc_nulls_last(),
+    col("postal_code").asc_nulls_last(),
+)
+
+df_ranked = df_customers.withColumn("row_num", row_number().over(window_spec))
+df_clean = df_ranked.filter(col("row_num") == 1).drop("row_num")
+```
+
+Si la columna de desempate en sí puede repetirse entre dos filas candidatas (como acá, donde dos clientes de la misma edad también podrían compartir `postal_code`), el resultado sigue sin ser 100% determinista — la garantía real solo la da una columna con valores únicos por fila dentro de cada partición (un identificador propio de la fila, o una marca temporal con precisión suficiente). En producción, el criterio más común es una columna de actualización (`updated_at DESC`) más una columna estable como desempate final.
+
+El caso real de S2 ilustra por qué esta distinción importa más allá de la sintaxis: en `articles.csv`, muchos `article_id` distintos comparten la misma `detail_desc` (mismo producto, distinta variante de color/talla). Eso **no** es un duplicado de fila — `dropDuplicates()`/`distinct()` no deberían eliminar ninguna de esas filas, porque cada `article_id` es legítimamente distinto. Si en cambio quisieras un solo representante por `product_code` (el producto base, sin variantes), ahí sí corresponde `Window`+`row_number()` — porque necesitas elegir cuál variante conservar, no simplemente confirmar unicidad.
+
+#### 2.2.3 Nulos: detección y tratamiento
+
+Un nulo no es automáticamente un error — puede ser un dato legítimamente ausente (una bandera que nunca se activó) o una falla real de captura. Antes de decidir qué hacer, hay que **contarlos**, columna por columna:
+
+```python
+from pyspark.sql.functions import col, count, when
+
+df.select([
+    count(when(col(c).isNull(), c)).alias(c) for c in df.columns
+]).show(vertical=True, truncate=False)
+```
+
+`when(col(c).isNull(), c)` devuelve el nombre de la columna cuando el valor es nulo, y `None` cuando no lo es; `count()` sobre eso cuenta solo los casos nulos, columna por columna, en una sola pasada.
+
+Ese conteo se le puede escapar a un problema real: en columnas de texto, una cadena vacía (`""`) o solo espacios no cuenta como `NULL` para Spark, aunque en la práctica signifique exactamente lo mismo — un dato ausente. Antes de dar por buena una columna de texto porque `isNull()` dio 0, confirma también esto:
+
+```python
+from pyspark.sql.functions import trim
+
+df.filter(col("customer_id").isNull() | (trim(col("customer_id")) == "")).count()
+```
+
+Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son intercambiables:
+
+**Tabla 4. `.na.fill()` vs. `.na.drop()`**
+
+| Operación | Qué hace | Cuándo usarla |
+|---|---|---|
+| `.na.fill({...})` (alias: `.fillna({...})`) | Reemplaza los nulos por un valor por defecto, columna por columna — de cualquier tipo, incluidas columnas numéricas. | Cuando el nulo tiene un significado razonable (una bandera no activada, una categoría "sin dato") y la fila completa sigue siendo útil. |
+| `.na.drop()` (sin argumentos) | Elimina **toda fila que tenga al menos un nulo, en cualquier columna**. | Rara vez es la decisión correcta sin más — es la versión más agresiva posible. |
+| `.na.drop(subset=[...])` | Elimina las filas donde **solo** la(s) columna(s) indicada(s) son nulas. | Cuando el nulo hace que la fila sea inutilizable — por ejemplo, sin un identificador (`customer_id`), la fila no se puede vincular a nada. |
+
+`.na.fill({...})` puede rellenar cualquier columna, con el tipo de valor que corresponda — pero que la sintaxis lo permita no significa que cualquier valor sea una buena decisión. Rellenar una columna de bandera (`FN`, `Active`) con `0` es razonable: el nulo ya significaba "no activado". Rellenar `age` con `0` es distinto — un cliente de "0 años" no es un dato faltante marcado como tal, es un dato **falso** que se ve como válido; peor que dejarlo nulo, porque un nulo al menos se puede detectar y un `0` se puede confundir con un valor real. Por eso el notebook de esta sesión no rellena `age`, aunque la sintaxis lo permitiría.
+
+`.na.drop()` sin argumentos es la versión más agresiva: elimina una fila si **cualquier** columna tiene un nulo. En una corrida real sobre `customers.csv`, esto dejó **462 911** de 1 371 980 filas — un 66.3% del dataset descartado, solo por tener al menos un nulo en alguna de las 7 columnas. Casi siempre conviene `subset=[...]`, apuntando solo a la columna que de verdad invalida la fila.
+
+### 2.3 Procesamiento distribuido: filtrado y orden de resultados
+
+Con el dataset ya validado, estas dos operaciones cubren cómo seleccionar y ordenar resultados sobre datos en los que ya se puede confiar.
+
+#### 2.3.1 Filtrado de datos: `filter()` y `where()`
 
 `filter()` acepta dos formas equivalentes de escribir la misma condición — una expresión SQL como texto, o una expresión booleana con `col()`. En una expresión booleana, las condiciones se combinan con `&` (y), `|` (o) y `~` (no), cada comparación entre paréntesis — **no** con los operadores `and`/`or`/`not` de Python, que no operan sobre columnas de Spark y fallan con un error, no con un resultado silenciosamente incorrecto.
 
-**Tabla 3. Dos formas de escribir el mismo filtro**
+**Tabla 5. Dos formas de escribir el mismo filtro**
 
 | Expresión SQL (texto) | Expresión booleana (`col()`) |
 |---|---|
@@ -186,9 +259,9 @@ df_customers.filter(col("postal_code").contains("56")).show()
 df_customers.filter(col("postal_code").endswith("00")).show()
 ```
 
-`.isNotNull()`/`.isNull()` filtran filas según si una columna específica es nula — a diferencia del conteo de 2.5 (que cuenta nulos en todas las columnas a la vez), esto te deja *ver* las filas nulas de una columna, no solo contarlas. `.startswith()`/`.contains()`/`.endswith()` filtran por texto dentro del valor de una columna — útiles para validar formato (por ejemplo, que todos los `postal_code` empiecen con un prefijo de región esperado).
+`.isNotNull()`/`.isNull()` filtran filas según si una columna específica es nula — a diferencia del conteo de 2.2.3 (que cuenta nulos en todas las columnas a la vez), esto te deja *ver* las filas nulas de una columna, no solo contarlas. `.startswith()`/`.contains()`/`.endswith()` filtran por texto dentro del valor de una columna — útiles para validar formato (por ejemplo, que todos los `postal_code` empiecen con un prefijo de región esperado).
 
-### 2.4 Orden de resultados: `orderBy()` y `sort()`
+#### 2.3.2 Orden de resultados: `orderBy()` y `sort()`
 
 `orderBy()` reorganiza **todo** el DataFrame en un orden global — a diferencia de un filtro, que cada partición resuelve por su cuenta sin coordinarse con las demás, ordenar de punta a punta obliga a Spark a barajar (*shuffle*) los datos entre particiones para compararlos entre sí. Es una operación cara: se aplica sobre el resultado final que vas a mostrar o guardar, no como paso intermedio de un pipeline si el orden no se necesita justo ahí.
 
@@ -212,7 +285,7 @@ df_customers.orderBy(col("club_member_status").asc(), col("age").desc()).show(3)
 df_customers.orderBy(["club_member_status", "age"], ascending=[True, False]).show(3)
 ```
 
-También podés ordenar por el resultado de una expresión, no solo por una columna tal cual — por ejemplo, por la longitud de un texto:
+También puedes ordenar por el resultado de una expresión, no solo por una columna tal cual — por ejemplo, por la longitud de un texto:
 
 ```python
 from pyspark.sql.functions import length
@@ -222,76 +295,11 @@ df_customers.orderBy(length(col("postal_code")).desc()).show()
 
 `sort()` es un **alias exacto** de `orderBy()`, igual que `where()` lo es de `filter()` — mismo resultado, dos nombres.
 
-### 2.5 Duplicados
+### 2.4 Carga particionada en formatos analíticos
 
-"Duplicado" no tiene una única definición — depende de qué columnas comparás, y de si necesitás *elegir* cuál fila conservar o simplemente confirmar que no hay copias:
+La carga particionada no es solo "elegir un formato" — cómo se escribe (2.4.1) y qué tan bien se aprovecha la memoria antes de escribir (2.4.2) determinan si esa carga es realmente utilizable a escala.
 
-**Tabla 4. Formas de tratar duplicados**
-
-| Técnica | Qué compara | Qué hace con las filas repetidas | Cuándo usarla |
-|---|---|---|---|
-| `df.dropDuplicates()` | **Todas** las columnas de la fila. | Colapsa filas idénticas en todas sus columnas a una sola. | Confirmar que no hay filas exactamente repetidas de punta a punta. |
-| `df.dropDuplicates(["col1", "col2"])` | Solo la(s) columna(s) indicada(s). | Se queda con **una** fila por cada combinación única de esas columnas — cuál exactamente no lo controlás. | Confirmar unicidad de una clave, simple o compuesta. |
-| `df.distinct()` | **Todas** las columnas de la fila. | Igual que `dropDuplicates()` sin argumentos — es su forma corta. | Lo mismo que la primera fila de esta tabla; ambas son intercambiables. |
-| `groupBy("col").count().filter("count > 1")` | La(s) columna(s) agrupadas. | No elimina nada — **lista** los valores que aparecen más de una vez, sin decidir qué hacer con ellos todavía. | Diagnosticar *cuántos* y *cuáles* duplicados hay, antes de decidir cómo tratarlos. |
-| `Window.partitionBy("col").orderBy(...)` + `row_number()` | Solo la(s) columna(s) de partición. | Igual que `dropDuplicates()`, pero **vos eliges** cuál fila del grupo conservar (la de mayor/menor valor de otra columna). | Cuando una fila cualquiera del grupo no sirve — necesitás la correcta (la más reciente, la de mayor edad, etc.). |
-
-`dropDuplicates()`/`distinct()` deciden solas cuál copia conservar (una cualquiera); `Window`+`row_number()` te da control real sobre el criterio de selección — por ejemplo, quedarte con el registro de mayor `age` por `customer_id`. Pero un solo criterio de orden no alcanza para que el resultado sea *determinista*: si dos filas del mismo `customer_id` empatan en `age`, cuál de las dos gana el `row_number() == 1` queda librado al orden interno con el que Spark procesó esos datos — puede cambiar entre corridas del mismo dataset. Se agrega una segunda columna como desempate, para que el ganador sea siempre el mismo:
-
-```python
-from pyspark.sql.window import Window
-from pyspark.sql.functions import row_number
-
-window_spec = Window.partitionBy("customer_id").orderBy(
-    col("age").desc_nulls_last(),
-    col("postal_code").asc_nulls_last(),
-)
-
-df_ranked = df_customers.withColumn("row_num", row_number().over(window_spec))
-df_clean = df_ranked.filter(col("row_num") == 1).drop("row_num")
-```
-
-Si la columna de desempate en sí puede repetirse entre dos filas candidatas (como acá, donde dos clientes de la misma edad también podrían compartir `postal_code`), el resultado sigue sin ser 100% determinista — la garantía real solo la da una columna con valores únicos por fila dentro de cada partición (un identificador propio de la fila, o una marca temporal con precisión suficiente). En producción, el criterio más común es una columna de actualización (`updated_at DESC`) más una columna estable como desempate final.
-
-El caso real de S2 ilustra por qué esta distinción importa más allá de la sintaxis: en `articles.csv`, muchos `article_id` distintos comparten la misma `detail_desc` (mismo producto, distinta variante de color/talla). Eso **no** es un duplicado de fila — `dropDuplicates()`/`distinct()` no deberían eliminar ninguna de esas filas, porque cada `article_id` es legítimamente distinto. Si en cambio quisieras un solo representante por `product_code` (el producto base, sin variantes), ahí sí corresponde `Window`+`row_number()` — porque necesitás elegir cuál variante conservar, no simplemente confirmar unicidad.
-
-### 2.6 Nulos: detección y tratamiento
-
-Un nulo no es automáticamente un error — puede ser un dato legítimamente ausente (una bandera que nunca se activó) o una falla real de captura. Antes de decidir qué hacer, hay que **contarlos**, columna por columna:
-
-```python
-from pyspark.sql.functions import col, count, when
-
-df.select([
-    count(when(col(c).isNull(), c)).alias(c) for c in df.columns
-]).show(vertical=True, truncate=False)
-```
-
-`when(col(c).isNull(), c)` devuelve el nombre de la columna cuando el valor es nulo, y `None` cuando no lo es; `count()` sobre eso cuenta solo los casos nulos, columna por columna, en una sola pasada.
-
-Ese conteo se le puede escapar a un problema real: en columnas de texto, una cadena vacía (`""`) o solo espacios no cuenta como `NULL` para Spark, aunque en la práctica signifique exactamente lo mismo — un dato ausente. Antes de dar por buena una columna de texto porque `isNull()` dio 0, confirma también esto:
-
-```python
-from pyspark.sql.functions import trim
-
-df.filter(col("customer_id").isNull() | (trim(col("customer_id")) == "")).count()
-```
-
-Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son intercambiables:
-
-**Tabla 5. `.na.fill()` vs. `.na.drop()`**
-
-| Operación | Qué hace | Cuándo usarla |
-|---|---|---|
-| `.na.fill({...})` (alias: `.fillna({...})`) | Reemplaza los nulos por un valor por defecto, columna por columna — de cualquier tipo, incluidas columnas numéricas. | Cuando el nulo tiene un significado razonable (una bandera no activada, una categoría "sin dato") y la fila completa sigue siendo útil. |
-| `.na.drop()` (sin argumentos) | Elimina **toda fila que tenga al menos un nulo, en cualquier columna**. | Rara vez es la decisión correcta sin más — es la versión más agresiva posible. |
-| `.na.drop(subset=[...])` | Elimina las filas donde **solo** la(s) columna(s) indicada(s) son nulas. | Cuando el nulo hace que la fila sea inutilizable — por ejemplo, sin un identificador (`customer_id`), la fila no se puede vincular a nada. |
-
-`.na.fill({...})` puede rellenar cualquier columna, con el tipo de valor que corresponda — pero que la sintaxis lo permita no significa que cualquier valor sea una buena decisión. Rellenar una columna de bandera (`FN`, `Active`) con `0` es razonable: el nulo ya significaba "no activado". Rellenar `age` con `0` es distinto — un cliente de "0 años" no es un dato faltante marcado como tal, es un dato **falso** que se ve como válido; peor que dejarlo nulo, porque un nulo al menos se puede detectar y un `0` se puede confundir con un valor real. Por eso el notebook de esta sesión no rellena `age`, aunque la sintaxis lo permitiría.
-
-`.na.drop()` sin argumentos es la versión más agresiva: elimina una fila si **cualquier** columna tiene un nulo. En una corrida real sobre `customers.csv`, esto dejó **462 911** de 1 371 980 filas — un 66.3% del dataset descartado, solo por tener al menos un nulo en alguna de las 7 columnas. Casi siempre conviene `subset=[...]`, apuntando solo a la columna que de verdad invalida la fila.
-
-### 2.7 Escritura en múltiples formatos y particionada
+#### 2.4.1 Escritura en múltiples formatos y particionada
 
 `.write.format("formato").option(...).save("ruta")` es la forma genérica de guardar un DataFrame — el mismo método sirve para `"csv"`, `"json"`, `"parquet"`, `"orc"`, cambiando solo el string:
 
@@ -339,11 +347,11 @@ df = df.repartition("customer_id")  # reorganiza los datos en memoria por esa co
 |---|---|---|
 | Puede... | Solo **reducir** el número de particiones. | Aumentar o reducir el número de particiones. |
 | Cómo lo hace | Combina particiones existentes, sin barajar todos los datos. | Baraja (*shuffle*) todos los datos entre las N particiones nuevas. |
-| Costo | Más barato — evita el *shuffle* completo. | Más caro, pero necesario si necesitás *más* particiones que las actuales. |
+| Costo | Más barato — evita el *shuffle* completo. | Más caro, pero necesario si necesitas *más* particiones que las actuales. |
 
-### 2.8 Cache y persistencia
+#### 2.4.2 Cache y persistencia
 
-Spark puede guardar un DataFrame ya calculado en memoria (o disco) para no recalcularlo cada vez que lo usás — la misma idea de `cache()` que S2 introdujo (2.5), acá con más control:
+Spark puede guardar un DataFrame ya calculado en memoria (o disco) para no recalcularlo cada vez que lo usas — la misma idea de `cache()` que S2 introdujo (2.5), acá con más control:
 
 ```python
 df_filtrado = df.filter(col("age") > 30).cache()
@@ -368,9 +376,9 @@ df.persist(StorageLevel.MEMORY_AND_DISK)  # usa memoria; si no alcanza, cae a di
 | `partitionBy()` / `repartition()` | Organiza los datos (en disco o en memoria) para paralelismo. | Antes de escrituras, `join()`s o `groupBy()`s costosos sobre esa columna. |
 | `cache()` / `persist()` | Evita recalcular un resultado ya obtenido. | Si vas a reutilizar el mismo DataFrame varias veces — no antes de un uso único. |
 
-`df.unpersist()` libera esa memoria cuando ya no la necesitás — cacheado indefinidamente, un DataFrame grande puede desplazar a otros del clúster.
+`df.unpersist()` libera esa memoria cuando ya no la necesitas — cacheado indefinidamente, un DataFrame grande puede desplazar a otros del clúster.
 
-### 2.9 Lectura particionada y *partition pruning*
+### 2.5 Verificación de la carga particionada
 
 Al leer una salida particionada, Spark reconstruye la columna de partición a partir del **nombre de la carpeta**, no del contenido del archivo — `spark.read.parquet("ruta/salida")` te devuelve `columna` como si fuera una columna normal, aunque no esté guardada dentro de ningún `part-0000X.parquet`.
 
@@ -382,7 +390,7 @@ assert df_leido.count() == df_original.count()
 
 Si el `assert` falla en silencio (sin lanzar excepción) es que los conteos coinciden — la ausencia de error es la confirmación misma, no hace falta un `print` adicional.
 
-Si filtrás por esa columna, `explain(True)` muestra una optimización que no viste en S2: **`PartitionFilters`**, junto al ya conocido `PushedFilters`. La diferencia es real, no solo de nombre:
+Si filtras por esa columna, `explain(True)` muestra una optimización que no viste en S2: **`PartitionFilters`**, junto al ya conocido `PushedFilters`. La diferencia es real, no solo de nombre:
 
 **Tabla 8. `PushedFilters` (S2) vs. `PartitionFilters` (S3)**
 
@@ -398,7 +406,7 @@ Si filtrás por esa columna, `explain(True)` muestra una optimización que no vi
 
 Tiempo: 2h.
 
-**Actividad:** construir el notebook `03_calidad_datos_practica.ipynb` sobre el entorno `lambda26` (`uso-pyspark`), validando esquema, tratando nulos y duplicados, y escribiendo una salida analítica particionada en Parquet — sobre el mismo dataset real H&M usado en S2 (`customers.csv`, `articles.csv`).
+**Actividad:** construir el notebook `03_procesamiento_calidad_datos_practica.ipynb` sobre el entorno `lambda26` (`uso-pyspark`), validando esquema, tratando nulos y duplicados, y escribiendo una salida analítica particionada en Parquet — sobre el mismo dataset real H&M usado en S2 (`customers.csv`, `articles.csv`).
 
 **Propósito de la actividad:** dejar evidencia ejecutable de que dominas los controles de calidad de datos (esquema, nulos, duplicados) y el particionamiento de salidas analíticas, antes de avanzar a ML distribuido (S4).
 
@@ -443,7 +451,7 @@ Esta sesión no necesita `transactions.parquet` — el foco es esquema, nulos y 
 
 ### 3.2 Crear el notebook y la `SparkSession`
 
-**Producto del paso:** notebook `03_calidad_datos_practica.ipynb` con una `SparkSession` activa.
+**Producto del paso:** notebook `03_procesamiento_calidad_datos_practica.ipynb` con una `SparkSession` activa.
 
 ```python
 from pyspark.sql import SparkSession
@@ -498,7 +506,7 @@ df_customers = spark.read.csv(
 df_customers.printSchema()
 ```
 
-Un esquema explícito confirma el tipo, no la presencia — valida las 7 columnas requeridas de forma explícita, deteniendo el pipeline si falta alguna (2.2):
+Un esquema explícito confirma el tipo, no la presencia — valida las 7 columnas requeridas de forma explícita, deteniendo el pipeline si falta alguna (2.2.1):
 
 ```python
 columnas_requeridas = {
@@ -529,7 +537,7 @@ df_customers.count()
 
 **Producto del paso:** conteo exacto de nulos por columna, con porcentaje sobre el total — control de calidad #2: nulos.
 
-En S2, `.describe()` ya insinuó el problema (la fila `count` daba menos que el total en `FN`/`Active`). Acá lo cuantificas exacto, con la técnica de 2.6:
+En S2, `.describe()` ya insinuó el problema (la fila `count` daba menos que el total en `FN`/`Active`). Acá lo cuantificas exacto, con la técnica de 2.2.3:
 
 ```python
 from pyspark.sql.functions import col, count, when
@@ -553,7 +561,7 @@ for columna, cantidad in nulos.items():
     print(f"{columna}: {cantidad} nulos ({porcentaje:.1f}%)")
 ```
 
-`isNull()` no detecta cadenas vacías ni espacios — confírmalo sobre `customer_id`, la columna crítica del dataset (2.6):
+`isNull()` no detecta cadenas vacías ni espacios — confírmalo sobre `customer_id`, la columna crítica del dataset (2.2.3):
 
 ```python
 from pyspark.sql.functions import trim
@@ -567,7 +575,7 @@ En una corrida real, dio **0** — `customer_id` no solo no tiene nulos, tampoco
 
 ### 3.5 Filtrado de datos (`filter()`/`where()`)
 
-**Producto del paso:** las dos sintaxis de `filter()` (SQL y booleana) aplicadas sobre datos reales, más filtrado de nulos y de contenido de texto (2.3). Recuerda: `&`/`|`/`~` para combinar condiciones de columna, nunca `and`/`or`/`not` de Python.
+**Producto del paso:** las dos sintaxis de `filter()` (SQL y booleana) aplicadas sobre datos reales, más filtrado de nulos y de contenido de texto (2.3.1). Recuerda: `&`/`|`/`~` para combinar condiciones de columna, nunca `and`/`or`/`not` de Python.
 
 Expresión SQL como texto:
 
@@ -640,7 +648,7 @@ Si el conteo da 0, también es un control de calidad exitoso — no un resultado
 
 ### 3.6 Ordenar resultados (`orderBy()`/`sort()`)
 
-**Producto del paso:** resultados ordenados por una, varias y por una expresión sobre una columna (2.4).
+**Producto del paso:** resultados ordenados por una, varias y por una expresión sobre una columna (2.3.2).
 
 Por una sola columna, en las formas equivalentes:
 
@@ -651,7 +659,7 @@ df_customers.orderBy(col("age").desc()).show(3)
 df_customers.orderBy("age", ascending=False).show(3)
 ```
 
-Por defecto, los nulos van al final en ascendente y al principio en descendente — `desc_nulls_last()`/`asc_nulls_last()` (2.4) lo dejan explícito:
+Por defecto, los nulos van al final en ascendente y al principio en descendente — `desc_nulls_last()`/`asc_nulls_last()` (2.3.2) lo dejan explícito:
 
 ```python
 df_customers.orderBy(col("age").desc_nulls_last()).show(3)
@@ -718,7 +726,7 @@ print(f"Total: {total}, sin duplicar (fila completa): {sin_duplicados_fila_compl
 
 En una corrida real, las tres cifras dieron **1 371 980** — cero duplicados, en ninguna de las dos definiciones. No es un resultado "vacío": es la confirmación real de que `customer_id` es una clave limpia en este dataset.
 
-Marcar duplicados eligiendo cuál fila conservar (acá, la de mayor `age` por `customer_id`) — a diferencia de `dropDuplicates()`, que elige una fila cualquiera. Un solo criterio de orden no es determinista si hay empates (2.5) — se agrega `postal_code` como desempate:
+Marcar duplicados eligiendo cuál fila conservar (acá, la de mayor `age` por `customer_id`) — a diferencia de `dropDuplicates()`, que elige una fila cualquiera. Un solo criterio de orden no es determinista si hay empates (2.2.2) — se agrega `postal_code` como desempate:
 
 ```python
 from pyspark.sql.window import Window
@@ -810,13 +818,13 @@ En una corrida real, ambos números dieron **1 371 980** — `customer_id` nunca
 assert df_customers_valido.filter(col("customer_id").isNull()).count() == 0
 ```
 
-`df_customers_valido` se reutiliza en los pasos que siguen (3.9-3.11), varios con su propio `.count()` — sin cachearlo, cada uno recalcularía la lectura completa más la limpieza desde cero. `cache()` (2.8, ya usado en S2) guarda el resultado la primera vez que una acción lo dispara:
+`df_customers_valido` se reutiliza en los pasos que siguen (3.9-3.11), varios con su propio `.count()` — sin cachearlo, cada uno recalcularía la lectura completa más la limpieza desde cero. `cache()` (2.4.2, ya usado en S2) guarda el resultado la primera vez que una acción lo dispara:
 
 ```python
 df_customers_valido = df_customers_valido.cache()
 ```
 
-Si el DataFrame fuera más grande de lo que la memoria disponible aguanta, `persist(StorageLevel.MEMORY_AND_DISK)` (2.8) es la versión con más control — cae a disco en vez de fallar:
+Si el DataFrame fuera más grande de lo que la memoria disponible aguanta, `persist(StorageLevel.MEMORY_AND_DISK)` (2.4.2) es la versión con más control — cae a disco en vez de fallar:
 
 ```python
 from pyspark.storagelevel import StorageLevel
@@ -826,7 +834,7 @@ df_customers_valido.persist(StorageLevel.MEMORY_AND_DISK)
 
 ### 3.9 Escritura en múltiples formatos
 
-**Producto del paso:** el mismo resultado guardado en tres formatos distintos, con `.write.format()` (2.7) — sobre una muestra chica, no el dataset completo, solo para ver la sintaxis:
+**Producto del paso:** el mismo resultado guardado en tres formatos distintos, con `.write.format()` (2.4.1) — sobre una muestra chica, no el dataset completo, solo para ver la sintaxis:
 
 ```python
 muestra = df_edad_invalida.limit(100)  # el resultado (vacío o no) de la validación de 3.5
@@ -838,9 +846,9 @@ muestra.write.format("parquet").mode("overwrite").save(f"{ARTIFACTS}/muestra_par
 
 ### 3.10 Escritura particionada en Parquet
 
-**Producto del paso:** salida analítica particionada por `club_member_status`, lista para BI/ML — el producto que pide el sílabo de esta sesión. `club_member_status` tiene pocos valores distintos y aparece seguido en filtros — la columna de partición correcta (2.7); un identificador único como `customer_id` habría creado más de un millón de carpetas diminutas.
+**Producto del paso:** salida analítica particionada por `club_member_status`, lista para BI/ML — el producto que pide el sílabo de esta sesión. `club_member_status` tiene pocos valores distintos y aparece seguido en filtros — la columna de partición correcta (2.4.1); un identificador único como `customer_id` habría creado más de un millón de carpetas diminutas.
 
-`repartition(4)` antes de escribir influye en cuántos archivos caen dentro de **cada** carpeta de partición (2.7) — sin esto, se hereda el número de particiones de la lectura original, la misma sorpresa de las ~50 particiones que viste en S2 al guardar la muestra de `customers.csv`. No es una garantía exacta de "4 archivos por carpeta" — depende de cómo queden distribuidos los datos entre esas 4 particiones:
+`repartition(4)` antes de escribir influye en cuántos archivos caen dentro de **cada** carpeta de partición (2.4.1) — sin esto, se hereda el número de particiones de la lectura original, la misma sorpresa de las ~50 particiones que viste en S2 al guardar la muestra de `customers.csv`. No es una garantía exacta de "4 archivos por carpeta" — depende de cómo queden distribuidos los datos entre esas 4 particiones:
 
 ```python
 (
@@ -853,7 +861,7 @@ muestra.write.format("parquet").mode("overwrite").save(f"{ARTIFACTS}/muestra_par
 )
 ```
 
-`partitionBy("club_member_status")` crea una subcarpeta por cada valor distinto de esa columna (`club_member_status=ACTIVE/`, `club_member_status=LEFT CLUB/`, ...), como en 2.7. Verifica la estructura real:
+`partitionBy("club_member_status")` crea una subcarpeta por cada valor distinto de esa columna (`club_member_status=ACTIVE/`, `club_member_status=LEFT CLUB/`, ...), como en 2.4.1. Verifica la estructura real:
 
 ```python
 import os
@@ -862,7 +870,7 @@ for carpeta in sorted(os.listdir(f"{ARTIFACTS}/customers_particionado")):
     print(carpeta)
 ```
 
-Contraste directo: si en vez de `repartition(4)` usás `coalesce(1)` (Tabla 6), obtenés **un solo** archivo por carpeta de partición en vez de cuatro — más lento de escribir en paralelo, pero más simple de compartir:
+Contraste directo: si en vez de `repartition(4)` usas `coalesce(1)` (Tabla 6), obtienes **un solo** archivo por carpeta de partición en vez de cuatro — más lento de escribir en paralelo, pero más simple de compartir:
 
 ```python
 (
@@ -885,13 +893,13 @@ df_verificacion.printSchema()
 df_verificacion.count()
 ```
 
-Confirma que el viaje de ida y vuelta no perdió ni duplicó filas — no lo asumas por los dos conteos ya impresos, verifícalo con un chequeo explícito (2.9):
+Confirma que el viaje de ida y vuelta no perdió ni duplicó filas — no lo asumas por los dos conteos ya impresos, verifícalo con un chequeo explícito (2.5):
 
 ```python
 assert df_verificacion.count() == df_customers_valido.count()
 ```
 
-`club_member_status` reaparece en el esquema aunque no está dentro de los archivos Parquet físicos — Spark lo reconstruye a partir del nombre de la carpeta (2.9, *partition discovery*).
+`club_member_status` reaparece en el esquema aunque no está dentro de los archivos Parquet físicos — Spark lo reconstruye a partir del nombre de la carpeta (2.5, *partition discovery*).
 
 Filtra por la columna particionada y revisa el plan — deberías ver `PartitionFilters` (Tabla 6), no solo `PushedFilters` (el que ya viste en S2, 3.6):
 
@@ -915,7 +923,7 @@ Agrega celdas markdown breves debajo de cada bloque de código (3.3-3.11) explic
 
 **Evidencia de aprendizaje:**
 
-- Notebook `03_calidad_datos_practica.ipynb` con filtrado, orden, duplicados y nulos tratados, documentado.
+- Notebook `03_procesamiento_calidad_datos_practica.ipynb` con filtrado, orden, duplicados y nulos tratados, documentado.
 - Duplicados identificados y tratados con al menos tres técnicas (`dropDuplicates()`/`distinct()`, `groupBy()+count()`, `Window`+`row_number()`).
 - Salida particionada en Parquet (`partitionBy()`) verificada por lectura, con plan de ejecución mostrando `PartitionFilters`.
 - Reflexión técnica documentada.
@@ -1009,7 +1017,7 @@ La evidencia individual se considera completa si:
 
 ### 4.5 Preguntas de defensa
 
-1. ¿Cuándo escribirías un filtro como expresión SQL de texto, y cuándo necesitás la versión con `col()`?
+1. ¿Cuándo escribirías un filtro como expresión SQL de texto, y cuándo necesitas la versión con `col()`?
 2. ¿Qué diferencia hay entre `.na.fill()` y `.na.drop()`, y cómo decidiste cuál aplicar en cada columna de tu caso?
 3. ¿Por qué `distinct()`/`dropDuplicates()` y `groupBy()+count()` responden preguntas distintas sobre los mismos duplicados?
 4. ¿Cuándo usarías `Window`+`row_number()` en vez de `dropDuplicates()` para tratar duplicados?
