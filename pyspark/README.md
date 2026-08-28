@@ -28,8 +28,11 @@ carpeta autocontenida (`sXX-nombre/`): el notebook, sus datos de entrada
 
 - `sesiones/s01-arquitectura/`: notebook y dataset (`data/biblia_ntv_.csv`) de S1.
 - `sesiones/s02-fundamentos/`: notebook y dataset (`data/`, dataset H&M) de S2.
-- `sesiones/s03-calidad-datos/`: notebook y dataset (`data/`, mismo H&M de S2:
-  `customers.csv`/`articles.csv`) de S3.
+- `sesiones/s03-procesamiento-calidad-datos/`: notebook y dataset (`data/`,
+  mismo H&M de S2: `customers.csv`/`articles.csv`) de S3.
+- `sesiones/s03-parte2-transacciones/`: notebook opcional (S3 parte 2) que
+  prepara `transactions.parquet` (H&M) particionado por mes, como entrada
+  directa de S4.
 - Sesiones futuras agregan su propia carpeta (`sesiones/s04-...`,
   `sesiones/s05-...`) a medida que el curso avanza.
 

@@ -29,7 +29,7 @@ Resultado esperado U1: el estudiante construye un pipeline batch reproducible co
 |---|---|---|---|
 | [S1](sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md) | Arquitectura Big Data: arquitecturas Lambda y Kappa, batch vs. streaming. | `uso-pyspark` | Arquitectura Big Data seleccionada y justificada (Lambda o Kappa) para un caso de negocio propio. |
 | [S2](sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation.md) | Fundamentos PySpark: extracción, transformaciones, funciones, agrupaciones, agregaciones, RDD y evaluación perezosa (lazy evaluation). | `uso-pyspark` | Transformaciones distribuidas documentadas, con evidencia del plan de ejecución (`explain()`). |
-| [S3](sesiones/S03_Calidad_Datos_Particionamiento_Formatos_Analiticos.md) | Procesamiento distribuido y carga de datos particionada en HDFS y formatos analíticos, con validación de calidad de datos. | `uso-pyspark` | Salida analítica particionada en formato columnar, con controles de calidad (esquema, nulos, duplicados). |
+| [S3](sesiones/S03_Procesamiento_Calidad_Datos_Particionamiento.md) | Procesamiento distribuido y carga de datos particionada en HDFS y formatos analíticos, con validación de calidad de datos. | `uso-pyspark` | Salida analítica particionada en formato columnar, con controles de calidad (esquema, nulos, duplicados). |
 | S4 | ML distribuido con Spark MLlib (Regresión). | `uso-pyspark` | Modelo de regresión distribuida entrenado, con métricas iniciales documentadas. |
 | S5 | Integración del procesamiento batch distribuido: arquitectura, PySpark, HDFS, formatos analíticos, particionamiento y ML distribuido. | — | **Producto U1:** pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML. |
 
@@ -201,5 +201,5 @@ flowchart LR
 - [Sílabo 2026-2](silabo_bigdata_2026_2.md)
 - [S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming](sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa.md)
 - [S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa](sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation.md)
-- [S3 - Calidad de Datos y Formatos Analíticos Particionados](sesiones/S03_Calidad_Datos_Particionamiento_Formatos_Analiticos.md)
+- [S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico](sesiones/S03_Procesamiento_Calidad_Datos_Particionamiento.md)
 - [Guía de Proyecto Sello](proyecto-sello/index.md)
