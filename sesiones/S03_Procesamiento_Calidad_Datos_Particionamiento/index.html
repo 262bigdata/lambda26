@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S03_Calidad_Datos_Particionamiento_Formatos_Analiticos/">
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S03_Procesamiento_Calidad_Datos_Particionamiento/">
       
       
         <link rel="prev" href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/">
@@ -23,7 +23,7 @@
     
     
   
-    <title>Big Data - S3 - Calidad de Datos y Formatos Analíticos Particionados</title>
+    <title>Big Data - S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico</title>
   
 
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#s3-calidad-de-datos-y-formatos-analiticos-particionados" class="md-skip">
+        <a href="#s3-procesamiento-y-calidad-de-datos-filtrado-duplicados-nulos-y-particionamiento-analitico" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              S3 - Calidad de Datos y Formatos Analíticos Particionados
+              S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
             
           </span>
         </div>
@@ -588,7 +588,7 @@
   <span class="md-ellipsis">
     
   
-    S3 - Calidad de Datos y Formatos Analíticos Particionados
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
   
 
     
@@ -606,7 +606,7 @@
   <span class="md-ellipsis">
     
   
-    S3 - Calidad de Datos y Formatos Analíticos Particionados
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
   
 
     
@@ -1689,21 +1689,21 @@
   
 
 
-<h1 id="s3-calidad-de-datos-y-formatos-analiticos-particionados">S3 - Calidad de Datos y Formatos Analíticos Particionados<a class="headerlink" href="#s3-calidad-de-datos-y-formatos-analiticos-particionados" title="Permanent link">&para;</a></h1>
+<h1 id="s3-procesamiento-y-calidad-de-datos-filtrado-duplicados-nulos-y-particionamiento-analitico">S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico<a class="headerlink" href="#s3-procesamiento-y-calidad-de-datos-filtrado-duplicados-nulos-y-particionamiento-analitico" title="Permanent link">&para;</a></h1>
 <h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
 <h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
-<p>S2 cerró con un hallazgo real sin resolver: al correr <code>df_customers.describe()</code> sobre <code>customers.csv</code>, la fila <code>count</code> mostró que <code>FN</code> y <code>Active</code> tenían cerca de dos tercios de sus valores en nulo — un problema de calidad de datos genuino, encontrado en el propio dataset del curso, no inventado para la sesión. Esta sesión existe para responder la pregunta que ese hallazgo dejó abierta: ¿qué hacés, en concreto, una vez que encontraste un problema así?</p>
-<p>S3 formaliza tres controles de calidad — <strong>esquema</strong>, <strong>nulos</strong> y <strong>duplicados</strong> — como un paso explícito y repetible, no una revisión visual ocasional, antes de que cualquier dataset se considere listo para alimentar un pipeline de BI/ML. Y cierra la narrativa de ETL batch de la unidad: S1 diseñó la arquitectura, S2 construyó las transformaciones, S3 produce la salida analítica particionada real que esos dos pasos prometían — organizada en un formato (Parquet) y una estructura de carpetas pensados para volúmenes reales, no para una hoja de cálculo. Esta sesión no levanta un clúster HDFS real (queda fuera del alcance de un laboratorio en una sola máquina), pero reproduce exactamente la misma estructura de carpetas particionadas y el mismo razonamiento que un almacenamiento distribuido real exige.</p>
+<p>S1 decidió la arquitectura del pipeline batch; S2 construyó las transformaciones distribuidas sobre esa arquitectura. Esta sesión cierra esa cadena: formaliza el procesamiento de datos (filtrar, ordenar) y la calidad de datos (esquema, nulos, duplicados) como un paso explícito y repetible antes de escribir cualquier salida analítica — el mismo control que se aplica de aquí en adelante a cualquier dataset nuevo que entre al pipeline, no solo al de hoy. Y cierra con el formato y la estructura de particionamiento que esa salida necesita para ser realmente utilizable a escala, no solo "que cargue sin error".</p>
+<p>El porqué de formalizar esto — qué pasa cuando nadie lo hace — se desarrolla en 1.6, a partir de un caso real. Esta sesión no levanta un clúster HDFS real (queda fuera del alcance de un laboratorio en una sola máquina), pero reproduce la misma estructura de carpetas particionadas y el mismo razonamiento que un almacenamiento distribuido real exige.</p>
 <h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Validación de esquema antes de cargar datos a un pipeline.</li>
-<li>Filtrado de datos: <code>filter()</code>/<code>where()</code>, expresiones SQL y booleanas, nulos y contenido de texto.</li>
-<li>Orden de resultados: <code>orderBy()</code>/<code>sort()</code>, una o varias columnas, expresiones.</li>
-<li>Duplicados: <code>dropDuplicates()</code>, <code>distinct()</code>, identificarlos sin eliminarlos, y deduplicación selectiva con <code>Window</code> + <code>row_number()</code>.</li>
-<li>Nulos: detección, <code>.na.fill()</code> y <code>.na.drop()</code>.</li>
-<li>Escritura en múltiples formatos (<code>.write.format()</code>) y particionada en Parquet: <code>partitionBy()</code>, <code>coalesce()</code>/<code>repartition()</code>.</li>
+<li>Validación de esquema antes de cargar datos a un pipeline: tipos explícitos y presencia de columnas.</li>
+<li>Filtrado de datos: <code>filter()</code>/<code>where()</code>, expresiones SQL y booleanas, <code>.between()</code> vs. comparaciones estrictas, <code>eqNullSafe()</code>, nulos y contenido de texto.</li>
+<li>Orden de resultados: <code>orderBy()</code>/<code>sort()</code>, una o varias columnas, expresiones, orden de nulos, costo de <em>shuffle</em>.</li>
+<li>Duplicados: <code>dropDuplicates()</code>, <code>distinct()</code>, identificarlos sin eliminarlos, y deduplicación determinista con <code>Window</code> + <code>row_number()</code>.</li>
+<li>Nulos: detección (incluidas cadenas vacías), <code>.na.fill()</code> y <code>.na.drop()</code>.</li>
+<li>Escritura en múltiples formatos (<code>.write.format()</code>) y particionada en Parquet: <code>partitionBy()</code>, <code>coalesce()</code>/<code>repartition()</code>, elección de columna de partición.</li>
 <li>Cache y persistencia: <code>cache()</code>, <code>persist()</code>, <code>StorageLevel</code>.</li>
-<li>Lectura particionada y <em>partition pruning</em>.</li>
+<li>Lectura particionada, verificación de integridad y <em>partition pruning</em>.</li>
 </ol>
 <h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
 <p>Al concluir la clase, estarás en condiciones de:</p>
@@ -1725,7 +1725,7 @@
 <tbody>
 <tr>
 <td>Revisión previa individual</td>
-<td>Repasar el notebook de S2 (entorno <code>lambda26</code> ya debe estar funcionando) y <strong>copiar <code>customers.csv</code>/<code>articles.csv</code> a <code>s03-calidad-datos/data/</code></strong> (ver 3.1) — no hace falta descargar nada nuevo, ya los tienes de S2.</td>
+<td>Repasar el notebook de S2 (entorno <code>lambda26</code> ya debe estar funcionando) y <strong>copiar <code>customers.csv</code>/<code>articles.csv</code> a <code>s03-procesamiento-calidad-datos/data/</code></strong> (ver 3.1) — no hace falta descargar nada nuevo, ya los tienes de S2.</td>
 <td>Guía S2, guía S3 — sección 3.1.</td>
 </tr>
 <tr>
@@ -1836,8 +1836,15 @@
 </tbody>
 </table>
 <p><code>printSchema()</code> y <code>df.columns</code> (ya vistos en S2) son las dos herramientas mínimas para esta verificación — la diferencia en S3 es que se hace <em>siempre</em>, como primer paso, antes de cualquier transformación, no como una curiosidad ocasional.</p>
+<p>Un esquema explícito confirma el <em>tipo</em> de cada columna, pero no confirma que la columna exista de verdad: un CSV con una columna renombrada o eliminada igual carga sin error, con esa columna entera en <code>null</code>. La verificación completa compara el conjunto de columnas leídas contra el conjunto esperado, y detiene el pipeline si falta alguna — no como advertencia, como una condición que impide seguir:</p>
+<div class="highlight"><pre><span></span><code><span class="n">columnas_requeridas</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"customer_id"</span><span class="p">,</span> <span class="s2">"FN"</span><span class="p">,</span> <span class="s2">"Active"</span><span class="p">,</span> <span class="s2">"club_member_status"</span><span class="p">,</span> <span class="s2">"fashion_news_frequency"</span><span class="p">,</span> <span class="s2">"age"</span><span class="p">,</span> <span class="s2">"postal_code"</span><span class="p">}</span>
+<span class="n">faltantes</span> <span class="o">=</span> <span class="n">columnas_requeridas</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">faltantes</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Faltan columnas obligatorias: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">faltantes</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p><code>raise ValueError(...)</code> detiene la ejecución ahí mismo, con un mensaje que dice exactamente qué falta — la diferencia frente a dejar que el pipeline siga y falle más adelante, en un paso que ya no tiene relación obvia con la causa real.</p>
 <h3 id="23-filtrado-de-datos-filter-y-where">2.3 Filtrado de datos: <code>filter()</code> y <code>where()</code><a class="headerlink" href="#23-filtrado-de-datos-filter-y-where" title="Permanent link">&para;</a></h3>
-<p><code>filter()</code> acepta dos formas equivalentes de escribir la misma condición — una expresión SQL como texto, o una expresión booleana con <code>col()</code>:</p>
+<p><code>filter()</code> acepta dos formas equivalentes de escribir la misma condición — una expresión SQL como texto, o una expresión booleana con <code>col()</code>. En una expresión booleana, las condiciones se combinan con <code>&amp;</code> (y), <code>|</code> (o) y <code>~</code> (no), cada comparación entre paréntesis — <strong>no</strong> con los operadores <code>and</code>/<code>or</code>/<code>not</code> de Python, que no operan sobre columnas de Spark y fallan con un error, no con un resultado silenciosamente incorrecto.</p>
 <p><strong>Tabla 3. Dos formas de escribir el mismo filtro</strong></p>
 <table>
 <thead>
@@ -1853,7 +1860,7 @@
 </tr>
 <tr>
 <td><code>df.filter("age BETWEEN 25 AND 35")</code></td>
-<td><code>df.filter((col("age") &gt; 25) &amp; (col("age") &lt; 35))</code></td>
+<td><code>df.filter(col("age").between(25, 35))</code></td>
 </tr>
 <tr>
 <td><code>df.filter("fashion_news_frequency IN ('Regularly', 'Monthly')")</code></td>
@@ -1862,6 +1869,8 @@
 </tbody>
 </table>
 <p>La versión SQL es más compacta para condiciones simples; la versión con <code>col()</code> es la única forma de combinar condiciones con operadores de columna (<code>&amp;</code>, <code>|</code>, <code>~</code>) o de encadenar métodos como <code>.isin()</code>, <code>.isNull()</code>, <code>.startswith()</code> — no hay un equivalente en texto para esos últimos. <code>where()</code> es un <strong>alias exacto</strong> de <code>filter()</code> (mismo método, otro nombre) — usa el que le resulte más natural a tu equipo; Spark no distingue entre ambos.</p>
+<p><strong>Cuidado con la trampa entre <code>BETWEEN</code>/<code>.between()</code> y una comparación estricta escrita a mano.</strong> <code>.between(25, 35)</code> es el equivalente exacto de <code>BETWEEN 25 AND 35</code> — <strong>incluye ambos extremos</strong>. Pero <code>(col("age") &gt; 25) &amp; (col("age") &lt; 35)</code> no es lo mismo: excluye 25 y 35. Parecen la misma idea, no lo son — en una corrida real sobre <code>customers.csv</code>, <code>.between(25, 35)</code> devolvió <strong>413 179</strong> filas y la versión estricta <strong>338 303</strong> — una diferencia real de <strong>74 876 filas</strong>, exactamente las que tienen edad 25 o 35.</p>
+<p><code>eqNullSafe()</code> es otra comparación con semántica distinta a la obvia: <code>col("x") == None</code> nunca es verdadero, ni siquiera para las filas donde <code>x</code> es nulo — comparar con <code>null</code> usando <code>==</code> siempre da <code>null</code>, no <code>True</code>. <code>col("x").eqNullSafe(None)</code> sí encuentra esas filas, porque trata <code>null</code> como un valor comparable en vez de "desconocido". Sobre <code>club_member_status</code> (6 062 nulos), <code>col("club_member_status").eqNullSafe(None)</code> devuelve exactamente esos <strong>6 062</strong> — el mismo resultado que <code>isNull()</code>, pero con la semántica de igualdad, útil cuando estás comparando contra una variable que podría o no ser <code>None</code> sin saberlo de antemano.</p>
 <p>Dos casos adicionales de <code>filter()</code> con <code>col()</code>, útiles para calidad de datos:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Filtrar nulos</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -1874,9 +1883,14 @@
 </code></pre></div>
 <p><code>.isNotNull()</code>/<code>.isNull()</code> filtran filas según si una columna específica es nula — a diferencia del conteo de 2.5 (que cuenta nulos en todas las columnas a la vez), esto te deja <em>ver</em> las filas nulas de una columna, no solo contarlas. <code>.startswith()</code>/<code>.contains()</code>/<code>.endswith()</code> filtran por texto dentro del valor de una columna — útiles para validar formato (por ejemplo, que todos los <code>postal_code</code> empiecen con un prefijo de región esperado).</p>
 <h3 id="24-orden-de-resultados-orderby-y-sort">2.4 Orden de resultados: <code>orderBy()</code> y <code>sort()</code><a class="headerlink" href="#24-orden-de-resultados-orderby-y-sort" title="Permanent link">&para;</a></h3>
+<p><code>orderBy()</code> reorganiza <strong>todo</strong> el DataFrame en un orden global — a diferencia de un filtro, que cada partición resuelve por su cuenta sin coordinarse con las demás, ordenar de punta a punta obliga a Spark a barajar (<em>shuffle</em>) los datos entre particiones para compararlos entre sí. Es una operación cara: se aplica sobre el resultado final que vas a mostrar o guardar, no como paso intermedio de un pipeline si el orden no se necesita justo ahí.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                      <span class="c1"># ascendente por defecto</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>           <span class="c1"># descendente</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"age"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>      <span class="c1"># descendente, otra sintaxis</span>
+</code></pre></div>
+<p>Por defecto, los nulos van al final en orden ascendente y al principio en descendente. <code>asc_nulls_last()</code>/<code>desc_nulls_last()</code> (o sus pares <code>_nulls_first()</code>) lo dejan explícito, en vez de depender de un comportamiento implícito:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc_nulls_last</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>Con varias columnas, cada una puede tener su propio sentido de orden:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">(),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -1933,15 +1947,19 @@
 </tr>
 </tbody>
 </table>
-<p><code>dropDuplicates()</code>/<code>distinct()</code> deciden solas cuál copia conservar (una cualquiera); <code>Window</code>+<code>row_number()</code> te da control real sobre el criterio de selección — por ejemplo, quedarte con el registro de mayor <code>age</code> por <code>customer_id</code>:</p>
+<p><code>dropDuplicates()</code>/<code>distinct()</code> deciden solas cuál copia conservar (una cualquiera); <code>Window</code>+<code>row_number()</code> te da control real sobre el criterio de selección — por ejemplo, quedarte con el registro de mayor <code>age</code> por <code>customer_id</code>. Pero un solo criterio de orden no alcanza para que el resultado sea <em>determinista</em>: si dos filas del mismo <code>customer_id</code> empatan en <code>age</code>, cuál de las dos gana el <code>row_number() == 1</code> queda librado al orden interno con el que Spark procesó esos datos — puede cambiar entre corridas del mismo dataset. Se agrega una segunda columna como desempate, para que el ganador sea siempre el mismo:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">row_number</span>
 
-<span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc_nulls_last</span><span class="p">(),</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">(),</span>
+<span class="p">)</span>
 
 <span class="n">df_ranked</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">,</span> <span class="n">row_number</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span>
 <span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_ranked</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">)</span>
 </code></pre></div>
+<p>Si la columna de desempate en sí puede repetirse entre dos filas candidatas (como acá, donde dos clientes de la misma edad también podrían compartir <code>postal_code</code>), el resultado sigue sin ser 100% determinista — la garantía real solo la da una columna con valores únicos por fila dentro de cada partición (un identificador propio de la fila, o una marca temporal con precisión suficiente). En producción, el criterio más común es una columna de actualización (<code>updated_at DESC</code>) más una columna estable como desempate final.</p>
 <p>El caso real de S2 ilustra por qué esta distinción importa más allá de la sintaxis: en <code>articles.csv</code>, muchos <code>article_id</code> distintos comparten la misma <code>detail_desc</code> (mismo producto, distinta variante de color/talla). Eso <strong>no</strong> es un duplicado de fila — <code>dropDuplicates()</code>/<code>distinct()</code> no deberían eliminar ninguna de esas filas, porque cada <code>article_id</code> es legítimamente distinto. Si en cambio quisieras un solo representante por <code>product_code</code> (el producto base, sin variantes), ahí sí corresponde <code>Window</code>+<code>row_number()</code> — porque necesitás elegir cuál variante conservar, no simplemente confirmar unicidad.</p>
 <h3 id="26-nulos-deteccion-y-tratamiento">2.6 Nulos: detección y tratamiento<a class="headerlink" href="#26-nulos-deteccion-y-tratamiento" title="Permanent link">&para;</a></h3>
 <p>Un nulo no es automáticamente un error — puede ser un dato legítimamente ausente (una bandera que nunca se activó) o una falla real de captura. Antes de decidir qué hacer, hay que <strong>contarlos</strong>, columna por columna:</p>
@@ -1952,6 +1970,11 @@
 <span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p><code>when(col(c).isNull(), c)</code> devuelve el nombre de la columna cuando el valor es nulo, y <code>None</code> cuando no lo es; <code>count()</code> sobre eso cuenta solo los casos nulos, columna por columna, en una sola pasada.</p>
+<p>Ese conteo se le puede escapar a un problema real: en columnas de texto, una cadena vacía (<code>""</code>) o solo espacios no cuenta como <code>NULL</code> para Spark, aunque en la práctica signifique exactamente lo mismo — un dato ausente. Antes de dar por buena una columna de texto porque <code>isNull()</code> dio 0, confirma también esto:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">trim</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="p">(</span><span class="n">trim</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">))</span> <span class="o">==</span> <span class="s2">""</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
 <p>Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son intercambiables:</p>
 <p><strong>Tabla 5. <code>.na.fill()</code> vs. <code>.na.drop()</code></strong></p>
 <table>
@@ -2001,11 +2024,12 @@
     └── part-00000-....parquet
 </code></pre></div>
 <p>Esta es la estructura que hace que un formato particionado sea distinto de "guardar un CSV grande": una consulta que filtra por <code>columna = "valor_a"</code> puede ignorar por completo las carpetas <code>valor_b</code>/<code>valor_c</code>, sin siquiera abrirlas — el mismo principio que organiza datos en HDFS o en un data lake real, aunque acá corra sobre disco local. Esto es <em>particionamiento físico</em> — existe en disco, en la estructura de carpetas.</p>
+<p>No cualquier columna sirve para esto. Una buena columna de partición tiene cardinalidad baja o moderada (pocos valores distintos) y aparece seguido en filtros — <code>club_member_status</code>, con un puñado de valores posibles, cumple ambas condiciones. Un identificador único como <code>customer_id</code> no serviría: crearía una carpeta distinta por cada uno de los 1 371 980 clientes, la mayoría con un solo archivo diminuto adentro — el particionamiento deja de ayudar (no hay ninguna carpeta grande que evitar abrir) y solo agrega miles de carpetas que gestionar.</p>
 <p>Existe también el <em>particionamiento lógico</em>: cómo Spark organiza los datos <strong>en memoria</strong>, mientras los procesa, sin que eso se refleje todavía en ningún archivo:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span>  <span class="c1"># reorganiza los datos en memoria por esa columna</span>
 </code></pre></div>
 <p><code>repartition("columna")</code> agrupa en memoria las filas que comparten valor de esa columna en la misma partición interna — útil antes de un <code>groupBy()</code>/<code>join()</code> costoso sobre esa columna, para que Spark no tenga que barajar los datos de nuevo en ese paso. No crea ninguna carpeta — es un paso previo, no de escritura.</p>
-<p><code>coalesce(N)</code>/<code>repartition(N)</code> (S2 ya usó <code>coalesce(1)</code> para forzar un solo archivo de salida) controlan cuántos archivos <code>part-0000X</code> caen <strong>dentro de cada</strong> carpeta de partición física — sin fijarlo, se hereda el número de particiones del DataFrame en memoria (la misma sorpresa de las ~50 particiones que viste en S2 al guardar una muestra pequeña).</p>
+<p><code>coalesce(N)</code>/<code>repartition(N)</code> (S2 ya usó <code>coalesce(1)</code> para forzar un solo archivo de salida) influyen en cuántos archivos <code>part-0000X</code> caen <strong>dentro de cada</strong> carpeta de partición física — sin fijarlos, se hereda el número de particiones del DataFrame en memoria (la misma sorpresa de las ~50 particiones que viste en S2 al guardar una muestra pequeña). No es una garantía exacta de "N archivos por carpeta": el resultado final depende también de cómo queden distribuidos los datos entre esas N particiones antes de escribir, no solo del número que pediste.</p>
 <p><strong>Tabla 6. <code>coalesce(N)</code> vs. <code>repartition(N)</code></strong></p>
 <table>
 <thead>
@@ -2075,6 +2099,10 @@
 <p><code>df.unpersist()</code> libera esa memoria cuando ya no la necesitás — cacheado indefinidamente, un DataFrame grande puede desplazar a otros del clúster.</p>
 <h3 id="29-lectura-particionada-y-partition-pruning">2.9 Lectura particionada y <em>partition pruning</em><a class="headerlink" href="#29-lectura-particionada-y-partition-pruning" title="Permanent link">&para;</a></h3>
 <p>Al leer una salida particionada, Spark reconstruye la columna de partición a partir del <strong>nombre de la carpeta</strong>, no del contenido del archivo — <code>spark.read.parquet("ruta/salida")</code> te devuelve <code>columna</code> como si fuera una columna normal, aunque no esté guardada dentro de ningún <code>part-0000X.parquet</code>.</p>
+<p>Antes de confiar en esa lectura, confirma que el viaje de ida y vuelta (escribir, después leer) no perdió ni duplicó ninguna fila — no lo asumas, compáralo contra el conteo del DataFrame que escribiste:</p>
+<div class="highlight"><pre><span></span><code><span class="k">assert</span> <span class="n">df_leido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="n">df_original</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p>Si el <code>assert</code> falla en silencio (sin lanzar excepción) es que los conteos coinciden — la ausencia de error es la confirmación misma, no hace falta un <code>print</code> adicional.</p>
 <p>Si filtrás por esa columna, <code>explain(True)</code> muestra una optimización que no viste en S2: <strong><code>PartitionFilters</code></strong>, junto al ya conocido <code>PushedFilters</code>. La diferencia es real, no solo de nombre:</p>
 <p><strong>Tabla 8. <code>PushedFilters</code> (S2) vs. <code>PartitionFilters</code> (S3)</strong></p>
 <table>
@@ -2125,14 +2153,14 @@
 <li><strong>3.12</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
 </ul>
 <h3 id="31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26">3.1 Preparar los datos de S3 y reanudar el entorno <code>lambda26</code><a class="headerlink" href="#31-preparar-los-datos-de-s3-y-reanudar-el-entorno-lambda26" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> <code>customers.csv</code> y <code>articles.csv</code> disponibles en <code>pyspark/sesiones/s03-calidad-datos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
+<p><strong>Producto del paso:</strong> <code>customers.csv</code> y <code>articles.csv</code> disponibles en <code>pyspark/sesiones/s03-procesamiento-calidad-datos/data/</code>, entorno <code>lambda26</code> funcionando.</p>
 <p>Ya descargaste estos dos archivos en S2 — no hace falta descargarlos de nuevo, solo cópialos a la carpeta de esta sesión (desde tu máquina, no dentro del notebook):</p>
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-calidad-datos/data/
-cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/articles.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-calidad-datos/data/
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-procesamiento-calidad-datos/data/
+cp<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/articles.csv<span class="w"> </span>lambda26/pyspark/sesiones/s03-procesamiento-calidad-datos/data/
 </code></pre></div>
 <p><code>customers.csv</code> pesa ~207 MB — la copia tarda unos segundos, no es instantánea. <strong>Espera a que termine antes de abrir Jupyter y correr el notebook</strong>: si lees el archivo mientras todavía se está copiando, Spark lee la foto parcial que existe en ese instante, sin ningún error — solo un conteo de filas mucho menor al real, silencioso. Confirma que la copia terminó comparando el número de líneas contra el original:</p>
 <div class="highlight"><pre><span></span><code>wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s02-fundamentos/data/customers.csv
-wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s03-calidad-datos/data/customers.csv
+wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s03-procesamiento-calidad-datos/data/customers.csv
 </code></pre></div>
 <p>Ambos deben coincidir exactamente antes de seguir a 3.2.</p>
 <p>Esta sesión no necesita <code>transactions.parquet</code> — el foco es esquema, nulos y duplicados sobre datos tabulares, no sobre transacciones. Si el contenedor <code>lambda26</code> sigue corriendo desde S2, continúa directo en 3.2.</p>
@@ -2154,8 +2182,8 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 </code></pre></div>
 <p><code>spark.driver.memory</code> en <code>"4g"</code> desde el arranque — en S2 la JVM se cayó por quedarse en el default de 1g; acá se fija de una vez, no se espera al primer <em>crash</em>.</p>
 <p>Declara las rutas del dataset y las salidas, una sola vez:</p>
-<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s03-calidad-datos/data"</span>
-<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s03-calidad-datos/artifacts"</span>
+<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s03-procesamiento-calidad-datos/data"</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s03-procesamiento-calidad-datos/artifacts"</span>
 </code></pre></div>
 <h3 id="33-cargar-customerscsv-y-validar-el-esquema">3.3 Cargar <code>customers.csv</code> y validar el esquema<a class="headerlink" href="#33-cargar-customerscsv-y-validar-el-esquema" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> <code>df_customers</code> cargado con esquema explícito, verificado contra lo esperado — control de calidad #1: esquema.</p>
@@ -2180,7 +2208,24 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 
 <span class="n">df_customers</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
-<p>Confirma que el esquema real coincide con el documentado — 7 columnas, en el mismo orden y tipo (Tabla 2):</p>
+<p>Un esquema explícito confirma el tipo, no la presencia — valida las 7 columnas requeridas de forma explícita, deteniendo el pipeline si falta alguna (2.2):</p>
+<div class="highlight"><pre><span></span><code><span class="n">columnas_requeridas</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"customer_id"</span><span class="p">,</span>
+    <span class="s2">"FN"</span><span class="p">,</span>
+    <span class="s2">"Active"</span><span class="p">,</span>
+    <span class="s2">"club_member_status"</span><span class="p">,</span>
+    <span class="s2">"fashion_news_frequency"</span><span class="p">,</span>
+    <span class="s2">"age"</span><span class="p">,</span>
+    <span class="s2">"postal_code"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">faltantes</span> <span class="o">=</span> <span class="n">columnas_requeridas</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">df_customers</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">faltantes</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Faltan columnas obligatorias: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">faltantes</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Esquema validado: las 7 columnas requeridas estan presentes."</span><span class="p">)</span>
+</code></pre></div>
+<p>Confirma también el conteo de filas — 7 columnas, en el mismo orden y tipo (Tabla 2):</p>
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">df_customers</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre></div>
@@ -2204,22 +2249,40 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
     <span class="n">porcentaje</span> <span class="o">=</span> <span class="n">cantidad</span> <span class="o">/</span> <span class="n">total_filas</span> <span class="o">*</span> <span class="mi">100</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">columna</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cantidad</span><span class="si">}</span><span class="s2"> nulos (</span><span class="si">{</span><span class="n">porcentaje</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
 </code></pre></div>
+<p><code>isNull()</code> no detecta cadenas vacías ni espacios — confírmalo sobre <code>customer_id</code>, la columna crítica del dataset (2.6):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">trim</span>
+
+<span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="p">(</span><span class="n">trim</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">))</span> <span class="o">==</span> <span class="s2">""</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p>En una corrida real, dio <strong>0</strong> — <code>customer_id</code> no solo no tiene nulos, tampoco tiene cadenas vacías disfrazadas de dato.</p>
 <h3 id="35-filtrado-de-datos-filterwhere">3.5 Filtrado de datos (<code>filter()</code>/<code>where()</code>)<a class="headerlink" href="#35-filtrado-de-datos-filterwhere" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> las dos sintaxis de <code>filter()</code> (SQL y booleana) aplicadas sobre datos reales, más filtrado de nulos y de contenido de texto (2.3).</p>
+<p><strong>Producto del paso:</strong> las dos sintaxis de <code>filter()</code> (SQL y booleana) aplicadas sobre datos reales, más filtrado de nulos y de contenido de texto (2.3). Recuerda: <code>&amp;</code>/<code>|</code>/<code>~</code> para combinar condiciones de columna, nunca <code>and</code>/<code>or</code>/<code>not</code> de Python.</p>
 <p>Expresión SQL como texto:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"age &gt; 30"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"club_member_status = 'ACTIVE'"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"age BETWEEN 25 AND 35"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"fashion_news_frequency IN ('Regularly', 'Monthly')"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>La misma lógica, con <code>col()</code> (Tabla 3):</p>
+<p>La misma lógica, con <code>col()</code> (Tabla 3) — <code>.between(25, 35)</code> es el equivalente exacto de <code>BETWEEN 25 AND 35</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span>
 
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"ACTIVE"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">35</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"fashion_news_frequency"</span><span class="p">)</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s2">"Regularly"</span><span class="p">,</span> <span class="s2">"Monthly"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
+<p>Confirma la trampa entre <code>.between()</code> (inclusivo) y una comparación estricta escrita a mano (Tabla 3):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"between (incluye 25 y 35):"</span><span class="p">,</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"estricto (excluye 25 y 35):   "</span><span class="p">,</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">35</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+</code></pre></div>
+<p>En una corrida real, <code>.between(25, 35)</code> dio <strong>413 179</strong> y la versión estricta <strong>338 303</strong> — una diferencia real de <strong>74 876 filas</strong>, las que tienen edad exactamente 25 o 35. No son la misma consulta, aunque se parezcan.</p>
+<p><code>eqNullSafe()</code> trata <code>null</code> como un valor comparable en vez de "desconocido" — útil cuando comparás contra algo que podría ser <code>None</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span><span class="s2">"ACTIVE"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">df_customers</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<p>En una corrida real, <code>eqNullSafe(None)</code> encontró <strong>6 062</strong> filas — exactamente los nulos de <code>club_member_status</code> (3.4) — algo que <code>col("club_member_status") == None</code> nunca habría encontrado, porque comparar con <code>null</code> usando <code>==</code> siempre da <code>null</code>, nunca <code>True</code>.</p>
 <p><code>where()</code> es el mismo método que <code>filter()</code>, con otro nombre:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"Active"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">"FN = 1"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -2245,6 +2308,10 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"age"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<p>Por defecto, los nulos van al final en ascendente y al principio en descendente — <code>desc_nulls_last()</code>/<code>asc_nulls_last()</code> (2.4) lo dejan explícito:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc_nulls_last</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>Por varias columnas, cada una con su propio sentido:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">(),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -2282,11 +2349,14 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">, sin duplicar (fila completa): </span><span class="si">{</span><span class="n">sin_duplicados_fila_completa</span><span class="si">}</span><span class="s2">, sin duplicar (por customer_id): </span><span class="si">{</span><span class="n">sin_duplicados_por_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <p>En una corrida real, las tres cifras dieron <strong>1 371 980</strong> — cero duplicados, en ninguna de las dos definiciones. No es un resultado "vacío": es la confirmación real de que <code>customer_id</code> es una clave limpia en este dataset.</p>
-<p>Marcar duplicados eligiendo cuál fila conservar (acá, la de mayor <code>age</code> por <code>customer_id</code>) — a diferencia de <code>dropDuplicates()</code>, que elige una fila cualquiera:</p>
+<p>Marcar duplicados eligiendo cuál fila conservar (acá, la de mayor <code>age</code> por <code>customer_id</code>) — a diferencia de <code>dropDuplicates()</code>, que elige una fila cualquiera. Un solo criterio de orden no es determinista si hay empates (2.5) — se agrega <code>postal_code</code> como desempate:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">row_number</span>
 
-<span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<span class="n">window_spec</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"age"</span><span class="p">)</span><span class="o">.</span><span class="n">desc_nulls_last</span><span class="p">(),</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">(),</span>
+<span class="p">)</span>
 
 <span class="n">df_ranked</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">,</span> <span class="n">row_number</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">window_spec</span><span class="p">))</span>
 <span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_ranked</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">)</span>
@@ -2304,7 +2374,7 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <span class="n">duplicados_por_descripcion</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p><code>filter(col("detail_desc").isNotNull())</code> va <strong>antes</strong> del <code>groupBy()</code>: sin él, <code>groupBy()</code> agrupa todos los artículos sin descripción bajo un mismo grupo <code>NULL</code> — que en una corrida real salió como el "valor más repetido" (416 artículos), tapando los duplicados de contenido real que sí importan. Un <code>NULL</code> que se repite no es un duplicado de descripción, es simplemente la ausencia del dato.</p>
-<p>Acá sí corresponde <code>Window</code>+<code>row_number()</code> para elegir un representante por <code>product_code</code> (el producto base, sin variantes de color/talla) — <code>article_id</code> identifica cada variante, <code>product_code</code> el producto:</p>
+<p>Acá sí corresponde <code>Window</code>+<code>row_number()</code> para elegir un representante por <code>product_code</code> (el producto base, sin variantes de color/talla) — <code>article_id</code> identifica cada variante, <code>product_code</code> el producto. A diferencia del dedup de <code>customer_id</code>, acá no hace falta una columna de desempate adicional: <code>article_id</code> ya es único por fila, así que ordenar solo por él ya es determinista:</p>
 <div class="highlight"><pre><span></span><code><span class="n">window_producto</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"product_code"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"article_id"</span><span class="p">)</span>
 
 <span class="n">df_articles_un_por_producto</span> <span class="o">=</span> <span class="p">(</span>
@@ -2339,7 +2409,9 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas antes: </span><span class="si">{</span><span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">, después de na.drop(subset=['customer_id']): </span><span class="si">{</span><span class="n">df_customers_valido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, ambos números dieron <strong>1 371 980</strong> — <code>customer_id</code> nunca llega nulo en este dataset, así que <code>na.drop(subset=[...])</code> no elimina ninguna fila (muy distinto del <code>.na.drop()</code> sin argumentos de arriba). Es el resultado esperado: confirma que la columna clave está completa.</p>
+<p>En una corrida real, ambos números dieron <strong>1 371 980</strong> — <code>customer_id</code> nunca llega nulo en este dataset, así que <code>na.drop(subset=[...])</code> no elimina ninguna fila (muy distinto del <code>.na.drop()</code> sin argumentos de arriba). Es el resultado esperado: confirma que la columna clave está completa. Confírmalo también con un chequeo explícito, no solo comparando conteos a simple vista:</p>
+<div class="highlight"><pre><span></span><code><span class="k">assert</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+</code></pre></div>
 <p><code>df_customers_valido</code> se reutiliza en los pasos que siguen (3.9-3.11), varios con su propio <code>.count()</code> — sin cachearlo, cada uno recalcularía la lectura completa más la limpieza desde cero. <code>cache()</code> (2.8, ya usado en S2) guarda el resultado la primera vez que una acción lo dispara:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_customers_valido</span> <span class="o">=</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 </code></pre></div>
@@ -2357,8 +2429,8 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <span class="n">muestra</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"parquet"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/muestra_parquet"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="310-escritura-particionada-en-parquet">3.10 Escritura particionada en Parquet<a class="headerlink" href="#310-escritura-particionada-en-parquet" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> salida analítica particionada por <code>club_member_status</code>, lista para BI/ML — el producto que pide el sílabo de esta sesión.</p>
-<p><code>repartition(4)</code> antes de escribir controla cuántos archivos caen dentro de <strong>cada</strong> carpeta de partición (2.7) — sin esto, se hereda el número de particiones de la lectura original, la misma sorpresa de las ~50 particiones que viste en S2 al guardar la muestra de <code>customers.csv</code>:</p>
+<p><strong>Producto del paso:</strong> salida analítica particionada por <code>club_member_status</code>, lista para BI/ML — el producto que pide el sílabo de esta sesión. <code>club_member_status</code> tiene pocos valores distintos y aparece seguido en filtros — la columna de partición correcta (2.7); un identificador único como <code>customer_id</code> habría creado más de un millón de carpetas diminutas.</p>
+<p><code>repartition(4)</code> antes de escribir influye en cuántos archivos caen dentro de <strong>cada</strong> carpeta de partición (2.7) — sin esto, se hereda el número de particiones de la lectura original, la misma sorpresa de las ~50 particiones que viste en S2 al guardar la muestra de <code>customers.csv</code>. No es una garantía exacta de "4 archivos por carpeta" — depende de cómo queden distribuidos los datos entre esas 4 particiones:</p>
 <div class="highlight"><pre><span></span><code><span class="p">(</span>
     <span class="n">df_customers_valido</span>
     <span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
@@ -2390,6 +2462,9 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <span class="n">df_verificacion</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">df_verificacion</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre></div>
+<p>Confirma que el viaje de ida y vuelta no perdió ni duplicó filas — no lo asumas por los dos conteos ya impresos, verifícalo con un chequeo explícito (2.9):</p>
+<div class="highlight"><pre><span></span><code><span class="k">assert</span> <span class="n">df_verificacion</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="n">df_customers_valido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
 <p><code>club_member_status</code> reaparece en el esquema aunque no está dentro de los archivos Parquet físicos — Spark lo reconstruye a partir del nombre de la carpeta (2.9, <em>partition discovery</em>).</p>
 <p>Filtra por la columna particionada y revisa el plan — deberías ver <code>PartitionFilters</code> (Tabla 6), no solo <code>PushedFilters</code> (el que ya viste en S2, 3.6):</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_verificacion</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"club_member_status"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"ACTIVE"</span><span class="p">)</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -2400,7 +2475,7 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <h3 id="312-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.12 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#312-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
 <p>Agrega celdas markdown breves debajo de cada bloque de código (3.3-3.11) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
-<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué diferencia encontraste entre <code>dropDuplicates()</code> y <code>Window</code>+<code>row_number()</code> al aplicarlos sobre <code>articles.csv</code>? ¿Qué columnas rellenaste con <code>.na.fill()</code> y cuáles no, y por qué? ¿Qué diferencia notaste entre <code>PushedFilters</code> (S2) y <code>PartitionFilters</code> (S3) en el plan de ejecución?</p>
+<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué diferencia encontraste entre <code>dropDuplicates()</code> y <code>Window</code>+<code>row_number()</code> al aplicarlos sobre <code>articles.csv</code>? ¿Qué columnas rellenaste con <code>.na.fill()</code> y cuáles no, y por qué? ¿Por qué <code>.between(25, 35)</code> y <code>(col("age") &gt; 25) &amp; (col("age") &lt; 35)</code> no dan el mismo resultado? ¿Qué diferencia notaste entre <code>PushedFilters</code> (S2) y <code>PartitionFilters</code> (S3) en el plan de ejecución?</p>
 <p><strong>Evidencia de aprendizaje:</strong></p>
 <ul>
 <li>Notebook <code>03_calidad_datos_practica.ipynb</code> con filtrado, orden, duplicados y nulos tratados, documentado.</li>
@@ -2433,7 +2508,7 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 <ul>
 <li>Nombre:</li>
 <li>Equipo:</li>
-<li>Sesión: S03 - Calidad de Datos y Formatos Analíticos Particionados</li>
+<li>Sesión: S03 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico</li>
 <li>Rol o aporte realizado:</li>
 <li>Link de GitHub:</li>
 </ul>
