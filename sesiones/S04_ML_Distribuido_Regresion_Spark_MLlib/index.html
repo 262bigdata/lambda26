@@ -14,7 +14,7 @@
         <link rel="prev" href="../S03_Procesamiento_Calidad_Datos_Particionamiento/">
       
       
-        <link rel="next" href="../S03b_Calidad_Campo_Electrico/">
+        <link rel="next" href="../PreS04_Calidad_Campo_Electrico/">
       
       
         
@@ -1174,14 +1174,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../S03b_Calidad_Campo_Electrico/" class="md-nav__link">
+      <a href="../PreS04_Calidad_Campo_Electrico/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    S3b - Calidad de datos y particionamiento: segundo caso de uso (sensores ambientales)
+    Pre-S4 - Calidad de datos y particionamiento: segundo caso de uso (sensores ambientales)
   
 
     
@@ -1723,8 +1723,8 @@
 <tbody>
 <tr>
 <td>Revisión previa individual</td>
-<td>Repasar la salida particionada de S3 (o S3b, según el dataset que uses) — confirmar que el entorno <code>lambda26</code> sigue funcionando y que esa salida está disponible sin errores.</td>
-<td>Guía S3 (y S3b, si aplica).</td>
+<td>Repasar la salida particionada de S3 (o Pre-S4, según el dataset que uses) — confirmar que el entorno <code>lambda26</code> sigue funcionando y que esa salida está disponible sin errores.</td>
+<td>Guía S3 (y Pre-S4, si aplica).</td>
 </tr>
 <tr>
 <td>Clase presencial</td>
@@ -1943,7 +1943,7 @@
 <li><strong>3.11</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
 </ul>
 <h3 id="31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3">3.1 Reanudar el entorno <code>lambda26</code> y confirmar la salida de S3<a class="headerlink" href="#31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando, con la salida particionada de S3 (o S3b, si tu equipo usa ese dataset) disponible y verificada.</p>
+<p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando, con la salida particionada de S3 (o Pre-S4, si tu equipo usa ese dataset) disponible y verificada.</p>
 <p>Si el contenedor <code>lambda26-pyspark</code> ya está corriendo desde una sesión anterior, continúa directo en 3.2. Si no:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>pyspark
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
@@ -1965,7 +1965,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 
 <span class="n">spark</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s03b-calidad-campo-electrico/artifacts/campo_electrico_particionado"</span>
+<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/pre-s04-calidad-campo-electrico/artifacts/campo_electrico_particionado"</span>
 <span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s04-ml-distribuido-regresion/artifacts"</span>
 </code></pre></div>
 <h3 id="33-cargar-la-salida-particionada-y-explorar-las-variables">3.3 Cargar la salida particionada y explorar las variables<a class="headerlink" href="#33-cargar-la-salida-particionada-y-explorar-las-variables" title="Permanent link">&para;</a></h3>
@@ -1982,7 +1982,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">VARIABLES_9</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>En una corrida real sobre la salida de S3b, este conteo dio <strong>184 538</strong> filas — el mismo número que S3b reportó como salida final (S3b, sección 7).</p>
+<p>En una corrida real sobre la salida de Pre-S4, este conteo dio <strong>184 538</strong> filas — el mismo número que Pre-S4 reportó como salida final (Pre-S4, sección 7).</p>
 <h3 id="34-ensamblar-el-vector-de-predictores-vectorassembler">3.4 Ensamblar el vector de predictores (<code>VectorAssembler</code>)<a class="headerlink" href="#34-ensamblar-el-vector-de-predictores-vectorassembler" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> <code>df_ml</code>, con una sola columna <code>features</code> (vector de 8 predictores) y la columna objetivo <code>Valor_CE</code> (2.2).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorAssembler</span>
@@ -2002,7 +2002,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Entrenamiento: </span><span class="si">{</span><span class="n">df_train</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prueba: </span><span class="si">{</span><span class="n">df_test</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, sobre las 184 538 filas de S3b: <strong>147 943</strong> para entrenamiento y <strong>36 595</strong> para prueba — el 80/20 esperado, con <code>seed=42</code> garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).</p>
+<p>En una corrida real, sobre las 184 538 filas de Pre-S4: <strong>147 943</strong> para entrenamiento y <strong>36 595</strong> para prueba — el 80/20 esperado, con <code>seed=42</code> garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).</p>
 <h3 id="36-entrenar-un-modelo-base-de-regresion-lineal">3.6 Entrenar un modelo base de regresión lineal<a class="headerlink" href="#36-entrenar-un-modelo-base-de-regresion-lineal" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> <code>modelo_base</code> entrenado, con coeficientes e intercepto visibles (2.3).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
@@ -2131,6 +2131,57 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </tbody>
 </table>
 <p>En una corrida real, <strong>Random Forest ganó en las tres métricas a la vez</strong> — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización <strong>empeoró</strong> el resultado en vez de mejorarlo (RMSE sube de <code>0.7909</code> a <code>0.8091</code> según crece la penalización): una señal de que este modelo base no estaba sobreajustando — no había ningún problema de <em>overfitting</em> que la regularización tuviera que corregir. La ganancia real vino de otro lado: <code>RandomForestRegressor</code> no asume una relación lineal entre las 8 variables ambientales y <code>Valor_CE</code>, y esa relación, en los datos reales, no lo es — coherente con que <code>Rain</code> (3.6) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables, una señal típica de que el modelo lineal está forzando una forma que no le queda bien a los datos.</p>
+<p><strong>¿Las 8 variables aportan por igual?</strong> Los coeficientes de <code>LinearRegression</code> (3.6) no responden esto de forma confiable — no son comparables entre sí porque cada variable tiene una escala distinta (<code>Valor_CM</code> en miles, <code>Rain</code> entre 0 y 0.2). <code>RandomForestRegressor</code> sí calcula algo directamente comparable, sin costo adicional: <code>featureImportances</code>, una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman <code>1.0</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">importancias</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">PREDICTORES</span><span class="p">,</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">featureImportances</span><span class="o">.</span><span class="n">toArray</span><span class="p">()))</span>
+<span class="n">importancias</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">importancia</span> <span class="ow">in</span> <span class="n">importancias</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">variable</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">importancia</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Tabla 7. Importancia de cada variable — completar con tu corrida real</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Importancia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>____</td>
+<td>____</td>
+</tr>
+</tbody>
+</table>
+<p>Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).</p>
 <h3 id="310-guardar-el-modelo-seleccionado">3.10 Guardar el modelo seleccionado<a class="headerlink" href="#310-guardar-el-modelo-seleccionado" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el modelo con mejor RMSE en la Tabla 6, guardado como artefacto reutilizable.</p>
 <div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># Random Forest gano las tres metricas (Tabla 6)</span>
@@ -2142,12 +2193,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <h3 id="311-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.11 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#311-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
 <p>Agrega celdas markdown breves debajo de cada bloque de código (3.6-3.9) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
-<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué configuración de la Tabla 6 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿Random Forest mejoró sobre <code>LinearRegression</code>, y qué te dice eso sobre si la relación entre las variables es aproximadamente lineal? ¿Por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib y no en scikit-learn?</p>
+<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué configuración de la Tabla 6 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿Random Forest mejoró sobre <code>LinearRegression</code>, y qué te dice eso sobre si la relación entre las variables es aproximadamente lineal? ¿Cuál fue la variable con mayor <code>featureImportances</code> en tu Tabla 7, y tiene sentido físico que sea la más relevante para explicar <code>Valor_CE</code>? ¿Por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib y no en scikit-learn?</p>
 <p><strong>Evidencia de aprendizaje:</strong></p>
 <ul>
 <li>Notebook <code>04_ml_distribuido_regresion_practica.ipynb</code> con vector de predictores, modelo base, evaluación y comparación documentados.</li>
 <li>Al menos tres configuraciones de regularización comparadas con las mismas métricas.</li>
-<li>Comparación con un segundo algoritmo (<code>RandomForestRegressor</code>).</li>
+<li>Comparación con un segundo algoritmo (<code>RandomForestRegressor</code>), incluida la importancia de cada variable (<code>featureImportances</code>).</li>
 <li>Modelo seleccionado guardado, coincidente con el mejor resultado de la comparación.</li>
 <li>Reflexión técnica documentada.</li>
 </ul>
@@ -2258,7 +2309,7 @@ va a usarse para tomar decisiones reales?
 <li>Si <code>RandomForestRegressor</code> hubiera dado un RMSE mucho peor que <code>LinearRegression</code>, ¿qué te diría eso sobre la relación entre tus variables?</li>
 </ol>
 <h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
-<p><strong>Tabla 7. Rúbrica de evaluación</strong></p>
+<p><strong>Tabla 8. Rúbrica de evaluación</strong></p>
 <table>
 <thead>
 <tr>
