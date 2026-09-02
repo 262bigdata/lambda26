@@ -106,9 +106,11 @@ flowchart LR
 
 Cada bloque de esta cadena es un paso necesario, no opcional: sin datos íntegros y de calidad no hay Data Lake confiable; sin `VectorAssembler` no hay entrada válida para MLlib; sin evaluación explícita no hay forma de saber si el modelo sirve; sin comparación no hay manera de distinguir un modelo confiable de uno que solo parece funcionar (el caso de 1.6).
 
-### 2.2 De tres fuentes crudas a un Data Lake Gold
+### 2.2 Preparación de datos: integración y calidad (Bronze, Silver, Gold)
 
-S3 (H&M) parte de una sola fuente ya lista. El dataset de hoy agrega el problema que casi cualquier proyecto real tiene desde el principio: los datos no llegan integrados, llegan repartidos en varios sistemas de origen, cada uno con su propia estructura y sus propios problemas de calidad — resolver eso, antes de aplicar esquema, nulos y duplicados, es contenido nuevo frente a S3.
+La **integración de datos** es el proceso de combinar información proveniente de distintos sistemas de origen —cada uno con su propia estructura, calidad y ritmo de actualización— en una sola fuente confiable para análisis. Es distinta de simplemente "cargar un dataset": antes de combinar dos o más fuentes hay que resolver los problemas de cada una por separado (esquema, duplicados, valores fuera de dominio), porque un problema sin resolver en una fuente no desaparece al integrarla — se propaga, y a veces se multiplica, al resto del resultado.
+
+S3 (H&M) parte de una sola fuente ya lista, así que ese problema no aparecía todavía. El dataset de hoy sí lo tiene, desde el principio: tres fuentes reales de sensores, cada una con su propia estructura y sus propios problemas de calidad — resolver eso, antes de aplicar esquema, nulos y duplicados, es contenido nuevo frente a S3.
 
 **Tabla 2. Las tres fuentes, tal como llegan**
 
@@ -175,9 +177,9 @@ df_train, df_test = df_ml.randomSplit([0.8, 0.2], seed=42)
 
 ### 2.4 Entrenamiento de un modelo de regresión distribuida
 
-El problema de hoy —estimar una variable numérica continua a partir de otras variables medidas en el mismo instante— es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia *House Prices* de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es `Valor_CE`.
-
 Todo estimador de Spark MLlib sigue el mismo patrón de dos pasos: `fit()` entrena sobre los datos de entrenamiento y devuelve un **modelo** (un `Transformer`); `transform()` aplica ese modelo entrenado sobre datos nuevos para producir predicciones. Es el mismo patrón que reaparecerá en cualquier otro algoritmo de MLlib, no solo en regresión.
+
+Estimar una variable numérica continua a partir de otras variables medidas en el mismo instante es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia *House Prices* de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es `Valor_CE`.
 
 ```python
 from pyspark.ml.regression import LinearRegression
