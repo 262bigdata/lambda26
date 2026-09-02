@@ -1,0 +1,2389 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S04_ML_Distribuido_Regresion_Spark_MLlib/">
+      
+      
+        <link rel="prev" href="../S03_Procesamiento_Calidad_Datos_Particionamiento/">
+      
+      
+        <link rel="next" href="../S03b_Calidad_Campo_Electrico/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S4 - ML Distribuido con Spark MLlib (Regresión)</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s4-ml-distribuido-con-spark-mllib-regresion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S4 - ML Distribuido con Spark MLlib (Regresión)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-algoritmo-que-le-costo-a-zillow-2000-empleos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el algoritmo que le costó a Zillow 2000 empleos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-preparacion-de-datos-para-modelado-distribuido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Preparación de datos para modelado distribuido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-entrenamiento-de-un-modelo-de-regresion-distribuida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Entrenamiento de un modelo de regresión distribuida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-evaluacion-con-metricas-de-regresion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Evaluación con métricas de regresión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-comparacion-de-configuraciones-y-algoritmos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Comparación de configuraciones y algoritmos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno lambda26 y confirmar la salida de S3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-cargar-la-salida-particionada-y-explorar-las-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Cargar la salida particionada y explorar las variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-ensamblar-el-vector-de-predictores-vectorassembler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Ensamblar el vector de predictores (VectorAssembler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-dividir-en-entrenamiento-y-prueba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Dividir en entrenamiento y prueba
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-entrenar-un-modelo-base-de-regresion-lineal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Entrenar un modelo base de regresión lineal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-evaluar-el-modelo-base-rmse-r2-mae" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Evaluar el modelo base (RMSE, R², MAE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-comparar-tres-configuraciones-basicas-de-regularizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Comparar tres configuraciones básicas de regularización
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-comparar-con-un-segundo-algoritmo-random-forest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Comparar con un segundo algoritmo (Random Forest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-guardar-el-modelo-seleccionado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Guardar el modelo seleccionado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-documentar-hallazgos-y-responder-preguntas-de-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Documentar hallazgos y responder preguntas de reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Material de referencia adicional
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Material de referencia adicional
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03b_Calidad_Campo_Electrico/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3b - Calidad de datos y particionamiento: segundo caso de uso (sensores ambientales)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-algoritmo-que-le-costo-a-zillow-2000-empleos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el algoritmo que le costó a Zillow 2000 empleos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-preparacion-de-datos-para-modelado-distribuido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Preparación de datos para modelado distribuido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-entrenamiento-de-un-modelo-de-regresion-distribuida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Entrenamiento de un modelo de regresión distribuida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-evaluacion-con-metricas-de-regresion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Evaluación con métricas de regresión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-comparacion-de-configuraciones-y-algoritmos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Comparación de configuraciones y algoritmos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno lambda26 y confirmar la salida de S3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-cargar-la-salida-particionada-y-explorar-las-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Cargar la salida particionada y explorar las variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-ensamblar-el-vector-de-predictores-vectorassembler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Ensamblar el vector de predictores (VectorAssembler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-dividir-en-entrenamiento-y-prueba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Dividir en entrenamiento y prueba
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-entrenar-un-modelo-base-de-regresion-lineal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Entrenar un modelo base de regresión lineal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-evaluar-el-modelo-base-rmse-r2-mae" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Evaluar el modelo base (RMSE, R², MAE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-comparar-tres-configuraciones-basicas-de-regularizacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Comparar tres configuraciones básicas de regularización
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-comparar-con-un-segundo-algoritmo-random-forest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Comparar con un segundo algoritmo (Random Forest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-guardar-el-modelo-seleccionado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Guardar el modelo seleccionado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-documentar-hallazgos-y-responder-preguntas-de-reflexion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Documentar hallazgos y responder preguntas de reflexión
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s4-ml-distribuido-con-spark-mllib-regresion">S4 - ML Distribuido con Spark MLlib (Regresión)<a class="headerlink" href="#s4-ml-distribuido-con-spark-mllib-regresion" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S3 cerró la base técnica del pipeline batch: una salida analítica particionada, con esquema validado, nulos tratados y duplicados resueltos. Hasta ahí, todo el trabajo transformaba y verificaba datos — ninguna sesión generaba todavía una predicción a partir de ellos. Esta sesión entrena el primer modelo de regresión distribuida con Spark sobre esa salida, y compara configuraciones básicas antes de reportar métricas.</p>
+<p>El porqué de comparar configuraciones en vez de conformarse con entrenar un único modelo se desarrolla en 1.6, a partir de un caso real. Esta sesión no busca el mejor modelo posible — ajustar hiperparámetros a fondo excede el alcance de un primer contacto — ni construye pronósticos con historial temporal: eso es contenido de S10.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Preparación de datos para modelado distribuido.</li>
+<li>Entrenamiento de un modelo de regresión distribuida.</li>
+<li>Evaluación con métricas de regresión.</li>
+<li>Comparación de configuraciones y algoritmos.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Entrenar y comparar</strong> modelos de regresión distribuida sobre una salida analítica ya validada, reportando métricas iniciales que permitan decidir si un modelo mejora sobre otro, sin necesidad de ajustar hiperparámetros de forma exhaustiva.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook de Jupyter con: vector de predictores ensamblado (<code>VectorAssembler</code>); modelo base de regresión lineal entrenado (<code>LinearRegression</code>) y evaluado (<code>RegressionEvaluator</code>: RMSE, R², MAE); comparación de al menos tres configuraciones de regularización (<code>regParam</code>, <code>elasticNetParam</code>); comparación con un segundo algoritmo (<code>RandomForestRegressor</code>); modelo seleccionado guardado (<code>model.write().overwrite().save(...)</code>).</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Repasar la salida particionada de S3 (o S3b, según el dataset que uses) — confirmar que el entorno <code>lambda26</code> sigue funcionando y que esa salida está disponible sin errores.</td>
+<td>Guía S3 (y S3b, si aplica).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>04_ml_distribuido_regresion_practica.ipynb</code>: preparación del vector de predictores, entrenamiento de un modelo base, evaluación con métricas de regresión, comparación de configuraciones y de un segundo algoritmo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas.</td>
+<td>Pasos 3.1 a 3.11 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase del modelo entrenado y de la tabla comparativa de configuraciones. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-el-algoritmo-que-le-costo-a-zillow-2000-empleos">1.6.1 Caso: el algoritmo que le costó a Zillow 2000 empleos<a class="headerlink" href="#161-caso-el-algoritmo-que-le-costo-a-zillow-2000-empleos" title="Permanent link">&para;</a></h4>
+<p>El 2 de noviembre de 2021, Zillow —la plataforma inmobiliaria más grande de Estados Unidos— anunció el cierre total de Zillow Offers, su negocio de compra automatizada de casas (<em>iBuying</em>). El modelo de negocio dependía de una sola variable crítica: la capacidad de su algoritmo de precios (basado en el <em>Zestimate</em>) para predecir, con precisión de pocos puntos porcentuales, el valor de una casa entre 3 y 6 meses hacia adelante — el tiempo que Zillow tardaba en comprar, remodelar y revender cada propiedad.</p>
+<p>El algoritmo sobreestimó sistemáticamente el valor de miles de casas. Zillow pagó por ellas más de lo que el mercado, ya desacelerándose, estaba dispuesto a pagar de vuelta. El resultado: un castigo contable de <strong>304 millones de dólares</strong> en inventario ese mismo trimestre, y el despido de aproximadamente el <strong>25% de la plantilla de la empresa</strong> (más de 2000 personas). Un modelo de regresión entrenado y desplegado a escala, sin margen para volatilidad de mercado ni un proceso que comparara su desempeño contra alternativas antes de comprometer capital real.</p>
+<p>Fuente: incidentdatabase.ai. (2021). <em>Incident 149: Zillow Shut Down Zillow Offers Division Allegedly Due to Predictive Pricing Tool's Insufficient Accuracy</em>. https://incidentdatabase.ai/cite/149/</p>
+<p>No fue que Zillow usara un modelo "malo" en un sentido técnico simple — fue que confió en un único modelo, entrenado sobre condiciones de mercado que ya habían cambiado, sin un proceso que lo comparara sistemáticamente contra configuraciones alternativas ni midiera qué tan lejos podía estar su error antes de arriesgar dinero real en cada predicción. Esta sesión formaliza justamente ese hábito: ningún modelo se reporta ni se guarda sin antes compararlo, con métricas explícitas, contra al menos otra configuración y otro algoritmo.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>Antes de leer la causa, ¿qué riesgo ves en construir un negocio completo sobre una única predicción numérica, sin ningún mecanismo de comparación o corrección?</li>
+</ol>
+<p><strong>Comprensión de la comparación de modelos</strong></p>
+<ol>
+<li>Según el caso, ¿qué hubiera cambiado si Zillow hubiera comparado su modelo de precios contra configuraciones alternativas, y hubiera medido explícitamente su margen de error antes de comprar cada casa?</li>
+<li>¿Por qué reportar una sola métrica (por ejemplo, solo R²) puede ocultar un problema que sí aparece en otra métrica (por ejemplo, RMSE)? Relaciónalo con lo que vas a comparar en 3.7-3.9.</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U1 - Arquitecturas Big Data y ETL batch distribuido.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</li>
+<li>Avance del producto en esta sesión: modelo de regresión distribuida entrenado y comparado sobre una salida analítica del Proyecto Sello, con métricas iniciales reportadas.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la unidad U1</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Arquitectura["Arquitectura Big Data&lt;br/&gt;Lambda o Kappa&lt;br/&gt;S1"]
+    PySpark["Fundamentos PySpark&lt;br/&gt;S2"]
+    HDFS["Formatos analíticos y calidad&lt;br/&gt;S3"]
+    ML["ML distribuido&lt;br/&gt;HOY"]
+    Evaluacion["Evaluación U1&lt;br/&gt;S5"]
+
+    Arquitectura --&gt; PySpark --&gt; HDFS --&gt; ML --&gt; Evaluacion
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class ML today;</code></pre>
+<p>Hoy se cierra el último eslabón que la evaluación de unidad (S5) necesita: sin un modelo entrenado y comparado sobre la salida particionada de S3, S5 no tendría nada de "ML distribuido" que sustentar como parte del pipeline batch completo.</p>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 25 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. De la salida particionada de S3 al modelo comparado</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    Parquet["Salida particionada&lt;br/&gt;de S3 (Parquet)"] --&gt; Vector["Ensamblar predictores&lt;br/&gt;VectorAssembler"]
+    Vector --&gt; Split["Dividir&lt;br/&gt;train / test"]
+    Split --&gt; Base["Entrenar modelo base&lt;br/&gt;LinearRegression"]
+    Base --&gt; Eval["Evaluar&lt;br/&gt;RMSE, R², MAE"]
+    Eval --&gt; Config["Comparar configuraciones&lt;br/&gt;regParam, elasticNetParam"]
+    Config --&gt; Alt["Comparar con otro algoritmo&lt;br/&gt;RandomForestRegressor"]
+    Alt --&gt; Guardar["Guardar el modelo&lt;br/&gt;seleccionado"]
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Vector,Split,Base,Eval,Config,Alt,Guardar today;</code></pre>
+<p>Cada bloque de esta cadena es un paso necesario, no opcional: sin <code>VectorAssembler</code> no hay entrada válida para MLlib; sin evaluación explícita no hay forma de saber si el modelo sirve; sin comparación no hay manera de distinguir un modelo confiable de uno que solo parece funcionar (el caso de 1.6).</p>
+<h3 id="22-preparacion-de-datos-para-modelado-distribuido">2.2 Preparación de datos para modelado distribuido<a class="headerlink" href="#22-preparacion-de-datos-para-modelado-distribuido" title="Permanent link">&para;</a></h3>
+<p>A diferencia de librerías como scikit-learn, donde un modelo acepta directamente una matriz de columnas (<code>X</code>), Spark MLlib exige que todos los predictores estén combinados en una <strong>sola columna vectorial</strong>. <code>VectorAssembler</code> hace esa combinación:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorAssembler</span>
+
+<span class="n">ensamblador</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">PREDICTORES</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">)</span>
+<span class="n">df_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="s2">"Valor_CE"</span><span class="p">)</span>
+</code></pre></div>
+<p>Esta diferencia no es una peculiaridad arbitraria de Spark: en un motor distribuido, cada fila se procesa de forma independiente en un nodo distinto — tener un único objeto <code>Vector</code> por fila simplifica cómo Spark distribuye y serializa esa fila entre nodos, en vez de coordinar N columnas sueltas por separado.</p>
+<p>La columna objetivo (<code>label</code>, aquí <code>Valor_CE</code>) <strong>no</strong> entra al ensamblador — es lo que el modelo debe predecir, no un dato de entrada.</p>
+<p><strong>Tabla 2. División de datos: por qué esta sesión no usa validación temporal</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Esta sesión (S4)</th>
+<th>S10 (Series de tiempo)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tipo de división</td>
+<td>Aleatoria (<code>randomSplit</code>)</td>
+<td>Cronológica (<code>TimeSeriesSplit</code>-equivalente)</td>
+</tr>
+<tr>
+<td>Supuesto sobre las filas</td>
+<td>Cada fila es una observación independiente</td>
+<td>El orden temporal importa; una fila "sabe" del pasado</td>
+</tr>
+<tr>
+<td>Riesgo si se usa el otro criterio</td>
+<td>Ninguno — no hay fuga de información temporal que evitar</td>
+<td>Un split aleatorio filtraría información del futuro al entrenamiento</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span> <span class="o">=</span> <span class="n">df_ml</span><span class="o">.</span><span class="n">randomSplit</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</code></pre></div>
+<p><code>seed=42</code> fija la aleatoriedad — sin ella, cada corrida dividiría los datos distinto, y los resultados no serían comparables entre configuraciones (2.5).</p>
+<h3 id="23-entrenamiento-de-un-modelo-de-regresion-distribuida">2.3 Entrenamiento de un modelo de regresión distribuida<a class="headerlink" href="#23-entrenamiento-de-un-modelo-de-regresion-distribuida" title="Permanent link">&para;</a></h3>
+<p>Todo estimador de Spark MLlib sigue el mismo patrón de dos pasos: <code>fit()</code> entrena sobre los datos de entrenamiento y devuelve un <strong>modelo</strong> (un <code>Transformer</code>); <code>transform()</code> aplica ese modelo entrenado sobre datos nuevos para producir predicciones. Es el mismo patrón que reaparecerá en cualquier otro algoritmo de MLlib, no solo en regresión.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">lr_base</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">)</span>
+<span class="n">modelo_base</span> <span class="o">=</span> <span class="n">lr_base</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+
+<span class="n">predicciones_base</span> <span class="o">=</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
+</code></pre></div>
+<p><code>modelo_base.coefficients</code> y <code>modelo_base.intercept</code> exponen la ecuación aprendida — útil para verificar rápido si un coeficiente tiene el signo físicamente esperado (por ejemplo, si más lluvia debería asociarse con un campo eléctrico más bajo o más alto, según lo que ya sabes del dominio).</p>
+<h3 id="24-evaluacion-con-metricas-de-regresion">2.4 Evaluación con métricas de regresión<a class="headerlink" href="#24-evaluacion-con-metricas-de-regresion" title="Permanent link">&para;</a></h3>
+<p>Ninguna métrica sola cuenta toda la historia — el caso de 1.6 es, en el fondo, un caso de confiar en una sola señal de desempeño:</p>
+<p><strong>Tabla 3. RMSE, R² y MAE</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Qué mide</th>
+<th>Sensible a errores grandes</th>
+<th>Unidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RMSE (raíz del error cuadrático medio)</td>
+<td>Qué tan lejos, en promedio, cae la predicción del valor real, penalizando fuerte los errores grandes.</td>
+<td>Sí — un solo error enorme infla el RMSE mucho más que varios errores moderados.</td>
+<td>La misma que la variable objetivo (<code>Valor_CE</code>).</td>
+</tr>
+<tr>
+<td>MAE (error absoluto medio)</td>
+<td>Qué tan lejos, en promedio, cae la predicción, sin penalizar extra los errores grandes.</td>
+<td>No — cada error pesa lo mismo, grande o chico.</td>
+<td>La misma que la variable objetivo.</td>
+</tr>
+<tr>
+<td>R² (coeficiente de determinación)</td>
+<td>Qué proporción de la variabilidad de <code>Valor_CE</code> explica el modelo, entre 0 y 1 (puede ser negativo si el modelo es peor que predecir siempre el promedio).</td>
+<td>No aplica — es una proporción, no un error.</td>
+<td>Sin unidad (proporción).</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionEvaluator</span>
+
+<span class="n">evaluador_rmse</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"rmse"</span><span class="p">)</span>
+<span class="n">evaluador_r2</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"r2"</span><span class="p">)</span>
+<span class="n">evaluador_mae</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"mae"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"RMSE=</span><span class="si">{</span><span class="n">evaluador_rmse</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"R2=</span><span class="si">{</span><span class="n">evaluador_r2</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"MAE=</span><span class="si">{</span><span class="n">evaluador_mae</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p>Que RMSE y MAE difieran bastante entre sí es, por sí solo, una señal: significa que hay al menos algunos errores grandes que MAE está "escondiendo" en el promedio.</p>
+<h3 id="25-comparacion-de-configuraciones-y-algoritmos">2.5 Comparación de configuraciones y algoritmos<a class="headerlink" href="#25-comparacion-de-configuraciones-y-algoritmos" title="Permanent link">&para;</a></h3>
+<p><code>regParam</code> controla cuánto se penaliza la magnitud de los coeficientes — un valor alto reduce el riesgo de que el modelo memorice ruido específico del conjunto de entrenamiento (<em>overfitting</em>), a costa de un ajuste menos preciso. <code>elasticNetParam</code> mezcla dos formas de esa penalización: <code>0.0</code> es Ridge (penalización L2, reduce coeficientes sin llevarlos nunca a cero), <code>1.0</code> es Lasso (penalización L1, puede llevar coeficientes irrelevantes exactamente a cero), y cualquier valor entre ambos es una mezcla (<em>Elastic Net</em>).</p>
+<p><strong>Tabla 4. Tres configuraciones básicas, sin búsqueda exhaustiva</strong></p>
+<table>
+<thead>
+<tr>
+<th>Configuración</th>
+<th style="text-align: right;"><code>regParam</code></th>
+<th style="text-align: right;"><code>elasticNetParam</code></th>
+<th>Qué prueba</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sin regularización</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td>La línea base, sin ningún ajuste.</td>
+</tr>
+<tr>
+<td>Ridge (L2)</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0.0</td>
+<td>Si penalizar coeficientes grandes mejora la generalización.</td>
+</tr>
+<tr>
+<td>Elastic Net (L1+L2)</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0.5</td>
+<td>Una mezcla de ambas penalizaciones.</td>
+</tr>
+</tbody>
+</table>
+<p><code>LinearRegression</code> asume que la relación entre predictores y objetivo es, de fondo, lineal. <code>RandomForestRegressor</code> no necesita ese supuesto — construye muchos árboles de decisión sobre subconjuntos aleatorios de datos y variables, y promedia sus predicciones, capturando relaciones no lineales e interacciones que una ecuación lineal no puede representar:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">numTrees</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">modelo_rf</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+</code></pre></div>
+<p>Comparar ambas familias (lineal vs. árboles) es la forma más básica de saber si, de entrada, la relación real es aproximadamente lineal — si <code>RandomForestRegressor</code> mejora mucho a <code>LinearRegression</code>, es una señal de que la relación no lo es.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>04_ml_distribuido_regresion_practica.ipynb</code> sobre el entorno <code>lambda26</code> (<code>uso-pyspark</code>), entrenando y comparando modelos de regresión distribuida con Spark MLlib sobre la salida analítica de S3, y reportando métricas iniciales (RMSE, R², MAE).</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que dominas la preparación de datos para MLlib, el entrenamiento y evaluación de un modelo de regresión, y la comparación sistemática de configuraciones — antes de confiar en un único modelo, como en el caso de 1.6.</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, verificando cada métrica antes de avanzar al siguiente paso.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno <code>lambda26</code> y confirmar la salida de S3.</li>
+<li><strong>3.2</strong> Crear el notebook y la <code>SparkSession</code>.</li>
+<li><strong>3.3</strong> Cargar la salida particionada y explorar las variables.</li>
+<li><strong>3.4</strong> Ensamblar el vector de predictores (<code>VectorAssembler</code>).</li>
+<li><strong>3.5</strong> Dividir en entrenamiento y prueba.</li>
+<li><strong>3.6</strong> Entrenar un modelo base de regresión lineal.</li>
+<li><strong>3.7</strong> Evaluar el modelo base (RMSE, R², MAE).</li>
+<li><strong>3.8</strong> Comparar tres configuraciones básicas de regularización.</li>
+<li><strong>3.9</strong> Comparar con un segundo algoritmo (Random Forest).</li>
+<li><strong>3.10</strong> Guardar el modelo seleccionado.</li>
+<li><strong>3.11</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3">3.1 Reanudar el entorno <code>lambda26</code> y confirmar la salida de S3<a class="headerlink" href="#31-reanudar-el-entorno-lambda26-y-confirmar-la-salida-de-s3" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> entorno <code>lambda26</code> funcionando, con la salida particionada de S3 (o S3b, si tu equipo usa ese dataset) disponible y verificada.</p>
+<p>Si el contenedor <code>lambda26-pyspark</code> ya está corriendo desde una sesión anterior, continúa directo en 3.2. Si no:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>pyspark
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<p>Confirma que la salida particionada de la sesión anterior sigue existiendo antes de avanzar — sin ella, no hay nada que cargar en 3.3.</p>
+<h3 id="32-crear-el-notebook-y-la-sparksession">3.2 Crear el notebook y la <code>SparkSession</code><a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook <code>04_ml_distribuido_regresion_practica.ipynb</code> con una <code>SparkSession</code> activa.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion4-ml-regresion"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.memory"</span><span class="p">,</span> <span class="s2">"4g"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">spark</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">ORIGEN_DATOS</span> <span class="o">=</span> <span class="s2">"/opt/s03b-calidad-campo-electrico/artifacts/campo_electrico_particionado"</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s04-ml-distribuido-regresion/artifacts"</span>
+</code></pre></div>
+<h3 id="33-cargar-la-salida-particionada-y-explorar-las-variables">3.3 Cargar la salida particionada y explorar las variables<a class="headerlink" href="#33-cargar-la-salida-particionada-y-explorar-las-variables" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>df</code> cargado desde la salida particionada de S3, con su esquema y conteo confirmados.</p>
+<p>Un Parquet particionado ya trae su propio esquema — no hace falta declararlo a mano como con un CSV (S3, 2.2.1). La columna de partición (<code>AnioMes</code> o <code>club_member_status</code>, según el dataset) reaparece en el esquema por <em>partition discovery</em> (S3, 2.5), aunque no está guardada dentro de ningún archivo físico:</p>
+<div class="highlight"><pre><span></span><code><span class="n">VARIABLES_9</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"Valor_CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span>
+    <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"Rain"</span><span class="p">,</span> <span class="s2">"SolarRad."</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ORIGEN_DATOS</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">VARIABLES_9</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>En una corrida real sobre la salida de S3b, este conteo dio <strong>184 538</strong> filas — el mismo número que S3b reportó como salida final (S3b, sección 7).</p>
+<h3 id="34-ensamblar-el-vector-de-predictores-vectorassembler">3.4 Ensamblar el vector de predictores (<code>VectorAssembler</code>)<a class="headerlink" href="#34-ensamblar-el-vector-de-predictores-vectorassembler" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>df_ml</code>, con una sola columna <code>features</code> (vector de 8 predictores) y la columna objetivo <code>Valor_CE</code> (2.2).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorAssembler</span>
+
+<span class="n">PREDICTORES</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">VARIABLES_9</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">"Valor_CE"</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predictores (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">PREDICTORES</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">PREDICTORES</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="n">ensamblador</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">PREDICTORES</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">)</span>
+<span class="n">df_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="s2">"Valor_CE"</span><span class="p">)</span>
+
+<span class="n">df_ml</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="35-dividir-en-entrenamiento-y-prueba">3.5 Dividir en entrenamiento y prueba<a class="headerlink" href="#35-dividir-en-entrenamiento-y-prueba" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>df_train</code>/<code>df_test</code>, división aleatoria 80/20 (2.2, Tabla 2).</p>
+<div class="highlight"><pre><span></span><code><span class="n">df_train</span><span class="p">,</span> <span class="n">df_test</span> <span class="o">=</span> <span class="n">df_ml</span><span class="o">.</span><span class="n">randomSplit</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Entrenamiento: </span><span class="si">{</span><span class="n">df_train</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prueba: </span><span class="si">{</span><span class="n">df_test</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="36-entrenar-un-modelo-base-de-regresion-lineal">3.6 Entrenar un modelo base de regresión lineal<a class="headerlink" href="#36-entrenar-un-modelo-base-de-regresion-lineal" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>modelo_base</code> entrenado, con coeficientes e intercepto visibles (2.3).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">lr_base</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">)</span>
+<span class="n">modelo_base</span> <span class="o">=</span> <span class="n">lr_base</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Coeficientes:"</span><span class="p">,</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Intercepto:"</span><span class="p">,</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">intercept</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="37-evaluar-el-modelo-base-rmse-r2-mae">3.7 Evaluar el modelo base (RMSE, R², MAE)<a class="headerlink" href="#37-evaluar-el-modelo-base-rmse-r2-mae" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> las tres métricas del modelo base, sobre el conjunto de prueba — nunca sobre el de entrenamiento (2.4).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionEvaluator</span>
+
+<span class="n">predicciones_base</span> <span class="o">=</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
+<span class="n">predicciones_base</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluar</span><span class="p">(</span><span class="n">predicciones</span><span class="p">,</span> <span class="n">nombre</span><span class="p">):</span>
+    <span class="n">resultados</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">metrica</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"rmse"</span><span class="p">,</span> <span class="s2">"r2"</span><span class="p">,</span> <span class="s2">"mae"</span><span class="p">]:</span>
+        <span class="n">evaluador</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="n">metrica</span><span class="p">)</span>
+        <span class="n">resultados</span><span class="p">[</span><span class="n">metrica</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">evaluador</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: RMSE=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'RMSE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  R2=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'R2'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  MAE=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'MAE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resultados</span>
+
+<span class="n">resultados_base</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">,</span> <span class="s2">"LinearRegression base"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Tabla 5. Resultado real del modelo base — completar con tu corrida</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RMSE</td>
+<td>____</td>
+</tr>
+<tr>
+<td>R²</td>
+<td>____</td>
+</tr>
+<tr>
+<td>MAE</td>
+<td>____</td>
+</tr>
+</tbody>
+</table>
+<h3 id="38-comparar-tres-configuraciones-basicas-de-regularizacion">3.8 Comparar tres configuraciones básicas de regularización<a class="headerlink" href="#38-comparar-tres-configuraciones-basicas-de-regularizacion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> tabla comparativa de las tres configuraciones de la Tabla 4 (2.5).</p>
+<div class="highlight"><pre><span></span><code><span class="n">configuraciones</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">"nombre"</span><span class="p">:</span> <span class="s2">"Sin regularizacion"</span><span class="p">,</span> <span class="s2">"regParam"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"elasticNetParam"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"nombre"</span><span class="p">:</span> <span class="s2">"Ridge (L2)"</span><span class="p">,</span> <span class="s2">"regParam"</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">"elasticNetParam"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"nombre"</span><span class="p">:</span> <span class="s2">"Elastic Net (L1+L2)"</span><span class="p">,</span> <span class="s2">"regParam"</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">"elasticNetParam"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">comparacion_configs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configuraciones</span><span class="p">:</span>
+    <span class="n">lr</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span>
+        <span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span>
+        <span class="n">regParam</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regParam"</span><span class="p">],</span> <span class="n">elasticNetParam</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"elasticNetParam"</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">modelo</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+    <span class="n">predicciones</span> <span class="o">=</span> <span class="n">modelo</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
+    <span class="n">resultado</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">"nombre"</span><span class="p">])</span>
+    <span class="n">resultado</span><span class="p">[</span><span class="s2">"Configuracion"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"nombre"</span><span class="p">]</span>
+    <span class="n">comparacion_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resultado</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">comparacion_configs</span><span class="p">)[[</span><span class="s2">"Configuracion"</span><span class="p">,</span> <span class="s2">"RMSE"</span><span class="p">,</span> <span class="s2">"R2"</span><span class="p">,</span> <span class="s2">"MAE"</span><span class="p">]]</span>
+</code></pre></div>
+<h3 id="39-comparar-con-un-segundo-algoritmo-random-forest">3.9 Comparar con un segundo algoritmo (Random Forest)<a class="headerlink" href="#39-comparar-con-un-segundo-algoritmo-random-forest" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> métricas de <code>RandomForestRegressor</code>, comparables directamente contra la Tabla 5 y el paso 3.8 (2.5).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">numTrees</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">modelo_rf</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
+<span class="n">predicciones_rf</span> <span class="o">=</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
+
+<span class="n">resultados_rf</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_rf</span><span class="p">,</span> <span class="s2">"Random Forest"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Tabla 6. Comparación final — completar con tu corrida real</strong></p>
+<table>
+<thead>
+<tr>
+<th>Configuración</th>
+<th>RMSE</th>
+<th>R²</th>
+<th>MAE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sin regularización</td>
+<td>____</td>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>Ridge (L2)</td>
+<td>____</td>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>Elastic Net (L1+L2)</td>
+<td>____</td>
+<td>____</td>
+<td>____</td>
+</tr>
+<tr>
+<td>Random Forest</td>
+<td>____</td>
+<td>____</td>
+<td>____</td>
+</tr>
+</tbody>
+</table>
+<h3 id="310-guardar-el-modelo-seleccionado">3.10 Guardar el modelo seleccionado<a class="headerlink" href="#310-guardar-el-modelo-seleccionado" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el modelo con mejor RMSE en la Tabla 6, guardado como artefacto reutilizable.</p>
+<div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># ajusta esta linea segun tu resultado real (Tabla 6)</span>
+
+<span class="n">modelo_ganador</span><span class="o">.</span><span class="n">write</span><span class="p">()</span><span class="o">.</span><span class="n">overwrite</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Modelo guardado en </span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: guardar el primer modelo entrenado (3.6) en vez del que realmente ganó la comparación de la Tabla 6. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar.</p>
+<h3 id="311-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.11 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#311-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
+<p>Agrega celdas markdown breves debajo de cada bloque de código (3.6-3.9) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
+<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿qué configuración de la Tabla 6 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿Random Forest mejoró sobre <code>LinearRegression</code>, y qué te dice eso sobre si la relación entre las variables es aproximadamente lineal? ¿Por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib y no en scikit-learn?</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Notebook <code>04_ml_distribuido_regresion_practica.ipynb</code> con vector de predictores, modelo base, evaluación y comparación documentados.</li>
+<li>Al menos tres configuraciones de regularización comparadas con las mismas métricas.</li>
+<li>Comparación con un segundo algoritmo (<code>RandomForestRegressor</code>).</li>
+<li>Modelo seleccionado guardado, coincidente con el mejor resultado de la comparación.</li>
+<li>Reflexión técnica documentada.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Replicación autónoma del entrenamiento y comparación de modelos de regresión construidos en clase, sobre una salida analítica del Proyecto Sello del equipo (la de S3, o una equivalente si el equipo todavía no tiene una salida particionada propia).</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Ensamblar el vector de predictores sobre una salida analítica del Proyecto Sello, con una variable objetivo numérica relevante al caso del equipo (equivalente a 3.4).</li>
+<li>Entrenar un modelo base de regresión y evaluarlo con las tres métricas (RMSE, R², MAE) (equivalente a 3.6-3.7).</li>
+<li>Comparar al menos tres configuraciones básicas de regularización, documentando el resultado de cada una (equivalente a 3.8).</li>
+<li>Comparar con un segundo algoritmo de MLlib, distinto de <code>LinearRegression</code> (equivalente a 3.9).</li>
+<li>Guardar el modelo con mejor desempeño, coincidente con la comparación (equivalente a 3.10).</li>
+<li>Explicar, con tus propias palabras, por qué ninguna métrica sola basta para decidir cuál modelo es mejor.</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual y fuera del aula, que puede entrenar, evaluar y comparar modelos de regresión distribuida sin el acompañamiento del docente — aplicándolo al caso real del Proyecto Sello de su equipo, no a un dataset desconectado.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S04_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S04 - ML Distribuido con Spark MLlib (Regresión)</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Preparación y modelo base</em><ul>
+<li>Vector de predictores ensamblado; modelo base entrenado y evaluado con las tres métricas (equivalente a 3.4, 3.6-3.7).</li>
+</ul>
+</li>
+<li><em>Comparación de configuraciones</em><ul>
+<li>Tabla comparativa de al menos tres configuraciones de regularización (equivalente a 3.8).</li>
+</ul>
+</li>
+<li><em>Comparación con otro algoritmo</em><ul>
+<li>Métricas de un segundo algoritmo, comparadas contra las anteriores (equivalente a 3.9).</li>
+</ul>
+</li>
+<li><em>Modelo seleccionado y reflexión</em><ul>
+<li>Modelo guardado, coincidente con la mejor comparación, más la reflexión técnica (equivalente a 3.10-3.11).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe al menos un error o comportamiento inesperado que encontraste al entrenar o comparar tus propios modelos:</p>
+<ul>
+<li>Qué ocurrió o qué limitación encontraste.</li>
+<li>Cómo lo identificaste.</li>
+<li>Cómo lo resolviste o qué decisión tomaste.</li>
+</ul>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>¿Por qué confiar en un único modelo, sin comparar configuraciones ni
+algoritmos alternativos, es una decisión de riesgo cuando ese modelo
+va a usarse para tomar decisiones reales?
+</code></pre></div>
+<p><strong>Anexo: Feedback de la sesión</strong></p>
+<p>Pega esta página como la última hoja del PDF, con tus respuestas.</p>
+<ol>
+<li>¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?</li>
+<li>¿Qué punto de la clase te resultó más confuso o te dejó con dudas?</li>
+<li>¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?</li>
+<li>Sobre tu nivel de comprensión de la clase de hoy, marca una opción:<ul>
+<li>¡Entendido! - Lo domino y podría explicarlo.</li>
+<li>Más o menos. - Entendí la idea general, pero tengo dudas.</li>
+<li>Necesito ayuda. - Me siento perdido/a con este tema.</li>
+</ul>
+</li>
+<li>¿Cómo puedo ayudarte a comprender mejor el tema?</li>
+<li>Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías? Marca una opción:<ul>
+<li>Muy Comprometido/a: Me esforcé al máximo.</li>
+<li>Comprometido/a: Sé que podría haberme esforzado un poco más.</li>
+<li>Poco Comprometido/a: Hoy no di mi mejor esfuerzo.</li>
+</ul>
+</li>
+<li>Mi satisfacción con la clase fue... (califica del 1 al 10, donde 1 es insatisfecho y 10 es muy satisfecho).</li>
+</ol>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<p>La evidencia individual se considera completa si:</p>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>Un vector de predictores fue ensamblado sobre una salida analítica del Proyecto Sello.</li>
+<li>El modelo base fue entrenado y evaluado con RMSE, R² y MAE.</li>
+<li>Al menos tres configuraciones de regularización fueron comparadas con las mismas métricas.</li>
+<li>Un segundo algoritmo de MLlib fue comparado contra el modelo lineal.</li>
+<li>El modelo guardado coincide con el de mejor desempeño en la comparación.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+<li>Incluye el Anexo de feedback de la sesión respondido, como última página del PDF.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib, y qué pasaría si intentaras entrenar un modelo sin ese paso?</li>
+<li>¿Qué diferencia hay entre <code>regParam=0.0</code> y <code>regParam</code> con un valor alto, y qué riesgo controla cada extremo?</li>
+<li>¿Por qué RMSE penaliza más los errores grandes que MAE, y cuándo esa diferencia importa más para una decisión real?</li>
+<li>¿Por qué esta sesión usa una división aleatoria (<code>randomSplit</code>) en vez de una división cronológica?</li>
+<li>Si <code>RandomForestRegressor</code> hubiera dado un RMSE mucho peor que <code>LinearRegression</code>, ¿qué te diría eso sobre la relación entre tus variables?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 7. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Preparación y modelo base*</td>
+<td style="text-align: right;">25</td>
+<td>Vector de predictores correcto, modelo base entrenado y evaluado con las tres métricas.</td>
+<td>Preparación y modelo base correctos, con alguna métrica incompleta.</td>
+<td>Preparación o modelo base incompletos.</td>
+<td>No presenta un modelo entrenado ni evaluado.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Comparación de configuraciones*</td>
+<td style="text-align: right;">25</td>
+<td>Al menos tres configuraciones comparadas con las mismas métricas, con análisis claro de diferencias.</td>
+<td>Tres configuraciones comparadas, con análisis superficial.</td>
+<td>Comparación incompleta (menos de tres configuraciones).</td>
+<td>No compara configuraciones.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Comparación con otro algoritmo*</td>
+<td style="text-align: right;">25</td>
+<td>Segundo algoritmo comparado correctamente, con conclusión clara sobre linealidad de la relación.</td>
+<td>Segundo algoritmo comparado, sin conclusión clara.</td>
+<td>Comparación incompleta o sin métricas comparables.</td>
+<td>No compara con un segundo algoritmo.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Modelo guardado y comprensión*</td>
+<td style="text-align: right;">25</td>
+<td>Modelo guardado coincide con la mejor comparación; explicación clara de por qué ninguna métrica sola basta.</td>
+<td>Modelo guardado correcto, explicación con detalles menores.</td>
+<td>Modelo guardado no coincide con la mejor comparación, o explicación superficial.</td>
+<td>No guarda modelo ni explica el criterio de selección.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy el pipeline batch ganó su primer modelo — un vector de predictores ensamblado con <code>VectorAssembler</code>, un modelo base de regresión lineal entrenado y evaluado con tres métricas distintas (RMSE, R², MAE), comparado sistemáticamente contra otras configuraciones de regularización y contra un segundo algoritmo (Random Forest), antes de guardar el que realmente tuvo mejor desempeño — no el primero que se entrenó.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 6 le dio el mejor RMSE, y si le sorprendió o no.</p>
+<p><strong>Metacognición:</strong> ¿qué parte de la sesión te costó más entender: por qué Spark MLlib necesita <code>VectorAssembler</code>, la diferencia entre RMSE y MAE, o por qué comparar contra Random Forest importa aunque el modelo lineal ya "funcione"?</p>
+<p><strong>Proyección:</strong> S5 evalúa el pipeline batch completo de la Unidad I — arquitectura, PySpark, calidad de datos, particionamiento y el modelo de regresión de hoy — como un sistema integrado. El componente de series de tiempo (con historial temporal e inferencia en streaming) queda para S10, sobre la misma familia de datos, una vez que exista la infraestructura de streaming (S6-S9).</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>incidentdatabase.ai. (2021). <em>Incident 149: Zillow Shut Down Zillow Offers Division Allegedly Due to Predictive Pricing Tool's Insufficient Accuracy</em>. https://incidentdatabase.ai/cite/149/</li>
+<li>Apache Software Foundation. (2024). <em>Apache Spark documentation</em>. https://spark.apache.org/docs/latest/</li>
+<li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.ml</em>. https://spark.apache.org/docs/latest/api/python/reference/pyspark.ml.html</li>
+<li>Apache Software Foundation. (2024). <em>ML Tuning: model selection and hyperparameter tuning</em>. Spark MLlib Guide. https://spark.apache.org/docs/latest/ml-tuning.html</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
