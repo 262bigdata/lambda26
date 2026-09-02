@@ -2724,18 +2724,18 @@ wc<span class="w"> </span>-l<span class="w"> </span>lambda26/pyspark/sesiones/s0
 </code></pre></div>
 <h3 id="37-tratamiento-de-duplicados">3.7 Tratamiento de duplicados<a class="headerlink" href="#37-tratamiento-de-duplicados" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> duplicados identificados y/o tratados con las técnicas de la Tabla 5 — control de calidad #2.</p>
-<p>Eliminar duplicados completos (todas las columnas) o por columnas específicas:</p>
+<p>Antes de eliminar nada, identifica <strong>sin eliminar todavía</strong> — lista qué valores de <code>customer_id</code> aparecen más de una vez, para saber si hay algo que tratar antes de decidir cómo tratarlo:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">count</span>
+
+<span class="n">df_customers</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"count &gt; 1"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>Recién ahora, con el diagnóstico en mano, elimina duplicados completos (todas las columnas) o por columnas específicas:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">()</span>
 <span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"customer_id"</span><span class="p">])</span>
 <span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"customer_id"</span><span class="p">,</span> <span class="s2">"postal_code"</span><span class="p">])</span>
 </code></pre></div>
 <p><code>distinct()</code> es la forma corta de <code>dropDuplicates()</code> sin argumentos:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_clean</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span>
-</code></pre></div>
-<p>Identificar duplicados <strong>sin</strong> eliminarlos todavía — lista qué valores de <code>customer_id</code> aparecen más de una vez:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">count</span>
-
-<span class="n">df_customers</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"customer_id"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"count &gt; 1"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Confirma las cifras sobre el dataset completo — si coinciden con el total, no hay duplicados reales en ninguna definición:</p>
 <div class="highlight"><pre><span></span><code><span class="n">total</span> <span class="o">=</span> <span class="n">df_customers</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
