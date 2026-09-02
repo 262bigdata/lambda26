@@ -271,7 +271,7 @@ Un Parquet particionado ya trae su propio esquema — no hace falta declararlo a
 ```python
 VARIABLES_9 = [
     "Valor_CE", "Valor_CM", "TempOut", "OutHum",
-    "WindSpeed", "Bar", "Rain", "SolarRad.", "UVIndex",
+    "WindSpeed", "Bar", "Rain", "SolarRad", "UVIndex",
 ]
 
 df = spark.read.parquet(ORIGEN_DATOS)
@@ -310,6 +310,8 @@ print(f"Entrenamiento: {df_train.count():,} filas")
 print(f"Prueba: {df_test.count():,} filas")
 ```
 
+En una corrida real, sobre las 184 538 filas de S3b: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).
+
 ### 3.6 Entrenar un modelo base de regresión lineal
 
 **Producto del paso:** `modelo_base` entrenado, con coeficientes e intercepto visibles (2.3).
@@ -323,6 +325,13 @@ modelo_base = lr_base.fit(df_train)
 print("Coeficientes:", modelo_base.coefficients)
 print("Intercepto:", modelo_base.intercept)
 ```
+
+**Advertencias esperadas, no errores**: al correr esta celda pueden aparecer dos líneas en la consola —
+
+- `regParam is zero, which might cause numerical instability and overfitting`: Spark avisa que este modelo base no tiene regularización (2.5) — es exactamente lo que se está probando a propósito como línea base en 3.8, no un problema a corregir.
+- `netlib-blas: JNI_OnLoad: dlopen(libblas.so.3) failed...`: el contenedor no tiene una librería de álgebra lineal nativa instalada, así que Spark cae a una implementación en JVM pura — más lenta, pero igual de correcta. No afecta ningún resultado de esta sesión.
+
+En una corrida real, `modelo_base.coefficients` dio `[-0.0028, 0.1454, 0.0069, -0.0779, -0.0429, 1.2399, -0.0007, 0.0416]` (en el orden de `PREDICTORES`) y el intercepto `104.7116`. El coeficiente de `Rain` (`1.2399`) es, por lejos, el más grande en magnitud — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".
 
 ### 3.7 Evaluar el modelo base (RMSE, R², MAE)
 
@@ -345,13 +354,15 @@ def evaluar(predicciones, nombre):
 resultados_base = evaluar(predicciones_base, "LinearRegression base")
 ```
 
-**Tabla 5. Resultado real del modelo base — completar con tu corrida**
+**Tabla 5. Resultado real del modelo base**
 
 | Métrica | Valor |
 |---|---|
-| RMSE | ____ |
-| R² | ____ |
-| MAE | ____ |
+| RMSE | 0.7909 |
+| R² | 0.2271 |
+| MAE | 0.6087 |
+
+Un R² de `0.23` significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de `Valor_CE` — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.9 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.
 
 ### 3.8 Comparar tres configuraciones básicas de regularización
 
@@ -394,27 +405,29 @@ predicciones_rf = modelo_rf.transform(df_test)
 resultados_rf = evaluar(predicciones_rf, "Random Forest")
 ```
 
-**Tabla 6. Comparación final — completar con tu corrida real**
+**Tabla 6. Comparación final**
 
 | Configuración | RMSE | R² | MAE |
 |---|---|---|---|
-| Sin regularización | ____ | ____ | ____ |
-| Ridge (L2) | ____ | ____ | ____ |
-| Elastic Net (L1+L2) | ____ | ____ | ____ |
-| Random Forest | ____ | ____ | ____ |
+| Sin regularización | 0.7909 | 0.2271 | 0.6087 |
+| Ridge (L2) | 0.7962 | 0.2166 | 0.6174 |
+| Elastic Net (L1+L2) | 0.8091 | 0.1910 | 0.6372 |
+| **Random Forest** | **0.6732** | **0.4399** | **0.5001** |
+
+En una corrida real, **Random Forest ganó en las tres métricas a la vez** — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo (RMSE sube de `0.7909` a `0.8091` según crece la penalización): una señal de que este modelo base no estaba sobreajustando — no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real vino de otro lado: `RandomForestRegressor` no asume una relación lineal entre las 8 variables ambientales y `Valor_CE`, y esa relación, en los datos reales, no lo es — coherente con que `Rain` (3.6) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables, una señal típica de que el modelo lineal está forzando una forma que no le queda bien a los datos.
 
 ### 3.10 Guardar el modelo seleccionado
 
 **Producto del paso:** el modelo con mejor RMSE en la Tabla 6, guardado como artefacto reutilizable.
 
 ```python
-modelo_ganador = modelo_rf  # ajusta esta linea segun tu resultado real (Tabla 6)
+modelo_ganador = modelo_rf  # Random Forest gano las tres metricas (Tabla 6)
 
 modelo_ganador.write().overwrite().save(f"{ARTIFACTS}/modelo_ce_regresion")
 print(f"Modelo guardado en {ARTIFACTS}/modelo_ce_regresion")
 ```
 
-**Error frecuente**: guardar el primer modelo entrenado (3.6) en vez del que realmente ganó la comparación de la Tabla 6. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar.
+**Error frecuente**: guardar el primer modelo entrenado (3.6) en vez del que realmente ganó la comparación de la Tabla 6. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (`modelo_rf` ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.
 
 ### 3.11 Documentar hallazgos y responder preguntas de reflexión
 

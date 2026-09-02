@@ -76,12 +76,14 @@ schema_va = StructType([
     StructField("WindDir", DoubleType(), nullable=True),
     StructField("Bar", DoubleType(), nullable=True),
     StructField("Rain", DoubleType(), nullable=True),
-    StructField("SolarRad.", DoubleType(), nullable=True),
+    StructField("SolarRad", DoubleType(), nullable=True),
     StructField("UVIndex", DoubleType(), nullable=True),
     StructField("FechaHora", TimestampType(), nullable=False),
 ])
 df_va = spark.read.csv(f"{ORIGEN_DATOS}/variables_ambientales.csv", header=True, schema=schema_va)
 ```
+
+**Error frecuente**: la fuente original trae esta columna como `SolarRad.` (con un punto al final, tal como la exporta el equipo de medición). Referenciarla luego con `col("SolarRad.")` falla con `AnalysisException` — Spark interpreta el punto como acceso a un campo anidado (`objeto.campo`), no como parte literal del nombre. No hace falta escapar el nombre en cada uso: como `header=True` junto con un `schema` explícito hace que Spark ignore el texto del header para nombrar columnas, basta con declarar el nombre ya limpio (`SolarRad`, sin punto) en el `StructField` de arriba — el resto del notebook nunca ve el nombre problemático.
 
 **Tabla 1. Las tres fuentes, tal como llegan**
 
@@ -180,7 +182,7 @@ Las nueve variables (`Valor_CE`, `Valor_CM` y las siete ambientales restantes, s
 ```python
 VARIABLES_9 = [
     "Valor_CE", "Valor_CM", "TempOut", "OutHum",
-    "WindSpeed", "Bar", "Rain", "SolarRad.", "UVIndex",
+    "WindSpeed", "Bar", "Rain", "SolarRad", "UVIndex",
 ]
 
 df_valido = df_limpio.na.drop(subset=VARIABLES_9).cache()
