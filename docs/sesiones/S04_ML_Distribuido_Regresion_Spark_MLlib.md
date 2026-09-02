@@ -31,7 +31,7 @@ Notebook de Jupyter con: vector de predictores ensamblado (`VectorAssembler`); m
 
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
-| Revisión previa individual | Repasar la salida particionada de S3 (o S3b, según el dataset que uses) — confirmar que el entorno `lambda26` sigue funcionando y que esa salida está disponible sin errores. | Guía S3 (y S3b, si aplica). |
+| Revisión previa individual | Repasar la salida particionada de S3 (o Pre-S4, según el dataset que uses) — confirmar que el entorno `lambda26` sigue funcionando y que esa salida está disponible sin errores. | Guía S3 (y Pre-S4, si aplica). |
 | Clase presencial | Construcción guiada del notebook `04_ml_distribuido_regresion_practica.ipynb`: preparación del vector de predictores, entrenamiento de un modelo base, evaluación con métricas de regresión, comparación de configuraciones y de un segundo algoritmo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Pasos 3.1 a 3.11 de esta guía. |
 | Evaluación formativa | Revisión en clase del modelo entrenado y de la tabla comparativa de configuraciones. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
@@ -226,7 +226,7 @@ Tiempo: 2h.
 
 ### 3.1 Reanudar el entorno `lambda26` y confirmar la salida de S3
 
-**Producto del paso:** entorno `lambda26` funcionando, con la salida particionada de S3 (o S3b, si tu equipo usa ese dataset) disponible y verificada.
+**Producto del paso:** entorno `lambda26` funcionando, con la salida particionada de S3 (o Pre-S4, si tu equipo usa ese dataset) disponible y verificada.
 
 Si el contenedor `lambda26-pyspark` ya está corriendo desde una sesión anterior, continúa directo en 3.2. Si no:
 
@@ -258,7 +258,7 @@ spark
 ```
 
 ```python
-ORIGEN_DATOS = "/opt/s03b-calidad-campo-electrico/artifacts/campo_electrico_particionado"
+ORIGEN_DATOS = "/opt/pre-s04-calidad-campo-electrico/artifacts/campo_electrico_particionado"
 ARTIFACTS = "/opt/s04-ml-distribuido-regresion/artifacts"
 ```
 
@@ -281,7 +281,7 @@ print(f"Filas: {df.count():,}")
 df.describe(VARIABLES_9).show()
 ```
 
-En una corrida real sobre la salida de S3b, este conteo dio **184 538** filas — el mismo número que S3b reportó como salida final (S3b, sección 7).
+En una corrida real sobre la salida de Pre-S4, este conteo dio **184 538** filas — el mismo número que Pre-S4 reportó como salida final (Pre-S4, sección 7).
 
 ### 3.4 Ensamblar el vector de predictores (`VectorAssembler`)
 
@@ -310,7 +310,7 @@ print(f"Entrenamiento: {df_train.count():,} filas")
 print(f"Prueba: {df_test.count():,} filas")
 ```
 
-En una corrida real, sobre las 184 538 filas de S3b: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).
+En una corrida real, sobre las 184 538 filas de Pre-S4: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).
 
 ### 3.6 Entrenar un modelo base de regresión lineal
 
@@ -416,6 +416,31 @@ resultados_rf = evaluar(predicciones_rf, "Random Forest")
 
 En una corrida real, **Random Forest ganó en las tres métricas a la vez** — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo (RMSE sube de `0.7909` a `0.8091` según crece la penalización): una señal de que este modelo base no estaba sobreajustando — no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real vino de otro lado: `RandomForestRegressor` no asume una relación lineal entre las 8 variables ambientales y `Valor_CE`, y esa relación, en los datos reales, no lo es — coherente con que `Rain` (3.6) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables, una señal típica de que el modelo lineal está forzando una forma que no le queda bien a los datos.
 
+**¿Las 8 variables aportan por igual?** Los coeficientes de `LinearRegression` (3.6) no responden esto de forma confiable — no son comparables entre sí porque cada variable tiene una escala distinta (`Valor_CM` en miles, `Rain` entre 0 y 0.2). `RandomForestRegressor` sí calcula algo directamente comparable, sin costo adicional: `featureImportances`, una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman `1.0`.
+
+```python
+importancias = list(zip(PREDICTORES, modelo_rf.featureImportances.toArray()))
+importancias.sort(key=lambda x: x[1], reverse=True)
+
+for variable, importancia in importancias:
+    print(f"{variable:12s} {importancia:.4f}")
+```
+
+**Tabla 7. Importancia de cada variable — completar con tu corrida real**
+
+| Variable | Importancia |
+|---|---|
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+| ____ | ____ |
+
+Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).
+
 ### 3.10 Guardar el modelo seleccionado
 
 **Producto del paso:** el modelo con mejor RMSE en la Tabla 6, guardado como artefacto reutilizable.
@@ -435,13 +460,13 @@ print(f"Modelo guardado en {ARTIFACTS}/modelo_ce_regresion")
 
 Agrega celdas markdown breves debajo de cada bloque de código (3.6-3.9) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.
 
-**Reflexión técnica breve** (5 a 8 líneas): ¿qué configuración de la Tabla 6 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿Random Forest mejoró sobre `LinearRegression`, y qué te dice eso sobre si la relación entre las variables es aproximadamente lineal? ¿Por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
+**Reflexión técnica breve** (5 a 8 líneas): ¿qué configuración de la Tabla 6 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿Random Forest mejoró sobre `LinearRegression`, y qué te dice eso sobre si la relación entre las variables es aproximadamente lineal? ¿Cuál fue la variable con mayor `featureImportances` en tu Tabla 7, y tiene sentido físico que sea la más relevante para explicar `Valor_CE`? ¿Por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
 
 **Evidencia de aprendizaje:**
 
 - Notebook `04_ml_distribuido_regresion_practica.ipynb` con vector de predictores, modelo base, evaluación y comparación documentados.
 - Al menos tres configuraciones de regularización comparadas con las mismas métricas.
-- Comparación con un segundo algoritmo (`RandomForestRegressor`).
+- Comparación con un segundo algoritmo (`RandomForestRegressor`), incluida la importancia de cada variable (`featureImportances`).
 - Modelo seleccionado guardado, coincidente con el mejor resultado de la comparación.
 - Reflexión técnica documentada.
 
@@ -561,7 +586,7 @@ La evidencia individual se considera completa si:
 
 ### 4.6 Rúbrica de evaluación
 
-**Tabla 7. Rúbrica de evaluación**
+**Tabla 8. Rúbrica de evaluación**
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|

@@ -14,12 +14,13 @@ El porqué de formalizar esto — qué pasa cuando nadie lo hace — se desarrol
 2. Procesamiento distribuido de datos: filtrado y orden.
 3. Carga particionada en formatos analíticos.
 4. Verificación de la carga particionada.
+5. Arquitectura por capas de un Data Lake: Bronze (raw), Silver y Gold.
 
 ### 1.3 Propósito de aprendizaje
 
 Al concluir la clase, estarás en condiciones de:
 
-- **Validar** el esquema y la calidad (nulos, duplicados) de un dataset real antes de cargarlo a un pipeline, **aplicar** el tratamiento apropiado según el tipo de problema encontrado, y **escribir/leer** una salida analítica particionada en Parquet lista para consumo BI/ML.
+- **Validar** el esquema y la calidad (nulos, duplicados) de un dataset real antes de cargarlo a un pipeline, **aplicar** el tratamiento adecuado según el problema encontrado, **escribir/leer** una salida analítica particionada en un formato columnar (Parquet), y **ubicar** cada paso dentro de las capas de un Data Lake analítico (Bronze/raw, Silver, Gold).
 
 ### 1.4 Producto de sesión
 
@@ -184,6 +185,27 @@ df_ranked = df_customers.withColumn("row_num", row_number().over(window_spec))
 df_clean = df_ranked.filter(col("row_num") == 1).drop("row_num")
 ```
 
+`Window` no hace nada raro — solo automatiza algo que harías a mano si tuvieras pocas filas: agrupar, ordenar cada grupo por tu criterio, y numerar. La diferencia con `dropDuplicates()` es que ahí **tú** decides el orden; en `dropDuplicates()`, decide Spark, sin que puedas influir.
+
+**Figura 4. Qué hace cada pieza de `Window`+`row_number()`**
+
+```mermaid
+flowchart LR
+    P["partitionBy('customer_id')<br/>agrupa las filas del mismo cliente"] --> O["orderBy(age desc, postal_code asc)<br/>ordena cada grupo por ese criterio"]
+    O --> R["row_number()<br/>numera cada fila dentro de su grupo:<br/>1 = primera en el orden"]
+    R --> F["filter(row_num == 1)<br/>conserva solo la primera de cada grupo"]
+```
+
+**Tabla 4. El mismo ejemplo, fila por fila**
+
+| `customer_id` | `age` | `postal_code` | → `row_num` | ¿Sobrevive `filter(row_num == 1)`? |
+|---|---|---|---|---|
+| C001 | 34 | 08001 | 1 | Sí — dentro del grupo C001, gana por `postal_code` (desempate, `asc`) |
+| C001 | 34 | 08002 | 2 | No — mismo `age`, pero pierde el desempate |
+| C002 | 51 | 28010 | 1 | Sí — único de su grupo, ni siquiera necesitó desempate |
+
+`partitionBy` decide **los grupos** (uno por `customer_id`); `orderBy` decide **el orden dentro de cada grupo**, no entre grupos — por eso C001 y C002 tienen cada uno su propio `row_num` empezando en 1. `dropDuplicates(["customer_id"])` llega al mismo número de filas finales, pero sin la columna `age`/`postal_code` como criterio: conservaría una fila cualquiera de C001, no necesariamente la de `postal_code` más bajo.
+
 Si la columna de desempate en sí puede repetirse entre dos filas candidatas (como acá, donde dos clientes de la misma edad también podrían compartir `postal_code`), el resultado sigue sin ser 100% determinista — la garantía real solo la da una columna con valores únicos por fila dentro de cada partición (un identificador propio de la fila, o una marca temporal con precisión suficiente). En producción, el criterio más común es una columna de actualización (`updated_at DESC`) más una columna estable como desempate final.
 
 El caso real de S2 ilustra por qué esta distinción importa más allá de la sintaxis: en `articles.csv`, muchos `article_id` distintos comparten la misma `detail_desc` (mismo producto, distinta variante de color/talla). Eso **no** es un duplicado de fila — `dropDuplicates()`/`distinct()` no deberían eliminar ninguna de esas filas, porque cada `article_id` es legítimamente distinto. Si en cambio quisieras un solo representante por `product_code` (el producto base, sin variantes), ahí sí corresponde `Window`+`row_number()` — porque necesitas elegir cuál variante conservar, no simplemente confirmar unicidad.
@@ -212,7 +234,7 @@ df.filter(col("customer_id").isNull() | (trim(col("customer_id")) == "")).count(
 
 Con el conteo en mano, hay dos operaciones para tratar los nulos, y no son intercambiables:
 
-**Tabla 4. `.na.fill()` vs. `.na.drop()`**
+**Tabla 5. `.na.fill()` vs. `.na.drop()`**
 
 | Operación | Qué hace | Cuándo usarla |
 |---|---|---|
@@ -232,7 +254,7 @@ Con el dataset ya validado, estas dos operaciones cubren cómo seleccionar y ord
 
 `filter()` acepta dos formas equivalentes de escribir la misma condición — una expresión SQL como texto, o una expresión booleana con `col()`. En una expresión booleana, las condiciones se combinan con `&` (y), `|` (o) y `~` (no), cada comparación entre paréntesis — **no** con los operadores `and`/`or`/`not` de Python, que no operan sobre columnas de Spark y fallan con un error, no con un resultado silenciosamente incorrecto.
 
-**Tabla 5. Dos formas de escribir el mismo filtro**
+**Tabla 6. Dos formas de escribir el mismo filtro**
 
 | Expresión SQL (texto) | Expresión booleana (`col()`) |
 |---|---|
@@ -341,7 +363,7 @@ df = df.repartition("customer_id")  # reorganiza los datos en memoria por esa co
 
 `coalesce(N)`/`repartition(N)` (S2 ya usó `coalesce(1)` para forzar un solo archivo de salida) influyen en cuántos archivos `part-0000X` caen **dentro de cada** carpeta de partición física — sin fijarlos, se hereda el número de particiones del DataFrame en memoria (la misma sorpresa de las ~50 particiones que viste en S2 al guardar una muestra pequeña). No es una garantía exacta de "N archivos por carpeta": el resultado final depende también de cómo queden distribuidos los datos entre esas N particiones antes de escribir, no solo del número que pediste.
 
-**Tabla 6. `coalesce(N)` vs. `repartition(N)`**
+**Tabla 7. `coalesce(N)` vs. `repartition(N)`**
 
 | | `coalesce(N)` | `repartition(N)` |
 |---|---|---|
@@ -368,7 +390,7 @@ from pyspark.storagelevel import StorageLevel
 df.persist(StorageLevel.MEMORY_AND_DISK)  # usa memoria; si no alcanza, cae a disco
 ```
 
-**Tabla 7. Cuándo usar cada técnica**
+**Tabla 8. Cuándo usar cada técnica**
 
 | Técnica | Qué hace | Cuándo usarla |
 |---|---|---|
@@ -392,7 +414,7 @@ Si el `assert` falla en silencio (sin lanzar excepción) es que los conteos coin
 
 Si filtras por esa columna, `explain(True)` muestra una optimización que no viste en S2: **`PartitionFilters`**, junto al ya conocido `PushedFilters`. La diferencia es real, no solo de nombre:
 
-**Tabla 8. `PushedFilters` (S2) vs. `PartitionFilters` (S3)**
+**Tabla 9. `PushedFilters` (S2) vs. `PartitionFilters` (S3)**
 
 | | `PushedFilters` | `PartitionFilters` |
 |---|---|---|
@@ -401,6 +423,83 @@ Si filtras por esa columna, `explain(True)` muestra una optimización que no vis
 | Costo evitado | Procesar filas que no cumplen el filtro. | Abrir y leer archivos que ni siquiera contienen el valor buscado. |
 
 *Partition pruning* es más barato que *predicate pushdown*: uno evita procesar filas, el otro evita abrir archivos enteros.
+
+### 2.6 Arquitectura por capas de un Data Lake: Bronze (raw), Silver y Gold
+
+Un Data Warehouse se grafica como estrella o constelación porque tiene tablas fijas (hecho + dimensiones) con relaciones declaradas. Un Data Lake no tiene eso — guarda archivos, no tablas relacionadas — así que no se grafica con un diagrama de esquema (ER): se organiza en **capas de refinamiento creciente**. El patrón más usado para eso es la arquitectura *medallion*: **Bronze** (*raw*), **Silver**, **Gold**.
+
+**Tabla 10. Las tres capas, con lo que ya construiste en esta sesión**
+
+| Capa | Qué contiene | Dónde queda en esta sesión |
+|---|---|---|
+| **Bronze** (*raw*) | El dato tal como llega, sin tocar — ni siquiera se valida todavía. | `customers.csv`/`articles.csv` originales (3.1). |
+| **Silver** | Esquema validado, nulos y duplicados tratados — confiable, pero todavía no organizado para consulta rápida. | `df_customers_valido` (3.3-3.8): esquema, nulos y duplicados de la sección 2.2. |
+| **Gold** | Particionado y listo para consumo directo por BI/ML, sin más limpieza pendiente. | `customers_particionado/` (3.10): la salida particionada de la sección 2.4. |
+
+**Figura 5. De Bronze a Gold, sobre los datos de esta sesión**
+
+```mermaid
+flowchart LR
+    Raw["Bronze (raw)<br/>customers.csv / articles.csv<br/>tal como llegan"]
+    Silver["Silver<br/>df_customers_valido<br/>esquema + nulos + duplicados tratados"]
+    Gold["Gold<br/>customers_particionado/<br/>particionado, listo para BI/ML"]
+
+    Raw -->|"2.2: esquema, nulos, duplicados"| Silver
+    Silver -->|"2.4: partitionBy()"| Gold
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class Raw,Silver,Gold today;
+```
+
+Cada control de calidad de esta sesión (2.2) es, en el fondo, el paso que mueve el dato de Bronze a Silver — validar esquema, tratar nulos y resolver duplicados no son pasos sueltos, son la definición operativa de "Silver". El particionado (2.4) es el paso que mueve el dato de Silver a Gold: ya confiable, pero todavía sin organizar para que una consulta futura no tenga que leer más de lo necesario. `customers_particionado/` —la salida que S4 consume— es Gold: es la capa que existe específicamente para ser consumida por otro sistema (BI o ML), no para seguir transformándose.
+
+**¿Y dónde quedan las dimensiones y la tabla de hechos?** No aparecen en esta sesión, por dos motivos, no uno solo. Primero, falta la mitad de la ecuación: una tabla de hechos existe para medir un **evento** (una venta, un pedido), y las dimensiones son las entidades que describen ese evento (quién, qué, cuándo) — acá `customers.csv` es una sola tabla descriptiva, sin ningún evento medible en juego. `transactions.parquet` sí sería el candidato natural a "hecho" (con `customers`/`articles` como dimensiones), pero esta sesión lo deja fuera a propósito (3.1: "esta sesión no necesita `transactions.parquet`") — sin un hecho, no hay nada alrededor de qué organizar dimensiones. Segundo, y más de fondo: aunque hubiera un hecho, modelarlo en estrella todavía no sería trabajo de esta capa. Un Data Lake prepara el dato para que **cualquier consumidor futuro** lo modele como necesite — un Data Warehouse con estrella, un modelo de ML (S4), un reporte ad hoc — esa decisión es de quien consume Gold, río abajo, no de quien lo construye.
+
+**Tabla 11. Data Warehouse frente a Data Lake**
+
+| | Data Warehouse | Data Lake (esta sesión) |
+|---|---|---|
+| Pregunta que resuelve | ¿Cómo se relacionan mis eventos con las entidades que los describen? | ¿Cómo garantizo que el dato esté limpio y sea consultable sin leer de más? |
+| Qué es | Una base de datos: el resultado ya modelado (hecho + dimensiones) | Un repositorio de archivos organizado en capas de refinamiento |
+| Paradigma de carga | **ETL**: transformar (modelar en estrella) antes de cargar a la base | **ELT**: cargar tal como llega (Bronze/raw), transformar después, dentro del propio repositorio |
+| Se grafica con | Diagrama ER: estrella o constelación | Diagrama de flujo por capas + árbol de carpetas particionadas |
+| Cuándo se decide la forma final | Antes de cargar — el modelo dimensional se diseña primero | Después de Gold — cada consumidor decide su propia forma |
+| Consumidor típico | Un dashboard ejecutivo con KPIs fijos | Cualquier proceso posterior: un DW, un modelo ML (S4), un reporte distinto cada vez |
+
+**Figura 6. De este Data Lake (ELT) a un futuro Data Warehouse (ETL)**
+
+```mermaid
+flowchart LR
+    subgraph DLPROC["ELT (Data Lake), esta sesión"]
+        direction LR
+        E2["Extract<br/>fuente(s) real(es)"]
+        subgraph LAGO["esto es el Data Lake"]
+            direction LR
+            L2["Load<br/>Bronze (raw), tal como llega"] --> T2["Transform<br/>esquema, nulos, duplicados<br/>(construye Silver)"]
+            T2 --> L3["Load<br/>Gold, particionado<br/>(customers_particionado/)"]
+        end
+        E2 --> L2
+    end
+    subgraph DWPROC["ETL (Data Warehouse) — hipotético"]
+        direction LR
+        T1["Transform<br/>modelar en estrella:<br/>hecho + dimensiones"]
+        subgraph ALMACEN["esto es el Data Warehouse"]
+            L1["Load<br/>Data Warehouse<br/>(la base de datos)"]
+        end
+        T1 --> L1
+    end
+
+    L3 -.->|"si algún día se construye un DW,<br/>parte de acá — no de un nuevo Extract"| T1
+
+    classDef raw fill:#e8dcc8,stroke:#8a7455,color:#111;
+    classDef gold fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    classDef hipotetico fill:#f5f5f5,stroke:#999,stroke-dasharray: 4 3,color:#555;
+    class L2 raw;
+    class L3 gold;
+    class DWPROC hipotetico;
+```
+
+El Data Lake es el recuadro "esto es el Data Lake" completo (Bronze + Transform + Gold), no solo la última caja dorada — al revés que el DW, donde el Data Warehouse real es únicamente ese último `Load`. `customers_particionado/` (Gold) es donde termina S03; el bloque "ETL (Data Warehouse)" es hipotético, no parte de esta sesión — y si algún día se construyera, partiría de Gold, no de un `Extract` nuevo, porque el Data Lake ya hizo el trabajo de calidad que un DW necesitaría de todas formas.
 
 ## 3. Aplica: actividad práctica guiada
 
@@ -414,20 +513,20 @@ Tiempo: 2h.
 
 **Actividades para realizar:**
 
-- **3.1** Preparar los datos de S3 y reanudar el entorno `lambda26`.
+- **3.1** Preparar los datos de S2 y reanudar el entorno `lambda26`. `[Bronze]`
 - **3.2** Crear el notebook y la `SparkSession`.
 - **3.3** Cargar `customers.csv` y validar el esquema.
 - **3.4** Explorar nulos por columna.
 - **3.5** Filtrado de datos (`filter()`/`where()`).
 - **3.6** Ordenar resultados (`orderBy()`/`sort()`).
 - **3.7** Tratamiento de duplicados.
-- **3.8** Tratar nulos con `.na.fill()` y `.na.drop()`.
+- **3.8** Tratar nulos con `.na.fill()` y `.na.drop()`. `[3.3-3.8: construyendo Silver]`
 - **3.9** Escritura en múltiples formatos.
-- **3.10** Escritura particionada en Parquet.
-- **3.11** Leer de vuelta y verificar el particionamiento.
+- **3.10** Escritura particionada en Parquet. `[Silver → Gold]`
+- **3.11** Leer de vuelta y verificar el particionamiento. `[Gold]`
 - **3.12** Documentar hallazgos y responder preguntas de reflexión.
 
-### 3.1 Preparar los datos de S3 y reanudar el entorno `lambda26`
+### 3.1 Preparar los datos de S2 y reanudar el entorno `lambda26` `[Bronze]`
 
 **Producto del paso:** `customers.csv` y `articles.csv` disponibles en `pyspark/sesiones/s03-procesamiento-calidad-datos/data/`, entorno `lambda26` funcionando.
 
@@ -479,6 +578,8 @@ ARTIFACTS = "/opt/s03-procesamiento-calidad-datos/artifacts"
 ```
 
 ### 3.3 Cargar `customers.csv` y validar el esquema
+
+`[3.3-3.8: construyendo Silver]` — ninguno de estos seis pasos por sí solo convierte `df_customers` en Silver (2.6); son el mismo dato, cada vez con un control de calidad más aplicado, hasta que 3.8 lo cierra en `df_customers_valido`.
 
 **Producto del paso:** `df_customers` cargado con esquema explícito, verificado contra lo esperado — control de calidad #1: esquema.
 
@@ -690,7 +791,7 @@ df_customers.sort(col("age").desc()).show(3)
 
 ### 3.7 Tratamiento de duplicados
 
-**Producto del paso:** duplicados identificados y/o tratados con las técnicas de la Tabla 4 — control de calidad #2.
+**Producto del paso:** duplicados identificados y/o tratados con las técnicas de la Tabla 5 — control de calidad #2.
 
 Eliminar duplicados completos (todas las columnas) o por columnas específicas:
 
@@ -775,9 +876,9 @@ print(f"Filas originales: {df_articles.count()}, un representante por product_co
 
 En una corrida real, la reducción fue de **105 542 filas a 47 224 representantes** — más de la mitad de `articles.csv` son variantes de un producto ya representado por otra fila. Es la diferencia real entre `dropDuplicates()` (no puede hacer esta reducción, porque cada `article_id` es único) y `Window`+`row_number()` (sí, porque agrupa por `product_code`).
 
-### 3.8 Tratar nulos con `.na.fill()` y `.na.drop()`
+### 3.8 Tratar nulos con `.na.fill()` y `.na.drop()` `[Silver, completa]`
 
-**Producto del paso:** `df_customers_valido`, el dataset final — filtrado/ordenado/deduplicado (3.5-3.7) y ahora con nulos tratados columna por columna, cada decisión con un criterio documentado (Tabla 5) — control de calidad #3.
+**Producto del paso:** `df_customers_valido`, el dataset final — filtrado/ordenado/deduplicado (3.5-3.7) y ahora con nulos tratados columna por columna, cada decisión con un criterio documentado (Tabla 6) — control de calidad #3.
 
 `FN`/`Active` son columnas de tipo "bandera" (presente/ausente); un nulo ahí significa "la bandera no se activó" — se rellenan con `0`, no con un promedio. `fashion_news_frequency` nulo se rellena con `"NONE"`, la misma categoría que el propio dataset ya usa explícitamente para ese caso. `fillna()` es un alias exacto de `.na.fill()`:
 
@@ -844,7 +945,7 @@ muestra.write.format("json").mode("overwrite").save(f"{ARTIFACTS}/muestra_json")
 muestra.write.format("parquet").mode("overwrite").save(f"{ARTIFACTS}/muestra_parquet")
 ```
 
-### 3.10 Escritura particionada en Parquet
+### 3.10 Escritura particionada en Parquet `[Silver → Gold]`
 
 **Producto del paso:** salida analítica particionada por `club_member_status`, lista para BI/ML — el producto que pide el sílabo de esta sesión. `club_member_status` tiene pocos valores distintos y aparece seguido en filtros — la columna de partición correcta (2.4.1); un identificador único como `customer_id` habría creado más de un millón de carpetas diminutas.
 
@@ -870,7 +971,7 @@ for carpeta in sorted(os.listdir(f"{ARTIFACTS}/customers_particionado")):
     print(carpeta)
 ```
 
-Contraste directo: si en vez de `repartition(4)` usas `coalesce(1)` (Tabla 6), obtienes **un solo** archivo por carpeta de partición en vez de cuatro — más lento de escribir en paralelo, pero más simple de compartir:
+Contraste directo: si en vez de `repartition(4)` usas `coalesce(1)` (Tabla 7), obtienes **un solo** archivo por carpeta de partición en vez de cuatro — más lento de escribir en paralelo, pero más simple de compartir:
 
 ```python
 (
@@ -883,7 +984,7 @@ Contraste directo: si en vez de `repartition(4)` usas `coalesce(1)` (Tabla 6), o
 )
 ```
 
-### 3.11 Leer de vuelta y verificar el particionamiento
+### 3.11 Leer de vuelta y verificar el particionamiento `[Gold]`
 
 **Producto del paso:** confirmación de que la salida particionada se lee correctamente y que el particionamiento sí se aprovecha en consultas.
 
@@ -901,11 +1002,28 @@ assert df_verificacion.count() == df_customers_valido.count()
 
 `club_member_status` reaparece en el esquema aunque no está dentro de los archivos Parquet físicos — Spark lo reconstruye a partir del nombre de la carpeta (2.5, *partition discovery*).
 
-Filtra por la columna particionada y revisa el plan — deberías ver `PartitionFilters` (Tabla 6), no solo `PushedFilters` (el que ya viste en S2, 3.6):
+Filtra por la columna particionada y revisa el plan — deberías ver `PartitionFilters` (Tabla 7), no solo `PushedFilters` (el que ya viste en S2, 3.6):
 
 ```python
 df_verificacion.filter(col("club_member_status") == "ACTIVE").explain(True)
 ```
+
+Para ver cuántas filas quedaron guardadas en cada partición (cada carpeta `club_member_status=...`), sin salir de Spark ni contar archivos a mano:
+
+```python
+df_verificacion.groupBy("club_member_status").count().orderBy("club_member_status").show(truncate=False)
+```
+
+**Tabla 12. Filas por partición, sobre la salida real de esta sesión**
+
+| `club_member_status` | Filas |
+|---|---|
+| ACTIVE | 1 272 491 |
+| LEFT CLUB | 467 |
+| PRE-CREATE | 92 960 |
+| UNKNOWN | 6 062 |
+
+Las cuatro particiones suman `1 371 980` — el mismo total de siempre, solo repartido entre carpetas. Pero el reparto está lejos de ser parejo: `ACTIVE` concentra el 92.7 % de las filas, mientras `LEFT CLUB` apenas tiene 467. `PartitionFilters` (Tabla 9) ayuda mucho al filtrar por `LEFT CLUB` (descarta casi todo el dataset sin abrirlo) — pero ayuda poco al filtrar por `ACTIVE`, porque esa "carpeta a evitar" ya es casi todo el dataset. Particionar por una columna así de desbalanceada sigue siendo válido, pero el beneficio real de *partition pruning* depende de qué tan pareja sea la columna elegida, no solo de que tenga pocos valores distintos.
 
 Ya terminaste de reutilizar `df_customers_valido` — libera la memoria que ocupaba cacheado:
 
@@ -943,7 +1061,8 @@ Completa y evidencia estas tareas:
 3. Confirmar o tratar duplicados con al menos dos técnicas distintas (`distinct()`/`dropDuplicates()` y `Window`+`row_number()`), aplicando la definición de duplicado correcta al caso (equivalente a 3.7).
 4. Detectar y tratar nulos con `.na.fill()`/`.na.drop()`, documentando el criterio de cada decisión (equivalente a 3.8).
 5. Escribir una salida particionada en Parquet por una columna categórica relevante al caso del equipo, controlando el número de archivos por partición (equivalente a 3.10).
-6. Leer de vuelta la salida particionada y analizar el plan de ejecución, identificando `PartitionFilters` (equivalente a 3.11).
+6. Leer de vuelta la salida particionada, analizar el plan de ejecución identificando `PartitionFilters`, y revisar si la columna de partición elegida queda balanceada o concentrada en pocos valores (equivalente a 3.11).
+7. Identificar las tres capas (Bronze, Silver, Gold) en tu propio pipeline, señalando qué artefacto real de tu proyecto corresponde a cada una (equivalente a 2.6).
 
 ### 4.2 Propósito
 
@@ -978,9 +1097,9 @@ Incluye capturas o extractos con una breve explicación debajo de cada uno, orga
 2. *Duplicados y nulos*
     - Duplicados confirmados/tratados con al menos dos técnicas, y nulos detectados y tratados con criterio documentado (equivalente a 3.7-3.8).
 3. *Escritura y lectura particionada*
-    - Salida en Parquet particionada por una columna relevante, leída de vuelta y verificada (equivalente a 3.10-3.11).
-4. *Plan de ejecución y reflexión*
-    - `explain()` con `PartitionFilters` identificado, más la reflexión técnica (equivalente a 3.11-3.12).
+    - Salida en Parquet particionada por una columna relevante, leída de vuelta y verificada, con el balance de filas por partición revisado (equivalente a 3.10-3.11).
+4. *Plan de ejecución, capas y reflexión*
+    - `explain()` con `PartitionFilters` identificado, las tres capas (Bronze, Silver, Gold) señaladas sobre el propio pipeline, más la reflexión técnica (equivalente a 2.6, 3.11-3.12).
 
 **Error o hallazgo**
 
@@ -1009,7 +1128,8 @@ La evidencia individual se considera completa si:
 - Confirma o trata duplicados con al menos dos técnicas distintas, aplicando una definición de duplicado coherente con el caso.
 - Detecta y trata los nulos con `.na.fill()`/`.na.drop()`, documentando el criterio de cada columna.
 - Escribe una salida particionada en Parquet, controlando el número de archivos por partición.
-- Lee de vuelta la salida particionada y analiza el plan de ejecución, identificando `PartitionFilters`.
+- Lee de vuelta la salida particionada, analiza el plan de ejecución identificando `PartitionFilters`, y revisa si la columna de partición queda balanceada.
+- Identifica las tres capas (Bronze, Silver, Gold) sobre su propio pipeline, con el artefacto real de cada una.
 - Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.
 - Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.
 - Incluye un error o hallazgo técnico diagnosticado.
@@ -1023,17 +1143,19 @@ La evidencia individual se considera completa si:
 4. ¿Cuándo usarías `Window`+`row_number()` en vez de `dropDuplicates()` para tratar duplicados?
 5. ¿Qué es *partition pruning*, y en qué se diferencia de *predicate pushdown* (visto en S2)?
 6. ¿Por qué `partitionBy()` crea carpetas en vez de agregar una columna al archivo Parquet?
+7. En tu propio pipeline, ¿qué artefacto real corresponde a Bronze, cuál a Silver y cuál a Gold? ¿Por qué esa salida final es Gold y no, por ejemplo, la fuente sin tocar?
+8. Si tu columna de partición quedó muy desbalanceada (una carpeta con casi todo el dataset), ¿qué tanto te sigue ayudando `PartitionFilters` en ese caso?
 
 ### 4.6 Rúbrica de evaluación
 
-**Tabla 9. Rúbrica de evaluación**
+**Tabla 13. Rúbrica de evaluación**
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
 | 1. Esquema, filtrado y orden* | 25 | Valida el esquema explícitamente, aplica filtrado y orden con al menos dos técnicas cada uno, con propósito claro. | Valida esquema y aplica filtrado/orden correctamente. | Validación de esquema o filtrado/orden incompleto, o con una sola técnica. | No valida esquema ni aplica filtrado/orden. | |
 | 2. Duplicados y nulos* | 25 | Trata duplicados con al menos dos técnicas (incluida `Window`+`row_number()`) y nulos con criterio documentado y coherente por columna. | Trata duplicados y nulos correctamente. | Tratamiento de duplicados o nulos incompleto o sin criterio claro. | No trata duplicados ni nulos. | |
-| 3. Escritura y lectura particionada* | 25 | Escribe una salida particionada relevante al caso, controla el número de archivos por partición y verifica la lectura. | Escribe y lee la salida particionada correctamente. | Escritura particionada incompleta o sin verificación de lectura. | No escribe salida particionada. | |
-| 4. Plan de ejecución y reflexión* | 25 | Identifica `PartitionFilters` en `explain()` y lo relaciona correctamente con *partition pruning*; reflexión técnica completa. | Identifica `PartitionFilters` y entrega reflexión técnica. | Análisis del plan superficial o reflexión incompleta. | No analiza el plan de ejecución ni entrega reflexión. | |
+| 3. Escritura y lectura particionada* | 25 | Escribe una salida particionada relevante al caso, controla el número de archivos por partición, verifica la lectura y revisa si el balance entre particiones es razonable. | Escribe y lee la salida particionada correctamente, sin revisar el balance entre particiones. | Escritura particionada incompleta o sin verificación de lectura. | No escribe salida particionada. | |
+| 4. Plan de ejecución, capas y reflexión* | 25 | Identifica `PartitionFilters` en `explain()` y lo relaciona correctamente con *partition pruning*; identifica Bronze, Silver y Gold sobre su propio pipeline; reflexión técnica completa. | Identifica `PartitionFilters` y las tres capas; reflexión técnica presente. | Análisis del plan o de las capas superficial, o reflexión incompleta. | No analiza el plan de ejecución, no identifica las capas ni entrega reflexión. | |
 
 \* Agregado manual.
 

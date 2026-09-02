@@ -1,4 +1,4 @@
-# S3b - Calidad de datos y particionamiento: un segundo caso de uso (sensores ambientales)
+# Pre-S4 - Calidad de datos y particionamiento: un segundo caso de uso (sensores ambientales)
 
 *Material de referencia, no una sesión del sílabo.* Aplica las mismas técnicas de calidad de datos y particionamiento de [S3](S03_Procesamiento_Calidad_Datos_Particionamiento.md) sobre un dataset real distinto — tres fuentes de sensores ambientales que hay que integrar antes de poder tratarlas. Es la entrada real de [S4](S04_ML_Distribuido_Regresion_Spark_MLlib.md) (ML distribuido con Spark MLlib).
 
@@ -21,7 +21,7 @@ Al finalizar podrás construir un flujo reproducible que:
 ### 2.1 Estructura esperada
 
 ```text
-s03b-calidad-campo-electrico/
+pre-s04-calidad-campo-electrico/
 ├── data/
 │   ├── campo_electrico.csv
 │   ├── campo_magnetico.csv
@@ -46,8 +46,8 @@ spark = (
     .getOrCreate()
 )
 
-ORIGEN_DATOS = "/opt/s03b-calidad-campo-electrico/data"
-ARTIFACTS = "/opt/s03b-calidad-campo-electrico/artifacts"
+ORIGEN_DATOS = "/opt/pre-s04-calidad-campo-electrico/data"
+ARTIFACTS = "/opt/pre-s04-calidad-campo-electrico/artifacts"
 ```
 
 ### 2.3 Lectura con esquema explícito
@@ -277,7 +277,43 @@ df_valido = (
 )
 ```
 
-## 11. Evidencia mínima del laboratorio
+## 11. De esta salida a dos preguntas distintas: regresión (S4) y series de tiempo (S10)
+
+`campo_electrico_particionado/` no tiene un solo destino. La misma tabla —184 538 filas, 9 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado".
+
+**S4 (hoy) pregunta:** dado un instante, ¿qué otras variables explican `Valor_CE` en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.
+
+**S10 pregunta:** dado el historial de `Valor_CE`, ¿su propio pasado predice su futuro? Ahí el orden de las filas *es* el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.
+
+```mermaid
+flowchart LR
+    subgraph S4["S4 - Regresión (hoy)"]
+        direction LR
+        P1["Valor_CM_t, TempOut_t,<br/>OutHum_t, ... (mismo instante t)"] --> M1["Valor_CE_t"]
+    end
+    subgraph S10["S10 - Series de tiempo"]
+        direction LR
+        P2["Valor_CE_t<br/>(y su historial)"] -.->|"orden cronológico,<br/>no se baraja"| M2["Valor_CE_t+1"]
+    end
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class P1,M1 today;
+```
+
+**Tabla 4. Misma tabla, dos preguntas**
+
+| | S4 — Regresión (hoy) | S10 — Series de tiempo |
+|---|---|---|
+| Pregunta de fondo | ¿Qué otras variables explican `Valor_CE`? | ¿El pasado de `Valor_CE` predice su futuro? |
+| Predictores | Las otras 8 variables, en el mismo instante `t` | `Valor_CE` en instantes anteriores (`t`, `t-1`, ...) |
+| Objetivo | `Valor_CE` en ese mismo instante `t` | `Valor_CE` en un instante futuro (`t+1`) |
+| Orden de las filas | Irrelevante — cada fila es independiente | Crítico — el orden cronológico es el dato |
+| División entrenamiento/prueba | Aleatoria (`randomSplit`, S4 2.2) | Cronológica (equivalente a `TimeSeriesSplit`) |
+| Riesgo si se usa la división del otro caso | Ninguno | Fuga de información: el modelo "vería" el futuro al entrenar |
+
+Ninguna de las dos preguntas es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.
+
+## 12. Evidencia mínima del laboratorio
 
 El notebook o informe debe mostrar:
 
@@ -292,15 +328,15 @@ El notebook o informe debe mostrar:
 9. lectura con conteo reconciliado y plan con `PartitionFilters`;
 10. liberación de la caché con `unpersist()`.
 
-## 12. Preguntas de reflexión
+## 13. Preguntas de reflexión
 
 1. ¿Por qué resolver los duplicados de variables ambientales **antes** del `join` evita un problema que, si se dejara para después, sería mucho más difícil de rastrear hasta su causa?
 2. ¿Qué hubiera pasado si `Valor_CM = 99999` no se filtrara, y ese valor entrara directo a un modelo de regresión en S4?
 3. ¿Por qué `WindDir` se descartó por completo, en vez de rellenarla con algún valor por defecto?
 4. ¿Por qué particionar por `AnioMes` tiene sentido acá, y por qué particionar por `FechaHora` completa (minuto a minuto) no serviría de nada?
-5. ¿Qué relación hay entre esta salida particionada y el dataset que usa S4?
+5. Según la Tabla 4 (sección 11), ¿por qué S4 puede dividir sus datos con `randomSplit` (al azar) y S10 no podrá hacer lo mismo?
 
-## 13. Lista de verificación técnica
+## 14. Lista de verificación técnica
 
 - [ ] Las tres fuentes se leyeron con esquema explícito, cada una con su propia estructura.
 - [ ] Los duplicados de la fuente ambiental se resolvieron antes del `join`, con un criterio de orden documentado.
