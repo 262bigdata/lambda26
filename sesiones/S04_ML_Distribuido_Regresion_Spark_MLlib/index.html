@@ -1973,7 +1973,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p>Un Parquet particionado ya trae su propio esquema — no hace falta declararlo a mano como con un CSV (S3, 2.2.1). La columna de partición (<code>AnioMes</code> o <code>club_member_status</code>, según el dataset) reaparece en el esquema por <em>partition discovery</em> (S3, 2.5), aunque no está guardada dentro de ningún archivo físico:</p>
 <div class="highlight"><pre><span></span><code><span class="n">VARIABLES_9</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"Valor_CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span>
-    <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"Rain"</span><span class="p">,</span> <span class="s2">"SolarRad."</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">,</span>
+    <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"Rain"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ORIGEN_DATOS</span><span class="p">)</span>
@@ -2002,6 +2002,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Entrenamiento: </span><span class="si">{</span><span class="n">df_train</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prueba: </span><span class="si">{</span><span class="n">df_test</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 </code></pre></div>
+<p>En una corrida real, sobre las 184 538 filas de S3b: <strong>147 943</strong> para entrenamiento y <strong>36 595</strong> para prueba — el 80/20 esperado, con <code>seed=42</code> garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.8-3.9 sean justas entre sí).</p>
 <h3 id="36-entrenar-un-modelo-base-de-regresion-lineal">3.6 Entrenar un modelo base de regresión lineal<a class="headerlink" href="#36-entrenar-un-modelo-base-de-regresion-lineal" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> <code>modelo_base</code> entrenado, con coeficientes e intercepto visibles (2.3).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
@@ -2012,6 +2013,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Coeficientes:"</span><span class="p">,</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Intercepto:"</span><span class="p">,</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">intercept</span><span class="p">)</span>
 </code></pre></div>
+<p><strong>Advertencias esperadas, no errores</strong>: al correr esta celda pueden aparecer dos líneas en la consola —</p>
+<ul>
+<li><code>regParam is zero, which might cause numerical instability and overfitting</code>: Spark avisa que este modelo base no tiene regularización (2.5) — es exactamente lo que se está probando a propósito como línea base en 3.8, no un problema a corregir.</li>
+<li><code>netlib-blas: JNI_OnLoad: dlopen(libblas.so.3) failed...</code>: el contenedor no tiene una librería de álgebra lineal nativa instalada, así que Spark cae a una implementación en JVM pura — más lenta, pero igual de correcta. No afecta ningún resultado de esta sesión.</li>
+</ul>
+<p>En una corrida real, <code>modelo_base.coefficients</code> dio <code>[-0.0028, 0.1454, 0.0069, -0.0779, -0.0429, 1.2399, -0.0007, 0.0416]</code> (en el orden de <code>PREDICTORES</code>) y el intercepto <code>104.7116</code>. El coeficiente de <code>Rain</code> (<code>1.2399</code>) es, por lejos, el más grande en magnitud — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".</p>
 <h3 id="37-evaluar-el-modelo-base-rmse-r2-mae">3.7 Evaluar el modelo base (RMSE, R², MAE)<a class="headerlink" href="#37-evaluar-el-modelo-base-rmse-r2-mae" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> las tres métricas del modelo base, sobre el conjunto de prueba — nunca sobre el de entrenamiento (2.4).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionEvaluator</span>
@@ -2029,7 +2036,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 
 <span class="n">resultados_base</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">,</span> <span class="s2">"LinearRegression base"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 5. Resultado real del modelo base — completar con tu corrida</strong></p>
+<p><strong>Tabla 5. Resultado real del modelo base</strong></p>
 <table>
 <thead>
 <tr>
@@ -2040,18 +2047,19 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <tbody>
 <tr>
 <td>RMSE</td>
-<td>____</td>
+<td>0.7909</td>
 </tr>
 <tr>
 <td>R²</td>
-<td>____</td>
+<td>0.2271</td>
 </tr>
 <tr>
 <td>MAE</td>
-<td>____</td>
+<td>0.6087</td>
 </tr>
 </tbody>
 </table>
+<p>Un R² de <code>0.23</code> significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de <code>Valor_CE</code> — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.9 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.</p>
 <h3 id="38-comparar-tres-configuraciones-basicas-de-regularizacion">3.8 Comparar tres configuraciones básicas de regularización<a class="headerlink" href="#38-comparar-tres-configuraciones-basicas-de-regularizacion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> tabla comparativa de las tres configuraciones de la Tabla 4 (2.5).</p>
 <div class="highlight"><pre><span></span><code><span class="n">configuraciones</span> <span class="o">=</span> <span class="p">[</span>
@@ -2085,7 +2093,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 
 <span class="n">resultados_rf</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_rf</span><span class="p">,</span> <span class="s2">"Random Forest"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 6. Comparación final — completar con tu corrida real</strong></p>
+<p><strong>Tabla 6. Comparación final</strong></p>
 <table>
 <thead>
 <tr>
@@ -2098,38 +2106,39 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <tbody>
 <tr>
 <td>Sin regularización</td>
-<td>____</td>
-<td>____</td>
-<td>____</td>
+<td>0.7909</td>
+<td>0.2271</td>
+<td>0.6087</td>
 </tr>
 <tr>
 <td>Ridge (L2)</td>
-<td>____</td>
-<td>____</td>
-<td>____</td>
+<td>0.7962</td>
+<td>0.2166</td>
+<td>0.6174</td>
 </tr>
 <tr>
 <td>Elastic Net (L1+L2)</td>
-<td>____</td>
-<td>____</td>
-<td>____</td>
+<td>0.8091</td>
+<td>0.1910</td>
+<td>0.6372</td>
 </tr>
 <tr>
-<td>Random Forest</td>
-<td>____</td>
-<td>____</td>
-<td>____</td>
+<td><strong>Random Forest</strong></td>
+<td><strong>0.6732</strong></td>
+<td><strong>0.4399</strong></td>
+<td><strong>0.5001</strong></td>
 </tr>
 </tbody>
 </table>
+<p>En una corrida real, <strong>Random Forest ganó en las tres métricas a la vez</strong> — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización <strong>empeoró</strong> el resultado en vez de mejorarlo (RMSE sube de <code>0.7909</code> a <code>0.8091</code> según crece la penalización): una señal de que este modelo base no estaba sobreajustando — no había ningún problema de <em>overfitting</em> que la regularización tuviera que corregir. La ganancia real vino de otro lado: <code>RandomForestRegressor</code> no asume una relación lineal entre las 8 variables ambientales y <code>Valor_CE</code>, y esa relación, en los datos reales, no lo es — coherente con que <code>Rain</code> (3.6) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables, una señal típica de que el modelo lineal está forzando una forma que no le queda bien a los datos.</p>
 <h3 id="310-guardar-el-modelo-seleccionado">3.10 Guardar el modelo seleccionado<a class="headerlink" href="#310-guardar-el-modelo-seleccionado" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el modelo con mejor RMSE en la Tabla 6, guardado como artefacto reutilizable.</p>
-<div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># ajusta esta linea segun tu resultado real (Tabla 6)</span>
+<div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># Random Forest gano las tres metricas (Tabla 6)</span>
 
 <span class="n">modelo_ganador</span><span class="o">.</span><span class="n">write</span><span class="p">()</span><span class="o">.</span><span class="n">overwrite</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Modelo guardado en </span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Error frecuente</strong>: guardar el primer modelo entrenado (3.6) en vez del que realmente ganó la comparación de la Tabla 6. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar.</p>
+<p><strong>Error frecuente</strong>: guardar el primer modelo entrenado (3.6) en vez del que realmente ganó la comparación de la Tabla 6. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (<code>modelo_rf</code> ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.</p>
 <h3 id="311-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.11 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#311-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
 <p>Agrega celdas markdown breves debajo de cada bloque de código (3.6-3.9) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
