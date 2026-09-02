@@ -793,7 +793,15 @@ df_customers.sort(col("age").desc()).show(3)
 
 **Producto del paso:** duplicados identificados y/o tratados con las técnicas de la Tabla 5 — control de calidad #2.
 
-Eliminar duplicados completos (todas las columnas) o por columnas específicas:
+Antes de eliminar nada, identifica **sin eliminar todavía** — lista qué valores de `customer_id` aparecen más de una vez, para saber si hay algo que tratar antes de decidir cómo tratarlo:
+
+```python
+from pyspark.sql.functions import count
+
+df_customers.groupBy("customer_id").count().filter("count > 1").show()
+```
+
+Recién ahora, con el diagnóstico en mano, elimina duplicados completos (todas las columnas) o por columnas específicas:
 
 ```python
 df_clean = df_customers.dropDuplicates()
@@ -805,14 +813,6 @@ df_clean = df_customers.dropDuplicates(["customer_id", "postal_code"])
 
 ```python
 df_clean = df_customers.distinct()
-```
-
-Identificar duplicados **sin** eliminarlos todavía — lista qué valores de `customer_id` aparecen más de una vez:
-
-```python
-from pyspark.sql.functions import count
-
-df_customers.groupBy("customer_id").count().filter("count > 1").show()
 ```
 
 Confirma las cifras sobre el dataset completo — si coinciden con el total, no hay duplicados reales en ninguna definición:
