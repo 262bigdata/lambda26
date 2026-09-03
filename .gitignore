@@ -1,5 +1,6 @@
 # Datasets de origen (grandes, se copian/descargan por fuera, no se versionan)
 pyspark/sesiones/*/data/
+pyspark/sesiones/*/data_backup*/
 
 # Salidas generadas al correr los notebooks (Parquet/CSV/JSON escritos por cada sesión)
 pyspark/sesiones/*/artifacts/
