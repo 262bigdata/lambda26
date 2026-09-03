@@ -800,18 +800,20 @@ for variable, importancia in importancias:
     print(f"{variable:12s} {importancia:.4f}")
 ```
 
-**Tabla 10. Importancia de cada variable — completar con tu corrida real**
+**Tabla 10. Importancia de cada variable**
 
 | Variable | Importancia |
 |---|---|
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
-| ____ | ____ |
+| WindSpeed | 0.3365 |
+| TempOut | 0.2023 |
+| OutHum | 0.1564 |
+| Valor_CM | 0.1262 |
+| SolarRad | 0.0800 |
+| Bar | 0.0558 |
+| UVIndex | 0.0428 |
+| Rain | 0.0000 |
+
+En una corrida real, `WindSpeed` concentra por lejos la mayor importancia (`0.3365`, más de un tercio del total), seguida de `TempOut` y `OutHum`. El hallazgo más llamativo es `Rain`: importancia `0.0000` en Random Forest, pese a tener el coeficiente lineal más grande en magnitud en 3.4.1 (`1.2399`). No es una contradicción — son medidas distintas: el coeficiente lineal mide una relación lineal marginal (y en una muestra con pocos eventos de lluvia, un solo patrón lineal fuerte puede dominar); `featureImportances` mide cuánto reduce el error el modelo completo al usar esa variable, y si `Rain` no aporta información que las otras 7 variables no capturen ya (o si su señal es demasiado escasa en los datos), Random Forest puede terminar sin apoyarse en ella. Es exactamente el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.
 
 Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).
 
