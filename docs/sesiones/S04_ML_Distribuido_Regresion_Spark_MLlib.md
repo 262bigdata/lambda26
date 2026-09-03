@@ -33,7 +33,7 @@ Notebook de Jupyter con: tres fuentes reales integradas por una clave común, co
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
 | Revisión previa individual | Repasar las técnicas de calidad de datos de S3 (esquema, nulos, duplicados, particionado) — confirmar que el entorno `lambda26` sigue funcionando. | Guía S3. |
-| Clase presencial | Construcción guiada del notebook `04_ml_distribuido_regresion_practica.ipynb`: integración de tres fuentes en un Data Lake analítico, entrenamiento de un modelo base, evaluación con métricas de regresión, comparación de configuraciones y de un segundo algoritmo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Pasos 3.1 a 3.19 de esta guía. |
+| Clase presencial | Construcción guiada del notebook `04_ml_distribuido_regresion_practica.ipynb`: integración de tres fuentes en un Data Lake analítico, entrenamiento de un modelo base, evaluación con métricas de regresión, comparación de configuraciones y de un segundo algoritmo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas. | Fases 3.1 a 3.7 de esta guía (24 actividades en total). |
 | Evaluación formativa | Revisión en clase de la salida particionada, del modelo entrenado y de la tabla comparativa de configuraciones. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -57,7 +57,7 @@ No fue que Zillow usara un modelo "malo" en un sentido técnico simple — fue q
 **Comprensión de la comparación de modelos**
 
 1. Según el caso, ¿qué hubiera cambiado si Zillow hubiera comparado su modelo de precios contra configuraciones alternativas, y hubiera medido explícitamente su margen de error antes de comprar cada casa?
-2. ¿Por qué reportar una sola métrica (por ejemplo, solo R²) puede ocultar un problema que sí aparece en otra métrica (por ejemplo, RMSE)? Relaciónalo con lo que vas a comparar en 3.16-3.17.
+2. ¿Por qué reportar una sola métrica (por ejemplo, solo R²) puede ocultar un problema que sí aparece en otra métrica (por ejemplo, RMSE)? Relaciónalo con lo que vas a comparar en 3.4.4-3.4.5.
 
 ### 1.7 Ubicación en el curso
 
@@ -108,15 +108,32 @@ Cada bloque de esta cadena es un paso necesario, no opcional: sin datos íntegro
 
 **CRISP-DM** (*Cross-Industry Standard Process for Data Mining*) es el proceso estándar, independiente de cualquier proyecto o herramienta, para organizar un trabajo de minería de datos o aprendizaje automático en seis fases: Business Understanding, Data Understanding, Data Preparation, Modeling, Evaluation y Deployment. No es exclusivo de Spark ni de esta sesión — es el mismo marco que ordenaría un proyecto de ML hecho enteramente en pandas y scikit-learn.
 
-Esta sesión sigue ese mismo orden. Business Understanding ya se resolvió en 1.6 (el caso Zillow: por qué no basta con un único modelo sin comparación). Las cinco fases restantes están marcadas de forma explícita en la sección 3, sobre los pasos 3.1 a 3.19 — con una simplificación deliberada frente a un pipeline de investigación completo: acá no hay una fase de validación interna separada de la prueba final, así que Modeling y Evaluation avanzan juntas (ver la nota antes de 3.14).
+Esta sesión sigue ese mismo orden, con las seis fases marcadas de forma explícita en la sección 3, sobre las fases 3.1 a 3.7 (24 actividades en total): Business Understanding se documenta directamente en el propio notebook (3.1.2-3.1.3), retomando el objetivo y alcance ya presentados en 1.1 y 1.7. Modeling y Evaluation quedan separadas: Fase 4 es técnica — entrenar y medir cada candidato por separado (3.4) —, Fase 5 es estratégica — comparar todos los candidatos entre sí y validar el resultado contra el objetivo de negocio de 3.1.3 (3.5).
+
+El contenido concreto de cada fase cambia según el tipo de problema que se resuelve — la tabla siguiente compara los tres tipos más comunes de problema supervisado, no solo el que trabaja esta sesión.
+
+**Tabla 2. Los mismos seis pasos, tres tipos de problema**
+
+| Fase CRISP-DM | Clasificación | Regresión | Series de tiempo |
+|---|---|---|---|
+| 1. Business Understanding | Definir la clase a predecir y el costo de cada tipo de error (falso positivo vs. falso negativo) | Definir la variable numérica a predecir y qué decisión de negocio depende de ella | Definir qué se pronostica, con qué horizonte (cuántos pasos adelante) y con qué frecuencia se necesita el pronóstico |
+| 2. Data Understanding | Cargar datos, describir clases, revisar **balance de clases** | Cargar datos, describir variables, correlación con el objetivo | Cargar la serie, **graficarla**, revisar frecuencia/huecos temporales, estacionalidad visible |
+| 3. Data Preparation | Limpieza, codificar categóricas, **balanceo** (SMOTE/undersampling) si aplica, **split aleatorio** train/test | Limpieza, ensamblar vector de predictores, escalado si aplica, **split aleatorio** train/test | Limpieza, crear **features de rezago (lag)** y ventana móvil, verificar estacionariedad (ADF), **split cronológico** — nunca aleatorio |
+| 4. Modeling (técnica) | Candidatos: logística, árboles, SVM…; entrenar y medir cada uno (accuracy, F1, AUC); ajustar hiperparámetros básicos; importancia de variables | Candidatos: lineal, con regularización, basado en árboles…; entrenar y medir cada uno (RMSE, R², MAE); ajustar hiperparámetros básicos; importancia de variables | Candidatos: **baseline de persistencia/naive estacional** + modelo con features de rezago (o clásico tipo ARIMA); entrenar y medir con **validación temporal** (`TimeSeriesSplit`, nunca k-fold aleatorio) |
+| 5. Evaluation (estratégica) | Comparar candidatos, elegir el más adecuado según el costo de error definido en Fase 1; validar contra el objetivo de negocio | Comparar candidatos, elegir el más adecuado; validar si el error es aceptable para la decisión de negocio de Fase 1 | Comparar candidatos **contra el baseline de persistencia** (si no le gana, el modelo no se justifica); validar si el error es aceptable para el horizonte de negocio de Fase 1 |
+| 6. Deployment | Guardar el modelo seleccionado | Guardar el modelo seleccionado | Guardar el modelo + definir la **cadencia de reentrenamiento** (una serie temporal cambia de régimen con el tiempo, un modelo de clasificación/regresión estático no) |
+
+Clasificación y regresión comparten casi toda la estructura (split aleatorio, comparar candidatos por métrica). Series de tiempo rompe dos supuestos, en Fase 3 y Fase 4: el split no puede ser aleatorio (fuga de futuro hacia el pasado, 2.3) y el modelo tiene que vencer a un baseline ingenuo para justificar su complejidad — no es solo "agregar variables de rezago", es una validación distinta de principio a fin.
+
+En este curso: la columna Regresión es esta sesión (S4); Series de tiempo es S10; Clasificación se trabaja con la plantilla de referencia del curso.
 
 ### 2.2 Preparación de datos: integración y calidad (Bronze, Silver, Gold)
 
 La **integración de datos** es el proceso de combinar información proveniente de distintos sistemas de origen —cada uno con su propia estructura, calidad y ritmo de actualización— en una sola fuente confiable para análisis. Es distinta de simplemente "cargar un dataset": antes de combinar dos o más fuentes hay que resolver los problemas de cada una por separado (esquema, duplicados, valores fuera de dominio), porque un problema sin resolver en una fuente no desaparece al integrarla — se propaga, y a veces se multiplica, al resto del resultado. Un caso típico, fuera de este curso: un sistema que junta ventas de un CRM y pedidos de un ERP, cada uno con su propio formato de fecha y sus propios duplicados — si el duplicado del CRM no se resuelve antes de unirlo con el ERP, el resultado final duplica pedidos que nunca estuvieron duplicados en ninguna de las dos fuentes por separado.
 
-S3 (H&M) parte de una sola fuente ya lista, así que ese problema no aparecía todavía. El dataset de hoy sí lo tiene, desde el principio: varias fuentes reales que hay que integrar antes de aplicar esquema, nulos y duplicados — la mecánica de cada control de calidad ya la viste en S3 (esquema explícito, `Window`+`row_number()`, particionado, 2.2-2.4 de esa sesión); lo nuevo hoy es aplicarla sobre más de una fuente a la vez, y distinguir un nulo de un código de error de sensor, que no es lo mismo (3.6).
+S3 (H&M) parte de una sola fuente ya lista, así que ese problema no aparecía todavía. El dataset de hoy sí lo tiene, desde el principio: varias fuentes reales que hay que integrar antes de aplicar esquema, nulos y duplicados — la mecánica de cada control de calidad ya la viste en S3 (esquema explícito, `Window`+`row_number()`, particionado, 2.2-2.4 de esa sesión); lo nuevo hoy es aplicarla sobre más de una fuente a la vez, y distinguir un nulo de un código de error de sensor, que no es lo mismo (3.3.1).
 
-Esta sesión organiza su salida en las mismas capas que ya viste en S3 (2.6): Bronze (crudo), Silver (integrado y validado), Gold (particionado, listo para consumo) — con una diferencia real frente a H&M: hoy no hay una columna categórica ya presente en los datos para particionar, así que se **deriva** una a partir de una fecha (3.9) — patrón igual de común en almacenamiento analítico real, basado en el mismo criterio de siempre (pocos valores distintos, usados seguido en filtros).
+Esta sesión organiza su salida en las mismas capas que ya viste en S3 (2.6): Bronze (crudo), Silver (integrado y validado), Gold (particionado, listo para consumo) — con una diferencia real frente a H&M: hoy no hay una columna categórica ya presente en los datos para particionar, así que se **deriva** una a partir de una fecha (3.3.4) — patrón igual de común en almacenamiento analítico real, basado en el mismo criterio de siempre (pocos valores distintos, usados seguido en filtros).
 
 ### 2.3 Preparación de datos para modelado distribuido
 
@@ -131,9 +148,9 @@ df_ml = ensamblador.transform(df).select("features", "Valor_Objetivo")
 
 Esta diferencia no es una peculiaridad arbitraria de Spark: en un motor distribuido, cada fila se procesa de forma independiente en un nodo distinto — tener un único objeto `Vector` por fila simplifica cómo Spark distribuye y serializa esa fila entre nodos, en vez de coordinar N columnas sueltas por separado.
 
-La columna objetivo (`label`, la variable que el modelo debe predecir) **no** entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es `Valor_CE` (3.12).
+La columna objetivo (`label`, la variable que el modelo debe predecir) **no** entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es `Valor_CE` (3.3.7).
 
-**Tabla 2. Misma tabla, dos preguntas distintas: regresión (hoy) y series de tiempo (S10)**
+**Tabla 3. Misma tabla, dos preguntas distintas: regresión (hoy) y series de tiempo (S10)**
 
 | | Esta sesión (S4) — Regresión | S10 — Series de tiempo |
 |---|---|---|
@@ -148,7 +165,7 @@ La columna objetivo (`label`, la variable que el modelo debe predecir) **no** en
 df_train, df_test = df_ml.randomSplit([0.8, 0.2], seed=42)
 ```
 
-`seed=42` fija la aleatoriedad — sin ella, cada corrida dividiría los datos distinto, y los resultados no serían comparables entre configuraciones (2.6). Ninguna de las dos preguntas de la Tabla 2 es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.
+`seed=42` fija la aleatoriedad — sin ella, cada corrida dividiría los datos distinto, y los resultados no serían comparables entre configuraciones (2.6). Ninguna de las dos preguntas de la Tabla 3 es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.
 
 ### 2.4 Entrenamiento de un modelo de regresión distribuida
 
@@ -171,7 +188,7 @@ predicciones_base = modelo_base.transform(df_test)
 
 Ninguna métrica sola cuenta toda la historia — el caso de 1.6 es, en el fondo, un caso de confiar en una sola señal de desempeño:
 
-**Tabla 3. RMSE, R² y MAE**
+**Tabla 4. RMSE, R² y MAE**
 
 | Métrica | Qué mide | Sensible a errores grandes | Unidad |
 |---|---|---|---|
@@ -197,13 +214,15 @@ Que RMSE y MAE difieran bastante entre sí es, por sí solo, una señal: signifi
 
 `regParam` controla cuánto se penaliza la magnitud de los coeficientes — un valor alto reduce el riesgo de que el modelo memorice ruido específico del conjunto de entrenamiento (*overfitting*), a costa de un ajuste menos preciso. `elasticNetParam` mezcla dos formas de esa penalización: `0.0` es Ridge (penalización L2, reduce coeficientes sin llevarlos nunca a cero), `1.0` es Lasso (penalización L1, puede llevar coeficientes irrelevantes exactamente a cero), y cualquier valor entre ambos es una mezcla (*Elastic Net*).
 
-**Tabla 4. Tres configuraciones básicas, sin búsqueda exhaustiva**
+**Tabla 5. Tres configuraciones básicas, sin búsqueda exhaustiva**
 
 | Configuración | `regParam` | `elasticNetParam` | Qué prueba |
 |---|---:|---:|---|
 | Sin regularización | 0.0 | 0.0 | La línea base, sin ningún ajuste. |
 | Ridge (L2) | 0.1 | 0.0 | Si penalizar coeficientes grandes mejora la generalización. |
 | Elastic Net (L1+L2) | 0.1 | 0.5 | Una mezcla de ambas penalizaciones. |
+
+`regParam` penaliza la **magnitud** de cada coeficiente, no su importancia real — así que si los predictores están en escalas muy distintas entre sí, la penalización podría terminar siendo desigual sin ninguna razón estadística. En muchas implementaciones de regresión regularizada esto obliga a escalar los predictores a mano antes de entrenar. `LinearRegression` de Spark MLlib no lo necesita: el parámetro `standardization` (`True` por defecto) ya estandariza las features internamente antes de ajustar el modelo, precisamente para que `regParam` penalice de forma justa entre variables de escalas distintas — y devuelve los coeficientes en la escala original de lo que se le pasó como `features`, no en unidades estandarizadas (documentación oficial de Spark). Escalar a mano (3.3.6) sería redundante. Tampoco aplica a modelos basados en árboles como `RandomForestRegressor`: dividen por umbrales, no por magnitud de coeficientes.
 
 `LinearRegression` asume que la relación entre predictores y objetivo es, de fondo, lineal. `RandomForestRegressor` no necesita ese supuesto — construye muchos árboles de decisión sobre subconjuntos aleatorios de datos y variables, y promedia sus predicciones, capturando relaciones no lineales e interacciones que una ecuación lineal no puede representar:
 
@@ -226,44 +245,56 @@ Tiempo: 2h.
 
 **Orientaciones metodológicas:** en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, verificando cada resultado antes de avanzar al siguiente paso.
 
-**Actividades para realizar** (organizadas por fase CRISP-DM, 2.1 — Business Understanding ya se resolvió en 1.6):
+**Actividades para realizar** (estructura genérica CRISP-DM: cada fase es un paso `3.N`, sus actividades son `3.N.M` — reutilizable como plantilla para cualquier sesión de este tipo):
 
-- **3.1** Crear el notebook y la `SparkSession`.
+**3.1 Fase 1 — Business Understanding**
 
-*Fase 2 — Data Understanding*
+- **3.1.1** Crear el notebook y la `SparkSession`.
+- **3.1.2** Definir la variable numérica a predecir.
+- **3.1.3** Definir la decisión de negocio asociada.
 
-- **3.2** Cargar las tres fuentes con esquema explícito.
-- **3.3** Resolver duplicados de `FechaHora` en variables ambientales, antes de integrar.
-- **3.4** Integrar las tres fuentes.
-- **3.5** Explorar nulos en la tabla integrada.
+**3.2 Fase 2 — Data Understanding**
 
-*Fase 3 — Data Preparation*
+- **3.2.1** Cargar los datos.
+- **3.2.2** Describir las variables.
+- **3.2.3** Analizar estadísticas descriptivas.
+- **3.2.4** Analizar correlación con el objetivo.
 
-- **3.6** Tratar una columna sin valores útiles y un código de error de sensor.
-- **3.7** Confirmar ausencia de duplicados en la tabla final.
-- **3.8** Nulos finales sobre las variables numéricas y filtrado.
-- **3.9** Escritura particionada en Parquet, por mes (Gold).
-- **3.10** Leer de vuelta y verificar el particionamiento.
-- **3.11** Reutilizar el Data Lake Gold para el modelado.
-- **3.12** Ensamblar el vector de predictores (`VectorAssembler`).
-- **3.13** Dividir en entrenamiento y prueba.
+**3.3 Fase 3 — Data Preparation**
 
-*Fase 4 y 5 — Modeling y Evaluation*
+- **3.3.1** Limpiar los datos.
+- **3.3.2** Tratar nulos, errores y duplicados.
+- **3.3.3** Seleccionar predictores.
+- **3.3.4** Ensamblar el vector de predictores (`VectorAssembler`).
+- **3.3.5** Dividir aleatoriamente en entrenamiento y prueba.
+- **3.3.6** Escalar si aplica.
 
-- **3.14** Entrenar un modelo base de regresión lineal.
-- **3.15** Evaluar el modelo base (RMSE, R², MAE).
-- **3.16** Comparar tres configuraciones básicas de regularización.
-- **3.17** Comparar con un segundo algoritmo (Random Forest) e importancia de variables.
+**3.4 Fase 4 — Modeling**
 
-*Fase 6 — Deployment*
+- **3.4.1** Entrenar regresión lineal.
+- **3.4.2** Evaluar con RMSE, R² y MAE.
+- **3.4.3** Probar regularización e hiperparámetros básicos.
+- **3.4.4** Entrenar un modelo basado en árboles.
+- **3.4.5** Evaluar con RMSE, R² y MAE.
+- **3.4.6** Analizar importancia de variables.
 
-- **3.18** Guardar el modelo seleccionado.
+**3.5 Fase 5 — Evaluation**
 
-*Cierre*
+- **3.5.1** Comparar los modelos candidatos.
+- **3.5.2** Seleccionar el mejor modelo.
+- **3.5.3** Validar si el error es aceptable para el negocio.
 
-- **3.19** Documentar hallazgos y responder preguntas de reflexión.
+**3.6 Fase 6 — Deployment**
 
-### 3.1 Crear el notebook y la `SparkSession`
+- **3.6.1** Guardar el modelo seleccionado.
+
+**3.7 Cierre**
+
+- **3.7.1** Documentar hallazgos y responder preguntas de reflexión.
+
+### 3.1 Fase 1 — Business Understanding
+
+#### 3.1.1 Crear el notebook y la `SparkSession`
 
 **Producto del paso:** notebook `04_ml_distribuido_regresion_practica.ipynb` con una `SparkSession` activa.
 
@@ -287,15 +318,37 @@ spark
 ORIGEN_DATOS = "/opt/s04-ml-distribuido-regresion/data"
 ```
 
-Nota metodológica: `ARTIFACTS` (la ruta de salida) todavía no se declara acá — recién hace falta en 3.9, cuando empieza a escribirse la primera salida. Cada configuración se declara en el paso donde se usa por primera vez, no de forma anticipada en un bloque global (más sobre esto en 2.1).
+Nota metodológica: `ARTIFACTS` (la ruta de salida) todavía no se declara acá — recién hace falta cuando empieza a escribirse la primera salida (3.3.2). Cada configuración se declara en el paso donde se usa por primera vez, no de forma anticipada en un bloque global (más sobre esto en 2.1).
 
-#### Fase 2 — Data Understanding (3.2-3.5)
+#### 3.1.2 Definir la variable numérica a predecir
+
+**Producto del paso:** una celda markdown que documenta, dentro del propio notebook, qué variable se predice y bajo qué condición — sin depender de esta guía para explicarlo.
+
+```markdown
+## Fase 1 — Business Understanding
+
+**Objetivo:** estimar `Valor_Objetivo` (hoy, `Valor_CE`) a partir de otras variables medidas
+en el mismo instante — no un pronóstico con historial temporal (eso es contenido de S10, 2.3).
+```
+
+#### 3.1.3 Definir la decisión de negocio asociada
+
+**Producto del paso:** el alcance de la comparación documentado — qué se va a entrenar y comparar antes de confiar en un único modelo, como en el caso de 1.6.
+
+```markdown
+**Alcance:** comparar un modelo base de regresión lineal, tres configuraciones de
+regularización y un segundo algoritmo (Random Forest), reportando RMSE, R² y MAE — sin
+búsqueda exhaustiva de hiperparámetros. El modelo ganador es el que decide si vale la pena
+sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no predecir nada.
+```
+
+### 3.2 Fase 2 — Data Understanding
 
 Cargar cada fuente con su esquema, resolver el problema técnico que bloquearía la integración, integrar, y explorar la tabla resultante para conocerla — todavía sin decidir ninguna regla de limpieza.
 
-### 3.2 Cargar las tres fuentes con esquema explícito
+#### 3.2.1 Cargar los datos
 
-**Producto del paso:** `df_ce`, `df_cm`, `df_va` cargados, cada uno con su propio esquema (2.2).
+**Producto del paso:** `df_integrado`, las tres fuentes cargadas con esquema explícito, deduplicadas donde hacía falta, e integradas por `FechaHora`.
 
 ```python
 from pyspark.sql.types import StructType, StructField, TimestampType, DoubleType
@@ -326,13 +379,7 @@ schema_va = StructType([
 df_va = spark.read.csv(f"{ORIGEN_DATOS}/variables_ambientales.csv", header=True, schema=schema_va)
 ```
 
-En una corrida real: `campo_electrico.csv` trajo `186 664` filas, `campo_magnetico.csv` `525 600`, y `variables_ambientales.csv` `708 958` — esta última con `181 918` filas de `FechaHora` duplicada, la única de las tres con ese problema. Es justo la que hay que resolver **antes** de integrar (3.3): un `join` contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible.
-
-**Error frecuente**: la fuente original trae esta columna como `SolarRad.` (con un punto al final, tal como la exporta el equipo de medición). Referenciarla luego con `col("SolarRad.")` falla con `AnalysisException` — Spark interpreta el punto como acceso a un campo anidado, no como parte literal del nombre. No hace falta escapar el nombre en cada uso: como `header=True` junto con un `schema` explícito hace que Spark ignore el texto del header para nombrar columnas, basta con declarar el nombre ya limpio (`SolarRad`, sin punto) en el `StructField` de arriba.
-
-### 3.3 Resolver duplicados de `FechaHora` en variables ambientales, antes de integrar
-
-**Producto del paso:** `df_va_unico`, un registro por minuto, eligiendo la fila con menos nulos (2.2).
+En una corrida real: `campo_electrico.csv` trajo `186 664` filas, `campo_magnetico.csv` `525 600`, y `variables_ambientales.csv` `708 958` — esta última con `181 918` filas de `FechaHora` duplicada, la única de las tres con ese problema. Un `join` contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible, así que hay que resolverlo **antes** de integrar:
 
 ```python
 from pyspark.sql.functions import col, count as spark_count, when, lit
@@ -356,13 +403,9 @@ df_va_unico = (
 )
 ```
 
-`WindDir` queda fuera del conteo de nulos a propósito — es 100 % nula en las tres fuentes (3.6): incluirla en el criterio de desempate no aportaría ninguna señal real. Mismo patrón de deduplicación determinista de S3 (`Window`+`row_number()`), con un criterio de orden distinto: en vez de "la fila con mayor `age`", acá se conserva **la fila con menos nulos** — el mismo minuto medido dos veces, con la versión más completa ganando. En una corrida real, `708 958` filas se redujeron a `527 040` — una por cada minuto distinto.
+`WindDir` queda fuera del conteo de nulos a propósito — es 100 % nula en las tres fuentes (3.3.1): incluirla en el criterio de desempate no aportaría ninguna señal real. Mismo patrón de deduplicación determinista de S3 (`Window`+`row_number()`), con un criterio de orden distinto: en vez de "la fila con mayor `age`", acá se conserva **la fila con menos nulos** — el mismo minuto medido dos veces, con la versión más completa ganando. En una corrida real, `708 958` filas se redujeron a `527 040` — una por cada minuto distinto.
 
-### 3.4 Integrar las tres fuentes
-
-**Producto del paso:** `df_integrado`, con el campo eléctrico como tabla principal.
-
-`FechaHora` es la clave común para integrar; el campo eléctrico queda como tabla principal (`left join`), porque interesa el periodo que ese sensor cubre, no el de los otros dos.
+`FechaHora` es la clave común para integrar; el campo eléctrico queda como tabla principal (`left join`), porque interesa el periodo que ese sensor cubre, no el de los otros dos:
 
 ```python
 df_integrado = (
@@ -372,32 +415,60 @@ df_integrado = (
 )
 
 print(f"Integrado: {df_integrado.count():,} registros x {len(df_integrado.columns)} columnas")
-df_integrado.printSchema()
 ```
 
-En una corrida real, el resultado fue `186 664` filas × `11` columnas — el mismo conteo que `campo_electrico.csv` por sí solo, sin duplicar ninguna fila: la deduplicación de 3.3 hizo su trabajo antes de llegar acá.
+En una corrida real, el resultado fue `186 664` filas × `11` columnas — el mismo conteo que `campo_electrico.csv` por sí solo, sin duplicar ninguna fila: la deduplicación de arriba hizo su trabajo antes de llegar acá.
 
-### 3.5 Explorar nulos en la tabla integrada
+**Error frecuente**: la fuente original trae la columna de radiación solar como `SolarRad.` (con un punto al final, tal como la exporta el equipo de medición). Referenciarla luego con `col("SolarRad.")` falla con `AnalysisException` — Spark interpreta el punto como acceso a un campo anidado, no como parte literal del nombre. No hace falta escapar el nombre en cada uso: como `header=True` junto con un `schema` explícito hace que Spark ignore el texto del header para nombrar columnas, basta con declarar el nombre ya limpio (`SolarRad`, sin punto) en el `StructField` de arriba.
 
-**Producto del paso:** conteo de nulos por columna sobre la tabla ya integrada — un `left join` puede introducir nulos nuevos si algún `FechaHora` del campo eléctrico no tiene contraparte en las otras dos fuentes.
+#### 3.2.2 Describir las variables
+
+**Producto del paso:** el esquema de `df_integrado` y el conteo de nulos por columna — un `left join` puede introducir nulos nuevos si algún `FechaHora` del campo eléctrico no tiene contraparte en las otras dos fuentes.
 
 ```python
+df_integrado.printSchema()
+
 df_integrado.select([
     spark_count(when(col(c).isNull(), c)).alias(c) for c in df_integrado.columns
 ]).show(vertical=True, truncate=False)
 ```
 
-#### Fase 3 — Data Preparation (3.6-3.13)
+#### 3.2.3 Analizar estadísticas descriptivas
+
+**Producto del paso:** media, desviación estándar, mínimo y máximo de cada variable numérica, todavía sobre datos sin limpiar — antes de decidir ninguna regla de calidad.
+
+```python
+df_integrado.describe(["Valor_CE", "Valor_CM", "TempOut", "OutHum", "WindSpeed", "Bar", "Rain", "SolarRad", "UVIndex"]).show()
+```
+
+#### 3.2.4 Analizar correlación con el objetivo
+
+**Producto del paso:** una primera lectura de qué variables podrían explicar `Valor_CE`.
+
+```python
+predictores_candidatos = [
+    c for c in df_integrado.columns
+    if c not in ("FechaHora", "Valor_CE", "WindDir")
+]
+
+for columna in predictores_candidatos:
+    correlacion = df_integrado.stat.corr(columna, "Valor_CE")
+    print(f"{columna:12s} correlacion con Valor_CE: {correlacion:.4f}")
+```
+
+`WindDir` queda fuera del cálculo a propósito: ya se vio en 3.2.2 que es 100 % nula, así que su correlación no estaría definida. Dos advertencias sobre este resultado, antes de sacar conclusiones: todavía no se filtró `Valor_CM = 99999` (3.3.1) — ese código de error puede distorsionar su correlación real con `Valor_CE` — y `df_integrado` todavía puede tener nulos sueltos (3.2.2) que Spark ignora en el cálculo, no reemplaza. Esta es una lectura preliminar; la relación real entre cada variable y `Valor_CE` se confirma recién con `df_valido` (3.3.2) y, sobre todo, con los coeficientes o la `featureImportances` del modelo entrenado (3.4).
+
+### 3.3 Fase 3 — Data Preparation
 
 Con los datos ya conocidos (Fase 2), acá se aplican las reglas de limpieza, se escribe la salida Gold y se deja lista la tabla para modelar: nada de esto se decide sin la exploración previa.
 
-### 3.6 Tratar una columna sin valores útiles y un código de error de sensor
+#### 3.3.1 Limpiar los datos
 
 **Producto del paso:** `df_limpio`, sin `WindDir` y sin el código de error de `Valor_CM` (2.2).
 
 Dos problemas de calidad distintos, dos tratamientos distintos — ninguno de los dos es un nulo común:
 
-**Tabla 5. Dos problemas de calidad, dos tratamientos distintos**
+**Tabla 6. Dos problemas de calidad, dos tratamientos distintos**
 
 | Problema | Cómo se detecta | Por qué no es lo mismo que un nulo | Tratamiento |
 |---|---|---|---|
@@ -424,9 +495,11 @@ print(f"Filas despues de eliminar el codigo de error: {df_limpio.count():,}")
 
 En una corrida real, `2 126` filas tenían ese código — se descartan, no se tratan como si `99999` microteslas fuera un dato real.
 
-### 3.7 Confirmar ausencia de duplicados en la tabla final
+#### 3.3.2 Tratar nulos, errores y duplicados
 
-**Producto del paso:** confirmación de que ni la deduplicación (3.3) ni el `join` (3.4) dejaron `FechaHora` repetida.
+**Producto del paso:** `df_valido`, con las nueve variables físicas completas y sin `FechaHora` repetida, persistido como capa Gold particionada y reutilizado para el modelado.
+
+Primero, confirmar que ni la deduplicación (3.2.1) ni el `join` (3.2.1) dejaron `FechaHora` repetida:
 
 ```python
 total_final = df_limpio.count()
@@ -436,9 +509,7 @@ print(f"Total: {total_final:,}, sin duplicar por FechaHora: {sin_duplicar:,}")
 assert total_final == sin_duplicar, "Hay FechaHora duplicada en la tabla integrada final"
 ```
 
-### 3.8 Nulos finales sobre las variables numéricas y filtrado
-
-**Producto del paso:** `df_valido`, con las nueve variables físicas completas, cacheado para reutilizar en los pasos siguientes.
+Con eso confirmado, quedan los nulos finales sobre las variables físicas:
 
 ```python
 VARIABLES_9 = [
@@ -456,9 +527,7 @@ print(f"Filas eliminadas por nulos en variables criticas: {antes - despues:,}")
 df_valido = df_valido.cache()
 ```
 
-### 3.9 Escritura particionada en Parquet, por mes (Gold)
-
-**Producto del paso:** `campo_electrico_particionado/`, la capa Gold de este Data Lake (2.2).
+Con la tabla ya limpia, se persiste como capa Gold particionada por mes (2.2), en vez de dejarla solo en memoria:
 
 ```python
 from pyspark.sql.functions import date_format
@@ -481,7 +550,7 @@ for carpeta in sorted(os.listdir(f"{ARTIFACTS}/campo_electrico_particionado")):
     print(carpeta)
 ```
 
-**Tabla 6. Filas reales por `AnioMes`**
+**Tabla 7. Filas reales por `AnioMes`**
 
 | AnioMes | Filas |
 |---|---:|
@@ -496,9 +565,7 @@ for carpeta in sorted(os.listdir(f"{ARTIFACTS}/campo_electrico_particionado")):
 
 Julio y diciembre tienen muchas menos filas que el resto — un vacío real de medición, no un error de esta guía.
 
-### 3.10 Leer de vuelta y verificar el particionamiento
-
-**Producto del paso:** `df_verificacion`, confirmado sin pérdida de filas, con `PartitionFilters` en el plan de ejecución al filtrar por `AnioMes` (S3, 2.5).
+Se lee de vuelta para confirmar que no hubo pérdida de filas, y que Spark usa `PartitionFilters` en el plan de ejecución al filtrar por `AnioMes` (S3, 2.5):
 
 ```python
 df_verificacion = spark.read.parquet(f"{ARTIFACTS}/campo_electrico_particionado")
@@ -516,17 +583,13 @@ Para ver cuántas filas quedaron guardadas en cada partición, sin salir de Spar
 df_verificacion.groupBy("AnioMes").count().orderBy("AnioMes").show(truncate=False)
 ```
 
-En una corrida real, coincide exactamente con la Tabla 6.
+En una corrida real, coincide exactamente con la Tabla 7.
 
 ```python
 df_valido.unpersist()
 ```
 
-### 3.11 Reutilizar el Data Lake Gold para el modelado
-
-**Producto del paso:** `df`, listo para ensamblar el vector de predictores.
-
-`df_verificacion` (3.10) ya es la salida Gold, leída y verificada — no hace falta volver a leer el Parquet desde disco para empezar la parte de modelado:
+`df_verificacion` ya es la salida Gold, leída y verificada — no hace falta volver a leer el Parquet desde disco para empezar la parte de modelado:
 
 ```python
 df = df_verificacion
@@ -538,15 +601,57 @@ df.describe(VARIABLES_9).show()
 
 En una corrida real, este conteo dio **184 538** filas.
 
-### 3.12 Ensamblar el vector de predictores (`VectorAssembler`)
+`campo_electrico_particionado/` no tiene un solo destino. La misma tabla —184 538 filas, 9 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado" (2.3).
+
+**S4 (hoy) pregunta:** dado un instante, ¿qué otras variables explican `Valor_CE` en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.
+
+**S10 pregunta:** dado el historial de `Valor_CE`, ¿su propio pasado predice su futuro? Ahí el orden de las filas *es* el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.
+
+**Figura 3. La misma salida Gold, dos preguntas distintas**
+
+```mermaid
+flowchart LR
+    subgraph S4["S4 - Regresión (hoy)"]
+        direction LR
+        P1["Valor_CM_t, TempOut_t,<br/>OutHum_t, ... (mismo instante t)"] --> M1["Valor_CE_t"]
+    end
+    subgraph S10["S10 - Series de tiempo"]
+        direction LR
+        P2["Valor_CE_t<br/>(y su historial)"] -.->|"orden cronológico,<br/>no se baraja"| M2["Valor_CE_t+1"]
+    end
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class P1,M1 today;
+```
+
+**Tabla 8. Misma salida Gold, dos preguntas**
+
+| | S4 — Regresión (hoy) | S10 — Series de tiempo |
+|---|---|---|
+| Pregunta de fondo | ¿Qué otras variables explican `Valor_CE`? | ¿El pasado de `Valor_CE` predice su futuro? |
+| Predictores | Las otras 8 variables, en el mismo instante `t` | `Valor_CE` en instantes anteriores (`t`, `t-1`, ...) |
+| Objetivo | `Valor_CE` en ese mismo instante `t` | `Valor_CE` en un instante futuro (`t+1`) |
+| Orden de las filas | Irrelevante — cada fila es independiente | Crítico — el orden cronológico es el dato |
+| División entrenamiento/prueba | Aleatoria (`randomSplit`, 2.3, Tabla 3) | Cronológica (equivalente a `TimeSeriesSplit`) |
+| Riesgo si se usa la división del otro caso | Ninguno | Fuga de información: el modelo "vería" el futuro al entrenar |
+
+Ninguna de las dos preguntas es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.
+
+#### 3.3.3 Seleccionar predictores
+
+**Producto del paso:** `PREDICTORES`, las 8 variables físicas que entran al modelo — todo `VARIABLES_9` menos la columna objetivo.
+
+```python
+PREDICTORES = [v for v in VARIABLES_9 if v != "Valor_CE"]
+print(f"Predictores ({len(PREDICTORES)}): {PREDICTORES}")
+```
+
+#### 3.3.4 Ensamblar el vector de predictores (`VectorAssembler`)
 
 **Producto del paso:** `df_ml`, con una sola columna `features` (vector de 8 predictores) y la columna objetivo `Valor_CE` (2.3).
 
 ```python
 from pyspark.ml.feature import VectorAssembler
-
-PREDICTORES = [v for v in VARIABLES_9 if v != "Valor_CE"]
-print(f"Predictores ({len(PREDICTORES)}): {PREDICTORES}")
 
 ensamblador = VectorAssembler(inputCols=PREDICTORES, outputCol="features")
 df_ml = ensamblador.transform(df).select("features", "Valor_CE")
@@ -554,9 +659,9 @@ df_ml = ensamblador.transform(df).select("features", "Valor_CE")
 df_ml.show(5, truncate=False)
 ```
 
-### 3.13 Dividir en entrenamiento y prueba
+#### 3.3.5 Dividir aleatoriamente en entrenamiento y prueba
 
-**Producto del paso:** `df_train`/`df_test`, división aleatoria 80/20 (2.3, Tabla 2).
+**Producto del paso:** `df_train`/`df_test`, división aleatoria 80/20 (2.3, Tabla 3).
 
 ```python
 df_train, df_test = df_ml.randomSplit([0.8, 0.2], seed=42)
@@ -565,13 +670,21 @@ print(f"Entrenamiento: {df_train.count():,} filas")
 print(f"Prueba: {df_test.count():,} filas")
 ```
 
-En una corrida real, sobre las 184 538 filas: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.16-3.17 sean justas entre sí).
+En una corrida real, sobre las 184 538 filas: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.4 sean justas entre sí).
 
-#### Fase 4 y 5 — Modeling y Evaluation (3.14-3.17, cierre en 3.19)
+#### 3.3.6 Escalar si aplica
 
-En un pipeline de investigación completo, Modeling (ajustar y comparar candidatos con validación interna) y Evaluation (medir el resultado final, una sola vez, sobre una prueba reservada) son fases separadas. Esta sesión no reserva una tercera partición para validación interna — cada configuración se entrena y se mide directamente contra `df_test` en el mismo paso — así que aquí ambas fases avanzan juntas, paso por paso, hasta cerrar con la reflexión de 3.19.
+**Producto del paso:** ninguno — este paso no aplica en esta sesión, y vale la pena documentar por qué en vez de saltarlo en silencio.
 
-### 3.14 Entrenar un modelo base de regresión lineal
+"Si aplica" es literal acá, y en Spark MLlib no aplica: `LinearRegression` tiene el parámetro `standardization`, activado (`True`) por defecto — ya estandariza los predictores internamente antes de ajustar el modelo, precisamente para que `regParam` (3.4.3) penalice de forma justa entre variables de escalas muy distintas (`Valor_CM` en miles, `Rain` entre 0 y 0.2), y devuelve los coeficientes en la escala original de `features`, no en unidades estandarizadas (2.6). Escalar a mano con `StandardScaler` antes de entrenar sería trabajo redundante — Spark ya lo hace, y sin ese paso extra los coeficientes quedan además más interpretables (en unidades reales, no en desviaciones estándar). `RandomForestRegressor` (3.4.4) tampoco lo necesita — sus árboles dividen por umbrales, no por magnitud de coeficientes.
+
+Este paso no siempre "no aplica": en librerías que no estandarizan internamente (por ejemplo, una implementación propia de regresión regularizada, o algunos modelos de otras librerías), escalar a mano sigue siendo necesario. Vale la pena confirmarlo revisando la documentación del modelo concreto, no asumirlo por costumbre.
+
+### 3.4 Fase 4 — Modeling
+
+Fase técnica: entrenar cada candidato, medir su desempeño individual sobre `df_test`, ajustar configuraciones básicas y analizar la relevancia de sus variables — todavía sin comparar entre sí ni decidir un ganador.
+
+#### 3.4.1 Entrenar regresión lineal
 
 **Producto del paso:** `modelo_base` entrenado, con coeficientes e intercepto visibles (2.4).
 
@@ -587,12 +700,12 @@ print("Intercepto:", modelo_base.intercept)
 
 **Advertencias esperadas, no errores**: al correr esta celda pueden aparecer dos líneas en la consola —
 
-- `regParam is zero, which might cause numerical instability and overfitting`: Spark avisa que este modelo base no tiene regularización (2.6) — es exactamente lo que se está probando a propósito como línea base en 3.16, no un problema a corregir.
+- `regParam is zero, which might cause numerical instability and overfitting`: Spark avisa que este modelo base no tiene regularización (2.6) — es exactamente lo que se está probando a propósito como línea base en 3.4.3, no un problema a corregir.
 - `netlib-blas: JNI_OnLoad: dlopen(libblas.so.3) failed...`: el contenedor no tiene una librería de álgebra lineal nativa instalada, así que Spark cae a una implementación en JVM pura — más lenta, pero igual de correcta. No afecta ningún resultado de esta sesión.
 
 En una corrida real, `modelo_base.coefficients` dio `[-0.0028, 0.1454, 0.0069, -0.0779, -0.0429, 1.2399, -0.0007, 0.0416]` (en el orden de `PREDICTORES`) y el intercepto `104.7116`. El coeficiente de `Rain` (`1.2399`) es, por lejos, el más grande en magnitud — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".
 
-### 3.15 Evaluar el modelo base (RMSE, R², MAE)
+#### 3.4.2 Evaluar con RMSE, R² y MAE
 
 **Producto del paso:** las tres métricas del modelo base, sobre el conjunto de prueba — nunca sobre el de entrenamiento (2.5).
 
@@ -613,7 +726,7 @@ def evaluar(predicciones, nombre):
 resultados_base = evaluar(predicciones_base, "LinearRegression base")
 ```
 
-**Tabla 7. Resultado real del modelo base**
+**Tabla 9. Resultado real del modelo base**
 
 | Métrica | Valor |
 |---|---|
@@ -621,11 +734,11 @@ resultados_base = evaluar(predicciones_base, "LinearRegression base")
 | R² | 0.2271 |
 | MAE | 0.6087 |
 
-Un R² de `0.23` significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de `Valor_CE` — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.17 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.
+Un R² de `0.23` significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de `Valor_CE` — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.4.5 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.
 
-### 3.16 Comparar tres configuraciones básicas de regularización
+#### 3.4.3 Probar regularización e hiperparámetros básicos
 
-**Producto del paso:** tabla comparativa de las tres configuraciones de la Tabla 4 (2.6).
+**Producto del paso:** tabla comparativa de las tres configuraciones de la Tabla 5 (2.6).
 
 ```python
 configuraciones = [
@@ -650,32 +763,34 @@ import pandas as pd
 pd.DataFrame(comparacion_configs)[["Configuracion", "RMSE", "R2", "MAE"]]
 ```
 
-### 3.17 Comparar con un segundo algoritmo (Random Forest) e importancia de variables
+La fila "Sin regularización" es una verificación útil: con `regParam=0.0` no hay penalización, así que su RMSE/R²/MAE debería salir igual al modelo base de 3.4.2 — si no coincide, algo cambió entre celdas (por ejemplo, `df_train`/`df_test` fueron reasignados).
 
-**Producto del paso:** métricas de `RandomForestRegressor`, comparables directamente contra la Tabla 7 y el paso 3.16 (2.6), más la importancia de cada variable.
+#### 3.4.4 Entrenar un modelo basado en árboles
+
+**Producto del paso:** `modelo_rf` entrenado — todavía sin evaluar ni comparar contra los modelos lineales de 3.4.1-3.4.3. Entrena sobre `features` (sin escalar, 3.3.6): los árboles no lo necesitan.
 
 ```python
 from pyspark.ml.regression import RandomForestRegressor
 
 rf = RandomForestRegressor(featuresCol="features", labelCol="Valor_CE", numTrees=50, maxDepth=8, seed=42)
 modelo_rf = rf.fit(df_train)
+```
+
+#### 3.4.5 Evaluar con RMSE, R² y MAE
+
+**Producto del paso:** métricas de `RandomForestRegressor` sobre `df_test`, con la misma función `evaluar()` de 3.4.2 — comparables directamente con la Tabla 9 y la Tabla 5, porque miden sobre el mismo `df_test`.
+
+```python
 predicciones_rf = modelo_rf.transform(df_test)
 
 resultados_rf = evaluar(predicciones_rf, "Random Forest")
 ```
 
-**Tabla 8. Comparación final**
+#### 3.4.6 Analizar importancia de variables
 
-| Configuración | RMSE | R² | MAE |
-|---|---|---|---|
-| Sin regularización | 0.7909 | 0.2271 | 0.6087 |
-| Ridge (L2) | 0.7962 | 0.2166 | 0.6174 |
-| Elastic Net (L1+L2) | 0.8091 | 0.1910 | 0.6372 |
-| **Random Forest** | **0.6732** | **0.4399** | **0.5001** |
+**Producto del paso:** la importancia de cada variable según `modelo_rf`, la primera medida directamente comparable entre las 8 variables sobre un modelo no lineal.
 
-En una corrida real, **Random Forest ganó en las tres métricas a la vez** — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo: una señal de que este modelo base no estaba sobreajustando — no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real vino de otro lado: `RandomForestRegressor` no asume una relación lineal entre las 8 variables ambientales y `Valor_CE`, y esa relación, en los datos reales, no lo es — coherente con que `Rain` (3.14) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables.
-
-**¿Las 8 variables aportan por igual?** Los coeficientes de `LinearRegression` (3.14) no responden esto de forma confiable — no son comparables entre sí porque cada variable tiene una escala distinta (`Valor_CM` en miles, `Rain` entre 0 y 0.2). `RandomForestRegressor` sí calcula algo directamente comparable, sin costo adicional: `featureImportances`, una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman `1.0`.
+**¿Las 8 variables aportan por igual?** `RandomForestRegressor` calcula, sin costo adicional, `featureImportances`: una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman `1.0`.
 
 ```python
 importancias = list(zip(PREDICTORES, modelo_rf.featureImportances.toArray()))
@@ -685,7 +800,7 @@ for variable, importancia in importancias:
     print(f"{variable:12s} {importancia:.4f}")
 ```
 
-**Tabla 9. Importancia de cada variable — completar con tu corrida real**
+**Tabla 10. Importancia de cada variable — completar con tu corrida real**
 
 | Variable | Importancia |
 |---|---|
@@ -700,30 +815,63 @@ for variable, importancia in importancias:
 
 Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).
 
-#### Fase 6 — Deployment (3.18)
+### 3.5 Fase 5 — Evaluation
 
-Aquí "Deployment" significa exactamente lo que hace este paso — persistir el artefacto ganador para poder reutilizarlo sin reentrenar — y no más que eso: no hay empaquetado productivo, servicio de inferencia ni monitoreo; ese alcance queda fuera de esta sesión.
+Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.1, antes de seleccionar un ganador.
 
-### 3.18 Guardar el modelo seleccionado
+#### 3.5.1 Comparar los modelos candidatos
 
-**Producto del paso:** el modelo con mejor RMSE en la Tabla 8, guardado como artefacto reutilizable.
+**Producto del paso:** tabla comparativa de las cuatro configuraciones entrenadas en 3.4, sobre el mismo `df_test`.
+
+**Tabla 11. Comparación final**
+
+| Configuración | RMSE | R² | MAE |
+|---|---|---|---|
+| Sin regularización | 0.7909 | 0.2271 | 0.6087 |
+| Ridge (L2) | 0.7962 | 0.2166 | 0.6174 |
+| Elastic Net (L1+L2) | 0.8091 | 0.1910 | 0.6372 |
+| **Random Forest** | **0.6732** | **0.4399** | **0.5001** |
+
+En una corrida real, **Random Forest ganó en las tres métricas a la vez** — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo: una señal de que este modelo base no estaba sobreajustando — no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real vino de otro lado: `RandomForestRegressor` no asume una relación lineal entre las 8 variables ambientales y `Valor_CE`, y esa relación, en los datos reales, no lo es — coherente con que `Rain` (3.4.1) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables.
+
+#### 3.5.2 Seleccionar el mejor modelo
+
+**Producto del paso:** el modelo ganador, señalado explícitamente con base en la Tabla 11 — no en cuál se entrenó primero o más rápido.
+
+Con los resultados de la Tabla 11, **Random Forest queda seleccionado** como modelo ganador de esta sesión — 3.6.1 lo persiste.
+
+#### 3.5.3 Validar si el error es aceptable para el negocio
+
+**Producto del paso:** una lectura explícita de si el resultado cumple lo que 3.1.3 se propuso medir — no solo qué modelo ganó, sino si ese resultado sirve para algo.
+
+El alcance declarado en 3.1.3 era comparar cuatro configuraciones y reportar RMSE, R² y MAE — eso ya se cumplió: las cuatro quedaron entrenadas, medidas sobre el mismo `df_test`, y reunidas en la Tabla 11. Sobre el desempeño en sí: un R² de `0.44` no alcanzaría el umbral que exigiría un sistema en producción real (donde normalmente se fija un mínimo de negocio *antes* de empezar a modelar), pero sí confirma que las variables ambientales disponibles tienen una relación real y no lineal con `Valor_CE` — suficiente para decidir con evidencia, no por intuición, cuál modelo se guarda.
+
+### 3.6 Fase 6 — Deployment
+
+Aquí "Deployment" significa exactamente lo que hace este paso — persistir el artefacto ya seleccionado en 3.5.2 para poder reutilizarlo sin reentrenar — y no más que eso: no hay empaquetado productivo, servicio de inferencia ni monitoreo; ese alcance queda fuera de esta sesión.
+
+#### 3.6.1 Guardar el modelo seleccionado
+
+**Producto del paso:** el modelo ganador de la Tabla 11 (3.5.2), guardado como artefacto reutilizable.
 
 ```python
-modelo_ganador = modelo_rf  # Random Forest gano las tres metricas (Tabla 8)
+modelo_ganador = modelo_rf  # Random Forest gano las tres metricas (Tabla 11, 3.5.2)
 
 modelo_ganador.write().overwrite().save(f"{ARTIFACTS}/modelo_ce_regresion")
 print(f"Modelo guardado en {ARTIFACTS}/modelo_ce_regresion")
 ```
 
-**Error frecuente**: guardar el primer modelo entrenado (3.14) en vez del que realmente ganó la comparación de la Tabla 8. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (`modelo_rf` ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.
+**Error frecuente**: guardar el primer modelo entrenado (3.4.1) en vez del que realmente ganó la comparación de 3.5.2. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (`modelo_rf` ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.
 
-### 3.19 Documentar hallazgos y responder preguntas de reflexión
+### 3.7 Cierre
+
+#### 3.7.1 Documentar hallazgos y responder preguntas de reflexión
 
 **Producto del paso:** notebook documentado con celdas markdown explicando cada resultado.
 
-Agrega celdas markdown breves debajo de cada bloque de código (3.3-3.17) explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.
+Agrega celdas markdown breves debajo de cada bloque de código relevante, desde la integración de fuentes (3.2) hasta la comparación de modelos (3.4), explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.
 
-**Reflexión técnica breve** (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del `join` evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 8 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor `featureImportances` en tu Tabla 9, y tiene sentido físico que sea la más relevante para explicar `Valor_CE`? ¿por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
+**Reflexión técnica breve** (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del `join` evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 11 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor `featureImportances` en tu Tabla 10, y tiene sentido físico que sea la más relevante para explicar `Valor_CE`? ¿por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
 
 **Evidencia de aprendizaje:**
 
@@ -743,14 +891,15 @@ Replicación autónoma de la integración de datos y del entrenamiento/comparaci
 
 Completa y evidencia estas tareas:
 
-1. Integrar al menos dos fuentes de datos del Proyecto Sello (o preparar una sola fuente ya integrada, si el caso del equipo no tiene múltiples orígenes), con esquema explícito y calidad de datos aplicada (equivalente a 3.2-3.8).
-2. Escribir una salida particionada en Parquet (Gold) e identificar sus capas Bronze/Silver/Gold (equivalente a 3.9-3.10, 2.2).
-3. Ensamblar el vector de predictores sobre esa salida, con una variable objetivo numérica relevante al caso del equipo (equivalente a 3.12).
-4. Entrenar un modelo base de regresión y evaluarlo con las tres métricas (RMSE, R², MAE) (equivalente a 3.14-3.15).
-5. Comparar al menos tres configuraciones básicas de regularización, documentando el resultado de cada una (equivalente a 3.16).
-6. Comparar con un segundo algoritmo de MLlib, distinto de `LinearRegression`, incluida la importancia de variables (equivalente a 3.17).
-7. Guardar el modelo con mejor desempeño, coincidente con la comparación (equivalente a 3.18).
-8. Explicar, con tus propias palabras, por qué ninguna métrica sola basta para decidir cuál modelo es mejor.
+1. Integrar al menos dos fuentes de datos del Proyecto Sello (o preparar una sola fuente ya integrada, si el caso del equipo no tiene múltiples orígenes), con esquema explícito y calidad de datos aplicada, incluida su escritura particionada en Parquet (Gold) con sus capas Bronze/Silver/Gold identificadas (equivalente a 3.2.1, 3.3.1-3.3.2, 2.2).
+2. Seleccionar predictores y ensamblar el vector sobre esa salida, con una variable objetivo numérica relevante al caso del equipo (equivalente a 3.3.3-3.3.4).
+3. Dividir en entrenamiento y prueba, y escalar los predictores si aplica (equivalente a 3.3.5-3.3.6).
+4. Entrenar un modelo base de regresión y evaluarlo con las tres métricas (RMSE, R², MAE) (equivalente a 3.4.1-3.4.2).
+5. Comparar al menos tres configuraciones básicas de regularización, documentando el resultado de cada una (equivalente a 3.4.3).
+6. Entrenar un segundo algoritmo de MLlib, distinto de `LinearRegression`, evaluarlo e incluir la importancia de variables (equivalente a 3.4.4-3.4.6).
+7. Comparar todos los candidatos en una sola tabla, seleccionar el mejor y validar si el resultado cumple el objetivo de negocio definido para el caso de tu equipo (equivalente a 3.5.1-3.5.3).
+8. Guardar el modelo con mejor desempeño, coincidente con la comparación (equivalente a 3.6.1).
+9. Explicar, con tus propias palabras, por qué ninguna métrica sola basta para decidir cuál modelo es mejor.
 
 ### 4.2 Propósito
 
@@ -781,15 +930,15 @@ Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del si
 Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 5 bloques de la rúbrica (4.6):
 
 1. *Integración y calidad de datos*
-    - Fuentes integradas con esquema explícito, calidad de datos aplicada (equivalente a 3.2-3.8).
-2. *Salida particionada (Gold)*
-    - Salida en Parquet particionada, verificada, con sus capas Bronze/Silver/Gold identificadas (equivalente a 3.9-3.10).
-3. *Preparación y modelo base*
-    - Vector de predictores ensamblado; modelo base entrenado y evaluado con las tres métricas (equivalente a 3.12, 3.14-3.15).
-4. *Comparación de configuraciones y algoritmos*
-    - Tabla comparativa de al menos tres configuraciones de regularización y un segundo algoritmo, con importancia de variables (equivalente a 3.16-3.17).
-5. *Modelo seleccionado y reflexión*
-    - Modelo guardado, coincidente con la mejor comparación, más la reflexión técnica (equivalente a 3.18-3.19).
+    - Fuentes integradas con esquema explícito, calidad de datos aplicada, con sus capas Bronze/Silver/Gold identificadas (equivalente a 3.2.1, 3.3.1-3.3.2).
+2. *Preparación y modelo base*
+    - Predictores seleccionados, vector ensamblado, división train/test y escalado si aplica; modelo base entrenado y evaluado con las tres métricas (equivalente a 3.3.3-3.3.6, 3.4.1-3.4.2).
+3. *Comparación de configuraciones y algoritmos*
+    - Tabla comparativa de al menos tres configuraciones de regularización y un segundo algoritmo, con importancia de variables (equivalente a 3.4.3-3.4.6).
+4. *Comparación final y validación de negocio*
+    - Tabla comparativa de todos los candidatos, modelo seleccionado y validación explícita contra el objetivo de negocio (equivalente a 3.5.1-3.5.3).
+5. *Modelo guardado y reflexión*
+    - Modelo guardado, coincidente con la mejor comparación, más la reflexión técnica (equivalente a 3.6-3.7, Deployment y cierre).
 
 **Error o hallazgo**
 
@@ -858,14 +1007,14 @@ La evidencia individual se considera completa si:
 
 ### 4.6 Rúbrica de evaluación
 
-**Tabla 10. Rúbrica de evaluación**
+**Tabla 12. Rúbrica de evaluación**
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
-| 1. Integración y calidad de datos* | 20 | Fuentes integradas con esquema explícito y calidad de datos aplicada (nulos, duplicados, casos especiales) con criterio documentado. | Integración y calidad correctas, con algún criterio menos justificado. | Integración o calidad incompleta. | No integra fuentes ni aplica calidad de datos. | |
-| 2. Salida particionada (Gold)* | 20 | Salida particionada, verificada, con las tres capas (Bronze/Silver/Gold) identificadas sobre el propio pipeline. | Salida particionada y verificada, sin identificar las capas con claridad. | Escritura particionada incompleta o sin verificación. | No escribe salida particionada. | |
-| 3. Preparación y modelo base* | 20 | Vector de predictores correcto, modelo base entrenado y evaluado con las tres métricas. | Preparación y modelo base correctos, con alguna métrica incompleta. | Preparación o modelo base incompletos. | No presenta un modelo entrenado ni evaluado. | |
-| 4. Comparación de configuraciones y algoritmos* | 20 | Al menos tres configuraciones y un segundo algoritmo comparados con las mismas métricas, con importancia de variables y análisis claro. | Comparación completa, con análisis superficial. | Comparación incompleta. | No compara configuraciones ni algoritmos. | |
+| 1. Integración y calidad de datos* | 20 | Fuentes integradas con esquema explícito y calidad de datos aplicada (nulos, duplicados, casos especiales), con salida particionada y las tres capas (Bronze/Silver/Gold) identificadas sobre el propio pipeline. | Integración, calidad y particionado correctos, con algún criterio menos justificado o las capas sin identificar con claridad. | Integración, calidad o particionado incompletos. | No integra fuentes ni aplica calidad de datos. | |
+| 2. Preparación y modelo base* | 20 | Vector de predictores correcto, división y escalado (si aplica) documentados, modelo base entrenado y evaluado con las tres métricas. | Preparación y modelo base correctos, con alguna métrica incompleta. | Preparación o modelo base incompletos. | No presenta un modelo entrenado ni evaluado. | |
+| 3. Comparación de configuraciones y algoritmos* | 20 | Al menos tres configuraciones y un segundo algoritmo comparados con las mismas métricas, con importancia de variables. | Comparación completa, con análisis superficial. | Comparación incompleta. | No compara configuraciones ni algoritmos. | |
+| 4. Comparación final y validación de negocio* | 20 | Todos los candidatos comparados en una sola tabla, modelo seleccionado explícitamente, y validación clara contra el objetivo de negocio de la Fase 1. | Comparación y selección correctas, validación de negocio superficial. | Comparación incompleta o sin validar contra el objetivo de negocio. | No compara los candidatos entre sí ni selecciona un ganador. | |
 | 5. Modelo guardado y comprensión* | 20 | Modelo guardado coincide con la mejor comparación; explicación clara de por qué ninguna métrica sola basta. | Modelo guardado correcto, explicación con detalles menores. | Modelo guardado no coincide con la mejor comparación, o explicación superficial. | No guarda modelo ni explica el criterio de selección. | |
 
 \* Agregado manual.
@@ -889,7 +1038,7 @@ Tiempo: 5 min.
 
 **Resumen breve:** hoy el pipeline batch ganó un Data Lake propio y su primer modelo — tres fuentes reales integradas y validadas (esquema, duplicados, un código de error distinto de un nulo), escritas como una capa Gold particionada; sobre esa salida, un vector de predictores ensamblado con `VectorAssembler`, un modelo base de regresión lineal entrenado y evaluado con tres métricas distintas (RMSE, R², MAE), comparado sistemáticamente contra otras configuraciones de regularización y contra un segundo algoritmo (Random Forest), antes de guardar el que realmente tuvo mejor desempeño — no el primero que se entrenó.
 
-**Dinámica participativa:** en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 8 le dio el mejor RMSE, y si le sorprendió o no.
+**Dinámica participativa:** en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 11 le dio el mejor RMSE, y si le sorprendió o no.
 
 **Metacognición:** ¿qué parte de la sesión te costó más entender: integrar tres fuentes con calidad de datos, por qué Spark MLlib necesita `VectorAssembler`, la diferencia entre RMSE y MAE, o por qué comparar contra Random Forest importa aunque el modelo lineal ya "funcione"?
 
