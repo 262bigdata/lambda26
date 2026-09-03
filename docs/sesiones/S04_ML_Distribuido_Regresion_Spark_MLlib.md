@@ -148,7 +148,7 @@ df_ml = ensamblador.transform(df).select("features", "Valor_Objetivo")
 
 Esta diferencia no es una peculiaridad arbitraria de Spark: en un motor distribuido, cada fila se procesa de forma independiente en un nodo distinto — tener un único objeto `Vector` por fila simplifica cómo Spark distribuye y serializa esa fila entre nodos, en vez de coordinar N columnas sueltas por separado.
 
-La columna objetivo (`label`, la variable que el modelo debe predecir) **no** entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es `Valor_CE` (3.3.7).
+La columna objetivo (`label`, la variable que el modelo debe predecir) **no** entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es `CE` (3.3.7).
 
 **Tabla 3. Misma tabla, dos preguntas distintas: regresión (hoy) y series de tiempo (S10)**
 
@@ -171,7 +171,7 @@ df_train, df_test = df_ml.randomSplit([0.8, 0.2], seed=42)
 
 Todo estimador de Spark MLlib sigue el mismo patrón de dos pasos: `fit()` entrena sobre los datos de entrenamiento y devuelve un **modelo** (un `Transformer`); `transform()` aplica ese modelo entrenado sobre datos nuevos para producir predicciones. Es el mismo patrón que reaparecerá en cualquier otro algoritmo de MLlib, no solo en regresión.
 
-Estimar una variable numérica continua a partir de otras variables medidas en el mismo instante es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia *House Prices* de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es `Valor_CE`.
+Estimar una variable numérica continua a partir de otras variables medidas en el mismo instante es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia *House Prices* de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es `CE`.
 
 ```python
 from pyspark.ml.regression import LinearRegression
@@ -327,7 +327,7 @@ Nota metodológica: `ARTIFACTS` (la ruta de salida) todavía no se declara acá 
 ```markdown
 ## Fase 1 — Business Understanding
 
-**Objetivo:** estimar `Valor_Objetivo` (hoy, `Valor_CE`) a partir de otras variables medidas
+**Objetivo:** estimar `Valor_Objetivo` (hoy, `CE`) a partir de otras variables medidas
 en el mismo instante — no un pronóstico con historial temporal (eso es contenido de S10, 2.3).
 ```
 
@@ -348,20 +348,20 @@ Cargar cada fuente con su esquema, resolver el problema técnico que bloquearía
 
 #### 3.2.1 Cargar los datos
 
-**Producto del paso:** `df_integrado`, las tres fuentes cargadas con esquema explícito, deduplicadas donde hacía falta, e integradas por `FechaHora`.
+**Producto del paso:** `df_integrado`, las tres fuentes cargadas con esquema explícito, deduplicadas donde hacía falta, e integradas por `DateTime`.
 
 ```python
 from pyspark.sql.types import StructType, StructField, TimestampType, DoubleType
 
 schema_ce = StructType([
-    StructField("FechaHora", TimestampType(), nullable=False),
-    StructField("Valor_CE", DoubleType(), nullable=True),
+    StructField("DateTime", TimestampType(), nullable=False),
+    StructField("CE", DoubleType(), nullable=True),
 ])
 df_ce = spark.read.csv(f"{ORIGEN_DATOS}/campo_electrico.csv", header=True, schema=schema_ce)
 
 schema_cm = StructType([
-    StructField("FechaHora", TimestampType(), nullable=False),
-    StructField("Valor_CM", DoubleType(), nullable=True),
+    StructField("DateTime", TimestampType(), nullable=False),
+    StructField("CM", DoubleType(), nullable=True),
 ])
 df_cm = spark.read.csv(f"{ORIGEN_DATOS}/campo_magnetico.csv", header=True, schema=schema_cm)
 
@@ -369,31 +369,29 @@ schema_va = StructType([
     StructField("TempOut", DoubleType(), nullable=True),
     StructField("OutHum", DoubleType(), nullable=True),
     StructField("WindSpeed", DoubleType(), nullable=True),
-    StructField("WindDir", DoubleType(), nullable=True),
     StructField("Bar", DoubleType(), nullable=True),
-    StructField("Rain", DoubleType(), nullable=True),
     StructField("SolarRad", DoubleType(), nullable=True),
     StructField("UVIndex", DoubleType(), nullable=True),
-    StructField("FechaHora", TimestampType(), nullable=False),
+    StructField("DateTime", TimestampType(), nullable=False),
 ])
 df_va = spark.read.csv(f"{ORIGEN_DATOS}/variables_ambientales.csv", header=True, schema=schema_va)
 ```
 
-En una corrida real: `campo_electrico.csv` trajo `186 664` filas, `campo_magnetico.csv` `525 600`, y `variables_ambientales.csv` `708 958` — esta última con `181 918` filas de `FechaHora` duplicada, la única de las tres con ese problema. Un `join` contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible, así que hay que resolverlo **antes** de integrar:
+En una corrida real: `campo_electrico.csv` trajo `93 027` filas, `campo_magnetico.csv` `355 021`, y `variables_ambientales.csv` `359 573` — esta última con `DateTime` duplicada en varias filas, la única de las tres con ese problema. Un `join` contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible, así que hay que resolverlo **antes** de integrar:
 
 ```python
 from pyspark.sql.functions import col, count as spark_count, when, lit
 from pyspark.sql.window import Window
 from pyspark.sql.functions import row_number
 
-columnas_conteo_nulos = [c for c in df_va.columns if c not in ("FechaHora", "WindDir")]
+columnas_conteo_nulos = [c for c in df_va.columns if c != "DateTime"]
 
 df_va_con_conteo = df_va.withColumn(
     "CantidadNulos",
     sum(when(col(c).isNull(), 1).otherwise(0) for c in columnas_conteo_nulos),
 )
 
-ventana_va = Window.partitionBy("FechaHora").orderBy(col("CantidadNulos").asc())
+ventana_va = Window.partitionBy("DateTime").orderBy(col("CantidadNulos").asc())
 
 df_va_unico = (
     df_va_con_conteo
@@ -403,27 +401,27 @@ df_va_unico = (
 )
 ```
 
-`WindDir` queda fuera del conteo de nulos a propósito — es 100 % nula en las tres fuentes (3.3.1): incluirla en el criterio de desempate no aportaría ninguna señal real. Mismo patrón de deduplicación determinista de S3 (`Window`+`row_number()`), con un criterio de orden distinto: en vez de "la fila con mayor `age`", acá se conserva **la fila con menos nulos** — el mismo minuto medido dos veces, con la versión más completa ganando. En una corrida real, `708 958` filas se redujeron a `527 040` — una por cada minuto distinto.
+Mismo patrón de deduplicación determinista de S3 (`Window`+`row_number()`), con un criterio de orden distinto: en vez de "la fila con mayor `age`", acá se conserva **la fila con menos nulos** — el mismo minuto medido dos veces, con la versión más completa ganando. Completa aquí cuántas filas quedaron después de esta deduplicación.
 
-`FechaHora` es la clave común para integrar; el campo eléctrico queda como tabla principal (`left join`), porque interesa el periodo que ese sensor cubre, no el de los otros dos:
+`DateTime` es la clave común para integrar; el campo eléctrico queda como tabla principal (`left join`), porque interesa el periodo que ese sensor cubre, no el de los otros dos:
 
 ```python
 df_integrado = (
     df_ce
-    .join(df_cm, on="FechaHora", how="left")
-    .join(df_va_unico, on="FechaHora", how="left")
+    .join(df_cm, on="DateTime", how="left")
+    .join(df_va_unico, on="DateTime", how="left")
 )
 
 print(f"Integrado: {df_integrado.count():,} registros x {len(df_integrado.columns)} columnas")
 ```
 
-En una corrida real, el resultado fue `186 664` filas × `11` columnas — el mismo conteo que `campo_electrico.csv` por sí solo, sin duplicar ninguna fila: la deduplicación de arriba hizo su trabajo antes de llegar acá.
+En una corrida real, el resultado fue `93 027` filas × `9` columnas (`DateTime`, `CE`, `CM`, `TempOut`, `OutHum`, `WindSpeed`, `Bar`, `SolarRad`, `UVIndex`) — el mismo conteo que `campo_electrico.csv` por sí solo, sin duplicar ninguna fila: la deduplicación de arriba hizo su trabajo antes de llegar acá.
 
 **Error frecuente**: la fuente original trae la columna de radiación solar como `SolarRad.` (con un punto al final, tal como la exporta el equipo de medición). Referenciarla luego con `col("SolarRad.")` falla con `AnalysisException` — Spark interpreta el punto como acceso a un campo anidado, no como parte literal del nombre. No hace falta escapar el nombre en cada uso: como `header=True` junto con un `schema` explícito hace que Spark ignore el texto del header para nombrar columnas, basta con declarar el nombre ya limpio (`SolarRad`, sin punto) en el `StructField` de arriba.
 
 #### 3.2.2 Describir las variables
 
-**Producto del paso:** el esquema de `df_integrado` y el conteo de nulos por columna — un `left join` puede introducir nulos nuevos si algún `FechaHora` del campo eléctrico no tiene contraparte en las otras dos fuentes.
+**Producto del paso:** el esquema de `df_integrado` y el conteo de nulos por columna — un `left join` puede introducir nulos nuevos si algún `DateTime` del campo eléctrico no tiene contraparte en las otras dos fuentes.
 
 ```python
 df_integrado.printSchema()
@@ -438,25 +436,25 @@ df_integrado.select([
 **Producto del paso:** media, desviación estándar, mínimo y máximo de cada variable numérica, todavía sobre datos sin limpiar — antes de decidir ninguna regla de calidad.
 
 ```python
-df_integrado.describe(["Valor_CE", "Valor_CM", "TempOut", "OutHum", "WindSpeed", "Bar", "Rain", "SolarRad", "UVIndex"]).show()
+df_integrado.describe(["CE", "CM", "TempOut", "OutHum", "WindSpeed", "Bar", "SolarRad", "UVIndex"]).show()
 ```
 
 #### 3.2.4 Analizar correlación con el objetivo
 
-**Producto del paso:** una primera lectura de qué variables podrían explicar `Valor_CE`.
+**Producto del paso:** una primera lectura de qué variables podrían explicar `CE`.
 
 ```python
 predictores_candidatos = [
     c for c in df_integrado.columns
-    if c not in ("FechaHora", "Valor_CE", "WindDir")
+    if c not in ("DateTime", "CE")
 ]
 
 for columna in predictores_candidatos:
-    correlacion = df_integrado.stat.corr(columna, "Valor_CE")
-    print(f"{columna:12s} correlacion con Valor_CE: {correlacion:.4f}")
+    correlacion = df_integrado.stat.corr(columna, "CE")
+    print(f"{columna:12s} correlacion con CE: {correlacion:.4f}")
 ```
 
-`WindDir` queda fuera del cálculo a propósito: ya se vio en 3.2.2 que es 100 % nula, así que su correlación no estaría definida. Dos advertencias sobre este resultado, antes de sacar conclusiones: todavía no se filtró `Valor_CM = 99999` (3.3.1) — ese código de error puede distorsionar su correlación real con `Valor_CE` — y `df_integrado` todavía puede tener nulos sueltos (3.2.2) que Spark ignora en el cálculo, no reemplaza. Esta es una lectura preliminar; la relación real entre cada variable y `Valor_CE` se confirma recién con `df_valido` (3.3.2) y, sobre todo, con los coeficientes o la `featureImportances` del modelo entrenado (3.4).
+En una corrida real: `CM` `0.0115`, `TempOut` `0.1170`, `OutHum` `-0.0597`, `WindSpeed` `-0.1675`, `Bar` `0.0132`, `SolarRad` `-0.0244`, `UVIndex` `-0.0092`. Todas las correlaciones lineales simples son débiles (la más fuerte, `WindSpeed`, no llega a `-0.17`) — dos advertencias antes de sacar conclusiones: todavía no se filtró `CM = 99999` (3.3.1) — ese código de error puede distorsionar su correlación real con `CE` — y `df_integrado` todavía puede tener nulos sueltos (3.2.2) que Spark ignora en el cálculo, no reemplaza. Esta es una lectura preliminar; la relación real entre cada variable y `CE` se confirma recién con `df_valido` (3.3.2) y, sobre todo, con los coeficientes o la `featureImportances` del modelo entrenado (3.4) — que sí capturan relaciones no lineales, a diferencia de una correlación de Pearson simple.
 
 ### 3.3 Fase 3 — Data Preparation
 
@@ -464,68 +462,55 @@ Con los datos ya conocidos (Fase 2), acá se aplican las reglas de limpieza, se 
 
 #### 3.3.1 Limpiar los datos
 
-**Producto del paso:** `df_limpio`, sin `WindDir` y sin el código de error de `Valor_CM` (2.2).
+**Producto del paso:** `df_limpio`, sin el código de error de `CM` (2.2).
 
-Dos problemas de calidad distintos, dos tratamientos distintos — ninguno de los dos es un nulo común:
-
-**Tabla 6. Dos problemas de calidad, dos tratamientos distintos**
-
-| Problema | Cómo se detecta | Por qué no es lo mismo que un nulo | Tratamiento |
-|---|---|---|---|
-| `WindDir` sin valores útiles | Conteo de nulos = 100 % de las filas | Sí es un nulo — pero total, no parcial: ninguna fila tiene el dato | Se descarta la columna completa |
-| `Valor_CM = 99999` | Filtro por el valor de dominio conocido, no `isNull()` | No es un nulo: Spark ve un `Double` válido, no `NULL` | Se descartan las filas con ese código |
+`CM = 99999` es un código de error de sensor, no un nulo: Spark lo ve como un `Double` válido, no como `NULL` — por eso `isNull()` no lo detecta, hace falta filtrarlo por el valor de dominio conocido.
 
 ```python
-nulos_winddir = df_integrado.filter(col("WindDir").isNull()).count()
-total = df_integrado.count()
-print(f"WindDir nula: {nulos_winddir:,} de {total:,} ({nulos_winddir/total*100:.1f}%)")
+errores_cm = df_integrado.filter(col("CM") == 99999).count()
+print(f"Filas con codigo de error CM=99999: {errores_cm:,}")
 
-df_sin_winddir = df_integrado.drop("WindDir")
-```
-
-En una corrida real, `WindDir` dio `708 958` nulos de `708 958` filas — el 100 % — cero valores útiles en toda la fuente.
-
-```python
-errores_cm = df_sin_winddir.filter(col("Valor_CM") == 99999).count()
-print(f"Filas con codigo de error Valor_CM=99999: {errores_cm:,}")
-
-df_limpio = df_sin_winddir.filter(col("Valor_CM") != 99999)
+df_limpio = df_integrado.filter(col("CM") != 99999)
 print(f"Filas despues de eliminar el codigo de error: {df_limpio.count():,}")
 ```
 
-En una corrida real, `2 126` filas tenían ese código — se descartan, no se tratan como si `99999` microteslas fuera un dato real.
+En una corrida real, `180` filas tenían ese código — se descartan, no se tratan como si `99999` microteslas fuera un dato real. `df_limpio` quedó con `92 847` filas (`93 027 - 180`).
 
 #### 3.3.2 Tratar nulos, errores y duplicados
 
-**Producto del paso:** `df_valido`, con las nueve variables físicas completas y sin `FechaHora` repetida, persistido como capa Gold particionada y reutilizado para el modelado.
+**Producto del paso:** `df_valido`, con las ocho variables físicas completas y sin `DateTime` repetida, persistido como capa Gold particionada y reutilizado para el modelado.
 
-Primero, confirmar que ni la deduplicación (3.2.1) ni el `join` (3.2.1) dejaron `FechaHora` repetida:
+Primero, confirmar que ni la deduplicación (3.2.1) ni el `join` (3.2.1) dejaron `DateTime` repetida:
 
 ```python
 total_final = df_limpio.count()
-sin_duplicar = df_limpio.dropDuplicates(["FechaHora"]).count()
+sin_duplicar = df_limpio.dropDuplicates(["DateTime"]).count()
 
-print(f"Total: {total_final:,}, sin duplicar por FechaHora: {sin_duplicar:,}")
-assert total_final == sin_duplicar, "Hay FechaHora duplicada en la tabla integrada final"
+print(f"Total: {total_final:,}, sin duplicar por DateTime: {sin_duplicar:,}")
+assert total_final == sin_duplicar, "Hay DateTime duplicada en la tabla integrada final"
 ```
+
+En una corrida real, `92 847` filas en ambos casos — sin duplicados en la tabla final, gracias a que `CE` (tabla principal del `join`) ya no los tiene desde el origen.
 
 Con eso confirmado, quedan los nulos finales sobre las variables físicas:
 
 ```python
-VARIABLES_9 = [
-    "Valor_CE", "Valor_CM", "TempOut", "OutHum",
-    "WindSpeed", "Bar", "Rain", "SolarRad", "UVIndex",
+VARIABLES_MODELO = [
+    "CE", "CM", "TempOut", "OutHum",
+    "WindSpeed", "Bar", "SolarRad", "UVIndex",
 ]
 
 antes = df_limpio.count()
-df_valido = df_limpio.na.drop(subset=VARIABLES_9)
+df_valido = df_limpio.na.drop(subset=VARIABLES_MODELO)
 despues = df_valido.count()
 
-print(f"Filas antes: {antes:,}, despues de na.drop(subset=VARIABLES_9): {despues:,}")
+print(f"Filas antes: {antes:,}, despues de na.drop(subset=VARIABLES_MODELO): {despues:,}")
 print(f"Filas eliminadas por nulos en variables criticas: {antes - despues:,}")
 
 df_valido = df_valido.cache()
 ```
+
+En una corrida real, `92 847` filas antes y después — `0` filas eliminadas por nulos: para este recorte de fechas (2026-03-01 a 2026-09-04), ninguna de las ocho variables físicas tenía nulos sueltos sobre el periodo que cubre `CE`.
 
 Con la tabla ya limpia, se persiste como capa Gold particionada por mes (2.2), en vez de dejarla solo en memoria:
 
@@ -534,7 +519,7 @@ from pyspark.sql.functions import date_format
 
 ARTIFACTS = "/opt/s04-ml-distribuido-regresion/artifacts"
 
-df_particionable = df_valido.withColumn("AnioMes", date_format(col("FechaHora"), "yyyy-MM"))
+df_particionable = df_valido.withColumn("AnioMes", date_format(col("DateTime"), "yyyy-MM"))
 
 (
     df_particionable
@@ -550,20 +535,17 @@ for carpeta in sorted(os.listdir(f"{ARTIFACTS}/campo_electrico_particionado")):
     print(carpeta)
 ```
 
-**Tabla 7. Filas reales por `AnioMes`**
+**Tabla 6. Filas reales por `AnioMes`**
 
 | AnioMes | Filas |
 |---|---:|
-| 2025-05 | 28 107 |
-| 2025-06 | 41 502 |
-| 2025-07 | 1 409 |
-| 2025-08 | 20 582 |
-| 2025-09 | 27 397 |
-| 2025-10 | 32 877 |
-| 2025-11 | 32 652 |
-| 2025-12 | 12 |
+| 2026-05 | 28 107 |
+| 2026-06 | 41 502 |
+| 2026-07 | 1 409 |
+| 2026-08 | 20 582 |
+| 2026-09 | 1 247 |
 
-Julio y diciembre tienen muchas menos filas que el resto — un vacío real de medición, no un error de esta guía.
+El rango real de `campo_electrico.csv` (mayo-septiembre 2026, con un hueco real de casi 7 días a inicios de septiembre) define cuántas particiones aparecen: solo 5, no 7 (marzo-abril de `variables_ambientales` se descartaron en el `join`, y septiembre queda muy chico porque `CE` se corta el 1 de septiembre a las 20:46, justo antes del hueco).
 
 Se lee de vuelta para confirmar que no hubo pérdida de filas, y que Spark usa `PartitionFilters` en el plan de ejecución al filtrar por `AnioMes` (S3, 2.5):
 
@@ -574,7 +556,7 @@ df_verificacion.printSchema()
 assert df_verificacion.count() == df_particionable.count()
 print(f"Verificado: {df_verificacion.count():,} filas, ida y vuelta sin perdida.")
 
-df_verificacion.filter(col("AnioMes") == "2025-09").explain(True)
+df_verificacion.filter(col("AnioMes") == "2026-09").explain(True)
 ```
 
 Para ver cuántas filas quedaron guardadas en cada partición, sin salir de Spark ni contar archivos a mano:
@@ -583,7 +565,7 @@ Para ver cuántas filas quedaron guardadas en cada partición, sin salir de Spar
 df_verificacion.groupBy("AnioMes").count().orderBy("AnioMes").show(truncate=False)
 ```
 
-En una corrida real, coincide exactamente con la Tabla 7.
+En una corrida real, coincide exactamente con la Tabla 6.
 
 ```python
 df_valido.unpersist()
@@ -596,16 +578,16 @@ df = df_verificacion
 
 df.printSchema()
 print(f"Filas: {df.count():,}")
-df.describe(VARIABLES_9).show()
+df.describe(VARIABLES_MODELO).show()
 ```
 
-En una corrida real, este conteo dio **184 538** filas.
+En una corrida real, este conteo dio **92 847** filas.
 
-`campo_electrico_particionado/` no tiene un solo destino. La misma tabla —184 538 filas, 9 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado" (2.3).
+`campo_electrico_particionado/` no tiene un solo destino. La misma tabla —8 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado" (2.3).
 
-**S4 (hoy) pregunta:** dado un instante, ¿qué otras variables explican `Valor_CE` en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.
+**S4 (hoy) pregunta:** dado un instante, ¿qué otras variables explican `CE` en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.
 
-**S10 pregunta:** dado el historial de `Valor_CE`, ¿su propio pasado predice su futuro? Ahí el orden de las filas *es* el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.
+**S10 pregunta:** dado el historial de `CE`, ¿su propio pasado predice su futuro? Ahí el orden de las filas *es* el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.
 
 **Figura 3. La misma salida Gold, dos preguntas distintas**
 
@@ -613,24 +595,24 @@ En una corrida real, este conteo dio **184 538** filas.
 flowchart LR
     subgraph S4["S4 - Regresión (hoy)"]
         direction LR
-        P1["Valor_CM_t, TempOut_t,<br/>OutHum_t, ... (mismo instante t)"] --> M1["Valor_CE_t"]
+        P1["CM_t, TempOut_t,<br/>OutHum_t, ... (mismo instante t)"] --> M1["CE_t"]
     end
     subgraph S10["S10 - Series de tiempo"]
         direction LR
-        P2["Valor_CE_t<br/>(y su historial)"] -.->|"orden cronológico,<br/>no se baraja"| M2["Valor_CE_t+1"]
+        P2["CE_t<br/>(y su historial)"] -.->|"orden cronológico,<br/>no se baraja"| M2["CE_t+1"]
     end
 
     classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
     class P1,M1 today;
 ```
 
-**Tabla 8. Misma salida Gold, dos preguntas**
+**Tabla 7. Misma salida Gold, dos preguntas**
 
 | | S4 — Regresión (hoy) | S10 — Series de tiempo |
 |---|---|---|
-| Pregunta de fondo | ¿Qué otras variables explican `Valor_CE`? | ¿El pasado de `Valor_CE` predice su futuro? |
-| Predictores | Las otras 8 variables, en el mismo instante `t` | `Valor_CE` en instantes anteriores (`t`, `t-1`, ...) |
-| Objetivo | `Valor_CE` en ese mismo instante `t` | `Valor_CE` en un instante futuro (`t+1`) |
+| Pregunta de fondo | ¿Qué otras variables explican `CE`? | ¿El pasado de `CE` predice su futuro? |
+| Predictores | Las otras 7 variables, en el mismo instante `t` | `CE` en instantes anteriores (`t`, `t-1`, ...) |
+| Objetivo | `CE` en ese mismo instante `t` | `CE` en un instante futuro (`t+1`) |
 | Orden de las filas | Irrelevante — cada fila es independiente | Crítico — el orden cronológico es el dato |
 | División entrenamiento/prueba | Aleatoria (`randomSplit`, 2.3, Tabla 3) | Cronológica (equivalente a `TimeSeriesSplit`) |
 | Riesgo si se usa la división del otro caso | Ninguno | Fuga de información: el modelo "vería" el futuro al entrenar |
@@ -639,22 +621,22 @@ Ninguna de las dos preguntas es más difícil de construir en Spark que la otra 
 
 #### 3.3.3 Seleccionar predictores
 
-**Producto del paso:** `PREDICTORES`, las 8 variables físicas que entran al modelo — todo `VARIABLES_9` menos la columna objetivo.
+**Producto del paso:** `PREDICTORES`, las 7 variables físicas que entran al modelo — todo `VARIABLES_MODELO` menos la columna objetivo.
 
 ```python
-PREDICTORES = [v for v in VARIABLES_9 if v != "Valor_CE"]
+PREDICTORES = [v for v in VARIABLES_MODELO if v != "CE"]
 print(f"Predictores ({len(PREDICTORES)}): {PREDICTORES}")
 ```
 
 #### 3.3.4 Ensamblar el vector de predictores (`VectorAssembler`)
 
-**Producto del paso:** `df_ml`, con una sola columna `features` (vector de 8 predictores) y la columna objetivo `Valor_CE` (2.3).
+**Producto del paso:** `df_ml`, con una sola columna `features` (vector de 7 predictores) y la columna objetivo `CE` (2.3).
 
 ```python
 from pyspark.ml.feature import VectorAssembler
 
 ensamblador = VectorAssembler(inputCols=PREDICTORES, outputCol="features")
-df_ml = ensamblador.transform(df).select("features", "Valor_CE")
+df_ml = ensamblador.transform(df).select("features", "CE")
 
 df_ml.show(5, truncate=False)
 ```
@@ -670,13 +652,13 @@ print(f"Entrenamiento: {df_train.count():,} filas")
 print(f"Prueba: {df_test.count():,} filas")
 ```
 
-En una corrida real, sobre las 184 538 filas: **147 943** para entrenamiento y **36 595** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.4 sean justas entre sí).
+En una corrida real, sobre las 92 847 filas: **74 434** para entrenamiento y **18 413** para prueba — el 80/20 esperado, con `seed=42` garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.4 sean justas entre sí).
 
 #### 3.3.6 Escalar si aplica
 
 **Producto del paso:** ninguno — este paso no aplica en esta sesión, y vale la pena documentar por qué en vez de saltarlo en silencio.
 
-"Si aplica" es literal acá, y en Spark MLlib no aplica: `LinearRegression` tiene el parámetro `standardization`, activado (`True`) por defecto — ya estandariza los predictores internamente antes de ajustar el modelo, precisamente para que `regParam` (3.4.3) penalice de forma justa entre variables de escalas muy distintas (`Valor_CM` en miles, `Rain` entre 0 y 0.2), y devuelve los coeficientes en la escala original de `features`, no en unidades estandarizadas (2.6). Escalar a mano con `StandardScaler` antes de entrenar sería trabajo redundante — Spark ya lo hace, y sin ese paso extra los coeficientes quedan además más interpretables (en unidades reales, no en desviaciones estándar). `RandomForestRegressor` (3.4.4) tampoco lo necesita — sus árboles dividen por umbrales, no por magnitud de coeficientes.
+"Si aplica" es literal acá, y en Spark MLlib no aplica: `LinearRegression` tiene el parámetro `standardization`, activado (`True`) por defecto — ya estandariza los predictores internamente antes de ajustar el modelo, precisamente para que `regParam` (3.4.3) penalice de forma justa entre variables de escalas muy distintas (`CM` en miles, `TempOut`/`OutHum` en decenas), y devuelve los coeficientes en la escala original de `features`, no en unidades estandarizadas (2.6). Escalar a mano con `StandardScaler` antes de entrenar sería trabajo redundante — Spark ya lo hace, y sin ese paso extra los coeficientes quedan además más interpretables (en unidades reales, no en desviaciones estándar). `RandomForestRegressor` (3.4.4) tampoco lo necesita — sus árboles dividen por umbrales, no por magnitud de coeficientes.
 
 Este paso no siempre "no aplica": en librerías que no estandarizan internamente (por ejemplo, una implementación propia de regresión regularizada, o algunos modelos de otras librerías), escalar a mano sigue siendo necesario. Vale la pena confirmarlo revisando la documentación del modelo concreto, no asumirlo por costumbre.
 
@@ -691,7 +673,7 @@ Fase técnica: entrenar cada candidato, medir su desempeño individual sobre `df
 ```python
 from pyspark.ml.regression import LinearRegression
 
-lr_base = LinearRegression(featuresCol="features", labelCol="Valor_CE")
+lr_base = LinearRegression(featuresCol="features", labelCol="CE")
 modelo_base = lr_base.fit(df_train)
 
 print("Coeficientes:", modelo_base.coefficients)
@@ -703,7 +685,7 @@ print("Intercepto:", modelo_base.intercept)
 - `regParam is zero, which might cause numerical instability and overfitting`: Spark avisa que este modelo base no tiene regularización (2.6) — es exactamente lo que se está probando a propósito como línea base en 3.4.3, no un problema a corregir.
 - `netlib-blas: JNI_OnLoad: dlopen(libblas.so.3) failed...`: el contenedor no tiene una librería de álgebra lineal nativa instalada, así que Spark cae a una implementación en JVM pura — más lenta, pero igual de correcta. No afecta ningún resultado de esta sesión.
 
-En una corrida real, `modelo_base.coefficients` dio `[-0.0028, 0.1454, 0.0069, -0.0779, -0.0429, 1.2399, -0.0007, 0.0416]` (en el orden de `PREDICTORES`) y el intercepto `104.7116`. El coeficiente de `Rain` (`1.2399`) es, por lejos, el más grande en magnitud — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".
+En una corrida real, `modelo_base.coefficients` dio `[-0.0027, 0.1241, 0.0104, -0.0740, -0.0104, 0.0000, 0.0194]` (en el orden de `PREDICTORES`: `CM`, `TempOut`, `OutHum`, `WindSpeed`, `Bar`, `SolarRad`, `UVIndex`) y el intercepto `71.5001`. `TempOut` (`0.1241`) es el coeficiente más grande en magnitud, seguido de `WindSpeed` (`-0.0740`) — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".
 
 #### 3.4.2 Evaluar con RMSE, R² y MAE
 
@@ -713,12 +695,12 @@ En una corrida real, `modelo_base.coefficients` dio `[-0.0028, 0.1454, 0.0069, -
 from pyspark.ml.evaluation import RegressionEvaluator
 
 predicciones_base = modelo_base.transform(df_test)
-predicciones_base.select("Valor_CE", "prediction").show(5)
+predicciones_base.select("CE", "prediction").show(5)
 
 def evaluar(predicciones, nombre):
     resultados = {}
     for metrica in ["rmse", "r2", "mae"]:
-        evaluador = RegressionEvaluator(labelCol="Valor_CE", predictionCol="prediction", metricName=metrica)
+        evaluador = RegressionEvaluator(labelCol="CE", predictionCol="prediction", metricName=metrica)
         resultados[metrica.upper()] = evaluador.evaluate(predicciones)
     print(f"{nombre}: RMSE={resultados['RMSE']:.4f}  R2={resultados['R2']:.4f}  MAE={resultados['MAE']:.4f}")
     return resultados
@@ -726,15 +708,15 @@ def evaluar(predicciones, nombre):
 resultados_base = evaluar(predicciones_base, "LinearRegression base")
 ```
 
-**Tabla 9. Resultado real del modelo base**
+**Tabla 8. Resultado real del modelo base**
 
 | Métrica | Valor |
 |---|---|
-| RMSE | 0.7909 |
-| R² | 0.2271 |
-| MAE | 0.6087 |
+| RMSE | 0.9153 |
+| R² | 0.1119 |
+| MAE | 0.7365 |
 
-Un R² de `0.23` significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de `Valor_CE` — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.4.5 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.
+Un R² de `0.11` significa que el modelo lineal explica poco más de una décima parte de la variabilidad real de `CE` — bastante menos que el resultado con las 8 variables originales (`Rain`/`WindDir` incluidos), y una señal de que estas 7 variables por sí solas no capturan gran parte de lo que mueve a `CE`. Guarda esa cifra — 3.4.5 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.
 
 #### 3.4.3 Probar regularización e hiperparámetros básicos
 
@@ -750,7 +732,7 @@ configuraciones = [
 comparacion_configs = []
 for config in configuraciones:
     lr = LinearRegression(
-        featuresCol="features", labelCol="Valor_CE",
+        featuresCol="features", labelCol="CE",
         regParam=config["regParam"], elasticNetParam=config["elasticNetParam"],
     )
     modelo = lr.fit(df_train)
@@ -763,7 +745,7 @@ import pandas as pd
 pd.DataFrame(comparacion_configs)[["Configuracion", "RMSE", "R2", "MAE"]]
 ```
 
-La fila "Sin regularización" es una verificación útil: con `regParam=0.0` no hay penalización, así que su RMSE/R²/MAE debería salir igual al modelo base de 3.4.2 — si no coincide, algo cambió entre celdas (por ejemplo, `df_train`/`df_test` fueron reasignados).
+La fila "Sin regularización" es una verificación útil: con `regParam=0.0` no hay penalización, así que su RMSE/R²/MAE debería salir igual al modelo base de 3.4.2 — si no coincide, algo cambió entre celdas (por ejemplo, `df_train`/`df_test` fueron reasignados). En una corrida real, coincidió exactamente: `Sin regularización` RMSE=`0.9153`, `Ridge (L2)` RMSE=`0.9175`, `Elastic Net (L1+L2)` RMSE=`0.9260` — agregar regularización empeoró el resultado en las tres configuraciones, no lo mejoró.
 
 #### 3.4.4 Entrenar un modelo basado en árboles
 
@@ -772,13 +754,13 @@ La fila "Sin regularización" es una verificación útil: con `regParam=0.0` no 
 ```python
 from pyspark.ml.regression import RandomForestRegressor
 
-rf = RandomForestRegressor(featuresCol="features", labelCol="Valor_CE", numTrees=50, maxDepth=8, seed=42)
+rf = RandomForestRegressor(featuresCol="features", labelCol="CE", numTrees=50, maxDepth=8, seed=42)
 modelo_rf = rf.fit(df_train)
 ```
 
 #### 3.4.5 Evaluar con RMSE, R² y MAE
 
-**Producto del paso:** métricas de `RandomForestRegressor` sobre `df_test`, con la misma función `evaluar()` de 3.4.2 — comparables directamente con la Tabla 9 y la Tabla 5, porque miden sobre el mismo `df_test`.
+**Producto del paso:** métricas de `RandomForestRegressor` sobre `df_test`, con la misma función `evaluar()` de 3.4.2 — comparables directamente con la Tabla 8 y la Tabla 5, porque miden sobre el mismo `df_test`.
 
 ```python
 predicciones_rf = modelo_rf.transform(df_test)
@@ -788,9 +770,9 @@ resultados_rf = evaluar(predicciones_rf, "Random Forest")
 
 #### 3.4.6 Analizar importancia de variables
 
-**Producto del paso:** la importancia de cada variable según `modelo_rf`, la primera medida directamente comparable entre las 8 variables sobre un modelo no lineal.
+**Producto del paso:** la importancia de cada variable según `modelo_rf`, la primera medida directamente comparable entre las 7 variables sobre un modelo no lineal.
 
-**¿Las 8 variables aportan por igual?** `RandomForestRegressor` calcula, sin costo adicional, `featureImportances`: una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman `1.0`.
+**¿Las 7 variables aportan por igual?** `RandomForestRegressor` calcula, sin costo adicional, `featureImportances`: una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 7 variables suman `1.0`.
 
 ```python
 importancias = list(zip(PREDICTORES, modelo_rf.featureImportances.toArray()))
@@ -800,53 +782,52 @@ for variable, importancia in importancias:
     print(f"{variable:12s} {importancia:.4f}")
 ```
 
-**Tabla 10. Importancia de cada variable**
+**Tabla 9. Importancia de cada variable**
 
 | Variable | Importancia |
 |---|---|
-| WindSpeed | 0.3365 |
-| TempOut | 0.2023 |
-| OutHum | 0.1564 |
-| Valor_CM | 0.1262 |
-| SolarRad | 0.0800 |
-| Bar | 0.0558 |
-| UVIndex | 0.0428 |
-| Rain | 0.0000 |
+| WindSpeed | 0.2549 |
+| TempOut | 0.2426 |
+| OutHum | 0.1550 |
+| CM | 0.1523 |
+| Bar | 0.0998 |
+| SolarRad | 0.0528 |
+| UVIndex | 0.0426 |
 
-En una corrida real, `WindSpeed` concentra por lejos la mayor importancia (`0.3365`, más de un tercio del total), seguida de `TempOut` y `OutHum`. El hallazgo más llamativo es `Rain`: importancia `0.0000` en Random Forest, pese a tener el coeficiente lineal más grande en magnitud en 3.4.1 (`1.2399`). No es una contradicción — son medidas distintas: el coeficiente lineal mide una relación lineal marginal (y en una muestra con pocos eventos de lluvia, un solo patrón lineal fuerte puede dominar); `featureImportances` mide cuánto reduce el error el modelo completo al usar esa variable, y si `Rain` no aporta información que las otras 7 variables no capturen ya (o si su señal es demasiado escasa en los datos), Random Forest puede terminar sin apoyarse en ella. Es exactamente el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.
+En una corrida real, `WindSpeed` y `TempOut` concentran juntas casi la mitad de la importancia total (`0.2549 + 0.2426 = 0.4975`), seguidas de cerca por `OutHum` y `CM`. Vale la pena notar que `CM` (correlación lineal de apenas `0.0115` en 3.2.4, la más débil de las 7) termina con la cuarta importancia más alta en Random Forest — una discrepancia real entre una medida lineal simple y una medida que sí captura relaciones no lineales e interacciones entre variables. Es el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.
 
 Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).
 
 ### 3.5 Fase 5 — Evaluation
 
-Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.1, antes de seleccionar un ganador.
+Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.3, antes de seleccionar un ganador.
 
 #### 3.5.1 Comparar los modelos candidatos
 
 **Producto del paso:** tabla comparativa de las cuatro configuraciones entrenadas en 3.4, sobre el mismo `df_test`.
 
-**Tabla 11. Comparación final**
+**Tabla 10. Comparación final**
 
 | Configuración | RMSE | R² | MAE |
 |---|---|---|---|
-| Sin regularización | 0.7909 | 0.2271 | 0.6087 |
-| Ridge (L2) | 0.7962 | 0.2166 | 0.6174 |
-| Elastic Net (L1+L2) | 0.8091 | 0.1910 | 0.6372 |
-| **Random Forest** | **0.6732** | **0.4399** | **0.5001** |
+| Sin regularización | 0.9153 | 0.1119 | 0.7365 |
+| Ridge (L2) | 0.9175 | 0.1075 | 0.7417 |
+| Elastic Net (L1+L2) | 0.9260 | 0.0909 | 0.7563 |
+| **Random Forest** | **0.7464** | **0.4094** | **0.5747** |
 
-En una corrida real, **Random Forest ganó en las tres métricas a la vez** — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo: una señal de que este modelo base no estaba sobreajustando — no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real vino de otro lado: `RandomForestRegressor` no asume una relación lineal entre las 8 variables ambientales y `Valor_CE`, y esa relación, en los datos reales, no lo es — coherente con que `Rain` (3.4.1) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables.
+En una corrida real, **Random Forest ganó en las tres métricas a la vez** — RMSE, R² (casi cuatro veces mayor que el mejor modelo lineal: `0.41` contra `0.11`) y MAE. Entre las tres configuraciones lineales, agregar regularización **empeoró** el resultado en vez de mejorarlo — el modelo base no estaba sobreajustando, así que no había ningún problema de *overfitting* que la regularización tuviera que corregir. La ganancia real de Random Forest vino de otro lado: no asume una relación lineal entre las 7 variables y `CE`, y esa relación, en los datos reales, claramente no lo es — un R² de apenas `0.11` en el mejor modelo lineal ya lo anticipaba.
 
 #### 3.5.2 Seleccionar el mejor modelo
 
-**Producto del paso:** el modelo ganador, señalado explícitamente con base en la Tabla 11 — no en cuál se entrenó primero o más rápido.
+**Producto del paso:** el modelo ganador, señalado explícitamente con base en la Tabla 10 — no en cuál se entrenó primero o más rápido.
 
-Con los resultados de la Tabla 11, **Random Forest queda seleccionado** como modelo ganador de esta sesión — 3.6.1 lo persiste.
+Con los resultados de la Tabla 10, **Random Forest queda seleccionado** como modelo ganador de esta sesión — 3.6.1 lo persiste.
 
 #### 3.5.3 Validar si el error es aceptable para el negocio
 
 **Producto del paso:** una lectura explícita de si el resultado cumple lo que 3.1.3 se propuso medir — no solo qué modelo ganó, sino si ese resultado sirve para algo.
 
-El alcance declarado en 3.1.3 era comparar cuatro configuraciones y reportar RMSE, R² y MAE — eso ya se cumplió: las cuatro quedaron entrenadas, medidas sobre el mismo `df_test`, y reunidas en la Tabla 11. Sobre el desempeño en sí: un R² de `0.44` no alcanzaría el umbral que exigiría un sistema en producción real (donde normalmente se fija un mínimo de negocio *antes* de empezar a modelar), pero sí confirma que las variables ambientales disponibles tienen una relación real y no lineal con `Valor_CE` — suficiente para decidir con evidencia, no por intuición, cuál modelo se guarda.
+El alcance declarado en 3.1.3 era comparar cuatro configuraciones y reportar RMSE, R² y MAE — eso ya se cumplió: las cuatro quedaron entrenadas, medidas sobre el mismo `df_test`, y reunidas en la Tabla 10. Sobre el desempeño en sí: un R² de `0.41` es un avance real frente al `0.11` del mejor modelo lineal, pero sigue dejando **casi el 60 % de la variabilidad de `CE` sin explicar** — no alcanzaría el umbral que exigiría un sistema en producción real (donde normalmente se fija un mínimo de negocio *antes* de empezar a modelar). La conclusión honesta: estas 7 variables meteorológicas, sin `Rain` ni `WindDir`, capturan una relación real pero parcial con `CE` — suficiente para decidir con evidencia, no por intuición, cuál modelo se guarda, pero no suficiente para un despliegue real sin seguir iterando (más variables, más historia, u otro enfoque).
 
 ### 3.6 Fase 6 — Deployment
 
@@ -854,16 +835,16 @@ Aquí "Deployment" significa exactamente lo que hace este paso — persistir el 
 
 #### 3.6.1 Guardar el modelo seleccionado
 
-**Producto del paso:** el modelo ganador de la Tabla 11 (3.5.2), guardado como artefacto reutilizable.
+**Producto del paso:** el modelo ganador de la Tabla 10 (3.5.2), guardado como artefacto reutilizable.
 
 ```python
-modelo_ganador = modelo_rf  # Random Forest gano las tres metricas (Tabla 11, 3.5.2)
+modelo_ganador = modelo_rf  # ajusta esta linea segun el ganador real de tu Tabla 10 (3.5.2)
 
 modelo_ganador.write().overwrite().save(f"{ARTIFACTS}/modelo_ce_regresion")
 print(f"Modelo guardado en {ARTIFACTS}/modelo_ce_regresion")
 ```
 
-**Error frecuente**: guardar el primer modelo entrenado (3.4.1) en vez del que realmente ganó la comparación de 3.5.2. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (`modelo_rf` ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.
+**Error frecuente**: guardar el primer modelo entrenado (3.4.1) en vez del que realmente ganó la comparación de 3.5.2. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. No des por sentado cuál algoritmo va a ganar solo porque ganó en una corrida anterior con otros datos — vuelve a comparar cada vez que cambien los datos.
 
 ### 3.7 Cierre
 
@@ -873,7 +854,7 @@ print(f"Modelo guardado en {ARTIFACTS}/modelo_ce_regresion")
 
 Agrega celdas markdown breves debajo de cada bloque de código relevante, desde la integración de fuentes (3.2) hasta la comparación de modelos (3.4), explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.
 
-**Reflexión técnica breve** (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del `join` evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 11 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor `featureImportances` en tu Tabla 10, y tiene sentido físico que sea la más relevante para explicar `Valor_CE`? ¿por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
+**Reflexión técnica breve** (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del `join` evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 10 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor `featureImportances` en tu Tabla 9, y tiene sentido físico que sea la más relevante para explicar `CE`? ¿por qué `VectorAssembler` es un paso obligatorio en Spark MLlib y no en scikit-learn?
 
 **Evidencia de aprendizaje:**
 
@@ -1009,7 +990,7 @@ La evidencia individual se considera completa si:
 
 ### 4.6 Rúbrica de evaluación
 
-**Tabla 12. Rúbrica de evaluación**
+**Tabla 11. Rúbrica de evaluación**
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
@@ -1040,7 +1021,7 @@ Tiempo: 5 min.
 
 **Resumen breve:** hoy el pipeline batch ganó un Data Lake propio y su primer modelo — tres fuentes reales integradas y validadas (esquema, duplicados, un código de error distinto de un nulo), escritas como una capa Gold particionada; sobre esa salida, un vector de predictores ensamblado con `VectorAssembler`, un modelo base de regresión lineal entrenado y evaluado con tres métricas distintas (RMSE, R², MAE), comparado sistemáticamente contra otras configuraciones de regularización y contra un segundo algoritmo (Random Forest), antes de guardar el que realmente tuvo mejor desempeño — no el primero que se entrenó.
 
-**Dinámica participativa:** en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 11 le dio el mejor RMSE, y si le sorprendió o no.
+**Dinámica participativa:** en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 10 le dio el mejor RMSE, y si le sorprendió o no.
 
 **Metacognición:** ¿qué parte de la sesión te costó más entender: integrar tres fuentes con calidad de datos, por qué Spark MLlib necesita `VectorAssembler`, la diferencia entre RMSE y MAE, o por qué comparar contra Random Forest importa aunque el modelo lineal ya "funcione"?
 
@@ -1054,3 +1035,4 @@ Tiempo: 5 min.
 4. Apache Software Foundation. (2024). *PySpark API reference: pyspark.sql.functions*. https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html
 5. Apache Software Foundation. (2024). *Parquet files*. Spark SQL Guide. https://spark.apache.org/docs/latest/sql-data-sources-parquet.html
 6. Apache Software Foundation. (2024). *ML Tuning: model selection and hyperparameter tuning*. Spark MLlib Guide. https://spark.apache.org/docs/latest/ml-tuning.html
+7. Apache Software Foundation. (2024). *LinearRegression (Scala API)* [parámetro `standardization`]. https://spark.apache.org/docs/latest/api/scala/org/apache/spark/ml/regression/LinearRegression.html
