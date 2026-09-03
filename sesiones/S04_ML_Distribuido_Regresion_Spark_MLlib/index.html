@@ -2977,7 +2977,7 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">importancia</span> <span class="ow">in</span> <span class="n">importancias</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">variable</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">importancia</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 10. Importancia de cada variable — completar con tu corrida real</strong></p>
+<p><strong>Tabla 10. Importancia de cada variable</strong></p>
 <table>
 <thead>
 <tr>
@@ -2987,39 +2987,40 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 </thead>
 <tbody>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>WindSpeed</td>
+<td>0.3365</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>TempOut</td>
+<td>0.2023</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>OutHum</td>
+<td>0.1564</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>Valor_CM</td>
+<td>0.1262</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>SolarRad</td>
+<td>0.0800</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>Bar</td>
+<td>0.0558</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>UVIndex</td>
+<td>0.0428</td>
 </tr>
 <tr>
-<td>____</td>
-<td>____</td>
+<td>Rain</td>
+<td>0.0000</td>
 </tr>
 </tbody>
 </table>
+<p>En una corrida real, <code>WindSpeed</code> concentra por lejos la mayor importancia (<code>0.3365</code>, más de un tercio del total), seguida de <code>TempOut</code> y <code>OutHum</code>. El hallazgo más llamativo es <code>Rain</code>: importancia <code>0.0000</code> en Random Forest, pese a tener el coeficiente lineal más grande en magnitud en 3.4.1 (<code>1.2399</code>). No es una contradicción — son medidas distintas: el coeficiente lineal mide una relación lineal marginal (y en una muestra con pocos eventos de lluvia, un solo patrón lineal fuerte puede dominar); <code>featureImportances</code> mide cuánto reduce el error el modelo completo al usar esa variable, y si <code>Rain</code> no aporta información que las otras 7 variables no capturen ya (o si su señal es demasiado escasa en los datos), Random Forest puede terminar sin apoyarse en ella. Es exactamente el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.</p>
 <p>Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).</p>
 <h3 id="35-fase-5-evaluation">3.5 Fase 5 — Evaluation<a class="headerlink" href="#35-fase-5-evaluation" title="Permanent link">&para;</a></h3>
 <p>Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.1, antes de seleccionar un ganador.</p>
