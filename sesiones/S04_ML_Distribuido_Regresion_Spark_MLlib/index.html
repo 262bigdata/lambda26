@@ -2317,7 +2317,7 @@
 <span class="n">df_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="s2">"Valor_Objetivo"</span><span class="p">)</span>
 </code></pre></div>
 <p>Esta diferencia no es una peculiaridad arbitraria de Spark: en un motor distribuido, cada fila se procesa de forma independiente en un nodo distinto — tener un único objeto <code>Vector</code> por fila simplifica cómo Spark distribuye y serializa esa fila entre nodos, en vez de coordinar N columnas sueltas por separado.</p>
-<p>La columna objetivo (<code>label</code>, la variable que el modelo debe predecir) <strong>no</strong> entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es <code>Valor_CE</code> (3.3.7).</p>
+<p>La columna objetivo (<code>label</code>, la variable que el modelo debe predecir) <strong>no</strong> entra al ensamblador — es un dato de salida, no de entrada. Hoy esa columna es <code>CE</code> (3.3.7).</p>
 <p><strong>Tabla 3. Misma tabla, dos preguntas distintas: regresión (hoy) y series de tiempo (S10)</strong></p>
 <table>
 <thead>
@@ -2365,7 +2365,7 @@
 <p><code>seed=42</code> fija la aleatoriedad — sin ella, cada corrida dividiría los datos distinto, y los resultados no serían comparables entre configuraciones (2.6). Ninguna de las dos preguntas de la Tabla 3 es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.</p>
 <h3 id="24-entrenamiento-de-un-modelo-de-regresion-distribuida">2.4 Entrenamiento de un modelo de regresión distribuida<a class="headerlink" href="#24-entrenamiento-de-un-modelo-de-regresion-distribuida" title="Permanent link">&para;</a></h3>
 <p>Todo estimador de Spark MLlib sigue el mismo patrón de dos pasos: <code>fit()</code> entrena sobre los datos de entrenamiento y devuelve un <strong>modelo</strong> (un <code>Transformer</code>); <code>transform()</code> aplica ese modelo entrenado sobre datos nuevos para producir predicciones. Es el mismo patrón que reaparecerá en cualquier otro algoritmo de MLlib, no solo en regresión.</p>
-<p>Estimar una variable numérica continua a partir de otras variables medidas en el mismo instante es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia <em>House Prices</em> de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es <code>Valor_CE</code>.</p>
+<p>Estimar una variable numérica continua a partir de otras variables medidas en el mismo instante es uno de los tipos de problema más comunes en aprendizaje automático, con o sin Spark de por medio. El ejemplo más conocido, fuera de este curso, es la competencia <em>House Prices</em> de Kaggle: predecir el precio de venta de una casa a partir de sus características (área, año de construcción, barrio, calidad de materiales, entre otras). La estructura es idéntica a la de hoy — varios predictores numéricos y categóricos, un objetivo numérico continuo, sin ningún componente temporal — solo que ahí la variable a explicar es el precio de una casa, y aquí es <code>CE</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
 
 <span class="n">lr_base</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_Objetivo"</span><span class="p">)</span>
@@ -2534,7 +2534,7 @@
 <p><strong>Producto del paso:</strong> una celda markdown que documenta, dentro del propio notebook, qué variable se predice y bajo qué condición — sin depender de esta guía para explicarlo.</p>
 <div class="highlight"><pre><span></span><code><span class="gu">## Fase 1 — Business Understanding</span>
 
-<span class="gs">**Objetivo:**</span> estimar <span class="sb">`Valor_Objetivo`</span> (hoy, <span class="sb">`Valor_CE`</span>) a partir de otras variables medidas
+<span class="gs">**Objetivo:**</span> estimar <span class="sb">`Valor_Objetivo`</span> (hoy, <span class="sb">`CE`</span>) a partir de otras variables medidas
 en el mismo instante — no un pronóstico con historial temporal (eso es contenido de S10, 2.3).
 </code></pre></div>
 <h4 id="313-definir-la-decision-de-negocio-asociada">3.1.3 Definir la decisión de negocio asociada<a class="headerlink" href="#313-definir-la-decision-de-negocio-asociada" title="Permanent link">&para;</a></h4>
@@ -2547,18 +2547,18 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <h3 id="32-fase-2-data-understanding">3.2 Fase 2 — Data Understanding<a class="headerlink" href="#32-fase-2-data-understanding" title="Permanent link">&para;</a></h3>
 <p>Cargar cada fuente con su esquema, resolver el problema técnico que bloquearía la integración, integrar, y explorar la tabla resultante para conocerla — todavía sin decidir ninguna regla de limpieza.</p>
 <h4 id="321-cargar-los-datos">3.2.1 Cargar los datos<a class="headerlink" href="#321-cargar-los-datos" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> <code>df_integrado</code>, las tres fuentes cargadas con esquema explícito, deduplicadas donde hacía falta, e integradas por <code>FechaHora</code>.</p>
+<p><strong>Producto del paso:</strong> <code>df_integrado</code>, las tres fuentes cargadas con esquema explícito, deduplicadas donde hacía falta, e integradas por <code>DateTime</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">,</span> <span class="n">DoubleType</span>
 
 <span class="n">schema_ce</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
 <span class="p">])</span>
 <span class="n">df_ce</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ORIGEN_DATOS</span><span class="si">}</span><span class="s2">/campo_electrico.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema_ce</span><span class="p">)</span>
 
 <span class="n">schema_cm</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"Valor_CM"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"CM"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
 <span class="p">])</span>
 <span class="n">df_cm</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ORIGEN_DATOS</span><span class="si">}</span><span class="s2">/campo_magnetico.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema_cm</span><span class="p">)</span>
 
@@ -2566,28 +2566,26 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"TempOut"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"OutHum"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"WindDir"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"Bar"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"Rain"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"SolarRad"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">"UVIndex"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="n">TimestampType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
 <span class="p">])</span>
 <span class="n">df_va</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ORIGEN_DATOS</span><span class="si">}</span><span class="s2">/variables_ambientales.csv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema_va</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real: <code>campo_electrico.csv</code> trajo <code>186 664</code> filas, <code>campo_magnetico.csv</code> <code>525 600</code>, y <code>variables_ambientales.csv</code> <code>708 958</code> — esta última con <code>181 918</code> filas de <code>FechaHora</code> duplicada, la única de las tres con ese problema. Un <code>join</code> contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible, así que hay que resolverlo <strong>antes</strong> de integrar:</p>
+<p>En una corrida real: <code>campo_electrico.csv</code> trajo <code>93 027</code> filas, <code>campo_magnetico.csv</code> <code>355 021</code>, y <code>variables_ambientales.csv</code> <code>359 573</code> — esta última con <code>DateTime</code> duplicada en varias filas, la única de las tres con ese problema. Un <code>join</code> contra una clave duplicada multiplica filas del lado que no lo está, sin ningún error visible, así que hay que resolverlo <strong>antes</strong> de integrar:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">count</span> <span class="k">as</span> <span class="n">spark_count</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">lit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">row_number</span>
 
-<span class="n">columnas_conteo_nulos</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_va</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="s2">"WindDir"</span><span class="p">)]</span>
+<span class="n">columnas_conteo_nulos</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_va</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s2">"DateTime"</span><span class="p">]</span>
 
 <span class="n">df_va_con_conteo</span> <span class="o">=</span> <span class="n">df_va</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
     <span class="s2">"CantidadNulos"</span><span class="p">,</span>
     <span class="nb">sum</span><span class="p">(</span><span class="n">when</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columnas_conteo_nulos</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="n">ventana_va</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"CantidadNulos"</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">())</span>
+<span class="n">ventana_va</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"CantidadNulos"</span><span class="p">)</span><span class="o">.</span><span class="n">asc</span><span class="p">())</span>
 
 <span class="n">df_va_unico</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">df_va_con_conteo</span>
@@ -2596,20 +2594,20 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
     <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"row_num"</span><span class="p">,</span> <span class="s2">"CantidadNulos"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
-<p><code>WindDir</code> queda fuera del conteo de nulos a propósito — es 100 % nula en las tres fuentes (3.3.1): incluirla en el criterio de desempate no aportaría ninguna señal real. Mismo patrón de deduplicación determinista de S3 (<code>Window</code>+<code>row_number()</code>), con un criterio de orden distinto: en vez de "la fila con mayor <code>age</code>", acá se conserva <strong>la fila con menos nulos</strong> — el mismo minuto medido dos veces, con la versión más completa ganando. En una corrida real, <code>708 958</code> filas se redujeron a <code>527 040</code> — una por cada minuto distinto.</p>
-<p><code>FechaHora</code> es la clave común para integrar; el campo eléctrico queda como tabla principal (<code>left join</code>), porque interesa el periodo que ese sensor cubre, no el de los otros dos:</p>
+<p>Mismo patrón de deduplicación determinista de S3 (<code>Window</code>+<code>row_number()</code>), con un criterio de orden distinto: en vez de "la fila con mayor <code>age</code>", acá se conserva <strong>la fila con menos nulos</strong> — el mismo minuto medido dos veces, con la versión más completa ganando. Completa aquí cuántas filas quedaron después de esta deduplicación.</p>
+<p><code>DateTime</code> es la clave común para integrar; el campo eléctrico queda como tabla principal (<code>left join</code>), porque interesa el periodo que ese sensor cubre, no el de los otros dos:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_integrado</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">df_ce</span>
-    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_cm</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_va_unico</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_cm</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_va_unico</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Integrado: </span><span class="si">{</span><span class="n">df_integrado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> registros x </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_integrado</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> columnas"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, el resultado fue <code>186 664</code> filas × <code>11</code> columnas — el mismo conteo que <code>campo_electrico.csv</code> por sí solo, sin duplicar ninguna fila: la deduplicación de arriba hizo su trabajo antes de llegar acá.</p>
+<p>En una corrida real, el resultado fue <code>93 027</code> filas × <code>9</code> columnas (<code>DateTime</code>, <code>CE</code>, <code>CM</code>, <code>TempOut</code>, <code>OutHum</code>, <code>WindSpeed</code>, <code>Bar</code>, <code>SolarRad</code>, <code>UVIndex</code>) — el mismo conteo que <code>campo_electrico.csv</code> por sí solo, sin duplicar ninguna fila: la deduplicación de arriba hizo su trabajo antes de llegar acá.</p>
 <p><strong>Error frecuente</strong>: la fuente original trae la columna de radiación solar como <code>SolarRad.</code> (con un punto al final, tal como la exporta el equipo de medición). Referenciarla luego con <code>col("SolarRad.")</code> falla con <code>AnalysisException</code> — Spark interpreta el punto como acceso a un campo anidado, no como parte literal del nombre. No hace falta escapar el nombre en cada uso: como <code>header=True</code> junto con un <code>schema</code> explícito hace que Spark ignore el texto del header para nombrar columnas, basta con declarar el nombre ya limpio (<code>SolarRad</code>, sin punto) en el <code>StructField</code> de arriba.</p>
 <h4 id="322-describir-las-variables">3.2.2 Describir las variables<a class="headerlink" href="#322-describir-las-variables" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> el esquema de <code>df_integrado</code> y el conteo de nulos por columna — un <code>left join</code> puede introducir nulos nuevos si algún <code>FechaHora</code> del campo eléctrico no tiene contraparte en las otras dos fuentes.</p>
+<p><strong>Producto del paso:</strong> el esquema de <code>df_integrado</code> y el conteo de nulos por columna — un <code>left join</code> puede introducir nulos nuevos si algún <code>DateTime</code> del campo eléctrico no tiene contraparte en las otras dos fuentes.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_integrado</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 
 <span class="n">df_integrado</span><span class="o">.</span><span class="n">select</span><span class="p">([</span>
@@ -2618,94 +2616,64 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 </code></pre></div>
 <h4 id="323-analizar-estadisticas-descriptivas">3.2.3 Analizar estadísticas descriptivas<a class="headerlink" href="#323-analizar-estadisticas-descriptivas" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> media, desviación estándar, mínimo y máximo de cada variable numérica, todavía sobre datos sin limpiar — antes de decidir ninguna regla de calidad.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df_integrado</span><span class="o">.</span><span class="n">describe</span><span class="p">([</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"Valor_CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span> <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"Rain"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">df_integrado</span><span class="o">.</span><span class="n">describe</span><span class="p">([</span><span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span> <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h4 id="324-analizar-correlacion-con-el-objetivo">3.2.4 Analizar correlación con el objetivo<a class="headerlink" href="#324-analizar-correlacion-con-el-objetivo" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> una primera lectura de qué variables podrían explicar <code>Valor_CE</code>.</p>
+<p><strong>Producto del paso:</strong> una primera lectura de qué variables podrían explicar <code>CE</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">predictores_candidatos</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">columns</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">,</span> <span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"WindDir"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">)</span>
 <span class="p">]</span>
 
 <span class="k">for</span> <span class="n">columna</span> <span class="ow">in</span> <span class="n">predictores_candidatos</span><span class="p">:</span>
-    <span class="n">correlacion</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">columna</span><span class="p">,</span> <span class="s2">"Valor_CE"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">columna</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> correlacion con Valor_CE: </span><span class="si">{</span><span class="n">correlacion</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">correlacion</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">stat</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">columna</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">columna</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> correlacion con CE: </span><span class="si">{</span><span class="n">correlacion</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p><code>WindDir</code> queda fuera del cálculo a propósito: ya se vio en 3.2.2 que es 100 % nula, así que su correlación no estaría definida. Dos advertencias sobre este resultado, antes de sacar conclusiones: todavía no se filtró <code>Valor_CM = 99999</code> (3.3.1) — ese código de error puede distorsionar su correlación real con <code>Valor_CE</code> — y <code>df_integrado</code> todavía puede tener nulos sueltos (3.2.2) que Spark ignora en el cálculo, no reemplaza. Esta es una lectura preliminar; la relación real entre cada variable y <code>Valor_CE</code> se confirma recién con <code>df_valido</code> (3.3.2) y, sobre todo, con los coeficientes o la <code>featureImportances</code> del modelo entrenado (3.4).</p>
+<p>En una corrida real: <code>CM</code> <code>0.0115</code>, <code>TempOut</code> <code>0.1170</code>, <code>OutHum</code> <code>-0.0597</code>, <code>WindSpeed</code> <code>-0.1675</code>, <code>Bar</code> <code>0.0132</code>, <code>SolarRad</code> <code>-0.0244</code>, <code>UVIndex</code> <code>-0.0092</code>. Todas las correlaciones lineales simples son débiles (la más fuerte, <code>WindSpeed</code>, no llega a <code>-0.17</code>) — dos advertencias antes de sacar conclusiones: todavía no se filtró <code>CM = 99999</code> (3.3.1) — ese código de error puede distorsionar su correlación real con <code>CE</code> — y <code>df_integrado</code> todavía puede tener nulos sueltos (3.2.2) que Spark ignora en el cálculo, no reemplaza. Esta es una lectura preliminar; la relación real entre cada variable y <code>CE</code> se confirma recién con <code>df_valido</code> (3.3.2) y, sobre todo, con los coeficientes o la <code>featureImportances</code> del modelo entrenado (3.4) — que sí capturan relaciones no lineales, a diferencia de una correlación de Pearson simple.</p>
 <h3 id="33-fase-3-data-preparation">3.3 Fase 3 — Data Preparation<a class="headerlink" href="#33-fase-3-data-preparation" title="Permanent link">&para;</a></h3>
 <p>Con los datos ya conocidos (Fase 2), acá se aplican las reglas de limpieza, se escribe la salida Gold y se deja lista la tabla para modelar: nada de esto se decide sin la exploración previa.</p>
 <h4 id="331-limpiar-los-datos">3.3.1 Limpiar los datos<a class="headerlink" href="#331-limpiar-los-datos" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> <code>df_limpio</code>, sin <code>WindDir</code> y sin el código de error de <code>Valor_CM</code> (2.2).</p>
-<p>Dos problemas de calidad distintos, dos tratamientos distintos — ninguno de los dos es un nulo común:</p>
-<p><strong>Tabla 6. Dos problemas de calidad, dos tratamientos distintos</strong></p>
-<table>
-<thead>
-<tr>
-<th>Problema</th>
-<th>Cómo se detecta</th>
-<th>Por qué no es lo mismo que un nulo</th>
-<th>Tratamiento</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WindDir</code> sin valores útiles</td>
-<td>Conteo de nulos = 100 % de las filas</td>
-<td>Sí es un nulo — pero total, no parcial: ninguna fila tiene el dato</td>
-<td>Se descarta la columna completa</td>
-</tr>
-<tr>
-<td><code>Valor_CM = 99999</code></td>
-<td>Filtro por el valor de dominio conocido, no <code>isNull()</code></td>
-<td>No es un nulo: Spark ve un <code>Double</code> válido, no <code>NULL</code></td>
-<td>Se descartan las filas con ese código</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre><span></span><code><span class="n">nulos_winddir</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"WindDir"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-<span class="n">total</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WindDir nula: </span><span class="si">{</span><span class="n">nulos_winddir</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> de </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">nulos_winddir</span><span class="o">/</span><span class="n">total</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+<p><strong>Producto del paso:</strong> <code>df_limpio</code>, sin el código de error de <code>CM</code> (2.2).</p>
+<p><code>CM = 99999</code> es un código de error de sensor, no un nulo: Spark lo ve como un <code>Double</code> válido, no como <code>NULL</code> — por eso <code>isNull()</code> no lo detecta, hace falta filtrarlo por el valor de dominio conocido.</p>
+<div class="highlight"><pre><span></span><code><span class="n">errores_cm</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"CM"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">99999</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas con codigo de error CM=99999: </span><span class="si">{</span><span class="n">errores_cm</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="n">df_sin_winddir</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"WindDir"</span><span class="p">)</span>
-</code></pre></div>
-<p>En una corrida real, <code>WindDir</code> dio <code>708 958</code> nulos de <code>708 958</code> filas — el 100 % — cero valores útiles en toda la fuente.</p>
-<div class="highlight"><pre><span></span><code><span class="n">errores_cm</span> <span class="o">=</span> <span class="n">df_sin_winddir</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"Valor_CM"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">99999</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas con codigo de error Valor_CM=99999: </span><span class="si">{</span><span class="n">errores_cm</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-<span class="n">df_limpio</span> <span class="o">=</span> <span class="n">df_sin_winddir</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"Valor_CM"</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">99999</span><span class="p">)</span>
+<span class="n">df_limpio</span> <span class="o">=</span> <span class="n">df_integrado</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"CM"</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">99999</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas despues de eliminar el codigo de error: </span><span class="si">{</span><span class="n">df_limpio</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, <code>2 126</code> filas tenían ese código — se descartan, no se tratan como si <code>99999</code> microteslas fuera un dato real.</p>
+<p>En una corrida real, <code>180</code> filas tenían ese código — se descartan, no se tratan como si <code>99999</code> microteslas fuera un dato real. <code>df_limpio</code> quedó con <code>92 847</code> filas (<code>93 027 - 180</code>).</p>
 <h4 id="332-tratar-nulos-errores-y-duplicados">3.3.2 Tratar nulos, errores y duplicados<a class="headerlink" href="#332-tratar-nulos-errores-y-duplicados" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> <code>df_valido</code>, con las nueve variables físicas completas y sin <code>FechaHora</code> repetida, persistido como capa Gold particionada y reutilizado para el modelado.</p>
-<p>Primero, confirmar que ni la deduplicación (3.2.1) ni el <code>join</code> (3.2.1) dejaron <code>FechaHora</code> repetida:</p>
+<p><strong>Producto del paso:</strong> <code>df_valido</code>, con las ocho variables físicas completas y sin <code>DateTime</code> repetida, persistido como capa Gold particionada y reutilizado para el modelado.</p>
+<p>Primero, confirmar que ni la deduplicación (3.2.1) ni el <code>join</code> (3.2.1) dejaron <code>DateTime</code> repetida:</p>
 <div class="highlight"><pre><span></span><code><span class="n">total_final</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-<span class="n">sin_duplicar</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"FechaHora"</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">sin_duplicar</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"DateTime"</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total_final</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">, sin duplicar por FechaHora: </span><span class="si">{</span><span class="n">sin_duplicar</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">total_final</span> <span class="o">==</span> <span class="n">sin_duplicar</span><span class="p">,</span> <span class="s2">"Hay FechaHora duplicada en la tabla integrada final"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total: </span><span class="si">{</span><span class="n">total_final</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">, sin duplicar por DateTime: </span><span class="si">{</span><span class="n">sin_duplicar</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">total_final</span> <span class="o">==</span> <span class="n">sin_duplicar</span><span class="p">,</span> <span class="s2">"Hay DateTime duplicada en la tabla integrada final"</span>
 </code></pre></div>
+<p>En una corrida real, <code>92 847</code> filas en ambos casos — sin duplicados en la tabla final, gracias a que <code>CE</code> (tabla principal del <code>join</code>) ya no los tiene desde el origen.</p>
 <p>Con eso confirmado, quedan los nulos finales sobre las variables físicas:</p>
-<div class="highlight"><pre><span></span><code><span class="n">VARIABLES_9</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"Valor_CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span>
-    <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"Rain"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="n">VARIABLES_MODELO</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span>
+    <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">antes</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-<span class="n">df_valido</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">na</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">VARIABLES_9</span><span class="p">)</span>
+<span class="n">df_valido</span> <span class="o">=</span> <span class="n">df_limpio</span><span class="o">.</span><span class="n">na</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">VARIABLES_MODELO</span><span class="p">)</span>
 <span class="n">despues</span> <span class="o">=</span> <span class="n">df_valido</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas antes: </span><span class="si">{</span><span class="n">antes</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">, despues de na.drop(subset=VARIABLES_9): </span><span class="si">{</span><span class="n">despues</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas antes: </span><span class="si">{</span><span class="n">antes</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">, despues de na.drop(subset=VARIABLES_MODELO): </span><span class="si">{</span><span class="n">despues</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas eliminadas por nulos en variables criticas: </span><span class="si">{</span><span class="n">antes</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">despues</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">df_valido</span> <span class="o">=</span> <span class="n">df_valido</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 </code></pre></div>
+<p>En una corrida real, <code>92 847</code> filas antes y después — <code>0</code> filas eliminadas por nulos: para este recorte de fechas (2026-03-01 a 2026-09-04), ninguna de las ocho variables físicas tenía nulos sueltos sobre el periodo que cubre <code>CE</code>.</p>
 <p>Con la tabla ya limpia, se persiste como capa Gold particionada por mes (2.2), en vez de dejarla solo en memoria:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">date_format</span>
 
 <span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s04-ml-distribuido-regresion/artifacts"</span>
 
-<span class="n">df_particionable</span> <span class="o">=</span> <span class="n">df_valido</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">,</span> <span class="n">date_format</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"FechaHora"</span><span class="p">),</span> <span class="s2">"yyyy-MM"</span><span class="p">))</span>
+<span class="n">df_particionable</span> <span class="o">=</span> <span class="n">df_valido</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">,</span> <span class="n">date_format</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">),</span> <span class="s2">"yyyy-MM"</span><span class="p">))</span>
 
 <span class="p">(</span>
     <span class="n">df_particionable</span>
@@ -2720,7 +2688,7 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="k">for</span> <span class="n">carpeta</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/campo_electrico_particionado"</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">carpeta</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 7. Filas reales por <code>AnioMes</code></strong></p>
+<p><strong>Tabla 6. Filas reales por <code>AnioMes</code></strong></p>
 <table>
 <thead>
 <tr>
@@ -2730,40 +2698,28 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 </thead>
 <tbody>
 <tr>
-<td>2025-05</td>
+<td>2026-05</td>
 <td style="text-align: right;">28 107</td>
 </tr>
 <tr>
-<td>2025-06</td>
+<td>2026-06</td>
 <td style="text-align: right;">41 502</td>
 </tr>
 <tr>
-<td>2025-07</td>
+<td>2026-07</td>
 <td style="text-align: right;">1 409</td>
 </tr>
 <tr>
-<td>2025-08</td>
+<td>2026-08</td>
 <td style="text-align: right;">20 582</td>
 </tr>
 <tr>
-<td>2025-09</td>
-<td style="text-align: right;">27 397</td>
-</tr>
-<tr>
-<td>2025-10</td>
-<td style="text-align: right;">32 877</td>
-</tr>
-<tr>
-<td>2025-11</td>
-<td style="text-align: right;">32 652</td>
-</tr>
-<tr>
-<td>2025-12</td>
-<td style="text-align: right;">12</td>
+<td>2026-09</td>
+<td style="text-align: right;">1 247</td>
 </tr>
 </tbody>
 </table>
-<p>Julio y diciembre tienen muchas menos filas que el resto — un vacío real de medición, no un error de esta guía.</p>
+<p>El rango real de <code>campo_electrico.csv</code> (mayo-septiembre 2026, con un hueco real de casi 7 días a inicios de septiembre) define cuántas particiones aparecen: solo 5, no 7 (marzo-abril de <code>variables_ambientales</code> se descartaron en el <code>join</code>, y septiembre queda muy chico porque <code>CE</code> se corta el 1 de septiembre a las 20:46, justo antes del hueco).</p>
 <p>Se lee de vuelta para confirmar que no hubo pérdida de filas, y que Spark usa <code>PartitionFilters</code> en el plan de ejecución al filtrar por <code>AnioMes</code> (S3, 2.5):</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_verificacion</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/campo_electrico_particionado"</span><span class="p">)</span>
 <span class="n">df_verificacion</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -2771,12 +2727,12 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="k">assert</span> <span class="n">df_verificacion</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="n">df_particionable</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Verificado: </span><span class="si">{</span><span class="n">df_verificacion</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas, ida y vuelta sin perdida."</span><span class="p">)</span>
 
-<span class="n">df_verificacion</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"2025-09"</span><span class="p">)</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_verificacion</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"2026-09"</span><span class="p">)</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 <p>Para ver cuántas filas quedaron guardadas en cada partición, sin salir de Spark ni contar archivos a mano:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_verificacion</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"AnioMes"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, coincide exactamente con la Tabla 7.</p>
+<p>En una corrida real, coincide exactamente con la Tabla 6.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df_valido</span><span class="o">.</span><span class="n">unpersist</span><span class="p">()</span>
 </code></pre></div>
 <p><code>df_verificacion</code> ya es la salida Gold, leída y verificada — no hace falta volver a leer el Parquet desde disco para empezar la parte de modelado:</p>
@@ -2784,26 +2740,26 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">VARIABLES_9</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">VARIABLES_MODELO</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>En una corrida real, este conteo dio <strong>184 538</strong> filas.</p>
-<p><code>campo_electrico_particionado/</code> no tiene un solo destino. La misma tabla —184 538 filas, 9 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado" (2.3).</p>
-<p><strong>S4 (hoy) pregunta:</strong> dado un instante, ¿qué otras variables explican <code>Valor_CE</code> en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.</p>
-<p><strong>S10 pregunta:</strong> dado el historial de <code>Valor_CE</code>, ¿su propio pasado predice su futuro? Ahí el orden de las filas <em>es</em> el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.</p>
+<p>En una corrida real, este conteo dio <strong>92 847</strong> filas.</p>
+<p><code>campo_electrico_particionado/</code> no tiene un solo destino. La misma tabla —8 variables, sin nulos, particionada por mes— alimenta dos sesiones que le hacen a los datos preguntas de naturaleza distinta, no solo un modelo "más simple" y otro "más avanzado" (2.3).</p>
+<p><strong>S4 (hoy) pregunta:</strong> dado un instante, ¿qué otras variables explican <code>CE</code> en ese mismo instante? Cada fila es una foto independiente — el orden en que aparecen no importa, se podrían barajar sin cambiar nada del resultado.</p>
+<p><strong>S10 pregunta:</strong> dado el historial de <code>CE</code>, ¿su propio pasado predice su futuro? Ahí el orden de las filas <em>es</em> el dato — no se pueden barajar, porque "usar el futuro para predecir el pasado" no es un error de estilo, es una fuga de información que invalida el resultado.</p>
 <p><strong>Figura 3. La misma salida Gold, dos preguntas distintas</strong></p>
 <pre class="mermaid"><code>flowchart LR
     subgraph S4["S4 - Regresión (hoy)"]
         direction LR
-        P1["Valor_CM_t, TempOut_t,&lt;br/&gt;OutHum_t, ... (mismo instante t)"] --&gt; M1["Valor_CE_t"]
+        P1["CM_t, TempOut_t,&lt;br/&gt;OutHum_t, ... (mismo instante t)"] --&gt; M1["CE_t"]
     end
     subgraph S10["S10 - Series de tiempo"]
         direction LR
-        P2["Valor_CE_t&lt;br/&gt;(y su historial)"] -.-&gt;|"orden cronológico,&lt;br/&gt;no se baraja"| M2["Valor_CE_t+1"]
+        P2["CE_t&lt;br/&gt;(y su historial)"] -.-&gt;|"orden cronológico,&lt;br/&gt;no se baraja"| M2["CE_t+1"]
     end
 
     classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
     class P1,M1 today;</code></pre>
-<p><strong>Tabla 8. Misma salida Gold, dos preguntas</strong></p>
+<p><strong>Tabla 7. Misma salida Gold, dos preguntas</strong></p>
 <table>
 <thead>
 <tr>
@@ -2815,18 +2771,18 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <tbody>
 <tr>
 <td>Pregunta de fondo</td>
-<td>¿Qué otras variables explican <code>Valor_CE</code>?</td>
-<td>¿El pasado de <code>Valor_CE</code> predice su futuro?</td>
+<td>¿Qué otras variables explican <code>CE</code>?</td>
+<td>¿El pasado de <code>CE</code> predice su futuro?</td>
 </tr>
 <tr>
 <td>Predictores</td>
-<td>Las otras 8 variables, en el mismo instante <code>t</code></td>
-<td><code>Valor_CE</code> en instantes anteriores (<code>t</code>, <code>t-1</code>, ...)</td>
+<td>Las otras 7 variables, en el mismo instante <code>t</code></td>
+<td><code>CE</code> en instantes anteriores (<code>t</code>, <code>t-1</code>, ...)</td>
 </tr>
 <tr>
 <td>Objetivo</td>
-<td><code>Valor_CE</code> en ese mismo instante <code>t</code></td>
-<td><code>Valor_CE</code> en un instante futuro (<code>t+1</code>)</td>
+<td><code>CE</code> en ese mismo instante <code>t</code></td>
+<td><code>CE</code> en un instante futuro (<code>t+1</code>)</td>
 </tr>
 <tr>
 <td>Orden de las filas</td>
@@ -2847,16 +2803,16 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 </table>
 <p>Ninguna de las dos preguntas es más difícil de construir en Spark que la otra — la diferencia está en qué significa una fila y qué se le puede hacer a su orden, no en la complejidad del código.</p>
 <h4 id="333-seleccionar-predictores">3.3.3 Seleccionar predictores<a class="headerlink" href="#333-seleccionar-predictores" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> <code>PREDICTORES</code>, las 8 variables físicas que entran al modelo — todo <code>VARIABLES_9</code> menos la columna objetivo.</p>
-<div class="highlight"><pre><span></span><code><span class="n">PREDICTORES</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">VARIABLES_9</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">"Valor_CE"</span><span class="p">]</span>
+<p><strong>Producto del paso:</strong> <code>PREDICTORES</code>, las 7 variables físicas que entran al modelo — todo <code>VARIABLES_MODELO</code> menos la columna objetivo.</p>
+<div class="highlight"><pre><span></span><code><span class="n">PREDICTORES</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">VARIABLES_MODELO</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">"CE"</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predictores (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">PREDICTORES</span><span class="p">)</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">PREDICTORES</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="334-ensamblar-el-vector-de-predictores-vectorassembler">3.3.4 Ensamblar el vector de predictores (<code>VectorAssembler</code>)<a class="headerlink" href="#334-ensamblar-el-vector-de-predictores-vectorassembler" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> <code>df_ml</code>, con una sola columna <code>features</code> (vector de 8 predictores) y la columna objetivo <code>Valor_CE</code> (2.3).</p>
+<p><strong>Producto del paso:</strong> <code>df_ml</code>, con una sola columna <code>features</code> (vector de 7 predictores) y la columna objetivo <code>CE</code> (2.3).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorAssembler</span>
 
 <span class="n">ensamblador</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">PREDICTORES</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">)</span>
-<span class="n">df_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="s2">"Valor_CE"</span><span class="p">)</span>
+<span class="n">df_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">)</span>
 
 <span class="n">df_ml</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -2867,10 +2823,10 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Entrenamiento: </span><span class="si">{</span><span class="n">df_train</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prueba: </span><span class="si">{</span><span class="n">df_test</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real, sobre las 184 538 filas: <strong>147 943</strong> para entrenamiento y <strong>36 595</strong> para prueba — el 80/20 esperado, con <code>seed=42</code> garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.4 sean justas entre sí).</p>
+<p>En una corrida real, sobre las 92 847 filas: <strong>74 434</strong> para entrenamiento y <strong>18 413</strong> para prueba — el 80/20 esperado, con <code>seed=42</code> garantizando que sea la misma división en cada nueva corrida (necesario para que las comparaciones de 3.4 sean justas entre sí).</p>
 <h4 id="336-escalar-si-aplica">3.3.6 Escalar si aplica<a class="headerlink" href="#336-escalar-si-aplica" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> ninguno — este paso no aplica en esta sesión, y vale la pena documentar por qué en vez de saltarlo en silencio.</p>
-<p>"Si aplica" es literal acá, y en Spark MLlib no aplica: <code>LinearRegression</code> tiene el parámetro <code>standardization</code>, activado (<code>True</code>) por defecto — ya estandariza los predictores internamente antes de ajustar el modelo, precisamente para que <code>regParam</code> (3.4.3) penalice de forma justa entre variables de escalas muy distintas (<code>Valor_CM</code> en miles, <code>Rain</code> entre 0 y 0.2), y devuelve los coeficientes en la escala original de <code>features</code>, no en unidades estandarizadas (2.6). Escalar a mano con <code>StandardScaler</code> antes de entrenar sería trabajo redundante — Spark ya lo hace, y sin ese paso extra los coeficientes quedan además más interpretables (en unidades reales, no en desviaciones estándar). <code>RandomForestRegressor</code> (3.4.4) tampoco lo necesita — sus árboles dividen por umbrales, no por magnitud de coeficientes.</p>
+<p>"Si aplica" es literal acá, y en Spark MLlib no aplica: <code>LinearRegression</code> tiene el parámetro <code>standardization</code>, activado (<code>True</code>) por defecto — ya estandariza los predictores internamente antes de ajustar el modelo, precisamente para que <code>regParam</code> (3.4.3) penalice de forma justa entre variables de escalas muy distintas (<code>CM</code> en miles, <code>TempOut</code>/<code>OutHum</code> en decenas), y devuelve los coeficientes en la escala original de <code>features</code>, no en unidades estandarizadas (2.6). Escalar a mano con <code>StandardScaler</code> antes de entrenar sería trabajo redundante — Spark ya lo hace, y sin ese paso extra los coeficientes quedan además más interpretables (en unidades reales, no en desviaciones estándar). <code>RandomForestRegressor</code> (3.4.4) tampoco lo necesita — sus árboles dividen por umbrales, no por magnitud de coeficientes.</p>
 <p>Este paso no siempre "no aplica": en librerías que no estandarizan internamente (por ejemplo, una implementación propia de regresión regularizada, o algunos modelos de otras librerías), escalar a mano sigue siendo necesario. Vale la pena confirmarlo revisando la documentación del modelo concreto, no asumirlo por costumbre.</p>
 <h3 id="34-fase-4-modeling">3.4 Fase 4 — Modeling<a class="headerlink" href="#34-fase-4-modeling" title="Permanent link">&para;</a></h3>
 <p>Fase técnica: entrenar cada candidato, medir su desempeño individual sobre <code>df_test</code>, ajustar configuraciones básicas y analizar la relevancia de sus variables — todavía sin comparar entre sí ni decidir un ganador.</p>
@@ -2878,7 +2834,7 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <p><strong>Producto del paso:</strong> <code>modelo_base</code> entrenado, con coeficientes e intercepto visibles (2.4).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
 
-<span class="n">lr_base</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">)</span>
+<span class="n">lr_base</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"CE"</span><span class="p">)</span>
 <span class="n">modelo_base</span> <span class="o">=</span> <span class="n">lr_base</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Coeficientes:"</span><span class="p">,</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
@@ -2889,25 +2845,25 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <li><code>regParam is zero, which might cause numerical instability and overfitting</code>: Spark avisa que este modelo base no tiene regularización (2.6) — es exactamente lo que se está probando a propósito como línea base en 3.4.3, no un problema a corregir.</li>
 <li><code>netlib-blas: JNI_OnLoad: dlopen(libblas.so.3) failed...</code>: el contenedor no tiene una librería de álgebra lineal nativa instalada, así que Spark cae a una implementación en JVM pura — más lenta, pero igual de correcta. No afecta ningún resultado de esta sesión.</li>
 </ul>
-<p>En una corrida real, <code>modelo_base.coefficients</code> dio <code>[-0.0028, 0.1454, 0.0069, -0.0779, -0.0429, 1.2399, -0.0007, 0.0416]</code> (en el orden de <code>PREDICTORES</code>) y el intercepto <code>104.7116</code>. El coeficiente de <code>Rain</code> (<code>1.2399</code>) es, por lejos, el más grande en magnitud — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".</p>
+<p>En una corrida real, <code>modelo_base.coefficients</code> dio <code>[-0.0027, 0.1241, 0.0104, -0.0740, -0.0104, 0.0000, 0.0194]</code> (en el orden de <code>PREDICTORES</code>: <code>CM</code>, <code>TempOut</code>, <code>OutHum</code>, <code>WindSpeed</code>, <code>Bar</code>, <code>SolarRad</code>, <code>UVIndex</code>) y el intercepto <code>71.5001</code>. <code>TempOut</code> (<code>0.1241</code>) es el coeficiente más grande en magnitud, seguido de <code>WindSpeed</code> (<code>-0.0740</code>) — vale la pena que confirmes si ese signo y esa magnitud tienen sentido físico con lo que ya sabes del dominio, antes de asumir que el modelo "aprendió algo real".</p>
 <h4 id="342-evaluar-con-rmse-r2-y-mae">3.4.2 Evaluar con RMSE, R² y MAE<a class="headerlink" href="#342-evaluar-con-rmse-r2-y-mae" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> las tres métricas del modelo base, sobre el conjunto de prueba — nunca sobre el de entrenamiento (2.5).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionEvaluator</span>
 
 <span class="n">predicciones_base</span> <span class="o">=</span> <span class="n">modelo_base</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
-<span class="n">predicciones_base</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">predicciones_base</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">evaluar</span><span class="p">(</span><span class="n">predicciones</span><span class="p">,</span> <span class="n">nombre</span><span class="p">):</span>
     <span class="n">resultados</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">metrica</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"rmse"</span><span class="p">,</span> <span class="s2">"r2"</span><span class="p">,</span> <span class="s2">"mae"</span><span class="p">]:</span>
-        <span class="n">evaluador</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="n">metrica</span><span class="p">)</span>
+        <span class="n">evaluador</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"CE"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="n">metrica</span><span class="p">)</span>
         <span class="n">resultados</span><span class="p">[</span><span class="n">metrica</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">evaluador</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: RMSE=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'RMSE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  R2=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'R2'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  MAE=</span><span class="si">{</span><span class="n">resultados</span><span class="p">[</span><span class="s1">'MAE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">resultados</span>
 
 <span class="n">resultados_base</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_base</span><span class="p">,</span> <span class="s2">"LinearRegression base"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 9. Resultado real del modelo base</strong></p>
+<p><strong>Tabla 8. Resultado real del modelo base</strong></p>
 <table>
 <thead>
 <tr>
@@ -2918,19 +2874,19 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <tbody>
 <tr>
 <td>RMSE</td>
-<td>0.7909</td>
+<td>0.9153</td>
 </tr>
 <tr>
 <td>R²</td>
-<td>0.2271</td>
+<td>0.1119</td>
 </tr>
 <tr>
 <td>MAE</td>
-<td>0.6087</td>
+<td>0.7365</td>
 </tr>
 </tbody>
 </table>
-<p>Un R² de <code>0.23</code> significa que el modelo lineal explica poco menos de un cuarto de la variabilidad real de <code>Valor_CE</code> — no es un resultado inútil, pero deja bastante margen sin explicar. Si esa cifra sorprende, guárdala: 3.4.5 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.</p>
+<p>Un R² de <code>0.11</code> significa que el modelo lineal explica poco más de una décima parte de la variabilidad real de <code>CE</code> — bastante menos que el resultado con las 8 variables originales (<code>Rain</code>/<code>WindDir</code> incluidos), y una señal de que estas 7 variables por sí solas no capturan gran parte de lo que mueve a <code>CE</code>. Guarda esa cifra — 3.4.5 compara este mismo resultado contra un algoritmo sin el supuesto de linealidad.</p>
 <h4 id="343-probar-regularizacion-e-hiperparametros-basicos">3.4.3 Probar regularización e hiperparámetros básicos<a class="headerlink" href="#343-probar-regularizacion-e-hiperparametros-basicos" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> tabla comparativa de las tres configuraciones de la Tabla 5 (2.6).</p>
 <div class="highlight"><pre><span></span><code><span class="n">configuraciones</span> <span class="o">=</span> <span class="p">[</span>
@@ -2942,7 +2898,7 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="n">comparacion_configs</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configuraciones</span><span class="p">:</span>
     <span class="n">lr</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span>
-        <span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span>
+        <span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"CE"</span><span class="p">,</span>
         <span class="n">regParam</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regParam"</span><span class="p">],</span> <span class="n">elasticNetParam</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"elasticNetParam"</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">modelo</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
@@ -2954,30 +2910,30 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">comparacion_configs</span><span class="p">)[[</span><span class="s2">"Configuracion"</span><span class="p">,</span> <span class="s2">"RMSE"</span><span class="p">,</span> <span class="s2">"R2"</span><span class="p">,</span> <span class="s2">"MAE"</span><span class="p">]]</span>
 </code></pre></div>
-<p>La fila "Sin regularización" es una verificación útil: con <code>regParam=0.0</code> no hay penalización, así que su RMSE/R²/MAE debería salir igual al modelo base de 3.4.2 — si no coincide, algo cambió entre celdas (por ejemplo, <code>df_train</code>/<code>df_test</code> fueron reasignados).</p>
+<p>La fila "Sin regularización" es una verificación útil: con <code>regParam=0.0</code> no hay penalización, así que su RMSE/R²/MAE debería salir igual al modelo base de 3.4.2 — si no coincide, algo cambió entre celdas (por ejemplo, <code>df_train</code>/<code>df_test</code> fueron reasignados). En una corrida real, coincidió exactamente: <code>Sin regularización</code> RMSE=<code>0.9153</code>, <code>Ridge (L2)</code> RMSE=<code>0.9175</code>, <code>Elastic Net (L1+L2)</code> RMSE=<code>0.9260</code> — agregar regularización empeoró el resultado en las tres configuraciones, no lo mejoró.</p>
 <h4 id="344-entrenar-un-modelo-basado-en-arboles">3.4.4 Entrenar un modelo basado en árboles<a class="headerlink" href="#344-entrenar-un-modelo-basado-en-arboles" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> <code>modelo_rf</code> entrenado — todavía sin evaluar ni comparar contra los modelos lineales de 3.4.1-3.4.3. Entrena sobre <code>features</code> (sin escalar, 3.3.6): los árboles no lo necesitan.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"Valor_CE"</span><span class="p">,</span> <span class="n">numTrees</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"CE"</span><span class="p">,</span> <span class="n">numTrees</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 <span class="n">modelo_rf</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df_train</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="345-evaluar-con-rmse-r2-y-mae">3.4.5 Evaluar con RMSE, R² y MAE<a class="headerlink" href="#345-evaluar-con-rmse-r2-y-mae" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> métricas de <code>RandomForestRegressor</code> sobre <code>df_test</code>, con la misma función <code>evaluar()</code> de 3.4.2 — comparables directamente con la Tabla 9 y la Tabla 5, porque miden sobre el mismo <code>df_test</code>.</p>
+<p><strong>Producto del paso:</strong> métricas de <code>RandomForestRegressor</code> sobre <code>df_test</code>, con la misma función <code>evaluar()</code> de 3.4.2 — comparables directamente con la Tabla 8 y la Tabla 5, porque miden sobre el mismo <code>df_test</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">predicciones_rf</span> <span class="o">=</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_test</span><span class="p">)</span>
 
 <span class="n">resultados_rf</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_rf</span><span class="p">,</span> <span class="s2">"Random Forest"</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="346-analizar-importancia-de-variables">3.4.6 Analizar importancia de variables<a class="headerlink" href="#346-analizar-importancia-de-variables" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> la importancia de cada variable según <code>modelo_rf</code>, la primera medida directamente comparable entre las 8 variables sobre un modelo no lineal.</p>
-<p><strong>¿Las 8 variables aportan por igual?</strong> <code>RandomForestRegressor</code> calcula, sin costo adicional, <code>featureImportances</code>: una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 8 variables suman <code>1.0</code>.</p>
+<p><strong>Producto del paso:</strong> la importancia de cada variable según <code>modelo_rf</code>, la primera medida directamente comparable entre las 7 variables sobre un modelo no lineal.</p>
+<p><strong>¿Las 7 variables aportan por igual?</strong> <code>RandomForestRegressor</code> calcula, sin costo adicional, <code>featureImportances</code>: una proporción de cuánto reduce cada variable el error del modelo en promedio, a lo largo de todos sus árboles — las proporciones de las 7 variables suman <code>1.0</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">importancias</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">PREDICTORES</span><span class="p">,</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">featureImportances</span><span class="o">.</span><span class="n">toArray</span><span class="p">()))</span>
 <span class="n">importancias</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">importancia</span> <span class="ow">in</span> <span class="n">importancias</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">variable</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">importancia</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Tabla 10. Importancia de cada variable</strong></p>
+<p><strong>Tabla 9. Importancia de cada variable</strong></p>
 <table>
 <thead>
 <tr>
@@ -2988,45 +2944,41 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <tbody>
 <tr>
 <td>WindSpeed</td>
-<td>0.3365</td>
+<td>0.2549</td>
 </tr>
 <tr>
 <td>TempOut</td>
-<td>0.2023</td>
+<td>0.2426</td>
 </tr>
 <tr>
 <td>OutHum</td>
-<td>0.1564</td>
+<td>0.1550</td>
 </tr>
 <tr>
-<td>Valor_CM</td>
-<td>0.1262</td>
-</tr>
-<tr>
-<td>SolarRad</td>
-<td>0.0800</td>
+<td>CM</td>
+<td>0.1523</td>
 </tr>
 <tr>
 <td>Bar</td>
-<td>0.0558</td>
+<td>0.0998</td>
+</tr>
+<tr>
+<td>SolarRad</td>
+<td>0.0528</td>
 </tr>
 <tr>
 <td>UVIndex</td>
-<td>0.0428</td>
-</tr>
-<tr>
-<td>Rain</td>
-<td>0.0000</td>
+<td>0.0426</td>
 </tr>
 </tbody>
 </table>
-<p>En una corrida real, <code>WindSpeed</code> concentra por lejos la mayor importancia (<code>0.3365</code>, más de un tercio del total), seguida de <code>TempOut</code> y <code>OutHum</code>. El hallazgo más llamativo es <code>Rain</code>: importancia <code>0.0000</code> en Random Forest, pese a tener el coeficiente lineal más grande en magnitud en 3.4.1 (<code>1.2399</code>). No es una contradicción — son medidas distintas: el coeficiente lineal mide una relación lineal marginal (y en una muestra con pocos eventos de lluvia, un solo patrón lineal fuerte puede dominar); <code>featureImportances</code> mide cuánto reduce el error el modelo completo al usar esa variable, y si <code>Rain</code> no aporta información que las otras 7 variables no capturen ya (o si su señal es demasiado escasa en los datos), Random Forest puede terminar sin apoyarse en ella. Es exactamente el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.</p>
+<p>En una corrida real, <code>WindSpeed</code> y <code>TempOut</code> concentran juntas casi la mitad de la importancia total (<code>0.2549 + 0.2426 = 0.4975</code>), seguidas de cerca por <code>OutHum</code> y <code>CM</code>. Vale la pena notar que <code>CM</code> (correlación lineal de apenas <code>0.0115</code> en 3.2.4, la más débil de las 7) termina con la cuarta importancia más alta en Random Forest — una discrepancia real entre una medida lineal simple y una medida que sí captura relaciones no lineales e interacciones entre variables. Es el tipo de discrepancia que justifica comparar más de un algoritmo (1.6) en vez de confiar en un único modelo.</p>
 <p>Si una o dos variables concentran la mayor parte de la importancia y el resto aporta casi nada, es una señal real para decidir con datos —no por intuición— si conviene simplificar el modelo a menos predictores en una futura iteración (fuera del alcance evaluado de esta sesión).</p>
 <h3 id="35-fase-5-evaluation">3.5 Fase 5 — Evaluation<a class="headerlink" href="#35-fase-5-evaluation" title="Permanent link">&para;</a></h3>
-<p>Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.1, antes de seleccionar un ganador.</p>
+<p>Fase estratégica: ya no se entrena nada nuevo — se comparan los candidatos de la Fase 4 entre sí y se valida el resultado contra el objetivo de negocio definido en 3.1.3, antes de seleccionar un ganador.</p>
 <h4 id="351-comparar-los-modelos-candidatos">3.5.1 Comparar los modelos candidatos<a class="headerlink" href="#351-comparar-los-modelos-candidatos" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> tabla comparativa de las cuatro configuraciones entrenadas en 3.4, sobre el mismo <code>df_test</code>.</p>
-<p><strong>Tabla 11. Comparación final</strong></p>
+<p><strong>Tabla 10. Comparación final</strong></p>
 <table>
 <thead>
 <tr>
@@ -3039,52 +2991,52 @@ sostener un pipeline de regresión distribuida sobre esta fuente, en vez de no p
 <tbody>
 <tr>
 <td>Sin regularización</td>
-<td>0.7909</td>
-<td>0.2271</td>
-<td>0.6087</td>
+<td>0.9153</td>
+<td>0.1119</td>
+<td>0.7365</td>
 </tr>
 <tr>
 <td>Ridge (L2)</td>
-<td>0.7962</td>
-<td>0.2166</td>
-<td>0.6174</td>
+<td>0.9175</td>
+<td>0.1075</td>
+<td>0.7417</td>
 </tr>
 <tr>
 <td>Elastic Net (L1+L2)</td>
-<td>0.8091</td>
-<td>0.1910</td>
-<td>0.6372</td>
+<td>0.9260</td>
+<td>0.0909</td>
+<td>0.7563</td>
 </tr>
 <tr>
 <td><strong>Random Forest</strong></td>
-<td><strong>0.6732</strong></td>
-<td><strong>0.4399</strong></td>
-<td><strong>0.5001</strong></td>
+<td><strong>0.7464</strong></td>
+<td><strong>0.4094</strong></td>
+<td><strong>0.5747</strong></td>
 </tr>
 </tbody>
 </table>
-<p>En una corrida real, <strong>Random Forest ganó en las tres métricas a la vez</strong> — no solo en RMSE, también en R² (casi el doble que el mejor modelo lineal) y en MAE. Entre las tres configuraciones lineales, agregar regularización <strong>empeoró</strong> el resultado en vez de mejorarlo: una señal de que este modelo base no estaba sobreajustando — no había ningún problema de <em>overfitting</em> que la regularización tuviera que corregir. La ganancia real vino de otro lado: <code>RandomForestRegressor</code> no asume una relación lineal entre las 8 variables ambientales y <code>Valor_CE</code>, y esa relación, en los datos reales, no lo es — coherente con que <code>Rain</code> (3.4.1) tuviera un coeficiente lineal desproporcionadamente grande frente a las demás variables.</p>
+<p>En una corrida real, <strong>Random Forest ganó en las tres métricas a la vez</strong> — RMSE, R² (casi cuatro veces mayor que el mejor modelo lineal: <code>0.41</code> contra <code>0.11</code>) y MAE. Entre las tres configuraciones lineales, agregar regularización <strong>empeoró</strong> el resultado en vez de mejorarlo — el modelo base no estaba sobreajustando, así que no había ningún problema de <em>overfitting</em> que la regularización tuviera que corregir. La ganancia real de Random Forest vino de otro lado: no asume una relación lineal entre las 7 variables y <code>CE</code>, y esa relación, en los datos reales, claramente no lo es — un R² de apenas <code>0.11</code> en el mejor modelo lineal ya lo anticipaba.</p>
 <h4 id="352-seleccionar-el-mejor-modelo">3.5.2 Seleccionar el mejor modelo<a class="headerlink" href="#352-seleccionar-el-mejor-modelo" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> el modelo ganador, señalado explícitamente con base en la Tabla 11 — no en cuál se entrenó primero o más rápido.</p>
-<p>Con los resultados de la Tabla 11, <strong>Random Forest queda seleccionado</strong> como modelo ganador de esta sesión — 3.6.1 lo persiste.</p>
+<p><strong>Producto del paso:</strong> el modelo ganador, señalado explícitamente con base en la Tabla 10 — no en cuál se entrenó primero o más rápido.</p>
+<p>Con los resultados de la Tabla 10, <strong>Random Forest queda seleccionado</strong> como modelo ganador de esta sesión — 3.6.1 lo persiste.</p>
 <h4 id="353-validar-si-el-error-es-aceptable-para-el-negocio">3.5.3 Validar si el error es aceptable para el negocio<a class="headerlink" href="#353-validar-si-el-error-es-aceptable-para-el-negocio" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> una lectura explícita de si el resultado cumple lo que 3.1.3 se propuso medir — no solo qué modelo ganó, sino si ese resultado sirve para algo.</p>
-<p>El alcance declarado en 3.1.3 era comparar cuatro configuraciones y reportar RMSE, R² y MAE — eso ya se cumplió: las cuatro quedaron entrenadas, medidas sobre el mismo <code>df_test</code>, y reunidas en la Tabla 11. Sobre el desempeño en sí: un R² de <code>0.44</code> no alcanzaría el umbral que exigiría un sistema en producción real (donde normalmente se fija un mínimo de negocio <em>antes</em> de empezar a modelar), pero sí confirma que las variables ambientales disponibles tienen una relación real y no lineal con <code>Valor_CE</code> — suficiente para decidir con evidencia, no por intuición, cuál modelo se guarda.</p>
+<p>El alcance declarado en 3.1.3 era comparar cuatro configuraciones y reportar RMSE, R² y MAE — eso ya se cumplió: las cuatro quedaron entrenadas, medidas sobre el mismo <code>df_test</code>, y reunidas en la Tabla 10. Sobre el desempeño en sí: un R² de <code>0.41</code> es un avance real frente al <code>0.11</code> del mejor modelo lineal, pero sigue dejando <strong>casi el 60 % de la variabilidad de <code>CE</code> sin explicar</strong> — no alcanzaría el umbral que exigiría un sistema en producción real (donde normalmente se fija un mínimo de negocio <em>antes</em> de empezar a modelar). La conclusión honesta: estas 7 variables meteorológicas, sin <code>Rain</code> ni <code>WindDir</code>, capturan una relación real pero parcial con <code>CE</code> — suficiente para decidir con evidencia, no por intuición, cuál modelo se guarda, pero no suficiente para un despliegue real sin seguir iterando (más variables, más historia, u otro enfoque).</p>
 <h3 id="36-fase-6-deployment">3.6 Fase 6 — Deployment<a class="headerlink" href="#36-fase-6-deployment" title="Permanent link">&para;</a></h3>
 <p>Aquí "Deployment" significa exactamente lo que hace este paso — persistir el artefacto ya seleccionado en 3.5.2 para poder reutilizarlo sin reentrenar — y no más que eso: no hay empaquetado productivo, servicio de inferencia ni monitoreo; ese alcance queda fuera de esta sesión.</p>
 <h4 id="361-guardar-el-modelo-seleccionado">3.6.1 Guardar el modelo seleccionado<a class="headerlink" href="#361-guardar-el-modelo-seleccionado" title="Permanent link">&para;</a></h4>
-<p><strong>Producto del paso:</strong> el modelo ganador de la Tabla 11 (3.5.2), guardado como artefacto reutilizable.</p>
-<div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># Random Forest gano las tres metricas (Tabla 11, 3.5.2)</span>
+<p><strong>Producto del paso:</strong> el modelo ganador de la Tabla 10 (3.5.2), guardado como artefacto reutilizable.</p>
+<div class="highlight"><pre><span></span><code><span class="n">modelo_ganador</span> <span class="o">=</span> <span class="n">modelo_rf</span>  <span class="c1"># ajusta esta linea segun el ganador real de tu Tabla 10 (3.5.2)</span>
 
 <span class="n">modelo_ganador</span><span class="o">.</span><span class="n">write</span><span class="p">()</span><span class="o">.</span><span class="n">overwrite</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Modelo guardado en </span><span class="si">{</span><span class="n">ARTIFACTS</span><span class="si">}</span><span class="s2">/modelo_ce_regresion"</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Error frecuente</strong>: guardar el primer modelo entrenado (3.4.1) en vez del que realmente ganó la comparación de 3.5.2. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. En esta corrida coinciden (<code>modelo_rf</code> ya era el modelo de referencia del notebook), pero no des por sentado que el ganador siempre va a ser el mismo que el ejemplo — vuelve a comparar cada vez que cambien los datos.</p>
+<p><strong>Error frecuente</strong>: guardar el primer modelo entrenado (3.4.1) en vez del que realmente ganó la comparación de 3.5.2. La sección 4.6 evalúa explícitamente que el modelo guardado coincida con el mejor resultado reportado — no con el más rápido de entrenar. No des por sentado cuál algoritmo va a ganar solo porque ganó en una corrida anterior con otros datos — vuelve a comparar cada vez que cambien los datos.</p>
 <h3 id="37-cierre">3.7 Cierre<a class="headerlink" href="#37-cierre" title="Permanent link">&para;</a></h3>
 <h4 id="371-documentar-hallazgos-y-responder-preguntas-de-reflexion">3.7.1 Documentar hallazgos y responder preguntas de reflexión<a class="headerlink" href="#371-documentar-hallazgos-y-responder-preguntas-de-reflexion" title="Permanent link">&para;</a></h4>
 <p><strong>Producto del paso:</strong> notebook documentado con celdas markdown explicando cada resultado.</p>
 <p>Agrega celdas markdown breves debajo de cada bloque de código relevante, desde la integración de fuentes (3.2) hasta la comparación de modelos (3.4), explicando qué hiciste y qué observaste — es la base directa de la evidencia técnica que armarás en 4.3.1.</p>
-<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del <code>join</code> evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 11 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor <code>featureImportances</code> en tu Tabla 10, y tiene sentido físico que sea la más relevante para explicar <code>Valor_CE</code>? ¿por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib y no en scikit-learn?</p>
+<p><strong>Reflexión técnica breve</strong> (5 a 8 líneas): ¿por qué resolver los duplicados de variables ambientales antes del <code>join</code> evita un problema que, si se dejara para después, sería más difícil de rastrear? ¿qué configuración de la Tabla 10 tuvo el mejor RMSE, y por cuánto margen superó a la línea base sin regularización? ¿cuál fue la variable con mayor <code>featureImportances</code> en tu Tabla 9, y tiene sentido físico que sea la más relevante para explicar <code>CE</code>? ¿por qué <code>VectorAssembler</code> es un paso obligatorio en Spark MLlib y no en scikit-learn?</p>
 <p><strong>Evidencia de aprendizaje:</strong></p>
 <ul>
 <li>Notebook <code>04_ml_distribuido_regresion_practica.ipynb</code> con las tres fuentes integradas, calidad de datos aplicada, y salida particionada (Gold) verificada.</li>
@@ -3212,7 +3164,7 @@ va a usarse para tomar decisiones reales?
 <li>Si <code>RandomForestRegressor</code> hubiera dado un RMSE mucho peor que <code>LinearRegression</code>, ¿qué te diría eso sobre la relación entre tus variables?</li>
 </ol>
 <h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
-<p><strong>Tabla 12. Rúbrica de evaluación</strong></p>
+<p><strong>Tabla 11. Rúbrica de evaluación</strong></p>
 <table>
 <thead>
 <tr>
@@ -3286,7 +3238,7 @@ Indica 2 fortalezas y 2 recomendaciones.
 <h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
 <p>Tiempo: 5 min.</p>
 <p><strong>Resumen breve:</strong> hoy el pipeline batch ganó un Data Lake propio y su primer modelo — tres fuentes reales integradas y validadas (esquema, duplicados, un código de error distinto de un nulo), escritas como una capa Gold particionada; sobre esa salida, un vector de predictores ensamblado con <code>VectorAssembler</code>, un modelo base de regresión lineal entrenado y evaluado con tres métricas distintas (RMSE, R², MAE), comparado sistemáticamente contra otras configuraciones de regularización y contra un segundo algoritmo (Random Forest), antes de guardar el que realmente tuvo mejor desempeño — no el primero que se entrenó.</p>
-<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 11 le dio el mejor RMSE, y si le sorprendió o no.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte qué configuración de la Tabla 10 le dio el mejor RMSE, y si le sorprendió o no.</p>
 <p><strong>Metacognición:</strong> ¿qué parte de la sesión te costó más entender: integrar tres fuentes con calidad de datos, por qué Spark MLlib necesita <code>VectorAssembler</code>, la diferencia entre RMSE y MAE, o por qué comparar contra Random Forest importa aunque el modelo lineal ya "funcione"?</p>
 <p><strong>Proyección:</strong> S5 evalúa el pipeline batch completo de la Unidad I — arquitectura, PySpark, calidad de datos, particionamiento y el Data Lake con el modelo de regresión de hoy — como un sistema integrado. El componente de series de tiempo (con historial temporal e inferencia en streaming) queda para S10, sobre la misma familia de datos, una vez que exista la infraestructura de streaming (S6-S9).</p>
 <h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
@@ -3297,6 +3249,7 @@ Indica 2 fortalezas y 2 recomendaciones.
 <li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.sql.functions</em>. https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html</li>
 <li>Apache Software Foundation. (2024). <em>Parquet files</em>. Spark SQL Guide. https://spark.apache.org/docs/latest/sql-data-sources-parquet.html</li>
 <li>Apache Software Foundation. (2024). <em>ML Tuning: model selection and hyperparameter tuning</em>. Spark MLlib Guide. https://spark.apache.org/docs/latest/ml-tuning.html</li>
+<li>Apache Software Foundation. (2024). <em>LinearRegression (Scala API)</em> [parámetro <code>standardization</code>]. https://spark.apache.org/docs/latest/api/scala/org/apache/spark/ml/regression/LinearRegression.html</li>
 </ol>
 
 
