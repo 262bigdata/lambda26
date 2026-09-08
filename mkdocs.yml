@@ -9,6 +9,10 @@ nav:
   - Guía de Proyecto Sello:
       - Guía del proyecto: proyecto-sello/index.md
       - Brief técnico-analítico (plantilla): proyecto-sello/brief.md
+      - Producto U1 (plantilla-ejemplo): proyecto-sello/u1-producto.md
+      - Producto U2 (plantilla-ejemplo): proyecto-sello/u2-producto.md
+      - Producto U3 / Producto Final (plantilla-ejemplo): proyecto-sello/u3-producto.md
+      - Matriz de competencias (ICACIT): proyecto-sello/matriz-competencias.md
   - Silabos:
       - Silabo 2026-1: silabo_bigdata_2026_1.md
       - Silabo 2026-2: silabo_bigdata_2026_2.md
@@ -18,6 +22,10 @@ nav:
       - "S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico": sesiones/S03_Procesamiento_Calidad_Datos_Particionamiento.md
       - "S4 - ML Distribuido con Spark MLlib (Regresión)": sesiones/S04_ML_Distribuido_Regresion_Spark_MLlib.md
       - "S5 - Evaluación de la Unidad I": sesiones/S05_Evaluacion_Unidad_1.md
+  - 2. Sistema Big Data en tiempo real:
+      - "S12 - Evaluación de la Unidad II": sesiones/S12_Evaluacion_Unidad_2.md
+  - 3. Integración, DataOps y despliegue del sistema final:
+      - "S15 - Evaluación de la Unidad III": sesiones/S15_Evaluacion_Unidad_3.md
 
 theme:
   name: material
