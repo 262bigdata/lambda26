@@ -424,6 +424,8 @@ Si filtras por esa columna, `explain(True)` muestra una optimización que no vis
 
 *Partition pruning* es más barato que *predicate pushdown*: uno evita procesar filas, el otro evita abrir archivos enteros.
 
+**Cuidado: `PartitionFilters` solo aparece si el filtro compara la columna de partición directamente.** En cuanto envuelves esa columna en una función —`upper()`, `trim()`, un `cast()`— antes de compararla, Spark ya no puede resolver de antemano qué carpetas saltarse: `PartitionFilters` queda vacía y el filtro se aplica *después* de abrir todos los archivos, como `PushedFilters` normal. El resultado final es idéntico; el costo, no. Se verifica en 3.11.
+
 ### 2.6 Arquitectura por capas de un Data Lake: Bronze (raw), Silver y Gold
 
 Un Data Warehouse se grafica como estrella o constelación porque tiene tablas fijas (hecho + dimensiones) con relaciones declaradas. Un Data Lake no tiene eso — guarda archivos, no tablas relacionadas — así que no se grafica con un diagrama de esquema (ER): se organiza en **capas de refinamiento creciente**. El patrón más usado para eso es la arquitectura *medallion*: **Bronze** (*raw*), **Silver**, **Gold**.
@@ -1007,6 +1009,16 @@ Filtra por la columna particionada y revisa el plan — deberías ver `Partition
 ```python
 df_verificacion.filter(col("club_member_status") == "ACTIVE").explain(True)
 ```
+
+Repite el mismo filtro, pero envolviendo la columna con `upper()` (convierte el texto a mayúsculas, para no depender de cómo vino escrito el valor) — mismo resultado final, plan de ejecución distinto:
+
+```python
+from pyspark.sql.functions import upper
+
+df_verificacion.filter(upper(col("club_member_status")) == "ACTIVE").explain(True)
+```
+
+En el primer `explain(True)`, el nodo `FileScan parquet` trae `PartitionFilters: [isnotnull(club_member_status#...), (club_member_status#... = ACTIVE)]` — la lista tiene contenido: Spark sabe, antes de leer nada, que solo debe abrir la carpeta `club_member_status=ACTIVE`. En el segundo, `PartitionFilters: []` — vacía: el `upper()` rompe la poda, y Spark abre las cuatro carpetas de la Tabla 12 completas, filtrando recién después de leerlas. Con 1.37 millones de filas la diferencia ya es real; a escala de producción, es la diferencia entre leer un archivo o leer todos.
 
 Para ver cuántas filas quedaron guardadas en cada partición (cada carpeta `club_member_status=...`), sin salir de Spark ni contar archivos a mano:
 
