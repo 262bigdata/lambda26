@@ -1,0 +1,2809 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S06_Ingesta_Eventos_Empresariales_Kafka/">
+      
+      
+        <link rel="prev" href="../S05_Evaluacion_Unidad_1/">
+      
+      
+        <link rel="next" href="../S12_Evaluacion_Unidad_2/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S6 - Ingesta de Eventos Empresariales en Tiempo Real</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s6-ingesta-de-eventos-empresariales-en-tiempo-real" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S6 - Ingesta de Eventos Empresariales en Tiempo Real
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-pedido-que-se-perdio-entre-dos-sistemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el pedido que se perdió entre dos sistemas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-conceptos-de-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Conceptos de Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-arquitectura-de-la-practica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Arquitectura de la práctica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-observabilidad-y-diagnostico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Observabilidad y diagnóstico
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-levantar-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Levantar Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-probar-kafka-por-consola" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Probar Kafka por consola
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-verificar-con-kafka-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Verificar con Kafka UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-probar-con-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Probar con Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-crear-ec-orden-ms-como-productor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Crear ec-orden-ms como productor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-levantar-y-probar-ec-orden-ms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Levantar y probar ec-orden-ms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-crear-ec-pago-ms-como-consumidor-y-productor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Crear ec-pago-ms como consumidor y productor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-levantar-y-probar-ec-pago-ms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Levantar y probar ec-pago-ms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-documentar-el-contrato-de-ambos-eventos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Documentar el contrato de ambos eventos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-pedido-que-se-perdio-entre-dos-sistemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el pedido que se perdió entre dos sistemas
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-conceptos-de-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Conceptos de Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-arquitectura-de-la-practica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Arquitectura de la práctica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-observabilidad-y-diagnostico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Observabilidad y diagnóstico
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-levantar-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Levantar Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-probar-kafka-por-consola" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Probar Kafka por consola
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-verificar-con-kafka-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Verificar con Kafka UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-probar-con-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Probar con Python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-crear-ec-orden-ms-como-productor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Crear ec-orden-ms como productor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-levantar-y-probar-ec-orden-ms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Levantar y probar ec-orden-ms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-crear-ec-pago-ms-como-consumidor-y-productor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Crear ec-pago-ms como consumidor y productor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-levantar-y-probar-ec-pago-ms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Levantar y probar ec-pago-ms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-documentar-el-contrato-de-ambos-eventos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Documentar el contrato de ambos eventos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s6-ingesta-de-eventos-empresariales-en-tiempo-real">S6 - Ingesta de Eventos Empresariales en Tiempo Real<a class="headerlink" href="#s6-ingesta-de-eventos-empresariales-en-tiempo-real" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>Hasta S5, todo el pipeline de <code>lambda26</code> fue <strong>batch</strong>: un archivo llega completo, Spark lo procesa de punta a punta, y termina. Esta sesión abre la Unidad II con un tipo de dato distinto — el <strong>evento</strong>: un mensaje pequeño, que llega uno a la vez, en cualquier momento, sin que nadie avise cuándo empieza ni cuándo termina el flujo. Antes de que Spark pueda procesar eventos en streaming (S8), tiene que existir algo que los reciba, los ordene y los entregue de forma confiable — ese componente es <strong>Apache Kafka</strong>, y esta sesión construye el primer flujo de eventos reales del proyecto: una orden de compra que se crea, y un pago que se procesa a partir de ella.</p>
+<p>Esta sesión trabaja <strong>eventos empresariales</strong> (una orden, un pago) — un flujo de negocio normal, con volumen bajo y estructura conocida de antemano. <strong>S7 aplica exactamente el mismo patrón de Kafka a un tipo de evento distinto: telemetría de sensores/IoT</strong> — alta frecuencia, volumen mayor, esquema que puede variar. Ninguna herramienta cambia entre S6 y S7; lo que cambia es el productor y la naturaleza del evento — por eso esta sesión invierte el tiempo en dejar Kafka y el patrón productor-consumidor bien entendidos, no en el negocio de "órdenes" en sí.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Conceptos de Kafka: topic, producer, consumer, broker, partition, offset, consumer group, key.</li>
+<li>Productor y consumidor manuales por consola.</li>
+<li>Productor y consumidor en Python.</li>
+<li>Microservicios Spring Boot como productor y consumidor reales.</li>
+<li>Contrato de evento, documentado y versionable.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Publicar y consumir</strong> eventos empresariales con Apache Kafka para un flujo de negocio real, documentando el contrato de cada evento, el tópico que lo transporta y su particionado, con evidencia verificable de publicación y consumo en al menos dos niveles: manual (consola/Python) y aplicado (microservicios).</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Un flujo de eventos empresariales funcional: Kafka corriendo con Kafka UI, el tópico <code>orden-eventos</code> probado manualmente por consola y por un productor/consumidor en Python, y dos microservicios Spring Boot reales — <code>ec-orden-ms</code> (publica <code>orden.creada</code> al registrar una orden) y <code>ec-pago-ms</code> (consume <code>orden.creada</code>, procesa el pago y publica <code>pago.aprobado</code>/<code>pago.rechazado</code> en <code>pago-eventos</code>) — con el contrato de ambos eventos documentado.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Confirmar Docker Desktop funcionando; instalar Java 17 y Maven si aún no están instalados (<code>choco install temurin17 -y</code>, <code>choco install maven -y</code>). Trabajo individual, antes de clase.</td>
+<td>Silabo Unidad II, este mismo documento (1.1-1.7).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada de <code>kafka/</code> (broker + UI), prueba manual por consola, prueba con Python, y construcción de <code>ec-orden-ms</code>/<code>ec-pago-ms</code> como productor y consumidor reales. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un topic que no aparece o un consumer que no recibe nada.</td>
+<td>Pasos 3.1 a 3.9 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de Kafka UI mostrando <code>orden-eventos</code> y <code>pago-eventos</code> con mensajes reales, y de los logs de ambos microservicios publicando/consumiendo. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-el-pedido-que-se-perdio-entre-dos-sistemas">1.6.1 Caso: el pedido que se perdió entre dos sistemas<a class="headerlink" href="#161-caso-el-pedido-que-se-perdio-entre-dos-sistemas" title="Permanent link">&para;</a></h4>
+<p>Una plataforma de comercio electrónico separa "registrar el pedido" de "procesar el pago" en dos aplicaciones distintas, para que un problema en una no tumbe a la otra. La primera versión los conecta con una llamada HTTP directa: el servicio de órdenes, apenas guarda el pedido, llama por REST al servicio de pagos. Funciona en las pruebas. En producción, un día el servicio de pagos está reiniciándose (un despliegue nuevo) justo cuando entra una ráfaga de pedidos — la llamada HTTP falla, y esos pedidos, o se pierden, o el servicio de órdenes también empieza a fallar en cadena (el mismo problema de acoplamiento síncrono que Circuit Breaker mitiga, pero no elimina: la orden y el pago siguen dependiendo de que ambos servicios estén arriba <em>al mismo tiempo</em>).</p>
+<p>La solución no es un mejor manejo de errores en esa llamada — es no depender de que los dos servicios coincidan en el tiempo. El servicio de órdenes publica un evento ("orden creada") y sigue con lo suyo, sin esperar respuesta de nadie. El servicio de pagos lee ese evento cuando puede — un minuto después, o una hora después si estuvo caído — y lo procesa. Ningún pedido se pierde: Kafka lo retiene hasta que alguien lo consuma. Esta sesión construye exactamente ese patrón, con datos reales.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>¿Qué problema tiene conectar dos servicios con una llamada HTTP directa, si uno de los dos puede estar caído en el momento exacto en que el otro lo necesita?</li>
+<li>¿Por qué "guardar el evento en una cola y seguir" es distinto de "esperar la respuesta antes de continuar"?</li>
+</ol>
+<p><strong>Comprensión de mensajería con Kafka</strong></p>
+<ol>
+<li>Si dos consumidores distintos (por ejemplo, <code>ec-pago-ms</code> y un futuro servicio de notificaciones) necesitan leer el mismo evento <code>orden.creada</code>, ¿alcanza con un solo consumer, o cada uno necesita su propio consumer group? Relaciónalo con 2.1.</li>
+<li>¿Qué garantiza Kafka si <code>ec-pago-ms</code> está caído cuando <code>ec-orden-ms</code> publica un evento, y <code>ec-pago-ms</code> vuelve a levantarse cinco minutos después?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U2 - Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.</li>
+<li>Avance del producto en esta sesión: ingesta de eventos empresariales con Kafka, primer tramo del pipeline en tiempo real.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la Unidad II</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    S6["`**S6:** Eventos empresariales (Kafka)`"]
+    S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
+    S8["`**S8:** Spark Structured Streaming`"]
+    S9["`**S9:** Observabilidad`"]
+    S10["`**S10:** BI/ML en streaming`"]
+    S12["`**S12:** Producto U2`"]
+
+    S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S12
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S6 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<h3 id="21-conceptos-de-kafka">2.1 Conceptos de Kafka<a class="headerlink" href="#21-conceptos-de-kafka" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 2. Conceptos clave de Kafka</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Qué es</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td>Canal lógico donde se publican mensajes de un mismo tipo (ej. <code>orden-eventos</code>).</td>
+</tr>
+<tr>
+<td><code>producer</code></td>
+<td>Aplicación que envía eventos a un topic.</td>
+</tr>
+<tr>
+<td><code>consumer</code></td>
+<td>Aplicación que lee eventos desde un topic.</td>
+</tr>
+<tr>
+<td><code>broker</code></td>
+<td>Servidor Kafka que almacena y distribuye los eventos.</td>
+</tr>
+<tr>
+<td><code>partition</code></td>
+<td>División interna de un topic — permite que varios consumidores lean en paralelo.</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>Posición de un evento dentro de una partición — Kafka no borra el evento al leerlo, solo avanza el offset del consumer.</td>
+</tr>
+<tr>
+<td><code>consumer group</code></td>
+<td>Grupo que coordina consumidores y recuerda hasta qué offset ya leyó cada uno.</td>
+</tr>
+<tr>
+<td><code>key</code></td>
+<td>Valor que Kafka usa para decidir en qué partición cae el evento — mensajes con la misma <code>key</code> siempre van a la misma partición, y por lo tanto se leen en orden entre sí.</td>
+</tr>
+</tbody>
+</table>
+<p>La <code>key</code> no tiene que ser una clave primaria relacional: puede ser <code>ordenId</code>, un <code>deviceId</code> (S7), un <code>correlationId</code> o un UUID generado por la aplicación — lo único que importa es que agrupe correctamente los eventos que deben mantenerse en orden entre sí.</p>
+<p><strong>Figura 2. Flujo completo: <code>ec-orden-ms</code> publica, <code>ec-pago-ms</code> consume y vuelve a publicar</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    OrdenProducer["PRODUCER&lt;br/&gt;ec-orden-ms&lt;br/&gt;orden.creada"]
+    PythonProducer["PRODUCER&lt;br/&gt;ec-orden-py&lt;br/&gt;orden.creada"]
+
+    subgraph KafkaOrden["BROKER KAFKA (kafka:9092)"]
+        direction TB
+        subgraph OrdenTopic["TOPIC: orden-eventos"]
+            OrdenP0["Partición 0&lt;br/&gt;offsets: 0 → 1 → 2 → 3"]
+        end
+    end
+
+    PythonConsumer["CONSUMER&lt;br/&gt;ec-orden-py&lt;br/&gt;group: ec-orden-py-group"]
+    PagoConsumer["CONSUMER&lt;br/&gt;ec-pago-ms&lt;br/&gt;group: ec-pago-ms-group"]
+    PagoProducer["PRODUCER&lt;br/&gt;ec-pago-ms&lt;br/&gt;pago.aprobado / pago.rechazado"]
+
+    subgraph KafkaPago["BROKER KAFKA (kafka:9092)"]
+        direction TB
+        subgraph PagoTopic["TOPIC: pago-eventos"]
+            PagoP0["Partición 0&lt;br/&gt;offsets: 0 → 1"]
+        end
+    end
+
+    OrdenProducer --&gt;|"publica, key=ordenId"| OrdenTopic
+    PythonProducer --&gt;|"publica, key=ordenId"| OrdenTopic
+    OrdenP0 --&gt;|"lee"| PythonConsumer
+    OrdenP0 --&gt;|"lee"| PagoConsumer
+    PagoConsumer --&gt;|"procesa pago"| PagoProducer
+    PagoProducer --&gt;|"publica"| PagoTopic</code></pre>
+<p><code>ec-pago-ms</code> y <code>ec-orden-py</code> leen del <strong>mismo</strong> topic (<code>orden-eventos</code>) sin competir entre sí porque cada uno tiene su propio <em>consumer group</em> (2.1, Tabla 2) — Kafka entrega una copia completa de los eventos a cada consumer group, no reparte los eventos como si fuera una sola cola compartida.</p>
+<p><strong>Error frecuente</strong>: pensar que leer un evento lo elimina del topic, igual que sacar un mensaje de una cola tradicional. Kafka retiene los eventos según su política de retención (por tiempo o tamaño, no cubierta en esta sesión) — leer solo avanza el offset del consumer group que lo leyó; otro consumer group puede leer el mismo evento desde el principio.</p>
+<h3 id="22-arquitectura-de-la-practica">2.2 Arquitectura de la práctica<a class="headerlink" href="#22-arquitectura-de-la-practica" title="Permanent link">&para;</a></h3>
+<p>Esta sesión trabaja únicamente con estos componentes, dentro de <code>lambda26</code>:</p>
+<ul>
+<li><code>kafka/</code> — el broker y su interfaz web.</li>
+<li><code>uso-rapido/ec-orden-py</code> — productor/consumidor en Python, para verificar el flujo sin depender de Java.</li>
+<li><code>uso-ms-sb/ec-orden-ms</code> — microservicio Spring Boot, productor real.</li>
+<li><code>uso-ms-sb/ec-pago-ms</code> — microservicio Spring Boot, consumidor y productor real.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>ec-orden-ms → orden-eventos → ec-pago-ms → pago-eventos
+</code></pre></div>
+<p>En la práctica manual (3.2) solo existe <code>orden-eventos</code>. El topic <code>pago-eventos</code> aparece recién cuando <code>ec-pago-ms</code> publica su primer resultado de pago (3.9).</p>
+<h3 id="23-observabilidad-y-diagnostico">2.3 Observabilidad y diagnóstico<a class="headerlink" href="#23-observabilidad-y-diagnostico" title="Permanent link">&para;</a></h3>
+<p>Revisar Kafka UI (topics, particiones, mensajes, consumer groups y su <em>lag</em>), logs de <code>ec-orden-ms</code> (líneas <code>component=producer</code>) y logs de <code>ec-pago-ms</code> (líneas <code>component=consumer</code>/<code>component=processor</code>/<code>component=producer</code>) — cada línea de log declara explícitamente <code>service</code>, <code>component</code>, <code>topic</code> y <code>status</code>, precisamente para que un evento se pueda rastrear de un extremo al otro sin adivinar.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h.</p>
+<p><strong>Actividad:</strong> construcción guiada del flujo de eventos empresariales de <code>lambda26</code>: Kafka, prueba manual, prueba en Python, y los microservicios <code>ec-orden-ms</code>/<code>ec-pago-ms</code> como productor y consumidor reales (Producto de la sesión en 1.4).</p>
+<p><strong>Propósito de la actividad:</strong> dejar Kafka operativo y validado en tres niveles de práctica — consola, Python, microservicios — de forma que el patrón productor-consumidor quede claro antes de repetirlo en S7 con otro tipo de evento.</p>
+<p><strong>Orientaciones metodológicas:</strong> en el laboratorio, el docente guía la construcción paso a paso frente a la clase; los estudiantes replican cada paso en su propia laptop, verificando el resultado en Kafka UI antes de avanzar al siguiente.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Levantar Kafka.</li>
+<li><strong>3.2</strong> Probar Kafka por consola (producer/consumer manuales).</li>
+<li><strong>3.3</strong> Verificar con Kafka UI.</li>
+<li><strong>3.4</strong> Probar con Python (productor y consumidor rápidos).</li>
+<li><strong>3.5</strong> Crear <code>ec-orden-ms</code> como productor.</li>
+<li><strong>3.6</strong> Levantar y probar <code>ec-orden-ms</code>.</li>
+<li><strong>3.7</strong> Crear <code>ec-pago-ms</code> como consumidor y productor.</li>
+<li><strong>3.8</strong> Levantar y probar <code>ec-pago-ms</code>.</li>
+<li><strong>3.9</strong> Documentar el contrato de ambos eventos.</li>
+</ul>
+<h3 id="31-levantar-kafka">3.1 Levantar Kafka<a class="headerlink" href="#31-levantar-kafka" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> Kafka, Kafka UI y el exportador de métricas corriendo en DEV.</p>
+<p>Crea:</p>
+<div class="highlight"><pre><span></span><code>kafka/compose.yml
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apache/kafka:3.8.0</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"49092:9092"</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">KAFKA_NODE_ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">KAFKA_PROCESS_ROLES</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">broker,controller</span>
+<span class="w">      </span><span class="nt">KAFKA_LISTENERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093</span>
+<span class="w">      </span><span class="nt">KAFKA_ADVERTISED_LISTENERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PLAINTEXT://kafka:9092</span>
+<span class="w">      </span><span class="nt">KAFKA_CONTROLLER_LISTENER_NAMES</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CONTROLLER</span>
+<span class="w">      </span><span class="nt">KAFKA_LISTENER_SECURITY_PROTOCOL_MAP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT</span>
+<span class="w">      </span><span class="nt">KAFKA_CONTROLLER_QUORUM_VOTERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1@kafka:9093</span>
+<span class="w">      </span><span class="nt">KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">KAFKA_AUTO_CREATE_TOPICS_ENABLE</span><span class="p">:</span><span class="w"> </span><span class="s">"false"</span>
+
+<span class="w">  </span><span class="nt">kafka-ui</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">provectuslabs/kafka-ui:latest</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-ui</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"48085:8080"</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">KAFKA_CLUSTERS_0_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26</span>
+<span class="w">      </span><span class="nt">KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka:9092</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span>
+
+<span class="w">  </span><span class="nt">kafka-exporter</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">danielqsj/kafka-exporter:latest</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-exporter</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"--kafka.server=kafka:9092"</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"49308:9308"</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span>
+</code></pre></div>
+<p><code>KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"</code> es intencional: cada topic se crea de forma explícita (3.2), con las particiones que decides — no aparece solo la primera vez que alguien publica en un nombre nuevo, un error común que oculta un typo en el nombre del topic detrás de un topic "fantasma" con una sola partición por defecto.</p>
+<p>Levanta:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="nb">ps</span>
+</code></pre></div>
+<p>Servicios esperados: <code>lambda26-kafka</code>, <code>lambda26-kafka-ui</code>, <code>lambda26-kafka-exporter</code>.</p>
+<h3 id="32-probar-kafka-por-consola">3.2 Probar Kafka por consola<a class="headerlink" href="#32-probar-kafka-por-consola" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> topic <code>orden-eventos</code> creado y probado con un producer y un consumer manuales.</p>
+<p>Entra al contenedor:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">kafka</span> <span class="n">bash</span>
+</code></pre></div>
+<p>Crea el topic:</p>
+<div class="highlight"><pre><span></span><code>/opt/kafka/bin/kafka-topics.sh<span class="w"> </span>--create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--topic<span class="w"> </span>orden-eventos<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bootstrap-server<span class="w"> </span>kafka:9092<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--partitions<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--replication-factor<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+<p>Lista los topics:</p>
+<div class="highlight"><pre><span></span><code>/opt/kafka/bin/kafka-topics.sh<span class="w"> </span>--list<span class="w"> </span>--bootstrap-server<span class="w"> </span>kafka:9092
+</code></pre></div>
+<p>Resultado esperado:</p>
+<div class="highlight"><pre><span></span><code>orden-eventos
+</code></pre></div>
+<p><strong>Terminal 1</strong> (consumer):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">kafka</span> <span class="n">bash</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>/opt/kafka/bin/kafka-console-consumer.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--topic<span class="w"> </span>orden-eventos<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bootstrap-server<span class="w"> </span>kafka:9092<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-beginning
+</code></pre></div>
+<p><strong>Terminal 2</strong> (producer):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">kafka</span> <span class="n">bash</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>/opt/kafka/bin/kafka-console-producer.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--topic<span class="w"> </span>orden-eventos<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bootstrap-server<span class="w"> </span>kafka:9092
+</code></pre></div>
+<p>Escribe:</p>
+<div class="highlight"><pre><span></span><code>hola kafka
+</code></pre></div>
+<p>El consumer de la Terminal 1 debe mostrar ese mismo texto de inmediato.</p>
+<h3 id="33-verificar-con-kafka-ui">3.3 Verificar con Kafka UI<a class="headerlink" href="#33-verificar-con-kafka-ui" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> confirmación visual del topic, sus mensajes y sus offsets.</p>
+<p>Abre <code>http://localhost:48085</code> y verifica:</p>
+<ul>
+<li>El clúster <code>lambda26</code> aparece conectado.</li>
+<li>El topic <code>orden-eventos</code> existe, con 1 partición.</li>
+<li>El mensaje manual de 3.2 aparece en la pestaña de mensajes, con columnas <code>partition</code> y <code>offset</code>.</li>
+</ul>
+<h3 id="34-probar-con-python">3.4 Probar con Python<a class="headerlink" href="#34-probar-con-python" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> confirmación de que el flujo funciona con un cliente distinto al de consola, incluida la estructura JSON del evento.</p>
+<p>Crea <code>uso-rapido/ec-orden-py/producer_ordenes.py</code> y <code>uso-rapido/ec-orden-py/consumer_ordenes.py</code> (usa la librería <code>kafka-python</code> o <code>confluent-kafka</code>, según lo que el equipo docente tenga disponible en el ambiente). El evento publicado por el productor Python debe seguir exactamente este formato — es el mismo contrato que usará <code>ec-orden-ms</code> en Java (3.9):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"tipoEvento"</span><span class="p">:</span><span class="w"> </span><span class="s2">"orden.creada"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ordenId"</span><span class="p">:</span><span class="w"> </span><span class="mi">321</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mf">180.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"estado"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PENDIENTE"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"origen"</span><span class="p">:</span><span class="w"> </span><span class="s2">"python"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1713350000000</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Levanta el contenedor de utilidades Python (o ejecuta los scripts directamente si el entorno ya tiene Python instalado con las librerías necesarias):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-rapido</span><span class="p">/</span><span class="n">ec-orden-py</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span> <span class="p">-</span><span class="n">-build</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-rapido</span><span class="p">/</span><span class="n">ec-orden-py</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">ec-orden-py</span> <span class="n">python</span> <span class="p">/</span><span class="n">app</span><span class="p">/</span><span class="n">consumer_ordenes</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<p>En otra terminal:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-rapido</span><span class="p">/</span><span class="n">ec-orden-py</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">ec-orden-py</span> <span class="n">python</span> <span class="p">/</span><span class="n">app</span><span class="p">/</span><span class="n">producer_ordenes</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<p>El consumer debe imprimir <code>topic</code>, <code>partition</code>, <code>offset</code>, <code>origen</code>, <code>estado</code>, <code>total</code> y <code>payload</code> completo. Si llega el mensaje manual de texto plano de 3.2 (no es JSON), el consumer no debe caerse: debe marcarlo como <code>invalid</code> y mostrar <code>rawPayload</code> — un consumer real recibe de todo, no solo lo que él mismo publicó.</p>
+<p><strong>Error frecuente</strong>: un consumer que asume que todo mensaje en el topic es JSON válido con la forma esperada, y lanza una excepción no controlada apenas llega algo distinto — un solo mensaje malformado no debería tumbar un consumer que va a correr indefinidamente.</p>
+<h3 id="35-crear-ec-orden-ms-como-productor">3.5 Crear <code>ec-orden-ms</code> como productor<a class="headerlink" href="#35-crear-ec-orden-ms-como-productor" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> proyecto Spring Boot <code>ec-orden-ms</code> creado, con Kafka, JPA y PostgreSQL.</p>
+<p><strong>Tabla 3. Configuración de <code>ec-orden-ms</code> en Spring Initializr</strong></p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project</td>
+<td>Maven Project</td>
+</tr>
+<tr>
+<td>Spring Boot</td>
+<td><strong>3.3.x</strong> (rama estable con Spring for Apache Kafka)</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>Java</td>
+</tr>
+<tr>
+<td>Group Id</td>
+<td><code>com.upeu</code></td>
+</tr>
+<tr>
+<td>Artifact Id</td>
+<td><code>ec-orden-ms</code></td>
+</tr>
+<tr>
+<td>Package name</td>
+<td><code>com.upeu.ecorden</code></td>
+</tr>
+<tr>
+<td>Java</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Dependencias</td>
+<td>Spring Web, Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok</td>
+</tr>
+<tr>
+<td>Ubicación sugerida</td>
+<td><code>uso-ms-sb/ec-orden-ms</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>uso-ms-sb/ec-orden-ms/compose-dev.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-ec-orden-ms-dev</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">postgres-ec-orden-ms-dev</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres:16-alpine</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-postgres-ec-orden-ms-dev</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">POSTGRES_DB</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db_ec_orden_ms</span>
+<span class="w">      </span><span class="nt">POSTGRES_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ecom</span>
+<span class="w">      </span><span class="nt">POSTGRES_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ecom</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"49021:5432"</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ec_orden_ms_dev_data:/var/lib/postgresql/data</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ec_orden_ms_dev_data</span><span class="p">:</span>
+</code></pre></div>
+<p><strong><code>uso-ms-sb/ec-orden-ms/src/main/resources/application.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">server</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">49021</span>
+
+<span class="nt">spring</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">application</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ec-orden-ms</span>
+<span class="w">  </span><span class="nt">datasource</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jdbc:postgresql://localhost:49021/db_ec_orden_ms</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ecom</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ecom</span>
+<span class="w">    </span><span class="nt">driver-class-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.postgresql.Driver</span>
+<span class="w">  </span><span class="nt">jpa</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hibernate</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ddl-auto</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">update</span>
+<span class="w">    </span><span class="nt">show-sql</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bootstrap-servers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost:49092</span>
+<span class="w">    </span><span class="nt">producer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">key-serializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.apache.kafka.common.serialization.StringSerializer</span>
+<span class="w">      </span><span class="nt">value-serializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.springframework.kafka.support.serializer.JsonSerializer</span>
+</code></pre></div>
+<p><code>ddl-auto: update</code> (no <code>validate</code>, a diferencia del criterio usado en los proyectos de LP2/DIST) es intencional aquí: este microservicio es una herramienta de laboratorio para generar eventos, no el producto evaluado de esta sesión — no justifica el peso de una migración Flyway completa solo para una tabla.</p>
+<p>Crea la entidad:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/Orden.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecorden</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.math.BigDecimal</span><span class="p">;</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ordenes"</span><span class="p">)</span>
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="nd">@Builder</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Orden</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Id</span>
+<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">usuarioId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">total</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@Builder.Default</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">estado</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"PENDIENTE"</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Crea el repositorio:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenRepository.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecorden</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.JpaRepository</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">OrdenRepository</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">JpaRepository</span><span class="o">&lt;</span><span class="n">Orden</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Crea el productor:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenEventProducer.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecorden</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.RequiredArgsConstructor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.kafka.core.KafkaTemplate</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.LinkedHashMap</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrdenEventProducer</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">TOPIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"orden-eventos"</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">KafkaTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kafkaTemplate</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">publicarOrdenCreada</span><span class="p">(</span><span class="n">Orden</span><span class="w"> </span><span class="n">orden</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">evento</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"tipoEvento"</span><span class="p">,</span><span class="w"> </span><span class="s">"orden.creada"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"ordenId"</span><span class="p">,</span><span class="w"> </span><span class="n">orden</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"total"</span><span class="p">,</span><span class="w"> </span><span class="n">orden</span><span class="p">.</span><span class="na">getTotal</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"estado"</span><span class="p">,</span><span class="w"> </span><span class="n">orden</span><span class="p">.</span><span class="na">getEstado</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"origen"</span><span class="p">,</span><span class="w"> </span><span class="s">"ec-orden-ms"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"timestamp"</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
+
+<span class="w">        </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">TOPIC</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">orden</span><span class="p">.</span><span class="na">getId</span><span class="p">()),</span><span class="w"> </span><span class="n">evento</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"service=ec-orden-ms component=producer topic={} eventType=orden.creada status=published"</span><span class="p">,</span><span class="w"> </span><span class="n">TOPIC</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>kafkaTemplate.send(TOPIC, String.valueOf(orden.getId()), evento)</code> usa <code>ordenId</code> como <code>key</code> (2.1) — así, si algún día un mismo pedido genera más de un evento (por ejemplo, <code>orden.creada</code> y una futura <code>orden.cancelada</code>), Kafka los mantiene en la misma partición y en orden entre sí.</p>
+<p>Crea el servicio y el controlador:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenService.java
+uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenController.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecorden</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.RequiredArgsConstructor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Service</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="p">;</span>
+
+<span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrdenService</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">OrdenRepository</span><span class="w"> </span><span class="n">ordenRepository</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">OrdenEventProducer</span><span class="w"> </span><span class="n">ordenEventProducer</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Transactional</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Orden</span><span class="w"> </span><span class="nf">crear</span><span class="p">(</span><span class="n">Orden</span><span class="w"> </span><span class="n">orden</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Orden</span><span class="w"> </span><span class="n">guardada</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ordenRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">orden</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ordenEventProducer</span><span class="p">.</span><span class="na">publicarOrdenCreada</span><span class="p">(</span><span class="n">guardada</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">guardada</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecorden</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.RequiredArgsConstructor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.*</span><span class="p">;</span>
+
+<span class="nd">@RestController</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrdenController</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">OrdenService</span><span class="w"> </span><span class="n">ordenService</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">"/ordenes"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Orden</span><span class="w"> </span><span class="nf">crear</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">Orden</span><span class="w"> </span><span class="n">orden</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ordenService</span><span class="p">.</span><span class="na">crear</span><span class="p">(</span><span class="n">orden</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>La orden se guarda en PostgreSQL y se publica en Kafka <strong>dentro de la misma transacción de negocio</strong> (<code>@Transactional</code> en <code>crear()</code>) — pero son dos sistemas distintos (base de datos relacional y broker de mensajería) que no comparten una transacción real entre sí; si el envío a Kafka fallara después de guardar en PostgreSQL, la orden quedaría guardada sin evento publicado. Resolver esa inconsistencia (patrón <em>Outbox</em>) queda fuera del alcance de esta sesión — aquí el objetivo es dejar el flujo feliz funcionando y visible.</p>
+<h3 id="36-levantar-y-probar-ec-orden-ms">3.6 Levantar y probar <code>ec-orden-ms</code><a class="headerlink" href="#36-levantar-y-probar-ec-orden-ms" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> primera orden real publicando un evento verificable en Kafka UI.</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-ms-sb</span><span class="p">/</span><span class="n">ec-orden-ms</span><span class="p">/</span><span class="n">compose-dev</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-ms-sb</span><span class="p">/</span><span class="n">ec-orden-ms</span><span class="p">/</span><span class="n">compose-dev</span><span class="p">.</span><span class="n">yml</span> <span class="nb">ps</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-postgres-ec-orden-ms-dev</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">ecom</span> <span class="n">-d</span> <span class="n">db_ec_orden_ms</span> <span class="n">-c</span> <span class="s2">"\dt"</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">uso-ms-sb</span><span class="p">/</span><span class="n">ec-orden-ms</span>
+<span class="n">mvn</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
+</code></pre></div>
+<p>Crea una orden:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="s2">"http://localhost:49021/ordenes"</span> <span class="p">`</span>
+  <span class="n">-ContentType</span> <span class="s2">"application/json"</span> <span class="p">`</span>
+  <span class="n">-Body</span> <span class="s1">'{"usuarioId":1,"total":100}'</span>
+</code></pre></div>
+<p>Verifica en consola (<code>Ctrl+C</code> no es necesario, revisa el log de la terminal donde corre <code>mvn spring-boot:run</code>):</p>
+<div class="highlight"><pre><span></span><code>service=ec-orden-ms component=producer topic=orden-eventos eventType=orden.creada status=published
+</code></pre></div>
+<p>Verifica en Kafka UI (3.3) que <code>orden-eventos</code> ahora tiene un mensaje con <code>tipoEvento: orden.creada</code> y <code>origen: ec-orden-ms</code>.</p>
+<h3 id="37-crear-ec-pago-ms-como-consumidor-y-productor">3.7 Crear <code>ec-pago-ms</code> como consumidor y productor<a class="headerlink" href="#37-crear-ec-pago-ms-como-consumidor-y-productor" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> proyecto Spring Boot <code>ec-pago-ms</code> que consume <code>orden-eventos</code> y publica el resultado del pago en <code>pago-eventos</code>.</p>
+<p>Repite 3.5 con <code>Artifact Id: ec-pago-ms</code>, <code>Package name: com.upeu.ecpago</code>, en <code>uso-ms-sb/ec-pago-ms</code>, con su propia base de datos <code>db_ec_pago_ms</code> en el puerto <code>49022</code>.</p>
+<p>Entidad <code>Pago</code>:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/Pago.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecpago</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">jakarta.persistence.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.math.BigDecimal</span><span class="p">;</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"pagos"</span><span class="p">)</span>
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="nd">@Builder</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Pago</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Id</span>
+<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">ordenId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">monto</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">nullable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">estado</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/PagoRepository.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecpago</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.data.jpa.repository.JpaRepository</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">PagoRepository</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">JpaRepository</span><span class="o">&lt;</span><span class="n">Pago</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>El consumidor de <code>orden-eventos</code>, el "procesador" de pago (una regla simple: montos menores a 1000 se aprueban, para tener un caso de <code>pago.rechazado</code> reproducible) y el productor de <code>pago-eventos</code>:</p>
+<div class="highlight"><pre><span></span><code>uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/OrdenEventListener.java
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">com.upeu.ecpago</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.RequiredArgsConstructor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.kafka.annotation.KafkaListener</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.kafka.core.KafkaTemplate</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.math.BigDecimal</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.LinkedHashMap</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="nd">@Component</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrdenEventListener</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">TOPIC_ORDEN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"orden-eventos"</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">TOPIC_PAGO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"pago-eventos"</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">LIMITE_APROBACION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BigDecimal</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PagoRepository</span><span class="w"> </span><span class="n">pagoRepository</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">KafkaTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kafkaTemplate</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TOPIC_ORDEN</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ec-pago-ms-group"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">consumirOrdenCreada</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">evento</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"service=ec-pago-ms component=consumer topic={} eventType=orden.creada status=consumed"</span><span class="p">,</span><span class="w"> </span><span class="n">TOPIC_ORDEN</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">Long</span><span class="w"> </span><span class="n">ordenId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Long</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">evento</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"ordenId"</span><span class="p">).</span><span class="na">toString</span><span class="p">());</span>
+<span class="w">        </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BigDecimal</span><span class="p">(</span><span class="n">evento</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"total"</span><span class="p">).</span><span class="na">toString</span><span class="p">());</span>
+
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">estadoPago</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total</span><span class="p">.</span><span class="na">compareTo</span><span class="p">(</span><span class="n">LIMITE_APROBACION</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"APROBADO"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">"RECHAZADO"</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">Pago</span><span class="w"> </span><span class="n">pago</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pagoRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Pago</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">ordenId</span><span class="p">(</span><span class="n">ordenId</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">monto</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">estado</span><span class="p">(</span><span class="n">estadoPago</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">());</span>
+
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"service=ec-pago-ms component=processor ordenId={} estadoPago={} status=processed"</span><span class="p">,</span><span class="w"> </span><span class="n">ordenId</span><span class="p">,</span><span class="w"> </span><span class="n">estadoPago</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">publicarResultadoPago</span><span class="p">(</span><span class="n">pago</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">publicarResultadoPago</span><span class="p">(</span><span class="n">Pago</span><span class="w"> </span><span class="n">pago</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">tipoEvento</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"APROBADO"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">pago</span><span class="p">.</span><span class="na">getEstado</span><span class="p">())</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"pago.aprobado"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">"pago.rechazado"</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">evento</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"tipoEvento"</span><span class="p">,</span><span class="w"> </span><span class="n">tipoEvento</span><span class="p">);</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"ordenId"</span><span class="p">,</span><span class="w"> </span><span class="n">pago</span><span class="p">.</span><span class="na">getOrdenId</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"monto"</span><span class="p">,</span><span class="w"> </span><span class="n">pago</span><span class="p">.</span><span class="na">getMonto</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"estado"</span><span class="p">,</span><span class="w"> </span><span class="n">pago</span><span class="p">.</span><span class="na">getEstado</span><span class="p">());</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"origen"</span><span class="p">,</span><span class="w"> </span><span class="s">"ec-pago-ms"</span><span class="p">);</span>
+<span class="w">        </span><span class="n">evento</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"timestamp"</span><span class="p">,</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
+
+<span class="w">        </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">TOPIC_PAGO</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">pago</span><span class="p">.</span><span class="na">getOrdenId</span><span class="p">()),</span><span class="w"> </span><span class="n">evento</span><span class="p">);</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"service=ec-pago-ms component=producer topic={} eventType={} status=published"</span><span class="p">,</span><span class="w"> </span><span class="n">TOPIC_PAGO</span><span class="p">,</span><span class="w"> </span><span class="n">tipoEvento</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Agrega, en <code>application.yml</code> de <code>ec-pago-ms</code>, la configuración de consumer (junto al bloque <code>producer</code> ya usado en <code>ec-orden-ms</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">spring</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bootstrap-servers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost:49092</span>
+<span class="w">    </span><span class="nt">consumer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">group-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ec-pago-ms-group</span>
+<span class="w">      </span><span class="nt">key-deserializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.apache.kafka.common.serialization.StringDeserializer</span>
+<span class="w">      </span><span class="nt">value-deserializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.springframework.kafka.support.serializer.JsonDeserializer</span>
+<span class="w">      </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">spring.json.trusted.packages</span><span class="p">:</span><span class="w"> </span><span class="s">"*"</span>
+<span class="w">    </span><span class="nt">producer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">key-serializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.apache.kafka.common.serialization.StringSerializer</span>
+<span class="w">      </span><span class="nt">value-serializer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.springframework.kafka.support.serializer.JsonSerializer</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: olvidar <code>spring.json.trusted.packages</code>. Sin esa propiedad, <code>JsonDeserializer</code> rechaza el mensaje con <code>Trusted packages</code> en el error, aunque el JSON esté perfectamente bien formado — la deserialización JSON de Spring Kafka bloquea por seguridad cualquier paquete Java no declarado explícitamente como confiable.</p>
+<h3 id="38-levantar-y-probar-ec-pago-ms">3.8 Levantar y probar <code>ec-pago-ms</code><a class="headerlink" href="#38-levantar-y-probar-ec-pago-ms" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> flujo completo — una orden nueva termina en un pago procesado y publicado.</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-ms-sb</span><span class="p">/</span><span class="n">ec-pago-ms</span><span class="p">/</span><span class="n">compose-dev</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="nb">cd </span><span class="n">uso-ms-sb</span><span class="p">/</span><span class="n">ec-pago-ms</span>
+<span class="n">mvn</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
+</code></pre></div>
+<p>Con <code>ec-orden-ms</code> (3.6) todavía corriendo, crea otra orden para disparar el flujo completo:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="s2">"http://localhost:49021/ordenes"</span> <span class="p">`</span>
+  <span class="n">-ContentType</span> <span class="s2">"application/json"</span> <span class="p">`</span>
+  <span class="n">-Body</span> <span class="s1">'{"usuarioId":2,"total":150}'</span>
+</code></pre></div>
+<p>Verifica en el log de <code>ec-pago-ms</code>:</p>
+<div class="highlight"><pre><span></span><code>service=ec-pago-ms component=consumer topic=orden-eventos eventType=orden.creada status=consumed
+service=ec-pago-ms component=processor ordenId=&lt;id-generado&gt; estadoPago=APROBADO status=processed
+service=ec-pago-ms component=producer topic=pago-eventos eventType=pago.aprobado status=published
+</code></pre></div>
+<p>Verifica los datos:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-postgres-ec-pago-ms-dev</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">ecom</span> <span class="n">-d</span> <span class="n">db_ec_pago_ms</span> <span class="n">-c</span> <span class="s2">"SELECT * FROM pagos;"</span>
+</code></pre></div>
+<p>Verifica en Kafka UI: el topic <code>pago-eventos</code> ahora existe, con el mensaje <code>pago.aprobado</code>, y el consumer group <code>ec-pago-ms-group</code> visible en la pestaña <code>Consumers</code>, con su <em>lag</em> en <code>orden-eventos</code> (idealmente en <code>0</code>, si ya consumió todo lo publicado).</p>
+<p>Repite con un total mayor o igual a <code>1000</code> para forzar el caso <code>pago.rechazado</code> — el mismo código, la misma regla, un resultado distinto según el dato real.</p>
+<h3 id="39-documentar-el-contrato-de-ambos-eventos">3.9 Documentar el contrato de ambos eventos<a class="headerlink" href="#39-documentar-el-contrato-de-ambos-eventos" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> contrato de evento documentado — el criterio de aceptación que el propio sílabo exige para esta sesión.</p>
+<p><strong>Tabla 4. Contrato del evento <code>orden.creada</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Topic</td>
+<td><code>orden-eventos</code></td>
+</tr>
+<tr>
+<td>Particiones</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Key</td>
+<td><code>ordenId</code> (como texto)</td>
+</tr>
+<tr>
+<td>Productores</td>
+<td><code>ec-orden-ms</code>, <code>ec-orden-py</code></td>
+</tr>
+<tr>
+<td>Consumidores</td>
+<td><code>ec-pago-ms</code>, <code>ec-orden-py</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"tipoEvento"</span><span class="p">:</span><span class="w"> </span><span class="s2">"orden.creada"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ordenId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"estado"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PENDIENTE"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"origen"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ec-orden-ms"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1713350000000</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Tabla 5. Contrato del evento de pago</strong></p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Topic</td>
+<td><code>pago-eventos</code></td>
+</tr>
+<tr>
+<td>Particiones</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Key</td>
+<td><code>ordenId</code> (como texto)</td>
+</tr>
+<tr>
+<td>Productor</td>
+<td><code>ec-pago-ms</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"tipoEvento"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pago.aprobado"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ordenId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"monto"</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"estado"</span><span class="p">:</span><span class="w"> </span><span class="s2">"APROBADO"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"origen"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ec-pago-ms"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1713350000000</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>tipoEvento</code> es <code>pago.rechazado</code> cuando <code>estado</code> es <code>RECHAZADO</code> — mismo esquema, mismo topic, distinto valor.</p>
+<p><strong>Por qué documentar el contrato, no solo construirlo:</strong> quien construya un tercer consumidor de <code>orden-eventos</code> (por ejemplo, un servicio de notificaciones, más adelante) necesita saber exactamente qué campos esperar, sin tener que leer el código fuente de <code>ec-orden-ms</code> — el contrato es la interfaz real entre servicios que no comparten base de datos.</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Kafka, Kafka UI y el exportador de métricas corriendo.</li>
+<li>Topic <code>orden-eventos</code> probado por consola y por Python.</li>
+<li><code>ec-orden-ms</code> publicando <code>orden.creada</code> con evidencia de log y de Kafka UI.</li>
+<li><code>ec-pago-ms</code> consumiendo <code>orden-eventos</code> y publicando <code>pago.aprobado</code>/<code>pago.rechazado</code>, con evidencia de log, de Kafka UI y de la tabla <code>pagos</code>.</li>
+<li>Contrato de ambos eventos documentado (Tablas 4-5).</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Extensión autónoma del flujo de eventos empresariales construido en clase, documentada en evidencia individual.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Agregar un tercer evento de negocio propio (por ejemplo, <code>orden.cancelada</code>), publicado por <code>ec-orden-ms</code> o por un nuevo microservicio pequeño.</li>
+<li>Documentar su contrato (mismo formato de las Tablas 4-5: topic, particiones, key, productores, consumidores, JSON de ejemplo).</li>
+<li>Provocar y evidenciar un mensaje que no cumple el contrato (por ejemplo, sin el campo <code>ordenId</code>) llegando al consumer, y explicar cómo el consumer lo maneja sin caerse.</li>
+<li>Verificar en Kafka UI el <em>lag</em> del consumer group antes y después de consumir una ráfaga de varios eventos seguidos.</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual, que puede extender el patrón productor-consumidor a un evento nuevo sin acompañamiento del docente — la misma habilidad que S7 exige aplicar a eventos IoT/sensores.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF:</p>
+<div class="highlight"><pre><span></span><code>S06_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S06 - Ingesta de Eventos Empresariales en Tiempo Real</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<ol>
+<li>Kafka UI con <code>orden-eventos</code> y <code>pago-eventos</code>, mensajes visibles.</li>
+<li>Logs de <code>ec-orden-ms</code> publicando y de <code>ec-pago-ms</code> consumiendo/publicando.</li>
+<li>Contrato del evento nuevo (4.1, punto 2).</li>
+<li>Evidencia del mensaje malformado manejado sin caída del consumer.</li>
+</ol>
+<p><strong>Reflexión técnica breve</strong></p>
+<div class="highlight"><pre><span></span><code>¿Por qué separar "registrar la orden" de "procesar el pago" en dos
+servicios que se comunican por eventos, en vez de una llamada HTTP
+directa entre ellos, reduce el riesgo del caso descrito en 1.6.1?
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>Kafka, Kafka UI y los dos microservicios evidenciados corriendo.</li>
+<li>Al menos un evento propio nuevo, con su contrato documentado en el mismo formato de la sesión.</li>
+<li>Evidencia de un mensaje malformado manejado sin caída del consumer.</li>
+<li>Reflexión técnica breve incluida.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Por qué Kafka no borra un evento apenas un consumer lo lee?</li>
+<li>¿Qué pasa si <code>ec-pago-ms</code> está caído cuando <code>ec-orden-ms</code> publica un evento?</li>
+<li>¿Por qué <code>ordenId</code> es una buena <code>key</code> para el topic <code>orden-eventos</code>?</li>
+<li>¿Qué evidencia concreta demuestra que tu consumer group ya leyó todos los eventos pendientes?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 6. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Kafka operativo y probado</td>
+<td style="text-align: right;">25</td>
+<td>Kafka, Kafka UI y prueba manual/Python evidenciados con claridad.</td>
+<td>Kafka operativo, prueba parcial.</td>
+<td>Kafka operativo, sin prueba clara.</td>
+<td>No evidencia Kafka funcionando.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Microservicios productor y consumidor</td>
+<td style="text-align: right;">25</td>
+<td><code>ec-orden-ms</code>/<code>ec-pago-ms</code> funcionando de punta a punta, con logs y datos verificados.</td>
+<td>Microservicios funcionales, evidencia parcial.</td>
+<td>Uno de los dos incompleto o sin verificar.</td>
+<td>No evidencia microservicios funcionando.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Contrato de evento documentado</td>
+<td style="text-align: right;">25</td>
+<td>Contrato completo y claro para ambos eventos, más el evento propio (4.1).</td>
+<td>Contrato completo de los dos eventos de clase.</td>
+<td>Contrato incompleto o impreciso.</td>
+<td>No documenta ningún contrato.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Manejo de errores y reflexión</td>
+<td style="text-align: right;">25</td>
+<td>Evidencia mensaje malformado manejado y reflexión técnica sólida, conectada al caso 1.6.1.</td>
+<td>Evidencia parcial de manejo de errores o reflexión genérica.</td>
+<td>Uno de los dos ausente.</td>
+<td>No presenta ninguno de los dos.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 10 min.</p>
+<p><strong>Resumen breve:</strong> hoy el proyecto dejó de ser puramente batch — Kafka retiene y entrega eventos empresariales entre dos servicios que no comparten base de datos ni tienen que estar arriba al mismo tiempo, con el contrato de cada evento documentado como la interfaz real entre ellos.</p>
+<p><strong>Dinámica participativa:</strong> cada estudiante comparte en una frase qué pasó cuando probó el caso <code>pago.rechazado</code> (monto ≥ 1000) — ¿el evento se publicó igual, con otro <code>tipoEvento</code>?</p>
+<p><strong>Metacognición:</strong> ¿en qué momento de hoy hubieras usado, sin pensarlo, una llamada HTTP directa entre <code>ec-orden-ms</code> y <code>ec-pago-ms</code> en vez de un evento — y por qué esa opción reintroduce el problema del caso 1.6.1?</p>
+<p><strong>Proyección:</strong> S7 reutiliza exactamente esta misma infraestructura de Kafka (el mismo <code>kafka/compose.yml</code>, el mismo Kafka UI) para un tipo de evento distinto — telemetría de sensores/IoT, con mayor frecuencia y volumen. Ningún concepto de esta sesión se descarta; se aplica a un productor distinto.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Kreps, J., Narkhede, N., &amp; Rao, J. (2011). <em>Kafka: A Distributed Messaging System for Log Processing</em>. LinkedIn.</li>
+<li>Apache Software Foundation. (2024). <em>Apache Kafka Documentation</em>. https://kafka.apache.org/documentation/</li>
+<li>Spring Team. (2024). <em>Spring for Apache Kafka Reference Documentation</em>. https://docs.spring.io/spring-kafka/reference/</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
