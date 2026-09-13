@@ -23,6 +23,7 @@ nav:
       - "S4 - ML Distribuido con Spark MLlib (Regresión)": sesiones/S04_ML_Distribuido_Regresion_Spark_MLlib.md
       - "S5 - Evaluación de la Unidad I": sesiones/S05_Evaluacion_Unidad_1.md
   - 2. Sistema Big Data en tiempo real:
+      - "S6 - Ingesta de Eventos Empresariales en Tiempo Real": sesiones/S06_Ingesta_Eventos_Empresariales_Kafka.md
       - "S12 - Evaluación de la Unidad II": sesiones/S12_Evaluacion_Unidad_2.md
   - 3. Integración, DataOps y despliegue del sistema final:
       - "S15 - Evaluación de la Unidad III": sesiones/S15_Evaluacion_Unidad_3.md
