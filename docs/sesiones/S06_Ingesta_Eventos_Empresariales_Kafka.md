@@ -375,10 +375,12 @@ El consumer debe imprimir `topic`, `partition`, `offset`, `origen`, `estado`, `t
 | Artifact Id | `ec-orden-ms` |
 | Package name | `pe.edu.upeu.ec.orden` |
 | Java | **21** (mismo criterio que DIST/LP2) |
-| Dependencias | Spring Web (**`spring-boot-starter-webmvc`** en Boot 4, ya no `-web`), Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok |
+| Dependencias | Spring Web (**`spring-boot-starter-webmvc`** en Boot 4, ya no `-web`), Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok, Spring Boot DevTools |
 | Ubicación sugerida | `uso-microserv/ec-orden-ms` |
 
 **Spring Boot 4 renombró varios starters** — no es solo un número de versión más alto. `spring-boot-starter-web` pasó a llamarse `spring-boot-starter-webmvc` (separa explícitamente WebMVC de WebFlux desde el nombre del starter), y el genérico `spring-boot-starter-test` desapareció: cada starter que uses trae su propio `-test` (`spring-boot-starter-data-jpa-test`, `spring-boot-starter-webmvc-test`) en vez de uno solo que los cubra todos. Si Spring Initializr no te deja elegir Boot 4 todavía, agrega estas dependencias a mano con los nombres de arriba después de generar el proyecto — no con los nombres de Boot 3.
+
+**Spring Boot DevTools** reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar `mvn spring-boot:run` a mano — en `application-dev.yml` (más abajo) se activa con `spring.devtools.restart.enabled` y `spring.devtools.livereload.enabled`. En el `pom.xml` va con `<scope>runtime</scope>` y `<optional>true</optional>`, para que no viaje al artefacto final en `prod`.
 
 **`uso-microserv/ec-orden-ms/compose-dev.yml`:**
 
