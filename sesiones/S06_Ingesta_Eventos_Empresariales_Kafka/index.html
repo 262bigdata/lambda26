@@ -2712,6 +2712,12 @@
 <div class="highlight"><pre><span></span><code>service=ec-orden-ms component=producer topic=orden-eventos partition=0 offset=0 eventType=orden.creada ordenId=1 timestamp=1713350000000 status=published
 </code></pre></div>
 <p>Verifica en Kafka UI (3.3) que <code>orden-eventos</code> ahora tiene un mensaje con <code>tipoEvento: orden.creada</code> y <code>origen: ec-orden-ms</code>.</p>
+<p>Confirma que la orden también quedó guardada en PostgreSQL (recuerda que es un sistema aparte de Kafka, sin transacción que los una):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-postgres-ec-orden-dev</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">ecom</span> <span class="n">-d</span> <span class="n">db_ec_orden_ms</span> <span class="n">-c</span> <span class="s2">"SELECT * FROM ordenes;"</span>
+</code></pre></div>
+<p>También puedes crear y listar órdenes desde Swagger, sin usar <code>Invoke-RestMethod</code>:</p>
+<div class="highlight"><pre><span></span><code>http://localhost:49021/swagger-ui/index.html
+</code></pre></div>
 <h3 id="37-crear-ec-pago-ms-como-consumidor-y-productor">3.7 Crear <code>ec-pago-ms</code> como consumidor y productor<a class="headerlink" href="#37-crear-ec-pago-ms-como-consumidor-y-productor" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> proyecto Spring Boot <code>ec-pago-ms</code> que consume <code>orden-eventos</code> y publica el resultado del pago en <code>pago-eventos</code>.</p>
 <p>Repite 3.5 con <code>Artifact Id: ec-pago-ms</code>, <code>Package name: pe.edu.upeu.ec.pago</code>, Java 21, en <code>uso-microserv/ec-pago-ms</code>, con su propia base de datos <code>db_ec_pago_ms</code> en el puerto <code>49030</code> y la app en el puerto <code>49031</code> — mismo criterio de <code>ec-orden-ms</code> (3.5): puertos distintos entre sí, para no repetir el error de usar el mismo número en Postgres y en la app.</p>
@@ -3188,6 +3194,9 @@ service=ec-pago-ms component=producer topic=pago-eventos partition=0 offset=0 ev
 </code></pre></div>
 <p>Verifica los datos:</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-postgres-ec-pago-dev</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">ecom</span> <span class="n">-d</span> <span class="n">db_ec_pago_ms</span> <span class="n">-c</span> <span class="s2">"SELECT * FROM pagos;"</span>
+</code></pre></div>
+<p>También puedes consultar los pagos desde Swagger:</p>
+<div class="highlight"><pre><span></span><code>http://localhost:49031/swagger-ui/index.html
 </code></pre></div>
 <p>Verifica en Kafka UI: el topic <code>pago-eventos</code> ahora existe, con el mensaje <code>pago.aprobado</code>, y el consumer group <code>ec-pago-ms-group</code> visible en la pestaña <code>Consumers</code>, con su <em>lag</em> en <code>orden-eventos</code> (idealmente en <code>0</code>, si ya consumió todo lo publicado).</p>
 <p>Repite con un total mayor o igual a <code>1000</code> para forzar el caso <code>pago.rechazado</code> — el mismo código, la misma regla, un resultado distinto según el dato real.</p>
