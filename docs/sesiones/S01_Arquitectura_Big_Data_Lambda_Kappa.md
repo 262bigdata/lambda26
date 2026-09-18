@@ -62,7 +62,7 @@ flowchart LR
     subgraph Producers["Productores"]
         direction TB
         P1["uso-atmos<br/>ESP32: sensores atmosféricos"]
-        P2["uso-rapido, uso-ms-sb<br/>(secundario)"]
+        P2["uso-rapido, uso-microserv<br/>(secundario)"]
         P3["uso-replica-cdc<br/>MySQL"]
     end
 
@@ -196,7 +196,7 @@ Una solución BI típica resuelve esas 4 etapas con herramientas de un solo nodo
 
 Al escalar a Big Data, el almacenamiento pasa por un Data Lake antes del Data Warehouse, y el procesamiento se distribuye entre un nodo master y varios workers, cada uno con su RDD (*Resilient Distributed Dataset*) — así es como Spark paraleliza el trabajo. `lambda26` implementa ese mismo patrón con sus propios componentes: PySpark en el procesamiento distribuido, casos de uso que publican y consumen eventos, Kafka como columna vertebral de ingesta y observabilidad con Prometheus/Grafana — el mismo patrón productores / pipeline en tiempo real / pipeline batch ya presentado en la **Figura 2** (ver 1.6), aplicado al laboratorio del curso.
 
-Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmos`, `uso-replica-cdc`, `uso-bi-tiempo-real` y los casos secundarios `uso-rapido`/`uso-ms-sb` quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.
+Hoy usamos solo el módulo `uso-pyspark` para reconocer el ecosistema; `uso-atmos`, `uso-replica-cdc`, `uso-bi-tiempo-real` y los casos secundarios `uso-rapido`/`uso-microserv` quedan pendientes como extensión progresiva del laboratorio a partir de S6. El detalle de contenedores, puertos y volúmenes de cada módulo está en el índice del curso.
 
 ### 2.3 Batch vs. Streaming
 
@@ -463,10 +463,10 @@ Responde:
 
 **Producto del paso:** clasificación justificada del caso.
 
-Retoma los casos de uso propios de `lambda26` (los analizas por su documentación, no los ejecutas hoy — `uso-rapido` y `uso-ms-sb` necesitan Kafka, que recién se instala en la Unidad 2):
+Retoma los casos de uso propios de `lambda26` (los analizas por su documentación, no los ejecutas hoy — `uso-rapido` y `uso-microserv` necesitan Kafka, que recién se instala en la Unidad 2):
 
-- `uso-rapido`: `ec-orden-py` publica y consume `orden-eventos` por Kafka.
-- `uso-ms-sb`: `ec-orden-ms` publica `orden-eventos`; `ec-pago-ms` consume `orden-eventos` y publica `pago-eventos`; cada microservicio guarda su propio histórico en su base Postgres.
+- `uso-rapido`: `ec-eventos-py` publica y consume `orden-eventos` por Kafka.
+- `uso-microserv`: `ec-orden-ms` publica `orden-eventos`; `ec-pago-ms` consume `orden-eventos` y publica `pago-eventos`; cada microservicio guarda su propio histórico en su base Postgres.
 
 El laboratorio necesita decidir cómo construir su capa analítica sobre esos eventos: ¿guarda el histórico en un almacenamiento separado (batch), reprocesa todo directamente desde Kafka (streaming), o necesita ambos?
 
@@ -633,7 +633,7 @@ Indica 2 fortalezas y 2 recomendaciones.
 
 Tiempo: 5 min.
 
-**Resumen breve:** hoy se construyó la primera decisión arquitectónica real del laboratorio `lambda26`: clasificación batch/streaming de los casos de uso propios (`uso-rapido`, `uso-ms-sb`), aplicación de la regla de decisión, selección justificada de Lambda o Kappa, tecnologías propuestas y diagrama de flujo — cada equipo aplicó el mismo análisis a su propio Proyecto Sello.
+**Resumen breve:** hoy se construyó la primera decisión arquitectónica real del laboratorio `lambda26`: clasificación batch/streaming de los casos de uso propios (`uso-rapido`, `uso-microserv`), aplicación de la regla de decisión, selección justificada de Lambda o Kappa, tecnologías propuestas y diagrama de flujo — cada equipo aplicó el mismo análisis a su propio Proyecto Sello.
 
 **Dinámica participativa:** en una ronda rápida (o con una herramienta digital tipo formulario o encuesta en vivo), cada estudiante comparte en una frase qué arquitectura (Lambda o Kappa) eligió para el caso guiado y por qué.
 

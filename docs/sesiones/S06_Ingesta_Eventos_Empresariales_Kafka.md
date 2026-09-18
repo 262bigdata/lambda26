@@ -32,7 +32,7 @@ Un flujo de eventos empresariales funcional: Kafka corriendo con Kafka UI, el t�
 
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
-| Revisión previa individual | Confirmar Docker Desktop funcionando; instalar Java 17 y Maven si aún no están instalados (`choco install temurin17 -y`, `choco install maven -y`). Trabajo individual, antes de clase. | Silabo Unidad II, este mismo documento (1.1-1.7). |
+| Revisión previa individual | Confirmar Docker Desktop funcionando; instalar Java 21 y Maven si aún no están instalados (`choco install temurin21 -y`, `choco install maven -y`). Trabajo individual, antes de clase. | Silabo Unidad II, este mismo documento (1.1-1.7). |
 | Clase presencial | Construcción guiada de `kafka/` (broker + UI), prueba manual por consola, prueba con Python, y construcción de `ec-orden-ms`/`ec-pago-ms` como productor y consumidor reales. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un topic que no aparece o un consumer que no recibe nada. | Pasos 3.1 a 3.9 de esta guía. |
 | Evaluación formativa | Revisión en clase de Kafka UI mostrando `orden-eventos` y `pago-eventos` con mensajes reales, y de los logs de ambos microservicios publicando/consumiendo. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
@@ -53,7 +53,7 @@ La solución no es un mejor manejo de errores en esa llamada — es no depender 
 
 **Comprensión de mensajería con Kafka**
 
-1. Si dos consumidores distintos (por ejemplo, `ec-pago-ms` y un futuro servicio de notificaciones) necesitan leer el mismo evento `orden.creada`, ¿alcanza con un solo consumer, o cada uno necesita su propio consumer group? Relaciónalo con 2.1.
+1. Si dos consumidores distintos (por ejemplo, `ec-pago-ms` y un futuro servicio de notificaciones) necesitan leer el mismo evento `orden.creada`, ¿alcanza con un solo consumer, o cada uno necesita su propio consumer group? Relaciónalo con 2.2.
 2. ¿Qué garantiza Kafka si `ec-pago-ms` está caído cuando `ec-orden-ms` publica un evento, y `ec-pago-ms` vuelve a levantarse cinco minutos después?
 
 ### 1.7 Ubicación en el curso
@@ -66,7 +66,7 @@ La solución no es un mejor manejo de errores en esa llamada — es no depender 
 **Figura 1. Roadmap del producto de la Unidad II**
 
 ```mermaid
-flowchart LR
+flowchart TB
     S6["`**S6:** Eventos empresariales (Kafka)`"]
     S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
     S8["`**S8:** Spark Structured Streaming`"]
@@ -82,29 +82,21 @@ flowchart LR
 
 ## 2. Explica
 
-### 2.1 Conceptos de Kafka
+### 2.1 Arquitectura de la sesión
 
-**Tabla 2. Conceptos clave de Kafka**
+Esta sesión trabaja únicamente con estos componentes, dentro de `lambda26`:
 
-| Concepto | Qué es |
-|---|---|
-| `topic` | Canal lógico donde se publican mensajes de un mismo tipo (ej. `orden-eventos`). |
-| `producer` | Aplicación que envía eventos a un topic. |
-| `consumer` | Aplicación que lee eventos desde un topic. |
-| `broker` | Servidor Kafka que almacena y distribuye los eventos. |
-| `partition` | División interna de un topic — permite que varios consumidores lean en paralelo. |
-| `offset` | Posición de un evento dentro de una partición — Kafka no borra el evento al leerlo, solo avanza el offset del consumer. |
-| `consumer group` | Grupo que coordina consumidores y recuerda hasta qué offset ya leyó cada uno. |
-| `key` | Valor que Kafka usa para decidir en qué partición cae el evento — mensajes con la misma `key` siempre van a la misma partición, y por lo tanto se leen en orden entre sí. |
-
-La `key` no tiene que ser una clave primaria relacional: puede ser `ordenId`, un `deviceId` (S7), un `correlationId` o un UUID generado por la aplicación — lo único que importa es que agrupe correctamente los eventos que deben mantenerse en orden entre sí.
+- `kafka/` — el broker y su interfaz web.
+- `uso-rapido/ec-eventos-py` — productor/consumidor en Python, para verificar el flujo sin depender de Java.
+- `uso-microserv/ec-orden-ms` — microservicio Spring Boot, productor real.
+- `uso-microserv/ec-pago-ms` — microservicio Spring Boot, consumidor y productor real.
 
 **Figura 2. Flujo completo: `ec-orden-ms` publica, `ec-pago-ms` consume y vuelve a publicar**
 
 ```mermaid
 flowchart LR
     OrdenProducer["PRODUCER<br/>ec-orden-ms<br/>orden.creada"]
-    PythonProducer["PRODUCER<br/>ec-orden-py<br/>orden.creada"]
+    PythonProducer["PRODUCER<br/>ec-eventos-py<br/>orden.creada"]
 
     subgraph KafkaOrden["BROKER KAFKA (kafka:9092)"]
         direction TB
@@ -113,7 +105,7 @@ flowchart LR
         end
     end
 
-    PythonConsumer["CONSUMER<br/>ec-orden-py<br/>group: ec-orden-py-group"]
+    PythonConsumer["CONSUMER<br/>ec-eventos-py<br/>group: ec-eventos-py-group"]
     PagoConsumer["CONSUMER<br/>ec-pago-ms<br/>group: ec-pago-ms-group"]
     PagoProducer["PRODUCER<br/>ec-pago-ms<br/>pago.aprobado / pago.rechazado"]
 
@@ -132,24 +124,28 @@ flowchart LR
     PagoProducer -->|"publica"| PagoTopic
 ```
 
-`ec-pago-ms` y `ec-orden-py` leen del **mismo** topic (`orden-eventos`) sin competir entre sí porque cada uno tiene su propio *consumer group* (2.1, Tabla 2) — Kafka entrega una copia completa de los eventos a cada consumer group, no reparte los eventos como si fuera una sola cola compartida.
-
-**Error frecuente**: pensar que leer un evento lo elimina del topic, igual que sacar un mensaje de una cola tradicional. Kafka retiene los eventos según su política de retención (por tiempo o tamaño, no cubierta en esta sesión) — leer solo avanza el offset del consumer group que lo leyó; otro consumer group puede leer el mismo evento desde el principio.
-
-### 2.2 Arquitectura de la práctica
-
-Esta sesión trabaja únicamente con estos componentes, dentro de `lambda26`:
-
-- `kafka/` — el broker y su interfaz web.
-- `uso-rapido/ec-orden-py` — productor/consumidor en Python, para verificar el flujo sin depender de Java.
-- `uso-ms-sb/ec-orden-ms` — microservicio Spring Boot, productor real.
-- `uso-ms-sb/ec-pago-ms` — microservicio Spring Boot, consumidor y productor real.
-
-```text
-ec-orden-ms → orden-eventos → ec-pago-ms → pago-eventos
-```
+`ec-pago-ms` y `ec-eventos-py` leen del **mismo** topic (`orden-eventos`) sin competir entre sí porque cada uno tiene su propio *consumer group* (2.2, Tabla 2) — Kafka entrega una copia completa de los eventos a cada consumer group, no reparte los eventos como si fuera una sola cola compartida.
 
 En la práctica manual (3.2) solo existe `orden-eventos`. El topic `pago-eventos` aparece recién cuando `ec-pago-ms` publica su primer resultado de pago (3.9).
+
+### 2.2 Conceptos de Kafka
+
+**Tabla 2. Conceptos clave de Kafka**
+
+| Concepto | Qué es |
+|---|---|
+| `topic` | Canal lógico donde se publican mensajes de un mismo tipo (ej. `orden-eventos`). |
+| `producer` | Aplicación que envía eventos a un topic. |
+| `consumer` | Aplicación que lee eventos desde un topic. |
+| `broker` | Servidor Kafka que almacena y distribuye los eventos. |
+| `partition` | División interna de un topic — permite que varios consumidores lean en paralelo. |
+| `offset` | Posición de un evento dentro de una partición — Kafka no borra el evento al leerlo, solo avanza el offset del consumer. |
+| `consumer group` | Grupo que coordina consumidores y recuerda hasta qué offset ya leyó cada uno. |
+| `key` | Valor que Kafka usa para decidir en qué partición cae el evento — mensajes con la misma `key` siempre van a la misma partición, y por lo tanto se leen en orden entre sí. |
+
+La `key` no tiene que ser una clave primaria relacional: puede ser `ordenId`, un `deviceId` (S7), un `correlationId` o un UUID generado por la aplicación — lo único que importa es que agrupe correctamente los eventos que deben mantenerse en orden entre sí. Ver Figura 2 (2.1) para el flujo completo con particiones y offsets reales.
+
+**Error frecuente**: pensar que leer un evento lo elimina del topic, igual que sacar un mensaje de una cola tradicional. Kafka retiene los eventos según su política de retención (por tiempo o tamaño, no cubierta en esta sesión) — leer solo avanza el offset del consumer group que lo leyó; otro consumer group puede leer el mismo evento desde el principio.
 
 ### 2.3 Observabilidad y diagnóstico
 
@@ -172,8 +168,14 @@ Tiempo: 3h.
 - **3.3** Verificar con Kafka UI.
 - **3.4** Probar con Python (productor y consumidor rápidos).
 - **3.5** Crear `ec-orden-ms` como productor.
+- **3.5.1** Crear la entidad, el evento y el repositorio.
+- **3.5.2** Configurar Kafka en código, no solo por propiedades.
+- **3.5.3** Crear el productor, el servicio y el controlador.
 - **3.6** Levantar y probar `ec-orden-ms`.
 - **3.7** Crear `ec-pago-ms` como consumidor y productor.
+- **3.7.1** Crear la entidad, los dos eventos y el repositorio.
+- **3.7.2** Configurar Kafka: productor, consumidor y manejo de errores.
+- **3.7.3** Crear el productor, el consumidor y el controlador.
 - **3.8** Levantar y probar `ec-pago-ms`.
 - **3.9** Documentar el contrato de ambos eventos.
 
@@ -192,7 +194,7 @@ name: lambda26-kafka
 
 services:
   kafka:
-    image: apache/kafka:3.8.0
+    image: apache/kafka:4.3.1
     container_name: lambda26-kafka
     restart: unless-stopped
     ports:
@@ -209,7 +211,7 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
     container_name: lambda26-kafka-ui
     restart: unless-stopped
     ports:
@@ -221,7 +223,7 @@ services:
       - kafka
 
   kafka-exporter:
-    image: danielqsj/kafka-exporter:latest
+    image: danielqsj/kafka-exporter:v1.10.0
     container_name: lambda26-kafka-exporter
     restart: unless-stopped
     command: ["--kafka.server=kafka:9092"]
@@ -232,6 +234,8 @@ services:
 ```
 
 `KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"` es intencional: cada topic se crea de forma explícita (3.2), con las particiones que decides — no aparece solo la primera vez que alguien publica en un nombre nuevo, un error común que oculta un typo en el nombre del topic detrás de un topic "fantasma" con una sola partición por defecto.
+
+Las tres imágenes van con versión fija, no `latest` — mismo criterio que ya aplican otros cursos del proyecto: una guía que muchos estudiantes siguen en momentos distintos no puede depender de un tag que cambia de contenido con el tiempo. `kafka-ui` es un caso particular: la imagen histórica, `provectuslabs/kafka-ui`, no saca una versión real desde hace más de dos años — el equipo original se movió a un fork activo, **Kafbat** (`ghcr.io/kafbat/kafka-ui`), que continúa el mismo proyecto con desarrollo real. Por eso esta guía usa `ghcr.io/kafbat/kafka-ui:v1.5.0` en vez de `provectuslabs/kafka-ui`, aunque el nombre del servicio (`kafka-ui`) y su función no cambian en nada.
 
 Levanta:
 
@@ -321,7 +325,7 @@ Abre `http://localhost:48085` y verifica:
 
 **Producto del paso:** confirmación de que el flujo funciona con un cliente distinto al de consola, incluida la estructura JSON del evento.
 
-Crea `uso-rapido/ec-orden-py/producer_ordenes.py` y `uso-rapido/ec-orden-py/consumer_ordenes.py` (usa la librería `kafka-python` o `confluent-kafka`, según lo que el equipo docente tenga disponible en el ambiente). El evento publicado por el productor Python debe seguir exactamente este formato — es el mismo contrato que usará `ec-orden-ms` en Java (3.9):
+Crea `uso-rapido/ec-eventos-py/producer_ordenes.py` y `uso-rapido/ec-eventos-py/consumer_ordenes.py` (usa la librería `kafka-python` o `confluent-kafka`, según lo que el equipo docente tenga disponible en el ambiente). El evento publicado por el productor Python debe seguir exactamente este formato — es el mismo contrato que usará `ec-orden-ms` en Java (3.9):
 
 ```json
 {
@@ -337,14 +341,19 @@ Crea `uso-rapido/ec-orden-py/producer_ordenes.py` y `uso-rapido/ec-orden-py/cons
 Levanta el contenedor de utilidades Python (o ejecuta los scripts directamente si el entorno ya tiene Python instalado con las librerías necesarias):
 
 ```powershell
-docker compose -f uso-rapido/ec-orden-py/compose.yml up -d --build
-docker compose -f uso-rapido/ec-orden-py/compose.yml exec ec-orden-py python /app/consumer_ordenes.py
+docker compose -f uso-rapido/ec-eventos-py/compose.yml up -d --build
+```
+
+Ejecuta el consumer:
+
+```powershell
+docker compose -f uso-rapido/ec-eventos-py/compose.yml exec ec-eventos-py python /app/consumer_ordenes.py
 ```
 
 En otra terminal:
 
 ```powershell
-docker compose -f uso-rapido/ec-orden-py/compose.yml exec ec-orden-py python /app/producer_ordenes.py
+docker compose -f uso-rapido/ec-eventos-py/compose.yml exec ec-eventos-py python /app/producer_ordenes.py
 ```
 
 El consumer debe imprimir `topic`, `partition`, `offset`, `origen`, `estado`, `total` y `payload` completo. Si llega el mensaje manual de texto plano de 3.2 (no es JSON), el consumer no debe caerse: debe marcarlo como `invalid` y mostrar `rawPayload` — un consumer real recibe de todo, no solo lo que él mismo publicó.
@@ -360,226 +369,406 @@ El consumer debe imprimir `topic`, `partition`, `offset`, `origen`, `estado`, `t
 | Campo | Valor |
 |---|---|
 | Project | Maven Project |
-| Spring Boot | **3.3.x** (rama estable con Spring for Apache Kafka) |
+| Spring Boot | **4.1.1** (mismo criterio que DIST — ya trae Swagger/springdoc probado) |
 | Language | Java |
-| Group Id | `com.upeu` |
+| Group Id | `pe.edu.upeu` |
 | Artifact Id | `ec-orden-ms` |
-| Package name | `com.upeu.ecorden` |
-| Java | 17 |
-| Dependencias | Spring Web, Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok |
-| Ubicación sugerida | `uso-ms-sb/ec-orden-ms` |
+| Package name | `pe.edu.upeu.ec.orden` |
+| Java | **21** (mismo criterio que DIST/LP2) |
+| Dependencias | Spring Web (**`spring-boot-starter-webmvc`** en Boot 4, ya no `-web`), Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok |
+| Ubicación sugerida | `uso-microserv/ec-orden-ms` |
 
-**`uso-ms-sb/ec-orden-ms/compose-dev.yml`:**
+**Spring Boot 4 renombró varios starters** — no es solo un número de versión más alto. `spring-boot-starter-web` pasó a llamarse `spring-boot-starter-webmvc` (separa explícitamente WebMVC de WebFlux desde el nombre del starter), y el genérico `spring-boot-starter-test` desapareció: cada starter que uses trae su propio `-test` (`spring-boot-starter-data-jpa-test`, `spring-boot-starter-webmvc-test`) en vez de uno solo que los cubra todos. Si Spring Initializr no te deja elegir Boot 4 todavía, agrega estas dependencias a mano con los nombres de arriba después de generar el proyecto — no con los nombres de Boot 3.
+
+**`uso-microserv/ec-orden-ms/compose-dev.yml`:**
 
 ```yaml
-name: lambda26-ec-orden-ms-dev
+name: lambda26-ec-orden-dev
 
 services:
-  postgres-ec-orden-ms-dev:
+  postgres-ec-orden-dev:
     image: postgres:16-alpine
-    container_name: lambda26-postgres-ec-orden-ms-dev
+    container_name: lambda26-postgres-ec-orden-dev
     restart: unless-stopped
     environment:
       POSTGRES_DB: db_ec_orden_ms
       POSTGRES_USER: ecom
       POSTGRES_PASSWORD: ecom
     ports:
-      - "49021:5432"
+      - "49020:5432"
     volumes:
-      - ec_orden_ms_dev_data:/var/lib/postgresql/data
+      - lambda26_postgres_ec_orden_dev_data:/var/lib/postgresql/data
 
 volumes:
-  ec_orden_ms_dev_data:
+  lambda26_postgres_ec_orden_dev_data:
 ```
 
-**`uso-ms-sb/ec-orden-ms/src/main/resources/application.yml`:**
+`name`/`container_name` dejan `-ms` fuera (`lambda26-ec-orden-dev`, no `lambda26-ec-orden-ms-dev`) — mismo criterio que ya usa DIST (`pagatu-orden-dev`, no `pagatu-orden-ms-dev`): el sufijo `-ms` identifica el artefacto Maven (`ec-orden-ms`, Tabla 3), no hace falta repetirlo en cada nombre de contenedor o red.
+
+**`uso-microserv/ec-orden-ms/src/main/resources/application.yml`** (agnóstico de ambiente, solo decide el perfil activo y las propiedades propias):
+
+```yaml
+spring:
+  application:
+    name: ec-orden-ms
+  profiles:
+    active: dev
+
+app:
+  kafka:
+    topic:
+      ordenes: orden-eventos
+```
+
+**`uso-microserv/ec-orden-ms/src/main/resources/application-dev.yml`:**
 
 ```yaml
 server:
   port: 49021
 
 spring:
-  application:
-    name: ec-orden-ms
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:49092
   datasource:
-    url: jdbc:postgresql://localhost:49021/db_ec_orden_ms
+    url: jdbc:postgresql://localhost:49020/db_ec_orden_ms
     username: ecom
     password: ecom
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: false
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-  kafka:
-    bootstrap-servers: localhost:49092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      hibernate:
+        format_sql: true
 ```
+
+`49020` (Postgres) y `49021` (la app) son puertos distintos, a propósito — usar el mismo número para los dos, un error fácil de cometer al copiar y pegar, haría que uno de los dos procesos no pudiera arrancar en DEV (ambos corren directo en el host, compitiendo por el mismo puerto).
+
+`app.kafka.topic.ordenes` (en `application.yml`, no en `application-dev.yml`) es el nombre del topic — vive en el archivo agnóstico de ambiente porque el topic es el mismo en DEV y en producción local; lo que cambia entre ambientes es la dirección del broker (`spring.kafka.bootstrap-servers`), no el nombre del topic. `spring.kafka.producer.key-serializer`/`value-serializer` ya **no** se configuran por propiedades (a diferencia de una primera versión de este proyecto) — 3.5.2 (`KafkaConfiguracion`) los define directamente en código, con un tipo concreto (`EventoOrden`) en vez del genérico `Object`.
 
 `ddl-auto: update` (no `validate`, a diferencia del criterio usado en los proyectos de LP2/DIST) es intencional aquí: este microservicio es una herramienta de laboratorio para generar eventos, no el producto evaluado de esta sesión — no justifica el peso de una migración Flyway completa solo para una tabla.
 
-Crea la entidad:
+#### 3.5.1 Crear la entidad, el evento y el repositorio
+
+Crea:
 
 ```text
-uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/Orden.java
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/entity/Orden.java
 ```
 
 ```java
-package com.upeu.ecorden;
+package pe.edu.upeu.ec.orden.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.math.BigDecimal;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "ordenes")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Orden {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Long usuarioId;
 
-    @Column(nullable = false)
-    private BigDecimal total;
+    private Double total;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private String estado = "PENDIENTE";
+    private String estado;
+}
+```
+
+`@Data` (Lombok) reemplaza aquí a `@Getter`/`@Setter` por separado — genera ambos de una vez, además de `equals()`/`hashCode()`/`toString()`; con una entidad tan simple como esta (cuatro campos, sin relaciones), no hay razón para escribirlos por separado.
+
+Crea el evento — un DTO propio, no la entidad `Orden` reutilizada, porque lo que viaja por Kafka es un contrato con otros servicios (2.1), no el modelo interno de persistencia:
+
+```text
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/event/EventoOrden.java
+```
+
+```java
+package pe.edu.upeu.ec.orden.event;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventoOrden {
+
+    private String tipoEvento;
+    private Long ordenId;
+    private Double total;
+    private String estado;
+    private String origen;
+    private Long timestamp;
 }
 ```
 
 Crea el repositorio:
 
 ```text
-uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenRepository.java
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/repository/OrdenRepositorio.java
 ```
 
 ```java
-package com.upeu.ecorden;
+package pe.edu.upeu.ec.orden.repository;
 
+import pe.edu.upeu.ec.orden.entity.Orden;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrdenRepository extends JpaRepository<Orden, Long> {
+public interface OrdenRepositorio extends JpaRepository<Orden, Long> {
 }
 ```
+
+#### 3.5.2 Configurar Kafka en código, no solo por propiedades
+
+**Producto del paso:** un `KafkaTemplate` tipado (`EventoOrden`, no `Object`), definido explícitamente en una clase `@Configuration`.
+
+Crea:
+
+```text
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/configuration/KafkaConfiguracion.java
+```
+
+```java
+package pe.edu.upeu.ec.orden.configuration;
+
+import pe.edu.upeu.ec.orden.event.EventoOrden;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+
+@Configuration
+public class KafkaConfiguracion {
+
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Bean
+    public ProducerFactory<String, EventoOrden> producerFactory() {
+        Map<String, Object> propiedades = new HashMap<>();
+        propiedades.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        propiedades.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        propiedades.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(propiedades);
+    }
+
+    @Bean
+    public KafkaTemplate<String, EventoOrden> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+```
+
+`KafkaTemplate<String, EventoOrden>` (tipado) en vez de `KafkaTemplate<String, Object>` (genérico, S3.5 de una versión anterior de esta guía) hace que el compilador rechace enviar cualquier cosa que no sea un `EventoOrden` por este template — un error de tipo se detecta al compilar, no en producción cuando alguien intente deserializar un evento con la forma equivocada.
+
+#### 3.5.3 Crear el productor, el servicio y el controlador
 
 Crea el productor:
 
 ```text
-uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenEventProducer.java
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/service/ProductorOrden.java
 ```
 
 ```java
-package com.upeu.ecorden;
+package pe.edu.upeu.ec.orden.service;
 
+import pe.edu.upeu.ec.orden.event.EventoOrden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
-public class OrdenEventProducer {
+public class ProductorOrden {
 
-    private static final String TOPIC = "orden-eventos";
+    private final KafkaTemplate<String, EventoOrden> kafkaTemplate;
+    @Value("${app.kafka.topic.ordenes}")
+    private String topicOrdenes;
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    public void publicarOrdenCreada(EventoOrden eventoOrden) {
+        kafkaTemplate.send(topicOrdenes, String.valueOf(eventoOrden.getOrdenId()), eventoOrden)
+                .whenComplete((resultado, ex) -> {
+                    if (ex != null) {
+                        log.error(
+                                "service=ec-orden-ms component=producer topic={} eventType={} ordenId={} timestamp={} status=error error=\"{}\"",
+                                topicOrdenes,
+                                eventoOrden.getTipoEvento(),
+                                eventoOrden.getOrdenId(),
+                                eventoOrden.getTimestamp(),
+                                ex.getMessage()
+                        );
+                        return;
+                    }
 
-    public void publicarOrdenCreada(Orden orden) {
-        Map<String, Object> evento = new LinkedHashMap<>();
-        evento.put("tipoEvento", "orden.creada");
-        evento.put("ordenId", orden.getId());
-        evento.put("total", orden.getTotal());
-        evento.put("estado", orden.getEstado());
-        evento.put("origen", "ec-orden-ms");
-        evento.put("timestamp", System.currentTimeMillis());
-
-        kafkaTemplate.send(TOPIC, String.valueOf(orden.getId()), evento);
-        log.info("service=ec-orden-ms component=producer topic={} eventType=orden.creada status=published", TOPIC);
+                    log.info(
+                            "service=ec-orden-ms component=producer topic={} partition={} offset={} eventType={} ordenId={} timestamp={} status=published",
+                            resultado.getRecordMetadata().topic(),
+                            resultado.getRecordMetadata().partition(),
+                            resultado.getRecordMetadata().offset(),
+                            eventoOrden.getTipoEvento(),
+                            eventoOrden.getOrdenId(),
+                            eventoOrden.getTimestamp()
+                    );
+                });
     }
 }
 ```
 
-`kafkaTemplate.send(TOPIC, String.valueOf(orden.getId()), evento)` usa `ordenId` como `key` (2.1) — así, si algún día un mismo pedido genera más de un evento (por ejemplo, `orden.creada` y una futura `orden.cancelada`), Kafka los mantiene en la misma partición y en orden entre sí.
+`kafkaTemplate.send(...)` devuelve un `CompletableFuture` — `.whenComplete(...)` reacciona cuando Kafka confirma el envío (o falla), sin bloquear el hilo que llamó a `publicarOrdenCreada` esperando la respuesta. El log de éxito recién imprime `partition`/`offset` reales (los que asignó el broker) porque solo se conocen después de que el envío se confirma — antes de eso, no existen todavía. `ordenId` como `key` (2.2) sigue el mismo motivo de antes: si algún día un mismo pedido genera más de un evento (por ejemplo, `orden.creada` y una futura `orden.cancelada`), Kafka los mantiene en la misma partición y en orden entre sí.
 
-Crea el servicio y el controlador:
+Crea el servicio:
 
 ```text
-uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenService.java
-uso-ms-sb/ec-orden-ms/src/main/java/com/upeu/ecorden/OrdenController.java
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/service/OrdenServicio.java
 ```
 
 ```java
-package com.upeu.ecorden;
+package pe.edu.upeu.ec.orden.service;
 
+import pe.edu.upeu.ec.orden.entity.Orden;
+import pe.edu.upeu.ec.orden.event.EventoOrden;
+import pe.edu.upeu.ec.orden.repository.OrdenRepositorio;
+import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class OrdenService {
+public class OrdenServicio {
 
-    private final OrdenRepository ordenRepository;
-    private final OrdenEventProducer ordenEventProducer;
+    private static final String ESTADO_PENDIENTE = "PENDIENTE";
+    private static final String TIPO_EVENTO_ORDEN_CREADA = "orden.creada";
 
-    @Transactional
-    public Orden crear(Orden orden) {
-        Orden guardada = ordenRepository.save(orden);
-        ordenEventProducer.publicarOrdenCreada(guardada);
-        return guardada;
+    private final OrdenRepositorio ordenRepositorio;
+    private final ProductorOrden productorOrden;
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    public List<Orden> listarOrdenes() {
+        return ordenRepositorio.findAll();
+    }
+
+    public Orden crearOrden(Orden orden) {
+        orden.setId(null);
+        orden.setEstado(ESTADO_PENDIENTE);
+
+        Orden ordenGuardada = ordenRepositorio.save(orden);
+
+        EventoOrden eventoOrden = EventoOrden.builder()
+                .tipoEvento(TIPO_EVENTO_ORDEN_CREADA)
+                .ordenId(ordenGuardada.getId())
+                .total(ordenGuardada.getTotal())
+                .estado(ordenGuardada.getEstado())
+                .origen(applicationName)
+                .timestamp(Instant.now().toEpochMilli())
+                .build();
+
+        productorOrden.publicarOrdenCreada(eventoOrden);
+
+        return ordenGuardada;
     }
 }
+```
+
+`orden.setId(null)` antes de guardar evita que alguien fuerce un `id` propio en el `POST` (un cliente podría mandar `{"id": 999, ...}` intentando sobrescribir una orden existente) — `crearOrden` siempre crea una fila nueva, nunca actualiza una vieja. `@Value("${spring.application.name}")` para `origen` evita hardcodear el literal `"ec-orden-ms"` (S3.5 de una versión anterior de esta guía) — si el nombre del microservicio cambia algún día, este valor lo sigue automáticamente.
+
+Crea el controlador:
+
+```text
+uso-microserv/ec-orden-ms/src/main/java/pe/edu/upeu/ec/orden/controller/OrdenControlador.java
 ```
 
 ```java
-package com.upeu.ecorden;
+package pe.edu.upeu.ec.orden.controller;
 
+import pe.edu.upeu.ec.orden.entity.Orden;
+import pe.edu.upeu.ec.orden.service.OrdenServicio;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/ordenes")
 @RequiredArgsConstructor
-public class OrdenController {
+public class OrdenControlador {
 
-    private final OrdenService ordenService;
+    private final OrdenServicio ordenServicio;
 
-    @PostMapping("/ordenes")
-    public Orden crear(@RequestBody Orden orden) {
-        return ordenService.crear(orden);
+    @GetMapping
+    public List<Orden> listarOrdenes() {
+        return ordenServicio.listarOrdenes();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Orden crearOrden(@RequestBody Orden orden) {
+        return ordenServicio.crearOrden(orden);
     }
 }
 ```
 
-La orden se guarda en PostgreSQL y se publica en Kafka **dentro de la misma transacción de negocio** (`@Transactional` en `crear()`) — pero son dos sistemas distintos (base de datos relacional y broker de mensajería) que no comparten una transacción real entre sí; si el envío a Kafka fallara después de guardar en PostgreSQL, la orden quedaría guardada sin evento publicado. Resolver esa inconsistencia (patrón *Outbox*) queda fuera del alcance de esta sesión — aquí el objetivo es dejar el flujo feliz funcionando y visible.
+La orden se guarda en PostgreSQL y se publica en Kafka **sin una transacción real que las una** — son dos sistemas distintos (base de datos relacional y broker de mensajería) que no comparten una transacción entre sí; si el envío a Kafka fallara después de guardar en PostgreSQL, la orden quedaría guardada sin evento publicado. Resolver esa inconsistencia (patrón *Outbox*) queda fuera del alcance de esta sesión — aquí el objetivo es dejar el flujo feliz funcionando y visible.
 
 ### 3.6 Levantar y probar `ec-orden-ms`
 
 **Producto del paso:** primera orden real publicando un evento verificable en Kafka UI.
 
 ```powershell
-docker compose -f uso-ms-sb/ec-orden-ms/compose-dev.yml up -d
-docker compose -f uso-ms-sb/ec-orden-ms/compose-dev.yml ps
+docker compose -f uso-microserv/ec-orden-ms/compose-dev.yml up -d
+docker compose -f uso-microserv/ec-orden-ms/compose-dev.yml ps
 ```
 
 ```powershell
-docker exec -it lambda26-postgres-ec-orden-ms-dev psql -U ecom -d db_ec_orden_ms -c "\dt"
+docker exec -it lambda26-postgres-ec-orden-dev psql -U ecom -d db_ec_orden_ms -c "\dt"
 ```
 
 ```powershell
-cd uso-ms-sb/ec-orden-ms
+cd uso-microserv/ec-orden-ms
 mvn spring-boot:run
 ```
 
@@ -594,7 +783,7 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:49021/ordenes" `
 Verifica en consola (`Ctrl+C` no es necesario, revisa el log de la terminal donde corre `mvn spring-boot:run`):
 
 ```text
-service=ec-orden-ms component=producer topic=orden-eventos eventType=orden.creada status=published
+service=ec-orden-ms component=producer topic=orden-eventos partition=0 offset=0 eventType=orden.creada ordenId=1 timestamp=1713350000000 status=published
 ```
 
 Verifica en Kafka UI (3.3) que `orden-eventos` ahora tiene un mensaje con `tipoEvento: orden.creada` y `origen: ec-orden-ms`.
@@ -603,151 +792,528 @@ Verifica en Kafka UI (3.3) que `orden-eventos` ahora tiene un mensaje con `tipoE
 
 **Producto del paso:** proyecto Spring Boot `ec-pago-ms` que consume `orden-eventos` y publica el resultado del pago en `pago-eventos`.
 
-Repite 3.5 con `Artifact Id: ec-pago-ms`, `Package name: com.upeu.ecpago`, en `uso-ms-sb/ec-pago-ms`, con su propia base de datos `db_ec_pago_ms` en el puerto `49022`.
+Repite 3.5 con `Artifact Id: ec-pago-ms`, `Package name: pe.edu.upeu.ec.pago`, Java 21, en `uso-microserv/ec-pago-ms`, con su propia base de datos `db_ec_pago_ms` en el puerto `49030` y la app en el puerto `49031` — mismo criterio de `ec-orden-ms` (3.5): puertos distintos entre sí, para no repetir el error de usar el mismo número en Postgres y en la app.
 
-Entidad `Pago`:
+**`uso-microserv/ec-pago-ms/src/main/resources/application.yml`:**
+
+```yaml
+spring:
+  application:
+    name: ec-pago-ms
+  profiles:
+    active: dev
+
+app:
+  kafka:
+    topic:
+      ordenes: orden-eventos
+      pagos: pago-eventos
+    group-id:
+      pagos: ec-pago-ms-group
+```
+
+**`uso-microserv/ec-pago-ms/src/main/resources/application-dev.yml`** (mismo patrón de `ec-orden-ms`, 3.5, con su propio puerto y base de datos):
+
+```yaml
+server:
+  port: 49031
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:49092
+  datasource:
+    url: jdbc:postgresql://localhost:49030/db_ec_pago_ms
+    username: ecom
+    password: ecom
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+```
+
+`ec-pago-ms` necesita **dos** topics (`ordenes`, el que consume; `pagos`, el que publica) y su propio `group-id` — por eso `app.kafka` tiene más llaves aquí que en `ec-orden-ms` (solo `ordenes`, que publica). El `group-id` va en `app.kafka.group-id.pagos` (propiedad propia), no en `spring.kafka.consumer.group-id` — se referencia directo en la anotación `@KafkaListener` (3.7.2) con `${app.kafka.group-id.pagos}`, sin depender de la configuración automática de consumer de Spring Boot.
+
+#### 3.7.1 Crear la entidad, los dos eventos y el repositorio
+
+`ec-pago-ms` maneja tres tipos de dato distintos: su propia entidad (`Pago`, lo que persiste), el evento que **consume** (`EventoOrden` — mismo contrato que publica `ec-orden-ms`, pero declarado de nuevo aquí, porque cada microservicio es dueño de su propio modelo de datos, 2.1) y el evento que **produce** (`EventoPago`).
+
+Crea:
 
 ```text
-uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/Pago.java
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/entity/Pago.java
 ```
 
 ```java
-package com.upeu.ecpago;
+package pe.edu.upeu.ec.pago.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.math.BigDecimal;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "pagos")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Pago {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Long ordenId;
 
-    @Column(nullable = false)
-    private BigDecimal monto;
+    private Double monto;
 
-    @Column(nullable = false)
     private String estado;
 }
 ```
 
+Crea el evento que consume (idéntico en forma al `EventoOrden` de `ec-orden-ms`, 3.5.1 — mismo contrato, cada servicio con su propia copia de la clase):
+
 ```text
-uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/PagoRepository.java
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/event/EventoOrden.java
 ```
 
 ```java
-package com.upeu.ecpago;
+package pe.edu.upeu.ec.pago.event;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventoOrden {
+
+    private String tipoEvento;
+    private Long ordenId;
+    private Double total;
+    private String estado;
+    private String origen;
+    private Long timestamp;
+}
+```
+
+Crea el evento que produce:
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/event/EventoPago.java
+```
+
+```java
+package pe.edu.upeu.ec.pago.event;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventoPago {
+
+    private String tipoEvento;
+    private Long ordenId;
+    private Double monto;
+    private String estado;
+    private String origen;
+    private Long timestamp;
+}
+```
+
+Crea el repositorio:
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/repository/PagoRepositorio.java
+```
+
+```java
+package pe.edu.upeu.ec.pago.repository;
+
+import pe.edu.upeu.ec.pago.entity.Pago;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PagoRepository extends JpaRepository<Pago, Long> {
+public interface PagoRepositorio extends JpaRepository<Pago, Long> {
 }
 ```
 
-El consumidor de `orden-eventos`, el "procesador" de pago (una regla simple: montos menores a 1000 se aprueban, para tener un caso de `pago.rechazado` reproducible) y el productor de `pago-eventos`:
+#### 3.7.2 Configurar Kafka: productor, consumidor y manejo de errores
+
+**Producto del paso:** `ec-pago-ms` preparado para publicar (`EventoPago`) y para consumir (`EventoOrden`) — con un mensaje malformado manejado sin tumbar el consumer (2.2, "Error frecuente").
+
+Crea:
 
 ```text
-uso-ms-sb/ec-pago-ms/src/main/java/com/upeu/ecpago/OrdenEventListener.java
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/configuration/KafkaConfiguracion.java
 ```
 
 ```java
-package com.upeu.ecpago;
+package pe.edu.upeu.ec.pago.configuration;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
+import pe.edu.upeu.ec.pago.event.EventoOrden;
+import pe.edu.upeu.ec.pago.event.EventoPago;
+import java.util.HashMap;
 import java.util.Map;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.listener.CommonErrorHandler;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.util.backoff.FixedBackOff;
 
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class OrdenEventListener {
+@EnableKafka
+@Configuration
+public class KafkaConfiguracion {
 
-    private static final String TOPIC_ORDEN = "orden-eventos";
-    private static final String TOPIC_PAGO = "pago-eventos";
-    private static final BigDecimal LIMITE_APROBACION = BigDecimal.valueOf(1000);
+    private static final Logger log = LoggerFactory.getLogger(KafkaConfiguracion.class);
 
-    private final PagoRepository pagoRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
-    @KafkaListener(topics = TOPIC_ORDEN, groupId = "ec-pago-ms-group")
-    public void consumirOrdenCreada(Map<String, Object> evento) {
-        log.info("service=ec-pago-ms component=consumer topic={} eventType=orden.creada status=consumed", TOPIC_ORDEN);
+    @Bean
+    public ProducerFactory<String, EventoPago> producerFactory() {
+        Map<String, Object> propiedades = new HashMap<>();
+        propiedades.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        propiedades.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        propiedades.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-        Long ordenId = Long.valueOf(evento.get("ordenId").toString());
-        BigDecimal total = new BigDecimal(evento.get("total").toString());
-
-        String estadoPago = total.compareTo(LIMITE_APROBACION) < 0 ? "APROBADO" : "RECHAZADO";
-
-        Pago pago = pagoRepository.save(Pago.builder()
-                .ordenId(ordenId)
-                .monto(total)
-                .estado(estadoPago)
-                .build());
-
-        log.info("service=ec-pago-ms component=processor ordenId={} estadoPago={} status=processed", ordenId, estadoPago);
-
-        publicarResultadoPago(pago);
+        return new DefaultKafkaProducerFactory<>(propiedades);
     }
 
-    private void publicarResultadoPago(Pago pago) {
-        String tipoEvento = "APROBADO".equals(pago.getEstado()) ? "pago.aprobado" : "pago.rechazado";
+    @Bean
+    public KafkaTemplate<String, EventoPago> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
 
-        Map<String, Object> evento = new LinkedHashMap<>();
-        evento.put("tipoEvento", tipoEvento);
-        evento.put("ordenId", pago.getOrdenId());
-        evento.put("monto", pago.getMonto());
-        evento.put("estado", pago.getEstado());
-        evento.put("origen", "ec-pago-ms");
-        evento.put("timestamp", System.currentTimeMillis());
+    @Bean
+    public ConsumerFactory<String, EventoOrden> consumerFactory() {
+        Map<String, Object> propiedades = new HashMap<>();
+        propiedades.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        propiedades.put(ConsumerConfig.GROUP_ID_CONFIG, "ec-pago-ms-group");
+        propiedades.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        propiedades.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        propiedades.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        propiedades.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        propiedades.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+        propiedades.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        propiedades.put(JsonDeserializer.VALUE_DEFAULT_TYPE, EventoOrden.class.getName());
+        propiedades.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
 
-        kafkaTemplate.send(TOPIC_PAGO, String.valueOf(pago.getOrdenId()), evento);
-        log.info("service=ec-pago-ms component=producer topic={} eventType={} status=published", TOPIC_PAGO, tipoEvento);
+        return new DefaultKafkaConsumerFactory<>(
+                propiedades,
+                new ErrorHandlingDeserializer<>(new StringDeserializer()),
+                new ErrorHandlingDeserializer<>(new JsonDeserializer<>())
+        );
+    }
+
+    @Bean
+    public CommonErrorHandler kafkaErrorHandler() {
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler((record, exception) ->
+                log.error(
+                        "Mensaje descartado de Kafka en topic={}, particion={}, offset={}: {}",
+                        record.topic(),
+                        record.partition(),
+                        record.offset(),
+                        exception.getMessage(),
+                        exception
+                ),
+                new FixedBackOff(0L, 0L)
+        );
+        errorHandler.setCommitRecovered(true);
+        return errorHandler;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, EventoOrden> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, EventoOrden> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setCommonErrorHandler(kafkaErrorHandler());
+        return factory;
     }
 }
 ```
 
-Agrega, en `application.yml` de `ec-pago-ms`, la configuración de consumer (junto al bloque `producer` ya usado en `ec-orden-ms`):
+`ErrorHandlingDeserializer` envuelve al deserializador real (`JsonDeserializer`) — si un mensaje no se puede convertir a `EventoOrden` (JSON malformado, o el texto plano de 3.2), no lanza la excepción directo al listener: la captura y se la entrega al `CommonErrorHandler`. `kafkaErrorHandler()` decide qué hacer con eso: `FixedBackOff(0L, 0L)` significa "no reintentes, falla una sola vez" (un mensaje malformado no se arregla solo reintentando), y `setCommitRecovered(true)` avanza el offset igual — sin esto, el consumer se quedaría reintentando el mismo mensaje malformado para siempre, sin poder avanzar a los siguientes. Esto es lo que responde al "Error frecuente" de 2.2: un mensaje que no cumple el contrato no tumba el consumer, queda registrado en el log y el consumer sigue.
 
-```yaml
-spring:
-  kafka:
-    bootstrap-servers: localhost:49092
-    consumer:
-      group-id: ec-pago-ms-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#### 3.7.3 Crear el productor, el consumidor y el controlador
+
+Crea el productor:
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/service/ProductorPago.java
 ```
 
-**Error frecuente**: olvidar `spring.json.trusted.packages`. Sin esa propiedad, `JsonDeserializer` rechaza el mensaje con `Trusted packages` en el error, aunque el JSON esté perfectamente bien formado — la deserialización JSON de Spring Kafka bloquea por seguridad cualquier paquete Java no declarado explícitamente como confiable.
+```java
+package pe.edu.upeu.ec.pago.service;
+
+import pe.edu.upeu.ec.pago.event.EventoPago;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class ProductorPago {
+
+    private final KafkaTemplate<String, EventoPago> kafkaTemplate;
+    @Value("${app.kafka.topic.pagos}")
+    private String topicPagos;
+
+    public void enviarEventoPago(EventoPago eventoPago) {
+        kafkaTemplate.send(topicPagos, String.valueOf(eventoPago.getOrdenId()), eventoPago)
+                .whenComplete((resultado, ex) -> {
+                    if (ex != null) {
+                        log.error(
+                                "service=ec-pago-ms component=producer topic={} eventType={} ordenId={} timestamp={} status=error error=\"{}\"",
+                                topicPagos,
+                                eventoPago.getTipoEvento(),
+                                eventoPago.getOrdenId(),
+                                eventoPago.getTimestamp(),
+                                ex.getMessage()
+                        );
+                        return;
+                    }
+
+                    log.info(
+                            "service=ec-pago-ms component=producer topic={} partition={} offset={} eventType={} ordenId={} timestamp={} status=published",
+                            resultado.getRecordMetadata().topic(),
+                            resultado.getRecordMetadata().partition(),
+                            resultado.getRecordMetadata().offset(),
+                            eventoPago.getTipoEvento(),
+                            eventoPago.getOrdenId(),
+                            eventoPago.getTimestamp()
+                    );
+                });
+    }
+}
+```
+
+Crea el consumidor — el "procesador" de pago, con una regla simple y **determinista**: montos menores a 1000 se aprueban, para poder forzar el caso `pago.rechazado` a voluntad (3.8), en vez de depender del azar:
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/service/ConsumidorPago.java
+```
+
+```java
+package pe.edu.upeu.ec.pago.service;
+
+import pe.edu.upeu.ec.pago.entity.Pago;
+import pe.edu.upeu.ec.pago.event.EventoOrden;
+import pe.edu.upeu.ec.pago.event.EventoPago;
+import pe.edu.upeu.ec.pago.repository.PagoRepositorio;
+import java.time.Instant;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class ConsumidorPago {
+
+    private static final String TIPO_EVENTO_ORDEN_CREADA = "orden.creada";
+    private static final String TIPO_EVENTO_PAGO_APROBADO = "pago.aprobado";
+    private static final String TIPO_EVENTO_PAGO_RECHAZADO = "pago.rechazado";
+    private static final String ESTADO_APROBADO = "APROBADO";
+    private static final String ESTADO_RECHAZADO = "RECHAZADO";
+    private static final double LIMITE_APROBACION = 1000;
+
+    private final PagoRepositorio pagoRepositorio;
+    private final ProductorPago productorPago;
+    @Value("${spring.application.name}")
+    private String applicationName;
+    @Value("${app.kafka.topic.ordenes}")
+    private String topicOrdenes;
+    @Value("${app.kafka.group-id.pagos}")
+    private String groupIdPagos;
+
+    @KafkaListener(
+            topics = "${app.kafka.topic.ordenes}",
+            groupId = "${app.kafka.group-id.pagos}",
+            containerFactory = "kafkaListenerContainerFactory"
+    )
+    public void consumirEventoOrden(EventoOrden eventoOrden) {
+        if (eventoOrden == null || !TIPO_EVENTO_ORDEN_CREADA.equals(eventoOrden.getTipoEvento())) {
+            log.warn("service=ec-pago-ms component=consumer eventType={} status=ignored", eventoOrden != null ? eventoOrden.getTipoEvento() : null);
+            return;
+        }
+
+        long processedAt = Instant.now().toEpochMilli();
+        Long latencyMs = eventoOrden.getTimestamp() != null ? processedAt - eventoOrden.getTimestamp() : null;
+
+        log.info(
+                "service=ec-pago-ms component=consumer topic={} groupId={} eventType={} ordenId={} timestamp={} processedAt={} latencyMs={} status=consumed",
+                topicOrdenes,
+                groupIdPagos,
+                eventoOrden.getTipoEvento(),
+                eventoOrden.getOrdenId(),
+                eventoOrden.getTimestamp(),
+                processedAt,
+                latencyMs
+        );
+
+        boolean pagoAprobado = eventoOrden.getTotal() != null && eventoOrden.getTotal() < LIMITE_APROBACION;
+        String estadoPago = pagoAprobado ? ESTADO_APROBADO : ESTADO_RECHAZADO;
+        String tipoEventoPago = pagoAprobado ? TIPO_EVENTO_PAGO_APROBADO : TIPO_EVENTO_PAGO_RECHAZADO;
+
+        Pago pago = Pago.builder()
+                .ordenId(eventoOrden.getOrdenId())
+                .monto(eventoOrden.getTotal())
+                .estado(estadoPago)
+                .build();
+
+        pagoRepositorio.save(pago);
+
+        EventoPago eventoPago = EventoPago.builder()
+                .tipoEvento(tipoEventoPago)
+                .ordenId(eventoOrden.getOrdenId())
+                .monto(eventoOrden.getTotal())
+                .estado(estadoPago)
+                .origen(applicationName)
+                .timestamp(Instant.now().toEpochMilli())
+                .build();
+
+        productorPago.enviarEventoPago(eventoPago);
+
+        log.info(
+                "service=ec-pago-ms component=processor ordenId={} estadoPago={} status=processed",
+                eventoOrden.getOrdenId(),
+                estadoPago
+        );
+    }
+}
+```
+
+`latencyMs` (diferencia entre `processedAt`, el momento en que este consumer procesa el evento, y `timestamp`, el momento en que `ec-orden-ms` lo publicó) es una métrica real de cuánto tarda el flujo completo en moverse de un extremo a otro — algo que Kafka UI no muestra directamente, solo se ve calculándolo en el propio log. `@KafkaListener` referencia el topic y el `groupId` con `${...}` (propiedades, 3.7) en vez de escribirlos literal — el mismo criterio que ya evita hardcodear `"ec-orden-ms"` en 3.5.3, aplicado ahora al nombre del topic y del grupo.
+
+Crea el servicio y el controlador (consulta simple sobre lo ya guardado, no participan del flujo de eventos):
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/service/PagoServicio.java
+```
+
+```java
+package pe.edu.upeu.ec.pago.service;
+
+import pe.edu.upeu.ec.pago.entity.Pago;
+import pe.edu.upeu.ec.pago.repository.PagoRepositorio;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class PagoServicio {
+
+    private final PagoRepositorio pagoRepositorio;
+
+    public List<Pago> listarPagos() {
+        return pagoRepositorio.findAll();
+    }
+
+    public Optional<Pago> buscarPagoPorId(Long id) {
+        return pagoRepositorio.findById(id);
+    }
+}
+```
+
+```text
+uso-microserv/ec-pago-ms/src/main/java/pe/edu/upeu/ec/pago/controller/PagoControlador.java
+```
+
+```java
+package pe.edu.upeu.ec.pago.controller;
+
+import pe.edu.upeu.ec.pago.entity.Pago;
+import pe.edu.upeu.ec.pago.service.PagoServicio;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/pagos")
+@RequiredArgsConstructor
+public class PagoControlador {
+
+    private final PagoServicio pagoServicio;
+
+    @GetMapping("/saludo")
+    public String saludo() {
+        return "ec-pago-ms activo";
+    }
+
+    @GetMapping
+    public List<Pago> listarPagos() {
+        return pagoServicio.listarPagos();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Pago> buscarPagoPorId(@PathVariable Long id) {
+        return pagoServicio.buscarPagoPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}
+```
 
 ### 3.8 Levantar y probar `ec-pago-ms`
 
 **Producto del paso:** flujo completo — una orden nueva termina en un pago procesado y publicado.
 
 ```powershell
-docker compose -f uso-ms-sb/ec-pago-ms/compose-dev.yml up -d
-cd uso-ms-sb/ec-pago-ms
+docker compose -f uso-microserv/ec-pago-ms/compose-dev.yml up -d
+cd uso-microserv/ec-pago-ms
 mvn spring-boot:run
 ```
 
@@ -762,15 +1328,15 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:49021/ordenes" `
 Verifica en el log de `ec-pago-ms`:
 
 ```text
-service=ec-pago-ms component=consumer topic=orden-eventos eventType=orden.creada status=consumed
-service=ec-pago-ms component=processor ordenId=<id-generado> estadoPago=APROBADO status=processed
-service=ec-pago-ms component=producer topic=pago-eventos eventType=pago.aprobado status=published
+service=ec-pago-ms component=consumer topic=orden-eventos groupId=ec-pago-ms-group eventType=orden.creada ordenId=2 timestamp=1713350000000 processedAt=1713350000120 latencyMs=120 status=consumed
+service=ec-pago-ms component=processor ordenId=2 estadoPago=APROBADO status=processed
+service=ec-pago-ms component=producer topic=pago-eventos partition=0 offset=0 eventType=pago.aprobado ordenId=2 timestamp=1713350000130 status=published
 ```
 
 Verifica los datos:
 
 ```powershell
-docker exec -it lambda26-postgres-ec-pago-ms-dev psql -U ecom -d db_ec_pago_ms -c "SELECT * FROM pagos;"
+docker exec -it lambda26-postgres-ec-pago-dev psql -U ecom -d db_ec_pago_ms -c "SELECT * FROM pagos;"
 ```
 
 Verifica en Kafka UI: el topic `pago-eventos` ahora existe, con el mensaje `pago.aprobado`, y el consumer group `ec-pago-ms-group` visible en la pestaña `Consumers`, con su *lag* en `orden-eventos` (idealmente en `0`, si ya consumió todo lo publicado).
@@ -788,8 +1354,8 @@ Repite con un total mayor o igual a `1000` para forzar el caso `pago.rechazado` 
 | Topic | `orden-eventos` |
 | Particiones | 1 |
 | Key | `ordenId` (como texto) |
-| Productores | `ec-orden-ms`, `ec-orden-py` |
-| Consumidores | `ec-pago-ms`, `ec-orden-py` |
+| Productores | `ec-orden-ms`, `ec-eventos-py` |
+| Consumidores | `ec-pago-ms`, `ec-eventos-py` |
 
 ```json
 {
