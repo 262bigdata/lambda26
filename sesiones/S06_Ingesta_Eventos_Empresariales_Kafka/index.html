@@ -2366,7 +2366,7 @@
 </tr>
 <tr>
 <td>Dependencias</td>
-<td>Spring Web (<strong><code>spring-boot-starter-webmvc</code></strong> en Boot 4, ya no <code>-web</code>), Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok</td>
+<td>Spring Web (<strong><code>spring-boot-starter-webmvc</code></strong> en Boot 4, ya no <code>-web</code>), Spring for Apache Kafka, Spring Data JPA, PostgreSQL Driver, Lombok, Spring Boot DevTools</td>
 </tr>
 <tr>
 <td>Ubicación sugerida</td>
@@ -2375,6 +2375,7 @@
 </tbody>
 </table>
 <p><strong>Spring Boot 4 renombró varios starters</strong> — no es solo un número de versión más alto. <code>spring-boot-starter-web</code> pasó a llamarse <code>spring-boot-starter-webmvc</code> (separa explícitamente WebMVC de WebFlux desde el nombre del starter), y el genérico <code>spring-boot-starter-test</code> desapareció: cada starter que uses trae su propio <code>-test</code> (<code>spring-boot-starter-data-jpa-test</code>, <code>spring-boot-starter-webmvc-test</code>) en vez de uno solo que los cubra todos. Si Spring Initializr no te deja elegir Boot 4 todavía, agrega estas dependencias a mano con los nombres de arriba después de generar el proyecto — no con los nombres de Boot 3.</p>
+<p><strong>Spring Boot DevTools</strong> reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar <code>mvn spring-boot:run</code> a mano — en <code>application-dev.yml</code> (más abajo) se activa con <code>spring.devtools.restart.enabled</code> y <code>spring.devtools.livereload.enabled</code>. En el <code>pom.xml</code> va con <code>&lt;scope&gt;runtime&lt;/scope&gt;</code> y <code>&lt;optional&gt;true&lt;/optional&gt;</code>, para que no viaje al artefacto final en <code>prod</code>.</p>
 <p><strong><code>uso-microserv/ec-orden-ms/compose-dev.yml</code>:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-ec-orden-dev</span>
 
