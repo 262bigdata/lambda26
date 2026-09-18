@@ -32,7 +32,7 @@ Un flujo de eventos empresariales funcional: Kafka corriendo con Kafka UI, el t�
 
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
-| Revisión previa individual | Confirmar Docker Desktop funcionando; instalar Java 21 y Maven si aún no están instalados (`choco install temurin21 -y`, `choco install maven -y`). Trabajo individual, antes de clase. | Silabo Unidad II, este mismo documento (1.1-1.7). |
+| Revisión previa individual | Confirmar Docker Desktop funcionando; instalar y verificar Java 21 y VS Code si aún no están instalados (ver 3.5.0). Trabajo individual, antes de clase. | Silabo Unidad II, este mismo documento (1.1-1.7). |
 | Clase presencial | Construcción guiada de `kafka/` (broker + UI), prueba manual por consola, prueba con Python, y construcción de `ec-orden-ms`/`ec-pago-ms` como productor y consumidor reales. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un topic que no aparece o un consumer que no recibe nada. | Pasos 3.1 a 3.9 de esta guía. |
 | Evaluación formativa | Revisión en clase de Kafka UI mostrando `orden-eventos` y `pago-eventos` con mensajes reales, y de los logs de ambos microservicios publicando/consumiendo. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
@@ -168,6 +168,7 @@ Tiempo: 3h.
 - **3.3** Verificar con Kafka UI.
 - **3.4** Probar con Python (productor y consumidor rápidos).
 - **3.5** Crear `ec-orden-ms` como productor.
+- **3.5.0** Instalar y verificar Java 21 y VS Code.
 - **3.5.1** Crear la entidad, el evento y el repositorio.
 - **3.5.2** Configurar Kafka en código, no solo por propiedades.
 - **3.5.3** Crear el productor, el servicio y el controlador.
@@ -364,6 +365,91 @@ El consumer debe imprimir `topic`, `partition`, `offset`, `origen`, `estado`, `t
 
 **Producto del paso:** proyecto Spring Boot `ec-orden-ms` creado, con Kafka, JPA y PostgreSQL.
 
+#### 3.5.0 Instalar y verificar Java 21 y VS Code
+
+**Producto del paso:** entorno de desarrollo configurado con Java 21 y VS Code (mismo criterio que DIST/LP2, ver 3.1 de esas guías).
+
+**Windows** — **PowerShell** como usuario normal:
+
+```powershell
+winget install --id EclipseAdoptium.Temurin.21.JDK --exact
+```
+
+**macOS** (Homebrew no viene preinstalado en ningún Mac; una vez instalado, el comando de Temurin es el mismo para Intel y para Apple Silicon M1/M2/M3/M4 — Homebrew detecta la arquitectura automáticamente):
+
+```bash
+# 1. Instalar Homebrew (si no lo tiene)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. Solo en Apple Silicon (M1/M2/M3/M4): agregar Homebrew al PATH.
+#    Se instala en /opt/homebrew (no en /usr/local como en Intel), y el
+#    propio instalador lo pide como paso obligatorio, no opcional.
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# 3. Instalar Temurin 21
+brew install --cask temurin@21
+```
+
+**Linux (Ubuntu/Debian)** — repositorio oficial de Adoptium vía `apt`:
+
+```bash
+sudo apt install -y wget apt-transport-https gpg
+wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null
+echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+sudo apt update
+sudo apt install -y temurin-21-jdk
+```
+
+**Linux (Fedora/RHEL)** — repositorio oficial de Adoptium vía `dnf`:
+
+```bash
+sudo tee /etc/yum.repos.d/adoptium.repo > /dev/null <<'EOF'
+[Adoptium]
+name=Adoptium
+baseurl=https://packages.adoptium.net/artifactory/rpm/$(. /etc/os-release; echo $ID)/$releasever/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public
+EOF
+sudo dnf install -y temurin-21-jdk
+```
+
+Al finalizar, cierra y vuelve a abrir la terminal. Verifica la instalación:
+
+```powershell
+java --version
+javac --version
+```
+
+Ambas comprobaciones deben mostrar Java 21. Si conserva una versión anterior, configura `JAVA_HOME` con la ruta del JDK 21 desde las variables de entorno de Windows, actualiza `Path` para que `%JAVA_HOME%\bin` tenga prioridad y abre una terminal nueva.
+
+**VS Code:**
+
+```powershell
+winget install -e --id Microsoft.VisualStudioCode
+```
+
+```bash
+brew install --cask visual-studio-code
+```
+
+```bash
+sudo snap install --classic code
+```
+
+Instala las extensiones desde la terminal:
+
+```bash
+code --install-extension vscjava.vscode-java-pack
+code --install-extension vmware.vscode-boot-dev-pack
+code --install-extension cweijan.vscode-database-client2
+```
+
+`vscjava.vscode-java-pack` trae soporte de Spring Initializr integrado a VS Code (lo usarás para generar `ec-orden-ms` y `ec-pago-ms` desde la Tabla 3), `vmware.vscode-boot-dev-pack` agrega el Spring Boot Dashboard para arrancar/detener ambos microservicios sin recordar el comando cada vez, y `cweijan.vscode-database-client2` es un cliente gráfico para revisar las tablas `ordenes`/`pagos` en PostgreSQL sin salir del editor.
+
+No hace falta instalar Maven aparte: cada proyecto que genera Spring Initializr trae su propio **Maven Wrapper** (`mvnw`/`mvnw.cmd`), que descarga la versión correcta de Maven la primera vez que lo ejecutas. Por eso en 3.6 y 3.8 los comandos usan `.\mvnw.cmd`, no `mvn`.
+
 **Tabla 3. Configuración de `ec-orden-ms` en Spring Initializr**
 
 | Campo | Valor |
@@ -380,7 +466,7 @@ El consumer debe imprimir `topic`, `partition`, `offset`, `origen`, `estado`, `t
 
 **Spring Boot 4 renombró varios starters** — no es solo un número de versión más alto. `spring-boot-starter-web` pasó a llamarse `spring-boot-starter-webmvc` (separa explícitamente WebMVC de WebFlux desde el nombre del starter), y el genérico `spring-boot-starter-test` desapareció: cada starter que uses trae su propio `-test` (`spring-boot-starter-data-jpa-test`, `spring-boot-starter-webmvc-test`) en vez de uno solo que los cubra todos. Si Spring Initializr no te deja elegir Boot 4 todavía, agrega estas dependencias a mano con los nombres de arriba después de generar el proyecto — no con los nombres de Boot 3.
 
-**Spring Boot DevTools** reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar `mvn spring-boot:run` a mano — en `application-dev.yml` (más abajo) se activa con `spring.devtools.restart.enabled` y `spring.devtools.livereload.enabled`. En el `pom.xml` va con `<scope>runtime</scope>` y `<optional>true</optional>`, para que no viaje al artefacto final en `prod`.
+**Spring Boot DevTools** reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar `.\mvnw.cmd spring-boot:run` a mano — en `application-dev.yml` (más abajo) se activa con `spring.devtools.restart.enabled` y `spring.devtools.livereload.enabled`. En el `pom.xml` va con `<scope>runtime</scope>` y `<optional>true</optional>`, para que no viaje al artefacto final en `prod`.
 
 **`uso-microserv/ec-orden-ms/compose-dev.yml`:**
 
@@ -771,7 +857,7 @@ docker exec -it lambda26-postgres-ec-orden-dev psql -U ecom -d db_ec_orden_ms -c
 
 ```powershell
 cd uso-microserv/ec-orden-ms
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Crea una orden:
@@ -782,7 +868,7 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:49021/ordenes" `
   -Body '{"usuarioId":1,"total":100}'
 ```
 
-Verifica en consola (`Ctrl+C` no es necesario, revisa el log de la terminal donde corre `mvn spring-boot:run`):
+Verifica en consola (`Ctrl+C` no es necesario, revisa el log de la terminal donde corre `.\mvnw.cmd spring-boot:run`):
 
 ```text
 service=ec-orden-ms component=producer topic=orden-eventos partition=0 offset=0 eventType=orden.creada ordenId=1 timestamp=1713350000000 status=published
@@ -1328,7 +1414,7 @@ public class PagoControlador {
 ```powershell
 docker compose -f uso-microserv/ec-pago-ms/compose-dev.yml up -d
 cd uso-microserv/ec-pago-ms
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Con `ec-orden-ms` (3.6) todavía corriendo, crea otra orden para disparar el flujo completo:

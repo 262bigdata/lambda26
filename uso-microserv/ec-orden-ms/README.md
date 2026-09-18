@@ -6,8 +6,9 @@ eventos empresariales (S06).
 
 ## Requisitos
 
-- Java 21 y Maven instalados (`choco install temurin21 -y`,
-  `choco install maven -y`).
+- Java 21 instalado (`winget install --id EclipseAdoptium.Temurin.21.JDK --exact`).
+  No hace falta instalar Maven aparte: el proyecto trae su propio Maven
+  Wrapper (`mvnw.cmd`).
 - Docker Desktop corriendo.
 - Kafka arriba (`kafka/`, ver su propio README) — este microservicio se
   conecta a `localhost:49092` en DEV, y a la red `lambda26-kafka-net` en
@@ -55,7 +56,7 @@ docker exec -it lambda26-postgres-ec-orden-dev psql -U ecom -d db_ec_orden_ms -c
 Ejecuta la aplicación (perfil `dev` activo por defecto, `application.yml`):
 
 ```powershell
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 ## Uso — Docker completo (app + Postgres)
@@ -89,7 +90,7 @@ http://localhost:49021/swagger-ui/index.html
 ## Qué esperar
 
 El `POST` responde `201` con la orden guardada (`estado: "PENDIENTE"`). En la
-consola donde corre `mvn spring-boot:run` aparece una línea de log
+consola donde corre `.\mvnw.cmd spring-boot:run` aparece una línea de log
 `component=producer ... status=published`, con `partition`/`offset` reales —
 confírmalo también en Kafka UI (`http://localhost:48085`), topic
 `orden-eventos`. Si el envío a Kafka falla, la orden queda igual guardada en

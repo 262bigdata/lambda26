@@ -194,58 +194,35 @@ docker ps
 
 Si el comando responde con una tabla de contenedores, Docker esta listo. Si muestra error de conexion, abre Docker Desktop y espera a que el motor termine de iniciar.
 
-Java 21 y Maven se usan en el paso final para ejecutar los microservicios Spring Boot localmente, desde tu IDE o con `mvn spring-boot:run`. En otros escenarios se puede construir la aplicacion dentro de Docker, pero ese modo `prod` no forma parte del alcance operativo de este taller.
+Java 21 y VS Code se usan en el paso final para ejecutar los microservicios Spring Boot localmente. En otros escenarios se puede construir la aplicacion dentro de Docker, pero ese modo `prod` no forma parte del alcance operativo de este taller.
 
-Verifica si tienes Chocolatey:
+Instalar Java 21 con winget:
 
 ```powershell
-choco -v
+winget install --id EclipseAdoptium.Temurin.21.JDK --exact
 ```
 
-Si no tienes Chocolatey, ejecuta PowerShell como administrador y pega este comando:
+Cierra y vuelve a abrir PowerShell. Verifica la version de Java:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
-
-Luego cierra y vuelve a abrir PowerShell. Verifica nuevamente:
-
-```powershell
-choco -v
-```
-
-Instalar Java 21 con Chocolatey:
-
-```powershell
-choco install temurin21 -y
-```
-
-Verifica la version de Java:
-
-```powershell
-java -version
+java --version
+javac --version
 ```
 
 Tambien puedes descargar Java 21 desde:
 
 [Adoptium Temurin](https://adoptium.net)
 
-Instalar Maven 3.x con Chocolatey:
+Instalar VS Code con winget:
 
 ```powershell
-choco install maven -y
+winget install -e --id Microsoft.VisualStudioCode
 ```
 
-Verifica la version de Maven:
+No hace falta instalar Maven aparte: cada microservicio ya trae su propio Maven Wrapper (`mvnw.cmd`), que descarga la version correcta de Maven la primera vez que lo ejecutas. Ubicate en la carpeta donde esta el `pom.xml` del microservicio y ejecuta:
 
 ```powershell
-mvn -v
-```
-
-Uso local de Maven: ubicate en la carpeta donde esta el `pom.xml` del microservicio y ejecuta:
-
-```powershell
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 ### 7.2 Como leer los comandos Docker de este taller
@@ -541,7 +518,7 @@ cd C:\262\2629bigdata\lambda26\uso-microserv\ec-orden-ms
 Ejecuta la aplicacion:
 
 ```powershell
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Prueba el endpoint:
@@ -577,7 +554,7 @@ Consulta los datos registrados en la tabla `ordenes`:
 docker exec -it lambda26-postgres-ec-orden-dev psql -U ecom -d db_ec_orden_ms -c "SELECT * FROM ordenes;"
 ```
 
-Revisa la terminal donde esta corriendo `mvn spring-boot:run`. Ahi aparecen los logs del productor.
+Revisa la terminal donde esta corriendo `.\mvnw.cmd spring-boot:run`. Ahi aparecen los logs del productor.
 
 Busca una linea similar:
 
@@ -628,7 +605,7 @@ cd C:\262\2629bigdata\lambda26\uso-microserv\ec-pago-ms
 Ejecuta la aplicacion:
 
 ```powershell
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 Vuelve a crear una orden:

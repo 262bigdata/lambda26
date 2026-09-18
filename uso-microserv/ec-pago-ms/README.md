@@ -7,8 +7,9 @@ segundo productor del flujo de eventos empresariales (S06).
 
 ## Requisitos
 
-- Java 21 y Maven instalados (`choco install temurin21 -y`,
-  `choco install maven -y`).
+- Java 21 instalado (`winget install --id EclipseAdoptium.Temurin.21.JDK --exact`).
+  No hace falta instalar Maven aparte: el proyecto trae su propio Maven
+  Wrapper (`mvnw.cmd`).
 - Docker Desktop corriendo.
 - Kafka arriba (`kafka/`, ver su propio README).
 - **`ec-orden-ms` corriendo y publicando** — sin órdenes creadas, este
@@ -53,7 +54,7 @@ docker exec -it lambda26-postgres-ec-pago-dev psql -U ecom -d db_ec_pago_ms -c "
 Ejecuta la aplicación:
 
 ```powershell
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 ## Uso — Docker completo (app + Postgres)
