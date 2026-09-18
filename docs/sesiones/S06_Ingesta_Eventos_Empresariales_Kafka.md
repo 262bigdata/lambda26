@@ -790,6 +790,18 @@ service=ec-orden-ms component=producer topic=orden-eventos partition=0 offset=0 
 
 Verifica en Kafka UI (3.3) que `orden-eventos` ahora tiene un mensaje con `tipoEvento: orden.creada` y `origen: ec-orden-ms`.
 
+Confirma que la orden también quedó guardada en PostgreSQL (recuerda que es un sistema aparte de Kafka, sin transacción que los una):
+
+```powershell
+docker exec -it lambda26-postgres-ec-orden-dev psql -U ecom -d db_ec_orden_ms -c "SELECT * FROM ordenes;"
+```
+
+También puedes crear y listar órdenes desde Swagger, sin usar `Invoke-RestMethod`:
+
+```text
+http://localhost:49021/swagger-ui/index.html
+```
+
 ### 3.7 Crear `ec-pago-ms` como consumidor y productor
 
 **Producto del paso:** proyecto Spring Boot `ec-pago-ms` que consume `orden-eventos` y publica el resultado del pago en `pago-eventos`.
@@ -1339,6 +1351,12 @@ Verifica los datos:
 
 ```powershell
 docker exec -it lambda26-postgres-ec-pago-dev psql -U ecom -d db_ec_pago_ms -c "SELECT * FROM pagos;"
+```
+
+También puedes consultar los pagos desde Swagger:
+
+```text
+http://localhost:49031/swagger-ui/index.html
 ```
 
 Verifica en Kafka UI: el topic `pago-eventos` ahora existe, con el mensaje `pago.aprobado`, y el consumer group `ec-pago-ms-group` visible en la pestaña `Consumers`, con su *lag* en `orden-eventos` (idealmente en `0`, si ya consumió todo lo publicado).
