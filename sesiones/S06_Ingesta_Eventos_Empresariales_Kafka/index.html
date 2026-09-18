@@ -1113,6 +1113,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#350-instalar-y-verificar-java-21-y-vs-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.0 Instalar y verificar Java 21 y VS Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#351-crear-la-entidad-el-evento-y-el-repositorio" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1742,6 +1753,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#350-instalar-y-verificar-java-21-y-vs-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.0 Instalar y verificar Java 21 y VS Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#351-crear-la-entidad-el-evento-y-el-repositorio" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2042,7 +2064,7 @@
 <tbody>
 <tr>
 <td>Revisión previa individual</td>
-<td>Confirmar Docker Desktop funcionando; instalar Java 21 y Maven si aún no están instalados (<code>choco install temurin21 -y</code>, <code>choco install maven -y</code>). Trabajo individual, antes de clase.</td>
+<td>Confirmar Docker Desktop funcionando; instalar y verificar Java 21 y VS Code si aún no están instalados (ver 3.5.0). Trabajo individual, antes de clase.</td>
 <td>Silabo Unidad II, este mismo documento (1.1-1.7).</td>
 </tr>
 <tr>
@@ -2192,6 +2214,7 @@
 <li><strong>3.3</strong> Verificar con Kafka UI.</li>
 <li><strong>3.4</strong> Probar con Python (productor y consumidor rápidos).</li>
 <li><strong>3.5</strong> Crear <code>ec-orden-ms</code> como productor.</li>
+<li><strong>3.5.0</strong> Instalar y verificar Java 21 y VS Code.</li>
 <li><strong>3.5.1</strong> Crear la entidad, el evento y el repositorio.</li>
 <li><strong>3.5.2</strong> Configurar Kafka en código, no solo por propiedades.</li>
 <li><strong>3.5.3</strong> Crear el productor, el servicio y el controlador.</li>
@@ -2327,6 +2350,61 @@
 <p><strong>Error frecuente</strong>: un consumer que asume que todo mensaje en el topic es JSON válido con la forma esperada, y lanza una excepción no controlada apenas llega algo distinto — un solo mensaje malformado no debería tumbar un consumer que va a correr indefinidamente.</p>
 <h3 id="35-crear-ec-orden-ms-como-productor">3.5 Crear <code>ec-orden-ms</code> como productor<a class="headerlink" href="#35-crear-ec-orden-ms-como-productor" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> proyecto Spring Boot <code>ec-orden-ms</code> creado, con Kafka, JPA y PostgreSQL.</p>
+<h4 id="350-instalar-y-verificar-java-21-y-vs-code">3.5.0 Instalar y verificar Java 21 y VS Code<a class="headerlink" href="#350-instalar-y-verificar-java-21-y-vs-code" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> entorno de desarrollo configurado con Java 21 y VS Code (mismo criterio que DIST/LP2, ver 3.1 de esas guías).</p>
+<p><strong>Windows</strong> — <strong>PowerShell</strong> como usuario normal:</p>
+<div class="highlight"><pre><span></span><code><span class="n">winget</span> <span class="n">install</span> <span class="p">-</span><span class="n">-id</span> <span class="n">EclipseAdoptium</span><span class="p">.</span><span class="n">Temurin</span><span class="p">.</span><span class="n">21</span><span class="p">.</span><span class="n">JDK</span> <span class="p">-</span><span class="o">-exact</span>
+</code></pre></div>
+<p><strong>macOS</strong> (Homebrew no viene preinstalado en ningún Mac; una vez instalado, el comando de Temurin es el mismo para Intel y para Apple Silicon M1/M2/M3/M4 — Homebrew detecta la arquitectura automáticamente):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Instalar Homebrew (si no lo tiene)</span>
+/bin/bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh<span class="k">)</span><span class="s2">"</span>
+
+<span class="c1"># 2. Solo en Apple Silicon (M1/M2/M3/M4): agregar Homebrew al PATH.</span>
+<span class="c1">#    Se instala en /opt/homebrew (no en /usr/local como en Intel), y el</span>
+<span class="c1">#    propio instalador lo pide como paso obligatorio, no opcional.</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'eval "$(/opt/homebrew/bin/brew shellenv)"'</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zprofile
+<span class="nb">eval</span><span class="w"> </span><span class="s2">"</span><span class="k">$(</span>/opt/homebrew/bin/brew<span class="w"> </span>shellenv<span class="k">)</span><span class="s2">"</span>
+
+<span class="c1"># 3. Instalar Temurin 21</span>
+brew<span class="w"> </span>install<span class="w"> </span>--cask<span class="w"> </span>temurin@21
+</code></pre></div>
+<p><strong>Linux (Ubuntu/Debian)</strong> — repositorio oficial de Adoptium vía <code>apt</code>:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gpg
+wget<span class="w"> </span>-qO<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/trusted.gpg.d/adoptium.gpg<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">'/^VERSION_CODENAME/{print$2}'</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>temurin-21-jdk
+</code></pre></div>
+<p><strong>Linux (Fedora/RHEL)</strong> — repositorio oficial de Adoptium vía <code>dnf</code>:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/yum.repos.d/adoptium.repo<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s">[Adoptium]</span>
+<span class="s">name=Adoptium</span>
+<span class="s">baseurl=https://packages.adoptium.net/artifactory/rpm/$(. /etc/os-release; echo $ID)/$releasever/$basearch</span>
+<span class="s">enabled=1</span>
+<span class="s">gpgcheck=1</span>
+<span class="s">gpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public</span>
+<span class="s">EOF</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>temurin-21-jdk
+</code></pre></div>
+<p>Al finalizar, cierra y vuelve a abrir la terminal. Verifica la instalación:</p>
+<div class="highlight"><pre><span></span><code><span class="n">java</span> <span class="p">-</span><span class="n">-version</span>
+<span class="n">javac</span> <span class="p">-</span><span class="n">-version</span>
+</code></pre></div>
+<p>Ambas comprobaciones deben mostrar Java 21. Si conserva una versión anterior, configura <code>JAVA_HOME</code> con la ruta del JDK 21 desde las variables de entorno de Windows, actualiza <code>Path</code> para que <code>%JAVA_HOME%\bin</code> tenga prioridad y abre una terminal nueva.</p>
+<p><strong>VS Code:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">winget</span> <span class="n">install</span> <span class="n">-e</span> <span class="p">-</span><span class="n">-id</span> <span class="n">Microsoft</span><span class="p">.</span><span class="n">VisualStudioCode</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>--cask<span class="w"> </span>visual-studio-code
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>snap<span class="w"> </span>install<span class="w"> </span>--classic<span class="w"> </span>code
+</code></pre></div>
+<p>Instala las extensiones desde la terminal:</p>
+<div class="highlight"><pre><span></span><code>code<span class="w"> </span>--install-extension<span class="w"> </span>vscjava.vscode-java-pack
+code<span class="w"> </span>--install-extension<span class="w"> </span>vmware.vscode-boot-dev-pack
+code<span class="w"> </span>--install-extension<span class="w"> </span>cweijan.vscode-database-client2
+</code></pre></div>
+<p><code>vscjava.vscode-java-pack</code> trae soporte de Spring Initializr integrado a VS Code (lo usarás para generar <code>ec-orden-ms</code> y <code>ec-pago-ms</code> desde la Tabla 3), <code>vmware.vscode-boot-dev-pack</code> agrega el Spring Boot Dashboard para arrancar/detener ambos microservicios sin recordar el comando cada vez, y <code>cweijan.vscode-database-client2</code> es un cliente gráfico para revisar las tablas <code>ordenes</code>/<code>pagos</code> en PostgreSQL sin salir del editor.</p>
+<p>No hace falta instalar Maven aparte: cada proyecto que genera Spring Initializr trae su propio <strong>Maven Wrapper</strong> (<code>mvnw</code>/<code>mvnw.cmd</code>), que descarga la versión correcta de Maven la primera vez que lo ejecutas. Por eso en 3.6 y 3.8 los comandos usan <code>.\mvnw.cmd</code>, no <code>mvn</code>.</p>
 <p><strong>Tabla 3. Configuración de <code>ec-orden-ms</code> en Spring Initializr</strong></p>
 <table>
 <thead>
@@ -2375,7 +2453,7 @@
 </tbody>
 </table>
 <p><strong>Spring Boot 4 renombró varios starters</strong> — no es solo un número de versión más alto. <code>spring-boot-starter-web</code> pasó a llamarse <code>spring-boot-starter-webmvc</code> (separa explícitamente WebMVC de WebFlux desde el nombre del starter), y el genérico <code>spring-boot-starter-test</code> desapareció: cada starter que uses trae su propio <code>-test</code> (<code>spring-boot-starter-data-jpa-test</code>, <code>spring-boot-starter-webmvc-test</code>) en vez de uno solo que los cubra todos. Si Spring Initializr no te deja elegir Boot 4 todavía, agrega estas dependencias a mano con los nombres de arriba después de generar el proyecto — no con los nombres de Boot 3.</p>
-<p><strong>Spring Boot DevTools</strong> reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar <code>mvn spring-boot:run</code> a mano — en <code>application-dev.yml</code> (más abajo) se activa con <code>spring.devtools.restart.enabled</code> y <code>spring.devtools.livereload.enabled</code>. En el <code>pom.xml</code> va con <code>&lt;scope&gt;runtime&lt;/scope&gt;</code> y <code>&lt;optional&gt;true&lt;/optional&gt;</code>, para que no viaje al artefacto final en <code>prod</code>.</p>
+<p><strong>Spring Boot DevTools</strong> reinicia la aplicación automáticamente cada vez que guardas un cambio en el código, sin que tengas que detener y volver a ejecutar <code>.\mvnw.cmd spring-boot:run</code> a mano — en <code>application-dev.yml</code> (más abajo) se activa con <code>spring.devtools.restart.enabled</code> y <code>spring.devtools.livereload.enabled</code>. En el <code>pom.xml</code> va con <code>&lt;scope&gt;runtime&lt;/scope&gt;</code> y <code>&lt;optional&gt;true&lt;/optional&gt;</code>, para que no viaje al artefacto final en <code>prod</code>.</p>
 <p><strong><code>uso-microserv/ec-orden-ms/compose-dev.yml</code>:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-ec-orden-dev</span>
 
@@ -2701,14 +2779,14 @@
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-postgres-ec-orden-dev</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">ecom</span> <span class="n">-d</span> <span class="n">db_ec_orden_ms</span> <span class="n">-c</span> <span class="s2">"\dt"</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">uso-microserv</span><span class="p">/</span><span class="n">ec-orden-ms</span>
-<span class="n">mvn</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
+<span class="p">.\</span><span class="n">mvnw</span><span class="p">.</span><span class="n">cmd</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
 </code></pre></div>
 <p>Crea una orden:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="s2">"http://localhost:49021/ordenes"</span> <span class="p">`</span>
   <span class="n">-ContentType</span> <span class="s2">"application/json"</span> <span class="p">`</span>
   <span class="n">-Body</span> <span class="s1">'{"usuarioId":1,"total":100}'</span>
 </code></pre></div>
-<p>Verifica en consola (<code>Ctrl+C</code> no es necesario, revisa el log de la terminal donde corre <code>mvn spring-boot:run</code>):</p>
+<p>Verifica en consola (<code>Ctrl+C</code> no es necesario, revisa el log de la terminal donde corre <code>.\mvnw.cmd spring-boot:run</code>):</p>
 <div class="highlight"><pre><span></span><code>service=ec-orden-ms component=producer topic=orden-eventos partition=0 offset=0 eventType=orden.creada ordenId=1 timestamp=1713350000000 status=published
 </code></pre></div>
 <p>Verifica en Kafka UI (3.3) que <code>orden-eventos</code> ahora tiene un mensaje con <code>tipoEvento: orden.creada</code> y <code>origen: ec-orden-ms</code>.</p>
@@ -3180,7 +3258,7 @@
 <p><strong>Producto del paso:</strong> flujo completo — una orden nueva termina en un pago procesado y publicado.</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-microserv</span><span class="p">/</span><span class="n">ec-pago-ms</span><span class="p">/</span><span class="n">compose-dev</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
 <span class="nb">cd </span><span class="n">uso-microserv</span><span class="p">/</span><span class="n">ec-pago-ms</span>
-<span class="n">mvn</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
+<span class="p">.\</span><span class="n">mvnw</span><span class="p">.</span><span class="n">cmd</span> <span class="n">spring-boot</span><span class="p">:</span><span class="n">run</span>
 </code></pre></div>
 <p>Con <code>ec-orden-ms</code> (3.6) todavía corriendo, crea otra orden para disparar el flujo completo:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="s2">"http://localhost:49021/ordenes"</span> <span class="p">`</span>
