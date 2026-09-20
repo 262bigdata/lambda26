@@ -1017,6 +1017,34 @@
   
   
     <li class="md-nav__item">
+      <a href="sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="sesiones/S12_Evaluacion_Unidad_2/" class="md-nav__link">
         
   
@@ -1338,13 +1366,13 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 <td>Salida analítica particionada en formato columnar, con controles de calidad (esquema, nulos, duplicados).</td>
 </tr>
 <tr>
-<td>S4</td>
+<td><a href="sesiones/S04_ML_Distribuido_Regresion_Spark_MLlib/">S4</a></td>
 <td>ML distribuido con Spark MLlib (Regresión).</td>
 <td><code>uso-pyspark</code></td>
 <td>Modelo de regresión distribuida entrenado, con métricas iniciales documentadas.</td>
 </tr>
 <tr>
-<td>S5</td>
+<td><a href="sesiones/S05_Evaluacion_Unidad_1/">S5</a></td>
 <td>Integración del procesamiento batch distribuido: arquitectura, PySpark, HDFS, formatos analíticos, particionamiento y ML distribuido.</td>
 <td>—</td>
 <td><strong>Producto U1:</strong> pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</td>
@@ -1365,13 +1393,13 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 </thead>
 <tbody>
 <tr>
-<td>S6</td>
+<td><a href="sesiones/S06_Ingesta_Eventos_Empresariales_Kafka/">S6</a></td>
 <td>Ingesta de eventos empresariales en tiempo real.</td>
 <td><code>uso-rapido</code> / <code>uso-microserv</code> + <code>kafka</code></td>
 <td>Publicación y consumo de eventos empresariales por Kafka, con contrato de evento documentado.</td>
 </tr>
 <tr>
-<td>S7</td>
+<td><a href="sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/">S7</a></td>
 <td>Ingesta de eventos IoT/sensores en tiempo real.</td>
 <td><code>uso-atmos</code> + <code>kafka</code></td>
 <td>Simulación de eventos de sensores integrada al pipeline de Kafka.</td>
@@ -1509,7 +1537,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
     Artifacts -.-&gt;|"modelo (volumen compartido)"| Scripts
 
     subgraph UseIoT["uso-atmos (fuente principal ML)"]
-        IoT["pendiente&lt;br/&gt;ESP32: temperatura,&lt;br/&gt;humedad, presión&lt;br/&gt;publica atmos-eventos"]
+        IoT["3 sensores ESP32 simulados&lt;br/&gt;temperatura, humedad, presión&lt;br/&gt;publica atmos-eventos (3 particiones)"]
     end
 
     subgraph UseCDC["uso-replica-cdc"]
@@ -1546,7 +1574,7 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
     end
 
     StreamingModule --&gt;|"U2: streaming consumer"| Kafka
-    UseIoT -. "futuro: atmos-eventos" .-&gt; Kafka
+    UseIoT --&gt;|"atmos-eventos"| Kafka
     UseCDC -. "futuro: migracion CDC" .-&gt; Kafka
     UseCDC -. "nuevo registro en el DW" .-&gt; UseBITR
     DBT -. "Grafana consulta marts cada 1s (polling)" .-&gt; Grafana
@@ -1578,6 +1606,10 @@ analítica/ML, observabilidad y visualización BI para la toma de decisiones.
 <li><a href="sesiones/S01_Arquitectura_Big_Data_Lambda_Kappa/">S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming</a></li>
 <li><a href="sesiones/S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/">S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa</a></li>
 <li><a href="sesiones/S03_Procesamiento_Calidad_Datos_Particionamiento/">S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico</a></li>
+<li><a href="sesiones/S04_ML_Distribuido_Regresion_Spark_MLlib/">S4 - ML Distribuido con Spark MLlib (Regresión)</a></li>
+<li><a href="sesiones/S05_Evaluacion_Unidad_1/">S5 - Evaluación de la Unidad I</a></li>
+<li><a href="sesiones/S06_Ingesta_Eventos_Empresariales_Kafka/">S6 - Ingesta de Eventos Empresariales en Tiempo Real</a></li>
+<li><a href="sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/">S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real</a></li>
 <li><a href="proyecto-sello/">Guía de Proyecto Sello</a></li>
 </ul>
 
