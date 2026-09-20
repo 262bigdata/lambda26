@@ -120,13 +120,13 @@ El particionado por `key` garantiza **orden**, no reparto parejo: los tres `sens
 **Figura 3. Flujo del dispositivo real simulado: ESP32 (Wokwi) → broker MQTT público → puente → Kafka**
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph WokwiModule["Simulación en el navegador (Wokwi, WebAssembly) — no localhost"]
         ESP32["ESP32 + DHT22 + potenciómetro<br/>firmware Arduino real"]
     end
 
     subgraph Broker["test.mosquitto.org (broker público, sin cuenta)"]
-        Topic["topic: lambda26/atmos/equipo01/lecturas"]
+        Topic["topic:<br/>lambda26/atmos/equipo01/lecturas"]
     end
 
     subgraph UsoAtmosMqtt["uso-atmos"]
@@ -135,7 +135,7 @@ flowchart LR
 
     KafkaTopic["TOPIC: atmos-eventos<br/>(mismo topic y esquema de Figura 2)"]
 
-    ESP32 -->|"MQTT, publica JSON"| Topic
+    ESP32 -->|"MQTT<br/>publica JSON"| Topic
     Topic -->|"suscripción"| Bridge
     Bridge -->|"publica, key=sensorId<br/>sin validar ni transformar"| KafkaTopic
 ```
