@@ -1972,13 +1972,13 @@
     Consumer -.-&gt;|"S10: inferencia ML&lt;br/&gt;sobre series de tiempo (futuro)"| Futuro["uso-pyspark&lt;br/&gt;streaming + modelo entrenado en S4"]</code></pre>
 <p>El particionado por <code>key</code> garantiza <strong>orden</strong>, no reparto parejo: los tres <code>sensorId</code> de esta simulación no caen uno por partición — <code>esp32-patio</code> y <code>esp32-invernadero</code> hashean a la misma partición (2), mientras que <code>esp32-laboratorio</code> cae solo en la partición 0, y la partición 1 queda sin uso con este conjunto exacto de 3 llaves. Cada <code>sensorId</code> sí conserva su propio orden interno entre lecturas (Kafka nunca reordena los eventos de una misma key dentro de una partición) — solo no reparte el volumen total en partes iguales entre particiones. Con más sensores o con otra elección de <code>key</code>, la distribución cambiaría; esto se verifica con datos reales en 3.5, no se memoriza como una regla fija.</p>
 <p><strong>Figura 3. Flujo del dispositivo real simulado: ESP32 (Wokwi) → broker MQTT público → puente → Kafka</strong></p>
-<pre class="mermaid"><code>flowchart LR
+<pre class="mermaid"><code>flowchart TB
     subgraph WokwiModule["Simulación en el navegador (Wokwi, WebAssembly) — no localhost"]
         ESP32["ESP32 + DHT22 + potenciómetro&lt;br/&gt;firmware Arduino real"]
     end
 
     subgraph Broker["test.mosquitto.org (broker público, sin cuenta)"]
-        Topic["topic: lambda26/atmos/equipo01/lecturas"]
+        Topic["topic:&lt;br/&gt;lambda26/atmos/equipo01/lecturas"]
     end
 
     subgraph UsoAtmosMqtt["uso-atmos"]
@@ -1987,7 +1987,7 @@
 
     KafkaTopic["TOPIC: atmos-eventos&lt;br/&gt;(mismo topic y esquema de Figura 2)"]
 
-    ESP32 --&gt;|"MQTT, publica JSON"| Topic
+    ESP32 --&gt;|"MQTT&lt;br/&gt;publica JSON"| Topic
     Topic --&gt;|"suscripción"| Bridge
     Bridge --&gt;|"publica, key=sensorId&lt;br/&gt;sin validar ni transformar"| KafkaTopic</code></pre>
 <p>Ni el ESP32 (simulado en tu navegador vía Wokwi) ni el bridge (corriendo en tu máquina) exponen nada a internet — los dos solo abren conexiones <strong>salientes</strong> hacia el mismo broker público, que ya está en internet. No hace falta Mosquitto propio, ni túnel, ni tarjeta de crédito, ni cuenta de ningún tipo: es exactamente el mismo patrón productor→broker→consumidor de toda la sesión, con la única diferencia de que este broker no es tuyo — es compartido por cualquiera en internet, por eso el topic incluye un identificador de equipo (<code>equipo01</code>), para no mezclar tus mensajes con los de otro grupo del curso que use el mismo broker al mismo tiempo.</p>
