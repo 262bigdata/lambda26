@@ -1949,6 +1949,7 @@
 <li><code>uso-atmos</code> — simulador Python de sensores ESP32 (productor) y su consumidor validador, sobre el mismo <code>kafka/</code> de S6. También aquí vive el puente hacia el broker MQTT público (3.7).</li>
 <li><code>uso-atmos/wokwi</code> — firmware de un ESP32 real simulado en Wokwi (DHT22 + potenciómetro).</li>
 </ul>
+<p>En total, <strong>cuatro dispositivos</strong> publican al mismo topic <code>atmos-eventos</code>, con el mismo contrato de evento: los 3 sensores ESP32 que simula <code>producer_sensores.py</code> en Python (Figura 2) y el ESP32 real simulado en Wokwi (Figura 3), que llega por una ruta distinta — MQTT y un puente — en vez de publicar directo a Kafka.</p>
 <p><strong>Figura 2. Flujo del simulador Python: 3 sensores simulados, particionados por <code>sensorId</code></strong></p>
 <pre class="mermaid"><code>flowchart LR
     subgraph UsoAtmos["uso-atmos"]
@@ -1989,7 +1990,7 @@
     ESP32 --&gt;|"MQTT, publica JSON"| Topic
     Topic --&gt;|"suscripción"| Bridge
     Bridge --&gt;|"publica, key=sensorId&lt;br/&gt;sin validar ni transformar"| KafkaTopic</code></pre>
-<p>Ni el ESP32 (simulado en la nube de Wokwi) ni el bridge (corriendo en tu máquina) exponen nada a internet — los dos solo abren conexiones <strong>salientes</strong> hacia el mismo broker público, que ya está en internet. No hace falta Mosquitto propio, ni túnel, ni tarjeta de crédito, ni cuenta de ningún tipo: es exactamente el mismo patrón productor→broker→consumidor de toda la sesión, con la única diferencia de que este broker no es tuyo — es compartido por cualquiera en internet, por eso el topic incluye un identificador de equipo (<code>equipo01</code>), para no mezclar tus mensajes con los de otro grupo del curso que use el mismo broker al mismo tiempo.</p>
+<p>Ni el ESP32 (simulado en tu navegador vía Wokwi) ni el bridge (corriendo en tu máquina) exponen nada a internet — los dos solo abren conexiones <strong>salientes</strong> hacia el mismo broker público, que ya está en internet. No hace falta Mosquitto propio, ni túnel, ni tarjeta de crédito, ni cuenta de ningún tipo: es exactamente el mismo patrón productor→broker→consumidor de toda la sesión, con la única diferencia de que este broker no es tuyo — es compartido por cualquiera en internet, por eso el topic incluye un identificador de equipo (<code>equipo01</code>), para no mezclar tus mensajes con los de otro grupo del curso que use el mismo broker al mismo tiempo.</p>
 <p>El puente no valida nada — reenvía el payload de MQTT a Kafka tal cual llegó. La validación de esquema y de rango físico sigue viviendo en un solo lugar (<code>consumer_sensores.py</code>, 3.4): para el consumer, no hay diferencia entre un evento que vino del simulador Python (Figura 2) o de un ESP32 real simulado (Figura 3) — ambos terminan en el mismo topic, con el mismo contrato.</p>
 <h3 id="22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio">2.2 Telemetría IoT: qué cambia frente a un evento de negocio<a class="headerlink" href="#22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio" title="Permanent link">&para;</a></h3>
 <p><strong>Tabla 2. Conceptos de esta sesión</strong></p>
