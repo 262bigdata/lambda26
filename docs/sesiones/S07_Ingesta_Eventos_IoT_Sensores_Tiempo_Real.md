@@ -94,30 +94,29 @@ En total, **cuatro dispositivos** publican al mismo topic `atmos-eventos`, con e
 **Figura 2. Flujo del simulador Python: 3 sensores simulados, particionados por `sensorId`**
 
 ```mermaid
-flowchart LR
-    subgraph UsoAtmos["uso-atmos"]
-        direction TB
-        Producer["PRODUCER<br/>3 sensores ESP32 simulados<br/>sensor.lectura"]
-        Consumer["CONSUMER<br/>group: uso-atmos-group<br/>valida esquema y rango"]
-    end
+flowchart TB
+    Producer["uso-atmos / PRODUCER<br/>3 sensores ESP32 simulados<br/>sensor.lectura"]
 
     subgraph KafkaAtmos["BROKER KAFKA (kafka:9092)"]
-        direction TB
         subgraph AtmosTopic["TOPIC: atmos-eventos (3 particiones)"]
+            direction LR
             P0["Partición 0<br/>key=esp32-laboratorio"]
-            P1["Partición 1<br/>(sin sensor asignado<br/>con estos 3 sensorId)"]
+            P1["Partición 1<br/>sin sensor asignado<br/>con estos 3 sensorId"]
             P2["Partición 2<br/>key=esp32-patio<br/>key=esp32-invernadero"]
         end
     end
 
-    Producer -->|"publica, key=sensorId"| AtmosTopic
+    Consumer["uso-atmos / CONSUMER<br/>group: uso-atmos-group<br/>valida esquema y rango"]
+    Futuro["uso-pyspark<br/>streaming + modelo<br/>entrenado en S4"]
+
+    Producer -->|"publica<br/>key=sensorId"| AtmosTopic
     AtmosTopic -->|"lee"| Consumer
-    Consumer -.->|"S10: inferencia ML<br/>sobre series de tiempo (futuro)"| Futuro["uso-pyspark<br/>streaming + modelo entrenado en S4"]
+    Consumer -.->|"S10: inferencia ML<br/>sobre series de tiempo<br/>(futuro)"| Futuro
 ```
 
 El particionado por `key` garantiza **orden**, no reparto parejo: los tres `sensorId` de esta simulación no caen uno por partición — `esp32-patio` y `esp32-invernadero` hashean a la misma partición (2), mientras que `esp32-laboratorio` cae solo en la partición 0, y la partición 1 queda sin uso con este conjunto exacto de 3 llaves. Cada `sensorId` sí conserva su propio orden interno entre lecturas (Kafka nunca reordena los eventos de una misma key dentro de una partición) — solo no reparte el volumen total en partes iguales entre particiones. Con más sensores o con otra elección de `key`, la distribución cambiaría; esto se verifica con datos reales en 3.5, no se memoriza como una regla fija.
 
-**Figura 3. Flujo del dispositivo real simulado: ESP32 (Wokwi) → broker MQTT público → puente → Kafka**
+**Figura 3. Flujo del dispositivo real simulado: ESP32 (Wokwi) → broker MQTT público → puente → mismo Kafka y consumer de la Figura 2**
 
 ```mermaid
 flowchart TB
@@ -126,18 +125,25 @@ flowchart TB
     end
 
     subgraph Broker["test.mosquitto.org (broker público, sin cuenta)"]
-        Topic["topic:<br/>lambda26/atmos/equipo01/lecturas"]
+        Topic["topic:<br/>lambda26/atmos/<br/>equipo01/lecturas"]
     end
 
     subgraph UsoAtmosMqtt["uso-atmos"]
         Bridge["BRIDGE<br/>bridge_mqtt_kafka.py<br/>suscrito al mismo topic"]
     end
 
-    KafkaTopic["TOPIC: atmos-eventos<br/>(mismo topic y esquema de Figura 2)"]
+    subgraph KafkaAtmos["BROKER KAFKA (kafka:9092) — el mismo de la Figura 2"]
+        AtmosTopic["TOPIC: atmos-eventos<br/>(3 particiones)"]
+    end
+
+    Consumer["uso-atmos / CONSUMER<br/>group: uso-atmos-group<br/>valida esquema y rango"]
+    Futuro["uso-pyspark<br/>streaming + modelo<br/>entrenado en S4"]
 
     ESP32 -->|"MQTT<br/>publica JSON"| Topic
     Topic -->|"suscripción"| Bridge
-    Bridge -->|"publica, key=sensorId<br/>sin validar ni transformar"| KafkaTopic
+    Bridge -->|"publica<br/>key=sensorId<br/>sin validar ni transformar"| AtmosTopic
+    AtmosTopic -->|"lee"| Consumer
+    Consumer -.->|"S10: inferencia ML<br/>sobre series de tiempo<br/>(futuro)"| Futuro
 ```
 
 Ni el ESP32 (simulado en tu navegador vía Wokwi) ni el bridge (corriendo en tu máquina) exponen nada a internet — los dos solo abren conexiones **salientes** hacia el mismo broker público, que ya está en internet. No hace falta Mosquitto propio, ni túnel, ni tarjeta de crédito, ni cuenta de ningún tipo: es exactamente el mismo patrón productor→broker→consumidor de toda la sesión, con la única diferencia de que este broker no es tuyo — es compartido por cualquiera en internet, por eso el topic incluye un identificador de equipo (`equipo01`), para no mezclar tus mensajes con los de otro grupo del curso que use el mismo broker al mismo tiempo.
@@ -804,18 +810,19 @@ Tiempo: 3h fuera del aula.
 
 ### 4.1 Actividad
 
-Extensión autónoma del simulador de sensores construido en clase, documentada en evidencia individual.
+Aplicación del patrón de ingesta IoT de esta sesión al **Proyecto Sello**, con un sensor **real** — no simulado en Wokwi.
 
 Completa y evidencia estas tareas:
 
-1. Ajustar `SENSOR_INTERVAL_MS` y `SENSOR_IDS` para aumentar la frecuencia y el volumen de eventos (por ejemplo, un sensor cada 500 ms y 5 sensores en total), y observar el efecto en el *lag* del consumer group en Kafka UI.
-2. Agregar un campo nuevo al esquema del evento (por ejemplo, `bateria` — porcentaje de batería del ESP32), actualizando el productor, el consumidor y el contrato documentado.
-3. Agregar una validación de rango nueva sobre ese campo (por ejemplo, `bateria` fuera de `0-100`), y provocar y evidenciar la alerta correspondiente.
-4. Verificar en Kafka UI cómo se distribuyen los eventos entre particiones con el nuevo conjunto de `sensorId`, y explicar si el reparto es más o menos parejo que el observado en 3.5.
+1. Sobre el problema de datos de tu propio Proyecto Sello (brief técnico-analítico de S2), identifica qué variable física necesita medir tu sistema (temperatura, humedad, distancia, luz, vibración, u otra según tu dominio) y consigue un sensor **real** que la mida — un ESP32/Arduino con un sensor físico de verdad conectado, el sensor propio de tu celular publicado por MQTT, o cualquier otra fuente de datos física real. No vale un componente simulado en Wokwi.
+2. Diseña el contrato de evento **propio de tu Proyecto Sello** (no `sensor.lectura` de `atmos-eventos`), con el mismo criterio de 3.6: campos, tipos y unidades explícitos.
+3. Construye tu propio productor o puente que publique las lecturas reales de tu sensor hacia un topic de Kafka propio de tu Proyecto Sello, replicando el patrón dispositivo→MQTT→puente→Kafka de 3.7-3.8 (o dispositivo→Kafka directo, si tu sensor sí puede correr un cliente Kafka).
+4. Construye el consumer correspondiente, separando validación de esquema y de rango físico (2.2) igual que `consumer_sensores.py`, pero sobre tu propio contrato.
+5. Verifica de punta a punta con datos **reales** (no simulados) y evidencia la distribución de particiones en Kafka UI.
 
 ### 4.2 Propósito
 
-Que cada estudiante demuestre, de forma individual, que puede ajustar esquema, frecuencia, volumen y validaciones de un productor IoT sin acompañamiento del docente — la extensión exacta que S10 va a necesitar para entrenar sobre esta misma fuente de datos.
+Que cada estudiante demuestre, con hardware o datos reales de su propio Proyecto Sello — sin depender de un simulador como Wokwi —, que puede replicar el patrón completo de ingesta IoT (dispositivo → MQTT/Kafka → puente → validación de esquema y rango) sobre su propia fuente de datos, dejando lista la ingesta real que su Proyecto Sello va a necesitar en las unidades siguientes.
 
 ### 4.3 Indicaciones
 
@@ -837,35 +844,37 @@ S07_Equipo##_ApellidoNombre.pdf
 
 **Evidencia técnica**
 
-1. Kafka UI con `atmos-eventos` y su nueva distribución de particiones (4.1, punto 4).
-2. Logs del producer y consumer con la nueva frecuencia/volumen (4.1, punto 1).
-3. Contrato del evento actualizado con el campo nuevo (4.1, punto 2).
-4. Evidencia de la alerta provocada sobre el campo nuevo (4.1, punto 3).
+1. Sensor físico real conectado y funcionando (foto o video corto del hardware real — no de una simulación en Wokwi).
+2. Kafka UI con el topic propio del Proyecto Sello y su distribución de particiones.
+3. Logs de tu productor/puente y de tu consumer, con lecturas reales (no simuladas) llegando de punta a punta.
+4. Contrato de evento propio del Proyecto Sello, documentado (4.1, punto 2).
+5. Evidencia de al menos una validación de rango físico provocada sobre un valor real fuera de rango.
 
 **Reflexión técnica breve**
 
 ```text
-¿Por qué separar la validación de esquema (¿tiene el campo?) de la
-validación de rango físico (¿el valor tiene sentido?) evita el problema
-del caso descrito en 1.6.1, en vez de una sola validación que intente
-cubrir ambas a la vez?
+¿Qué tuviste que resolver para pasar de un sensor simulado en Wokwi a uno
+real que tu Proyecto Sello va a usar de verdad, y por qué el mismo patrón
+dispositivo -> MQTT/Kafka -> puente -> validación siguió funcionando sin
+cambios de fondo?
 ```
 
 ### 4.4 Criterios mínimos de aceptación
 
 - El archivo respeta el nombre solicitado.
-- `uso-atmos` corriendo con la frecuencia/volumen ajustados, evidenciado.
-- Campo nuevo agregado al esquema, documentado en el contrato.
-- Evidencia de la alerta de rango provocada sobre el campo nuevo.
+- Sensor real conectado y publicando datos reales — no un componente simulado en Wokwi.
+- Contrato de evento propio del Proyecto Sello, documentado.
+- Productor/puente y consumer propios, con separación de validación de esquema y de rango físico.
+- Evidencia de al menos una alerta de rango provocada sobre un valor real.
 - Reflexión técnica breve incluida.
 
 ### 4.5 Preguntas de defensa
 
-1. ¿Por qué `esp32-patio` y `esp32-invernadero` cayeron en la misma partición en 3.5, si tienen `sensorId` distintos?
-2. ¿Qué diferencia hay entre un evento `invalid` y un evento `alerta` en tu consumer?
-3. ¿Qué pasaría si el productor no mantuviera un estado por sensor y generara cada valor de forma independiente en cada ronda?
-4. ¿Por qué el volumen de eventos importa más en esta sesión que en S6, si el patrón de Kafka es exactamente el mismo?
-5. ¿Por qué un ESP32 real no puede publicar directamente en Kafka, y qué rol cumple el puente MQTT-Kafka de 3.7?
+1. ¿Por qué tu sensor real no puede publicar directamente en Kafka, y qué rol cumple tu propio puente MQTT-Kafka?
+2. ¿Qué diferencia hay, en tu consumer, entre un evento `invalid` (falla de esquema) y uno con una alerta de rango físico?
+3. ¿En qué te basaste para definir el rango físico plausible de tu sensor real, y qué pasaría si lo dejaras sin validar?
+4. ¿Qué cambiaría en tu contrato de evento si tu Proyecto Sello agrega un segundo sensor real de otra naturaleza?
+5. ¿Por qué esta sesión simuló primero el dispositivo en Wokwi antes de pedirte conectar el sensor real de tu Proyecto Sello?
 
 ### 4.6 Rúbrica de evaluación
 
@@ -873,10 +882,10 @@ cubrir ambas a la vez?
 
 | Criterio | Peso (%) | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Nivel obtenido |
 |---|---:|---|---|---|---|---:|
-| 1. Frecuencia y volumen ajustados | 25 | Cambios evidenciados con claridad, incluyendo el efecto en el *lag*. | Cambios evidenciados, sin relacionarlos con el *lag*. | Cambios parciales o poco claros. | No evidencia ningún ajuste. | |
-| 2. Esquema extendido y documentado | 25 | Campo nuevo agregado, funcional y documentado en el contrato. | Campo agregado y funcional, contrato incompleto. | Campo agregado sin actualizar el contrato. | No agrega ningún campo. | |
-| 3. Validación de rango nueva | 25 | Validación implementada y alerta provocada y evidenciada con claridad. | Validación implementada, evidencia parcial de la alerta. | Validación incompleta o sin evidencia de la alerta. | No implementa la validación. | |
-| 4. Particionado y reflexión | 25 | Explica con claridad la nueva distribución de particiones y reflexión sólida, conectada al caso 1.6.1. | Evidencia parcial de la distribución o reflexión genérica. | Uno de los dos ausente. | No presenta ninguno de los dos. | |
+| 1. Sensor real conectado | 25 | Sensor físico real funcionando y evidenciado con claridad (no simulado). | Sensor real funcionando, evidencia parcial. | Sensor real conectado con fallas o evidencia insuficiente. | No conecta un sensor real. | |
+| 2. Contrato de evento propio | 25 | Contrato propio del Proyecto Sello bien definido y documentado. | Contrato definido, documentación incompleta. | Contrato incompleto o poco claro. | No define un contrato propio. | |
+| 3. Productor/puente y consumer propios | 25 | Implementados y funcionando de punta a punta con datos reales. | Implementados, con al menos un tramo simulado o incompleto. | Implementación parcial. | No implementa productor/puente ni consumer propios. | |
+| 4. Validación de rango y reflexión | 25 | Alerta de rango provocada y evidenciada con claridad; reflexión sólida sobre real vs. simulado. | Evidencia parcial de la alerta o reflexión genérica. | Uno de los dos ausente. | No presenta ninguno de los dos. | |
 
 Nota final = suma de (`Peso` / 100 × `Puntos del nivel obtenido`) = ____ / 20.
 
