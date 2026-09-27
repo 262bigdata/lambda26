@@ -1,0 +1,3082 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking/">
+      
+      
+        <link rel="prev" href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/">
+      
+      
+        <link rel="next" href="../S12_Evaluacion_Unidad_2/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S8 - Procesamiento en Streaming con Spark</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s8-procesamiento-en-streaming-con-spark-ventanas-watermarking-y-semantica-de-entrega" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S8 - Procesamiento en Streaming con Spark
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S06_Ingesta_Eventos_Empresariales_Kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-cajero-que-nunca-cerraba-caja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el cajero que nunca cerraba caja
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-streaming-por-micro-lotes-readstream-writestream-y-modos-de-salida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Streaming por micro-lotes: readStream, writeStream y modos de salida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-ventanas-de-tiempo-fijas-y-deslizantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Ventanas de tiempo: fijas y deslizantes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-watermarking-acotar-la-espera-por-datos-tardios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Watermarking: acotar la espera por datos tardíos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-checkpointing-tolerancia-a-fallos-en-una-consulta-que-no-termina" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Checkpointing: tolerancia a fallos en una consulta que no termina
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-semantica-de-entrega-y-el-costo-del-intervalo-de-disparo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Semántica de entrega y el costo del intervalo de disparo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno lambda26 y verificar el punto de partida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession, con el conector de Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-leer-el-topic-en-modo-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Leer el topic en modo streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-parsear-el-json-con-un-esquema-explicito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Parsear el JSON con un esquema explícito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-primera-consulta-ver-los-eventos-llegar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Primera consulta: ver los eventos llegar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.7)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-watermarking-acotar-cuanto-se-espera-por-datos-tardios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Watermarking: acotar cuánto se espera por datos tardíos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Ventana deslizante: una lectura que se actualiza más seguido que se cierra
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-checkpointing-que-guarda-y-que-pasa-al-reiniciar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Checkpointing: qué guarda, y qué pasa al reiniciar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-un-dato-tardio-y-el-watermark-descartandolo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Un dato tardío, y el watermark descartándolo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-deduplicacion-acotada-por-watermark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Deduplicación acotada por watermark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.12 Intervalo de disparo: el costo de decidir cada cuánto procesar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313-escribir-la-salida-a-parquet-con-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.13 Escribir la salida a Parquet, con checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-cajero-que-nunca-cerraba-caja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el cajero que nunca cerraba caja
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-streaming-por-micro-lotes-readstream-writestream-y-modos-de-salida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Streaming por micro-lotes: readStream, writeStream y modos de salida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-ventanas-de-tiempo-fijas-y-deslizantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Ventanas de tiempo: fijas y deslizantes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-watermarking-acotar-la-espera-por-datos-tardios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Watermarking: acotar la espera por datos tardíos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-checkpointing-tolerancia-a-fallos-en-una-consulta-que-no-termina" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Checkpointing: tolerancia a fallos en una consulta que no termina
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-semantica-de-entrega-y-el-costo-del-intervalo-de-disparo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Semántica de entrega y el costo del intervalo de disparo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno lambda26 y verificar el punto de partida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession, con el conector de Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-leer-el-topic-en-modo-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Leer el topic en modo streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-parsear-el-json-con-un-esquema-explicito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Parsear el JSON con un esquema explícito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-primera-consulta-ver-los-eventos-llegar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Primera consulta: ver los eventos llegar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.7)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-watermarking-acotar-cuanto-se-espera-por-datos-tardios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Watermarking: acotar cuánto se espera por datos tardíos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Ventana deslizante: una lectura que se actualiza más seguido que se cierra
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-checkpointing-que-guarda-y-que-pasa-al-reiniciar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Checkpointing: qué guarda, y qué pasa al reiniciar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-un-dato-tardio-y-el-watermark-descartandolo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Un dato tardío, y el watermark descartándolo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-deduplicacion-acotada-por-watermark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Deduplicación acotada por watermark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.12 Intervalo de disparo: el costo de decidir cada cuánto procesar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313-escribir-la-salida-a-parquet-con-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.13 Escribir la salida a Parquet, con checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s8-procesamiento-en-streaming-con-spark-ventanas-watermarking-y-semantica-de-entrega">S8 - Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega<a class="headerlink" href="#s8-procesamiento-en-streaming-con-spark-ventanas-watermarking-y-semantica-de-entrega" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S6 y S7 dejaron dos productores publicando en Kafka: eventos empresariales y telemetría de sensores. Hasta ahí, el consumidor de cada topic (<code>consumer_sensores.py</code>, en Python simple) procesa un mensaje a la vez y valida su forma y su rango. Esta sesión cambia de herramienta: <strong>Spark Structured Streaming</strong> lee el mismo topic <code>atmos-eventos</code> de S7, pero en vez de procesar mensaje por mensaje, agrupa los eventos en micro-lotes y permite <strong>agregarlos por ventanas de tiempo</strong> — un promedio de temperatura cada 10 segundos, por sensor. Esa idea trae dos preguntas nuevas que un consumidor simple no tenía que responder: ¿cuánto tiempo se espera a un dato que llega tarde?, y ¿qué pasa con el resultado si el proceso se cae a mitad de camino? El porqué de tratarlas juntas se desarrolla en 1.6, a partir del caso.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Streaming por micro-lotes: <code>readStream</code>, <code>writeStream</code> y modos de salida.</li>
+<li>Ventanas de tiempo: fijas y deslizantes.</li>
+<li>Watermarking: acotar la espera por datos tardíos.</li>
+<li>Checkpointing: tolerancia a fallos en una consulta que no termina.</li>
+<li>Semántica de entrega: al menos una vez, y cómo deduplicar.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Construir</strong> un pipeline de Spark Structured Streaming que agrega eventos por ventanas de tiempo, aplicando watermarking para descartar datos tardíos y checkpointing para tolerar fallos, y <strong>explicar</strong>, con evidencia real, la semántica de entrega resultante y el efecto del intervalo de disparo sobre la latencia y el throughput.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>08_streaming_estructurado_practica.ipynb</code> corriendo sobre <code>atmos-eventos</code> (el mismo topic de S7): lectura en modo streaming con esquema explícito, agregación por ventana fija y por ventana deslizante, comparación con y sin watermarking, inspección del contenido real de un <em>checkpoint</em>, un evento tardío descartado por el watermark, deduplicación acotada de un evento repetido, comparación de dos intervalos de disparo, y una salida persistida en Parquet.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Confirmar que <code>kafka</code> y <code>uso-atmos</code> (S7) siguen arrancando, y que el productor de sensores (<code>producer_sensores.py</code>) publica en <code>atmos-eventos</code>. Repasar el contrato del evento <code>sensor.lectura</code> (S7, 3.6). Trabajo individual, antes de clase.</td>
+<td>Guía de S7 (2.1, 3.6), este mismo documento (1.1-1.7).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>08-streaming-estructurado</code>: lectura streaming, ventanas, watermarking, checkpointing, deduplicación y comparación de intervalos de disparo, sobre datos reales llegando en vivo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante una consulta que no arranca o una ventana que no se cierra.</td>
+<td>Pasos 3.1 a 3.13 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de la diferencia real entre la agregación sin watermark (creciendo sin límite) y con watermark (acotada), y de la evidencia de que un dato tardío se descarta. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-el-cajero-que-nunca-cerraba-caja">1.6.1 Caso: el cajero que nunca cerraba caja<a class="headerlink" href="#161-caso-el-cajero-que-nunca-cerraba-caja" title="Permanent link">&para;</a></h4>
+<p>Un supermercado registra cada venta en el momento en que ocurre. Al final del día, alguien debía sumar el total — pero el cajero nunca "cerraba" el día: seguía sumando ventas de ayer, de anteayer, de la semana pasada, todas juntas, para siempre. La planilla de sumas crecía sin parar, y a los pocos meses ya no cabía en ningún escritorio.</p>
+<p>Un supermercado distinto sí cierra caja cada noche: las ventas de un día se suman, se archivan, y la planilla de hoy empieza vacía. Pero si un comprobante de ayer aparece recién hoy (un cliente que devolvió un ticket tarde), ¿se reabre la caja ya cerrada, o se rechaza?</p>
+<p>Un sistema que agrega eventos por ventanas de tiempo enfrenta exactamente este par de decisiones: cuánto tiempo mantener una ventana "abierta" antes de cerrarla y liberar su memoria, y qué hacer con un dato que llega después de que su ventana ya cerró. Eso es lo que esta sesión construye y prueba con datos reales.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>¿Qué pasaría si un negocio nunca cerrara sus cuentas del día, y las fuera sumando todas juntas para siempre?</li>
+<li>En S6/S7, ¿el consumidor de Kafka agrupaba los eventos por algún periodo de tiempo, o procesaba cada uno por separado?</li>
+</ol>
+<p><strong>Comprensión de streaming, ventanas y watermarking</strong></p>
+<ol>
+<li>Si un sistema agrega eventos por ventanas de 10 segundos y nunca las cierra, ¿qué le pasa a la memoria del proceso con el paso de las horas?</li>
+<li>¿Qué información necesita el sistema para decidir que ya es seguro cerrar una ventana y dejar de esperar datos para ella?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U2 - Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.</li>
+<li>Avance del producto en esta sesión: procesamiento streaming con Spark Structured Streaming sobre la telemetría de S7 — ventanas, watermarking y checkpointing, la pieza que S9 va a observar y S10-S11 van a alimentar con modelos.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la Unidad II</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    S6["`**S6:** Eventos empresariales (Kafka)`"]
+    S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
+    S8["`**S8:** Spark Structured Streaming`"]
+    S9["`**S9:** Observabilidad`"]
+    S10["`**S10:** BI/ML en streaming`"]
+    S12["`**S12:** Producto U2`"]
+
+    S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S12
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S8 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 30 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. Del topic de Kafka al resultado agregado, con estado tolerante a fallos</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Kafka[("Kafka&lt;br/&gt;topic atmos-eventos&lt;br/&gt;(S7)")]
+    Read["readStream&lt;br/&gt;+ esquema explícito"]
+    Agg["Agregación por ventana&lt;br/&gt;+ watermark"]
+    State[("Estado de la consulta&lt;br/&gt;(ventanas abiertas)")]
+    Chk[("Checkpoint&lt;br/&gt;offsets + estado")]
+    Sink["writeStream&lt;br/&gt;consola / Parquet / memoria"]
+
+    Kafka --&gt; Read --&gt; Agg
+    Agg &lt;--&gt; State
+    Agg -. guarda progreso .-&gt; Chk
+    Agg --&gt; Sink</code></pre>
+<p>Lectura del diagrama: los eventos entran por la izquierda igual que en S6-S7, pero ahora una <strong>agregación con estado</strong> (<code>State</code>) se intercala entre la lectura y la salida — es lo que permite calcular un promedio por ventana sin volver a leer todo el historial en cada micro-lote. El <em>checkpoint</em> es la memoria externa de ese estado: si el proceso se cae, se reconstruye desde ahí. Cada apartado siguiente desarrolla una de estas piezas, en el mismo orden del Índice (1.2).</p>
+<h3 id="22-streaming-por-micro-lotes-readstream-writestream-y-modos-de-salida">2.2 Streaming por micro-lotes: <code>readStream</code>, <code>writeStream</code> y modos de salida<a class="headerlink" href="#22-streaming-por-micro-lotes-readstream-writestream-y-modos-de-salida" title="Permanent link">&para;</a></h3>
+<p>Spark Structured Streaming no procesa un evento a la vez: agrupa los eventos que llegaron en un intervalo en un <strong>micro-lote</strong> (<em>micro-batch</em>) y lo procesa como si fuera una tabla — la misma API de DataFrame de S2-S4, aplicada a datos que nunca dejan de llegar. <code>spark.readStream</code> crea la fuente; <code>.writeStream</code> crea el destino (<em>sink</em>) y arranca la consulta.</p>
+<p><strong>Tabla 2. <code>read</code>/<code>write</code> frente a <code>readStream</code>/<code>writeStream</code></strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Batch (S2-S4)</th>
+<th>Streaming (hoy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cuándo termina</td>
+<td>Cuando termina de procesar los datos que ya existen.</td>
+<td>Nunca, salvo que se detenga a mano (<code>query.stop()</code>).</td>
+</tr>
+<tr>
+<td><code>.show()</code> / <code>.count()</code></td>
+<td>Funcionan directo.</td>
+<td>No existen sobre el DataFrame streaming: hay que usar <code>.writeStream</code> con un <em>sink</em>.</td>
+</tr>
+<tr>
+<td>Unidad de trabajo</td>
+<td>Toda la tabla, de una vez.</td>
+<td>Un micro-lote a la vez, cada <code>trigger</code>.</td>
+</tr>
+<tr>
+<td>Progreso</td>
+<td>No aplica.</td>
+<td>Se guarda en el <em>checkpoint</em> (2.4).</td>
+</tr>
+</tbody>
+</table>
+<p>Un <em>sink</em> de salida exige declarar un <strong>modo de salida</strong>, porque no todos los resultados se pueden entregar de la misma forma:</p>
+<p><strong>Tabla 3. Modos de salida (<code>outputMode</code>)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Modo</th>
+<th>Qué entrega en cada micro-lote</th>
+<th>Cuándo se usa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>append</code></td>
+<td>Solo las filas nuevas, que ya no van a cambiar.</td>
+<td>Eventos sin agregar (3.4), o agregaciones con watermark cuya ventana ya cerró.</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td>Las filas que cambiaron desde el último micro-lote.</td>
+<td>Agregaciones con watermark, para ver el resultado actualizarse (3.6, 3.7).</td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td>Toda la tabla de resultados, completa, en cada micro-lote.</td>
+<td>Agregaciones sin watermark, o tablas pequeñas donde reimprimir todo es aceptable (3.5).</td>
+</tr>
+</tbody>
+</table>
+<p><code>append</code> es el único modo que un <em>sink</em> de archivo (Parquet, JSON, CSV) acepta cuando hay una agregación de por medio: no puede "reescribir" una fila que ya guardó en disco.</p>
+<h3 id="23-ventanas-de-tiempo-fijas-y-deslizantes">2.3 Ventanas de tiempo: fijas y deslizantes<a class="headerlink" href="#23-ventanas-de-tiempo-fijas-y-deslizantes" title="Permanent link">&para;</a></h3>
+<p>Una <strong>ventana de tiempo</strong> agrupa eventos según su <strong>tiempo de evento</strong> (cuándo ocurrió, un dato del propio evento) y no su <strong>tiempo de procesamiento</strong> (cuándo Spark lo vio) — la distinción importa porque un evento puede llegar tarde (2.4), y solo el tiempo de evento describe cuándo pasó de verdad en el mundo real.</p>
+<p><strong>Tabla 4. Ventana fija frente a ventana deslizante</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Fija (<em>tumbling</em>)</th>
+<th>Deslizante (<em>sliding</em>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relación ancho/paso</td>
+<td>El paso es igual al ancho.</td>
+<td>El paso es menor que el ancho.</td>
+</tr>
+<tr>
+<td>Un evento cae en...</td>
+<td>Exactamente una ventana.</td>
+<td>Varias ventanas a la vez.</td>
+</tr>
+<tr>
+<td>Costo de estado</td>
+<td>Uno por ventana.</td>
+<td>Un evento se cuenta en varias ventanas: más estado.</td>
+</tr>
+<tr>
+<td>Para qué sirve</td>
+<td>Un resumen por bloque de tiempo, sin solapar.</td>
+<td>Suavizar una métrica, actualizándola más seguido de lo que dura la ventana.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Figura 3. Una ventana fija de 10s frente a una deslizante de 15s con paso de 5s</strong></p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Fija["Ventana fija (10s, paso 10s)"]
+        direction TB
+        F1["[0-10s]"]
+        F2["[10-20s]"]
+        F3["[20-30s]"]
+    end
+    subgraph Deslizante["Ventana deslizante (15s, paso 5s)"]
+        direction TB
+        D1["[0-15s]"]
+        D2["[5-20s]"]
+        D3["[10-25s]"]
+    end</code></pre>
+<p>En Spark, ambas se escriben con la misma función, <code>window(columna_de_tiempo, ancho)</code> para la fija, y <code>window(columna_de_tiempo, ancho, paso)</code> para la deslizante — el tercer argumento es la única diferencia de sintaxis (Apache Software Foundation, 2024).</p>
+<h3 id="24-watermarking-acotar-la-espera-por-datos-tardios">2.4 Watermarking: acotar la espera por datos tardíos<a class="headerlink" href="#24-watermarking-acotar-la-espera-por-datos-tardios" title="Permanent link">&para;</a></h3>
+<p>Sin ninguna regla adicional, una agregación por ventana tendría que guardar el estado de <strong>cada ventana que existió jamás</strong>, por si acaso llega un evento tardío que todavía la necesite — el problema del cajero que nunca cierra caja (1.6.1). El <strong>watermark</strong> es esa regla: declara cuánto tiempo, como máximo, se va a esperar por un dato tardío, contado desde el evento más reciente visto.</p>
+<blockquote>
+<p>watermark(t) = max(tiempo de evento visto hasta ahora) − margen de tolerancia</p>
+</blockquote>
+<p>Una ventana se cierra quando el watermark supera su límite superior. Un evento que llega <strong>después</strong> de que su ventana cerró se descarta, sin lanzar ningún error — es una decisión de diseño, no una falla (Apache Software Foundation, 2024).</p>
+<p><strong>Tabla 5. Qué pasa según cuándo llega el evento</strong></p>
+<table>
+<thead>
+<tr>
+<th>Situación</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>El evento llega antes de que el watermark alcance su ventana.</td>
+<td>Se agrega normalmente; la ventana se actualiza.</td>
+</tr>
+<tr>
+<td>El evento llega después de que el watermark ya pasó su ventana.</td>
+<td>Se descarta en silencio.</td>
+</tr>
+<tr>
+<td>Es de los primeros eventos que ve la consulta (el watermark todavía no tiene ninguna referencia).</td>
+<td>Se acepta, aunque su marca de tiempo sea vieja — el watermark recién se establece con el primer lote.</td>
+</tr>
+</tbody>
+</table>
+<p>Esa última fila es un caso de borde real, no teórico: se verifica con datos reales en 3.9.</p>
+<h3 id="25-checkpointing-tolerancia-a-fallos-en-una-consulta-que-no-termina">2.5 Checkpointing: tolerancia a fallos en una consulta que no termina<a class="headerlink" href="#25-checkpointing-tolerancia-a-fallos-en-una-consulta-que-no-termina" title="Permanent link">&para;</a></h3>
+<p>Una consulta de streaming corre indefinidamente, así que tarde o temprano se va a caer o se va a reiniciar — por una actualización, un error, un reinicio del servidor. El <strong>checkpoint</strong> es la carpeta donde Spark guarda, en cada micro-lote, todo lo necesario para retomar exactamente donde se quedó: qué <em>offset</em> de cada partición de Kafka ya se leyó, y el contenido de cada ventana todavía abierta.</p>
+<p><strong>Tabla 6. Contenido de un checkpoint</strong></p>
+<table>
+<thead>
+<tr>
+<th>Carpeta</th>
+<th>Qué guarda</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>offsets/</code></td>
+<td>El <em>offset</em> de Kafka hasta el que se leyó, por cada micro-lote.</td>
+</tr>
+<tr>
+<td><code>commits/</code></td>
+<td>Qué micro-lotes terminaron de escribirse por completo.</td>
+</tr>
+<tr>
+<td><code>state/</code></td>
+<td>El contenido de cada ventana (u otro estado) que la agregación todavía tiene abierto.</td>
+</tr>
+</tbody>
+</table>
+<p>Sin un <code>checkpointLocation</code>, una consulta con agregación (con estado) ni siquiera arranca — Spark no tiene dónde guardar ese progreso. Reiniciar una consulta apuntando al mismo <em>checkpoint</em> la hace retomar desde el último <em>offset</em> confirmado, sin reprocesar el topic entero desde el principio (Apache Software Foundation, 2024).</p>
+<h3 id="26-semantica-de-entrega-y-el-costo-del-intervalo-de-disparo">2.6 Semántica de entrega y el costo del intervalo de disparo<a class="headerlink" href="#26-semantica-de-entrega-y-el-costo-del-intervalo-de-disparo" title="Permanent link">&para;</a></h3>
+<p>Kafka entrega cada mensaje <strong>al menos una vez</strong> (<em>at-least-once</em>, S6-S7): nunca se pierde un mensaje, pero un reintento tras un fallo de red puede duplicarlo. Structured Streaming no cambia esa garantía de origen: lo que puede hacer es evitar que un duplicado se <strong>cuente</strong> dos veces, con <code>dropDuplicates</code> acotado por un watermark — la misma idea de 2.4, aplicada al contenido del evento en vez de a la ventana.</p>
+<p><strong>Tabla 7. Semántica de entrega</strong></p>
+<table>
+<thead>
+<tr>
+<th>Garantía</th>
+<th>Qué significa</th>
+<th>Cómo se logra aquí</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>At-most-once</em></td>
+<td>Un mensaje se procesa cero o una vez; puede perderse.</td>
+<td>No es el caso de Kafka.</td>
+</tr>
+<tr>
+<td><em>At-least-once</em></td>
+<td>Un mensaje se procesa una o más veces; nunca se pierde.</td>
+<td>Lo que da Kafka por defecto.</td>
+</tr>
+<tr>
+<td><em>Effectively-once</em> (o "exactamente una vez" en la práctica)</td>
+<td>El resultado final es como si cada mensaje se hubiera procesado una sola vez.</td>
+<td><code>dropDuplicates</code> con un identificador del evento, acotado por watermark.</td>
+</tr>
+</tbody>
+</table>
+<p>El <strong>intervalo de disparo</strong> (<code>trigger</code>) decide cada cuánto se arma un micro-lote, y con eso reparte el compromiso entre <strong>latencia</strong> (cuánto espera un evento antes de aparecer en el resultado) y <strong>throughput</strong> (cuántos eventos se procesan juntos, con menos <em>overhead</em> por lote). Un disparo más frecuente baja la latencia y sube el <em>overhead</em>; uno menos frecuente hace lo contrario. Ninguno es "el correcto": depende de si el sistema necesita reaccionar rápido o procesar volumen (Databricks, 2024).</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>08_streaming_estructurado_practica.ipynb</code> sobre el entorno <code>lambda26</code> (<code>uso-pyspark</code>), consumiendo en modo streaming el mismo topic <code>atmos-eventos</code> de S7, aplicando ventanas de tiempo, watermarking, checkpointing, deduplicación y comparación de intervalos de disparo, con datos reales llegando en vivo.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que dominas la diferencia entre batch y streaming, el efecto real del watermarking sobre el estado y sobre los datos tardíos, qué guarda un <em>checkpoint</em>, y cómo el intervalo de disparo cambia la latencia y el throughput — antes de confiar en un pipeline de streaming sin haber visto fallar, a propósito, cada una de esas piezas.</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, con el productor de sensores de S7 corriendo en vivo — varios pasos de hoy solo se entienden viendo llegar datos reales, no un dataset estático.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno <code>lambda26</code> y verificar el punto de partida.</li>
+<li><strong>3.2</strong> Leer el topic en modo streaming.</li>
+<li><strong>3.3</strong> Parsear el JSON con un esquema explícito.</li>
+<li><strong>3.4</strong> Primera consulta: ver los eventos llegar.</li>
+<li><strong>3.5</strong> Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.6).</li>
+<li><strong>3.6</strong> Watermarking: acotar cuánto se espera por datos tardíos.</li>
+<li><strong>3.7</strong> Ventana deslizante: una lectura que se actualiza más seguido que se cierra.</li>
+<li><strong>3.8</strong> Checkpointing: qué guarda, y qué pasa al reiniciar.</li>
+<li><strong>3.9</strong> Un dato tardío, y el watermark descartándolo.</li>
+<li><strong>3.10</strong> Deduplicación acotada por watermark.</li>
+<li><strong>3.11</strong> Intervalo de disparo: el costo de decidir cada cuánto procesar.</li>
+<li><strong>3.12</strong> Escribir la salida a Parquet, con checkpoint.</li>
+<li><strong>3.13</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida">3.1 Reanudar el entorno <code>lambda26</code> y verificar el punto de partida<a class="headerlink" href="#31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> Kafka, Kafka UI y el simulador de sensores de S7 (<code>uso-atmos</code>) corriendo, con eventos reales llegando a <code>atmos-eventos</code>.</p>
+<p>Este notebook <strong>no genera sus propios datos</strong>: consume el mismo topic que S7 ya construyó. Antes de continuar, en una terminal (fuera del notebook):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>kafka<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<span class="nb">cd</span><span class="w"> </span>../uso-atmos<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-d<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
+</code></pre></div>
+<p>Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos <strong>llegando en vivo</strong>, no solo los que ya están en el topic.</p>
+<p><strong>Error frecuente</strong>: el productor se detiene solo si el contenedor <code>uso-atmos</code> se recrea (por ejemplo, al bajar y volver a levantar el stack) — <code>docker exec -d</code> no sobrevive a que el contenedor se reinicie. Antes de correr una celda que depende de datos en vivo, confirma que el proceso sigue vivo (<code>docker exec lambda26-uso-atmos ps aux</code>, o revisa Kafka UI: el <em>lag</em> del topic debe estar creciendo).</p>
+<h3 id="32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka">3.2 Crear el notebook y la <code>SparkSession</code>, con el conector de Kafka<a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook <code>08_streaming_estructurado_practica.ipynb</code> con una <code>SparkSession</code> capaz de leer y escribir Kafka.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion8-streaming-estructurado"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"3"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="s2">"ERROR"</span><span class="p">)</span>
+<span class="n">spark</span>
+</code></pre></div>
+<p><code>spark.jars.packages</code> agrega el conector <code>spark-sql-kafka-0-10</code>, que Spark no trae por defecto (a diferencia de la lectura de CSV o Parquet de S2-S4). La primera vez que se ejecuta esta celda, Spark descarga el conector y sus dependencias desde Maven Central — puede tardar. <code>spark.sql.shuffle.partitions</code> se baja a 3 (el número de particiones del topic, S7): con el valor por defecto (200), cada micro-lote crearía 200 tareas para casi ningún dato.</p>
+<p>Verifica que el topic tiene mensajes, con una lectura <strong>batch</strong> (no streaming) — el mismo tipo de lectura que ya usaste con CSV o Parquet, aplicada a Kafka:</p>
+<div class="highlight"><pre><span></span><code><span class="n">lote</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"earliest"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"mensajes en el topic:"</span><span class="p">,</span> <span class="n">lote</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="n">lote</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"CAST(key AS STRING) AS key"</span><span class="p">,</span> <span class="s2">"CAST(value AS STRING) AS value"</span><span class="p">,</span> <span class="s2">"partition"</span><span class="p">,</span> <span class="s2">"offset"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"offset"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real de esta corrida:</p>
+<div class="highlight"><pre><span></span><code>mensajes en el topic: 446
+
++-----------------+--------------------------------------------------------------+---------+------+
+|key              |value                                                          |partition|offset|
++-----------------+--------------------------------------------------------------+---------+------+
+|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |457   |
+|esp32-patio      |{"tipoEvento": "sensor.lectura", "sensorId": "esp32-patio", "te...|2        |456   |
+|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |455   |
++-----------------+--------------------------------------------------------------+---------+------+
+</code></pre></div>
+<p>Un numero mayor que cero, y JSON con <code>sensorId</code>, <code>temperatura</code>, <code>humedad</code>, <code>presion</code> (el contrato de S7). Una lectura <strong>batch</strong> de Kafka lee lo que hay <strong>hoy</strong> y termina; el resto del notebook usa lectura <strong>streaming</strong>, que no termina — sigue escuchando.</p>
+<h3 id="33-leer-el-topic-en-modo-streaming">3.3 Leer el topic en modo streaming<a class="headerlink" href="#33-leer-el-topic-en-modo-streaming" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un DataFrame que <strong>no se puede materializar con <code>.show()</code> ni <code>.count()</code></strong> — la primera diferencia real entre batch y streaming.</p>
+<div class="highlight"><pre><span></span><code><span class="n">crudo</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"es un stream:"</span><span class="p">,</span> <span class="n">crudo</span><span class="o">.</span><span class="n">isStreaming</span><span class="p">)</span>
+<span class="n">crudo</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real:</p>
+<div class="highlight"><pre><span></span><code>es un stream: True
+root
+ |-- key: binary (nullable = true)
+ |-- value: binary (nullable = true)
+ |-- topic: string (nullable = true)
+ |-- partition: integer (nullable = true)
+ |-- offset: long (nullable = true)
+ |-- timestamp: timestamp (nullable = true)
+ |-- timestampType: integer (nullable = true)
+</code></pre></div>
+<p><code>readStream</code> en vez de <code>read</code> es la única diferencia de sintaxis, y cambia todo lo que viene después: <code>crudo</code> es un <strong>plan</strong>, no una tabla en memoria. <code>crudo.show()</code> fallaría con <code>AnalysisException</code>, porque mostrar implica materializar de una vez, y un stream no tiene un "final" que mostrar. Cada mensaje de Kafka llega con las mismas columnas, sin importar el topic: <code>key</code>, <code>value</code> (ambos en binario), <code>topic</code>, <code>partition</code>, <code>offset</code>, <code>timestamp</code>. El contenido real del evento está <strong>adentro</strong> de <code>value</code>, sin parsear todavía — eso es 3.4.</p>
+<p><code>startingOffsets: "latest"</code> (no <code>"earliest"</code>) es a propósito: en un stream que corre indefinidamente, no tiene sentido reprocesar todo el historial cada vez que se reinicia una consulta de prueba — se quiere ver lo que llega <strong>de ahora en adelante</strong>. La diferencia importa, y se vuelve a ver en 3.9.</p>
+<h3 id="34-parsear-el-json-con-un-esquema-explicito">3.4 Parsear el JSON con un esquema explícito<a class="headerlink" href="#34-parsear-el-json-con-un-esquema-explicito" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> las columnas reales del evento (<code>sensorId</code>, <code>temperatura</code>...), ya tipadas, listas para agregar.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">col</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">LongType</span>
+
+<span class="n">esquema_evento</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"humedad"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"presion"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"origen"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">())</span>
+<span class="p">)</span>
+
+<span class="n">eventos</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">crudo</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"CAST(value AS STRING) AS json_str"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">from_json</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"json_str"</span><span class="p">),</span> <span class="n">esquema_evento</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"e"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"e.*"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">))</span>
+<span class="p">)</span>
+<span class="n">eventos</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real:</p>
+<div class="highlight"><pre><span></span><code>root
+ |-- tipoEvento: string (nullable = true)
+ |-- sensorId: string (nullable = true)
+ |-- temperatura: double (nullable = true)
+ |-- humedad: double (nullable = true)
+ |-- presion: double (nullable = true)
+ |-- origen: string (nullable = true)
+ |-- timestamp: long (nullable = true)
+ |-- ts: timestamp (nullable = true)
+</code></pre></div>
+<p><code>value</code> llega en binario; <code>CAST(value AS STRING)</code> lo vuelve texto, y <code>from_json</code> lo convierte a columnas según <code>esquema_evento</code> — el mismo contrato de <code>sensor.lectura</code> que S7 documentó. Un esquema <strong>explícito</strong> (no inferido) es obligatorio en streaming: Spark no puede "mirar" todo el stream para adivinar tipos, porque el stream no tiene fin. <code>ts</code> convierte el <code>timestamp</code> (milisegundos <em>epoch</em>, un <code>Long</code>) a un tipo <code>timestamp</code> real: <strong>es la columna que 3.5 en adelante usa como reloj del evento</strong> — el momento en que el sensor midió, no el momento en que Spark lo procesa.</p>
+<h3 id="35-primera-consulta-ver-los-eventos-llegar">3.5 Primera consulta: ver los eventos llegar<a class="headerlink" href="#35-primera-consulta-ver-los-eventos-llegar" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la primera consulta de streaming corriendo, con salida por consola.</p>
+<div class="highlight"><pre><span></span><code><span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real (dos de los micro-lotes):</p>
+<div class="highlight"><pre><span></span><code>-------------------------------------------
+Batch: 1
+-------------------------------------------
++--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
+|tipoEvento    |sensorId         |temperatura|humedad|presion|origen   |timestamp    |ts                     |
++--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
+|sensor.lectura|esp32-laboratorio|9.6        |35.9   |1017.8 |uso-atmos|1790512778045|2026-09-27 12:39:38.045|
+|sensor.lectura|esp32-patio      |12.0       |87.7   |1001.3 |uso-atmos|1790512778035|2026-09-27 12:39:38.035|
+|sensor.lectura|esp32-invernadero|40.0       |60.9   |1003.0 |uso-atmos|1790512778041|2026-09-27 12:39:38.041|
++--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
+</code></pre></div>
+<p><code>writeStream</code> (no <code>write</code>) inicia una <strong>consulta continua</strong>: <code>.start()</code> la lanza en segundo plano y devuelve de inmediato un objeto <code>StreamingQuery</code>; el proceso sigue corriendo aunque la celda ya haya terminado. <code>awaitTermination(20)</code> bloquea esta celda 20 segundos para que se alcance a ver algo, y <code>.stop()</code> la detiene a mano — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre.</p>
+<p><code>outputMode("append")</code> dice que solo se muestran filas <strong>nuevas</strong>, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. <code>trigger(processingTime="5 seconds")</code> fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en <strong>micro-lotes</strong> cada 5 segundos.</p>
+<p><strong>Error frecuente</strong>: al llamar <code>.stop()</code>, el log muestra líneas <code>ERROR ... Aborting task</code> o <code>TaskKilledException</code>. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un <code>stop()</code> abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.</p>
+<h3 id="36-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-37">3.6 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.7)<a class="headerlink" href="#36-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-37" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> evidencia de que, sin watermark, el estado de una agregación por ventana <strong>crece para siempre</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">count</span>
+
+<span class="n">agregado_sin_limite</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"10 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"temp_prom"</span><span class="p">),</span> <span class="n">count</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"n"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">agregado_sin_limite</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"complete"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real, dos micro-lotes consecutivos (nota cómo la ventana <code>12:39:50-12:40:00</code> se repite, igual, en ambos):</p>
+<div class="highlight"><pre><span></span><code>-------------------------------------------
+Batch: 3
+-------------------------------------------
++------------------------------------------+-----------------+------------------+---+
+|window                                    |sensorId         |temp_prom         |n  |
++------------------------------------------+-----------------+------------------+---+
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-laboratorio|9.333333333333334 |3  |
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-patio      |11.733333333333334|3  |
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-invernadero|39.6              |3  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-patio      |11.8              |2  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-laboratorio|9.25              |2  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-invernadero|39.650000000000006|2  |
++------------------------------------------+-----------------+------------------+---+
+
+-------------------------------------------
+Batch: 4
+-------------------------------------------
++------------------------------------------+-----------------+------------------+---+
+|window                                    |sensorId         |temp_prom         |n  |
++------------------------------------------+-----------------+------------------+---+
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-laboratorio|9.333333333333334 |3  |
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-patio      |11.733333333333334|3  |
+|{2026-09-27 12:40:00, 2026-09-27 12:40:10}|esp32-invernadero|39.6              |3  |
+|{2026-09-27 12:40:10, 2026-09-27 12:40:20}|esp32-invernadero|39.7              |2  |
+|{2026-09-27 12:40:10, 2026-09-27 12:40:20}|esp32-laboratorio|9.45              |2  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-patio      |11.8              |2  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-laboratorio|9.25              |2  |
+|{2026-09-27 12:40:10, 2026-09-27 12:40:20}|esp32-patio      |11.4              |2  |
+|{2026-09-27 12:39:50, 2026-09-27 12:40:00}|esp32-invernadero|39.650000000000006|2  |
++------------------------------------------+-----------------+------------------+---+
+</code></pre></div>
+<p><code>window(col("ts"), "10 seconds")</code> agrupa los eventos en bloques de 10 segundos de tiempo de <strong>evento</strong> (<code>ts</code>), no de tiempo de procesamiento — dos sensores que midieron en el mismo instante caen en la misma ventana, sin importar cuándo Spark los procesó. <code>outputMode("complete")</code> es el único modo que puede acompañar a una agregación <strong>sin</strong> watermark: en cada micro-lote, Spark reimprime <strong>todas</strong> las ventanas vistas hasta ahora, porque no tiene ninguna señal de que una ventana vieja ya no va a recibir más datos.</p>
+<p>La tabla completa <strong>crece</strong> de un micro-lote al siguiente: la ventana <code>12:39:50-12:40:00</code> sigue apareciendo, igual, en el Batch 4, junto a las dos ventanas nuevas. Ese es el problema: Spark tiene que guardar el estado de <strong>cada ventana que existió jamás</strong>, indefinidamente — en un sistema real, que corre por días, esto agota la memoria. El watermarking (3.7) es la respuesta.</p>
+<h3 id="37-watermarking-acotar-cuanto-se-espera-por-datos-tardios">3.7 Watermarking: acotar cuánto se espera por datos tardíos<a class="headerlink" href="#37-watermarking-acotar-cuanto-se-espera-por-datos-tardios" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la misma agregación, pero con las ventanas viejas <strong>cerradas y liberadas</strong> de la memoria.</p>
+<div class="highlight"><pre><span></span><code><span class="n">agregado_con_watermark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span>
+    <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"10 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"10 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"temp_prom"</span><span class="p">),</span> <span class="n">count</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"n"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">agregado_con_watermark</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"update"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="s2">"/tmp/s08-chk-watermark"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real, dos micro-lotes consecutivos — compáralos con los de 3.6: aquí <strong>no</strong> se repite la ventana anterior en cada lote, solo la que cambió:</p>
+<div class="highlight"><pre><span></span><code>-------------------------------------------
+Batch: 1
+-------------------------------------------
++------------------------------------------+-----------------+---------+---+
+|window                                    |sensorId         |temp_prom|n  |
++------------------------------------------+-----------------+---------+---+
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-laboratorio|9.3      |1  |
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-patio      |10.9     |1  |
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-invernadero|39.4     |1  |
++------------------------------------------+-----------------+---------+---+
+
+-------------------------------------------
+Batch: 2
+-------------------------------------------
++------------------------------------------+-----------------+------------------+---+
+|window                                    |sensorId         |temp_prom         |n  |
++------------------------------------------+-----------------+------------------+---+
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-laboratorio|9.266666666666667 |3  |
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-patio      |11.133333333333333|3  |
+|{2026-09-27 12:40:20, 2026-09-27 12:40:30}|esp32-invernadero|39.199999999999996|3  |
++------------------------------------------+-----------------+------------------+---+
+</code></pre></div>
+<p><code>withWatermark("ts", "10 seconds")</code> es la regla que le faltaba a 3.6: le dice a Spark "una vez que veas un evento con <code>ts</code> = X, ya no esperes datos con <code>ts</code> anterior a X menos 10 segundos — cierra esas ventanas y olvídalas". El <strong>watermark</strong> en un momento dado es, entonces, el evento más reciente visto menos ese margen. Con el watermark, <code>outputMode("update")</code> ya es válido: en cada micro-lote solo se imprimen las ventanas que <strong>cambiaron</strong>, no todas — y las ventanas cerradas dejan de aparecer y dejan de ocupar memoria.</p>
+<p><code>checkpointLocation</code> aparece por primera vez: es la carpeta donde Spark guarda el estado de la consulta (qué ventanas existen, hasta qué <em>offset</em> de Kafka se leyó). Sin ella, esta consulta con estado (una agregación) ni siquiera arrancaría. Se profundiza en 3.9.</p>
+<h3 id="38-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra">3.8 Ventana deslizante: una lectura que se actualiza más seguido que se cierra<a class="headerlink" href="#38-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> ventanas que se <strong>solapan</strong>, para suavizar una métrica sin esperar a que cada bloque termine.</p>
+<div class="highlight"><pre><span></span><code><span class="n">agregado_deslizante</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span>
+    <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"15 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"15 seconds"</span><span class="p">,</span> <span class="s2">"5 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">avg</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"temp_prom"</span><span class="p">),</span> <span class="n">count</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"n"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">agregado_deslizante</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"update"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="s2">"/tmp/s08-chk-deslizante"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p>Resultado real — un solo evento de <code>esp32-laboratorio</code> (o de <code>esp32-patio</code>, <code>esp32-invernadero</code>) aparece en <strong>tres</strong> ventanas de 15 segundos distintas, que se solapan cada 5 segundos:</p>
+<div class="highlight"><pre><span></span><code>-------------------------------------------
+Batch: 1
+-------------------------------------------
++------------------------------------------+-----------------+---------+---+
+|window                                    |sensorId         |temp_prom|n  |
++------------------------------------------+-----------------+---------+---+
+|{2026-09-27 12:40:40, 2026-09-27 12:40:55}|esp32-laboratorio|8.9      |1  |
+|{2026-09-27 12:40:35, 2026-09-27 12:40:50}|esp32-patio      |11.4     |1  |
+|{2026-09-27 12:40:40, 2026-09-27 12:40:55}|esp32-invernadero|39.4     |1  |
+|{2026-09-27 12:40:35, 2026-09-27 12:40:50}|esp32-invernadero|39.4     |1  |
+|{2026-09-27 12:40:35, 2026-09-27 12:40:50}|esp32-laboratorio|8.9      |1  |
+|{2026-09-27 12:40:45, 2026-09-27 12:41:00}|esp32-invernadero|39.4     |1  |
+|{2026-09-27 12:40:45, 2026-09-27 12:41:00}|esp32-laboratorio|8.9      |1  |
+|{2026-09-27 12:40:45, 2026-09-27 12:41:00}|esp32-patio      |11.4     |1  |
+|{2026-09-27 12:40:40, 2026-09-27 12:40:55}|esp32-patio      |11.4     |1  |
++------------------------------------------+-----------------+---------+---+
+</code></pre></div>
+<p><code>window(col("ts"), "15 seconds", "5 seconds")</code> tiene un tercer argumento que 3.7 no tenía: el <strong>paso</strong> (5 segundos) es menor que el <strong>ancho</strong> (15 segundos) de la ventana. El resultado es una ventana <strong>deslizante</strong>: cada evento cae en <strong>varias</strong> ventanas de 15 segundos a la vez (una que empieza ahora, otra que empezó hace 5 segundos, otra hace 10). En 3.7, cada evento caía en <strong>una sola</strong> ventana (ventana <strong>fija</strong> o <em>tumbling</em>: el paso es igual al ancho).</p>
+<p>Para un mismo <code>sensorId</code>, aparecen varias filas con rangos de <code>window</code> que se superponen — y el mismo evento cuenta para varias de ellas. Sirve para suavizar una lectura (un promedio que no salta de golpe cada 15 segundos), a costa de guardar más estado: cada evento se cuenta varias veces en la memoria de la consulta, no una.</p>
+<h3 id="39-checkpointing-que-guarda-y-que-pasa-al-reiniciar">3.9 Checkpointing: qué guarda, y qué pasa al reiniciar<a class="headerlink" href="#39-checkpointing-que-guarda-y-que-pasa-al-reiniciar" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> evidencia de que el <em>checkpoint</em> no es una carpeta vacía — ahí vive el progreso real de la consulta.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">for</span> <span class="n">carpeta</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">"/tmp/s08-chk-watermark"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">carpeta</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real:</p>
+<div class="highlight"><pre><span></span><code>.metadata.crc
+commits
+metadata
+offsets
+sources
+state
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">archivos_offsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">"/tmp/s08-chk-watermark/offsets"</span><span class="p">))</span>
+<span class="n">ultimo_offset</span> <span class="o">=</span> <span class="n">archivos_offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/tmp/s08-chk-watermark/offsets/</span><span class="si">{</span><span class="n">ultimo_offset</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre></div>
+<p>Resultado real (recortado):</p>
+<div class="highlight"><pre><span></span><code>v1
+{"batchWatermarkMs":1790512828406,"batchTimestampMs":1790512845013,"conf":{...}}
+{"atmos-eventos":{"0":183,"1":3,"2":506}}
+</code></pre></div>
+<p><code>offsets/</code> guarda, por cada micro-lote, hasta qué <em>offset</em> de cada partición de Kafka se leyó — en esta corrida, la partición 0 llegó hasta el mensaje 183, la 1 hasta el 3, la 2 hasta el 506. <code>commits/</code> confirma cuáles de esos micro-lotes terminaron de escribirse por completo. <code>state/</code> guarda el contenido de cada ventana abierta — es lo que 3.6 mostró creciendo sin límite.</p>
+<p>La consecuencia práctica: si una consulta se cae y se reinicia <strong>apuntando al mismo <code>checkpointLocation</code></strong>, Spark lee <code>offsets/</code> y retoma exactamente donde se quedó — no vuelve a leer el topic desde el principio, y no pierde el estado de las ventanas que ya tenía abiertas. Es la misma idea del <em>offset</em> de un <code>consumer group</code> de Kafka (S6, S7), pero aplicada también al estado de la agregación, no solo a la posición de lectura.</p>
+<h3 id="310-un-dato-tardio-y-el-watermark-descartandolo">3.10 Un dato tardío, y el watermark descartándolo<a class="headerlink" href="#310-un-dato-tardio-y-el-watermark-descartandolo" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un evento con marca de tiempo vieja, publicado <strong>después</strong> de que el watermark ya avanzó más allá de su ventana — y la prueba de que Spark lo descarta sin avisar.</p>
+<p><strong>Advertencia sobre el "arranque en frío":</strong> si publicas el evento tardío como el <strong>primer</strong> mensaje que la consulta ve, no se descarta — el watermark todavía no tiene ningún evento "reciente" contra el cual compararlo (2.4, Tabla 5, última fila). Por eso, primero se deja correr la consulta con datos en vivo un rato, y <strong>recién después</strong> se publica el evento tardío.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_json</span><span class="p">,</span> <span class="n">struct</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">publicar_evento_tardio</span><span class="p">(</span><span class="n">segundos_de_espera</span><span class="p">,</span> <span class="n">segundos_en_el_pasado</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">segundos_de_espera</span><span class="p">)</span>
+    <span class="n">ahora_ms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="n">evento_tardio</span> <span class="o">=</span> <span class="p">[(</span>
+        <span class="s2">"sensor.lectura"</span><span class="p">,</span> <span class="s2">"esp32-tardio"</span><span class="p">,</span> <span class="mf">99.9</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span>
+        <span class="s2">"prueba-watermark"</span><span class="p">,</span> <span class="n">ahora_ms</span> <span class="o">-</span> <span class="n">segundos_en_el_pasado</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="p">)]</span>
+    <span class="n">columnas</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"humedad"</span><span class="p">,</span> <span class="s2">"presion"</span><span class="p">,</span> <span class="s2">"origen"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">]</span>
+    <span class="n">df_tardio</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">evento_tardio</span><span class="p">,</span> <span class="n">columnas</span><span class="p">)</span>
+    <span class="n">salida</span> <span class="o">=</span> <span class="n">df_tardio</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">df_tardio</span><span class="o">.</span><span class="n">sensorId</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"string"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"key"</span><span class="p">),</span>
+        <span class="n">to_json</span><span class="p">(</span><span class="n">struct</span><span class="p">(</span><span class="o">*</span><span class="n">columnas</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"value"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">salida</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">save</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&gt;&gt;&gt; publicado esp32-tardio, </span><span class="si">{</span><span class="n">segundos_en_el_pasado</span><span class="si">}</span><span class="s2">s en el pasado"</span><span class="p">)</span>
+
+<span class="n">hilo</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">publicar_evento_tardio</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">45</span><span class="p">),</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">hilo</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="n">agregado</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span>
+    <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"10 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">count</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"n"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">agregado</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"update"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="s2">"/tmp/s08-chk-tardio"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"4 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Buscando 'esp32-tardio' en la salida de arriba: si no aparece ninguna fila, el watermark lo descarto."</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real: el hilo publicó <code>&gt;&gt;&gt; publicado esp32-tardio, 45s en el pasado</code>, y en los <strong>11 micro-lotes</strong> que corrieron después de esa publicación, la cadena <code>esp32-tardio</code> <strong>no apareció en ninguno</strong>. El watermark de 5 segundos ya había avanzado más allá de la ventana a la que ese evento pertenecía, y Spark lo descartó en silencio.</p>
+<p>El hilo publica un evento <code>esp32-tardio</code> cuyo <code>timestamp</code> corresponde a <strong>45 segundos antes</strong> del momento de publicación, pero recién 15 segundos después de arrancar la consulta — tiempo suficiente para que el watermark ya haya avanzado con los eventos en vivo del productor de S7. Con un watermark de 5 segundos, cualquier ventana que termine más de 5 segundos antes del evento más reciente visto queda cerrada, y un evento que llega después para esa ventana se descarta <strong>en silencio</strong>: no hay excepción, no hay log de error, la fila simplemente nunca aparece en la salida.</p>
+<p>Esto se verificó dos veces antes de escribir esta guía: publicando el evento tardío <strong>antes</strong> de que el watermark avanzara (como primer mensaje de la consulta), sí se dejaba pasar — es el caso de "arranque en frío" de la advertencia de arriba. La lección no es "Spark falla a veces": es que el watermark necesita <strong>datos frescos previos</strong> para tener algo contra qué comparar.</p>
+<h3 id="311-deduplicacion-acotada-por-watermark">3.11 Deduplicación acotada por watermark<a class="headerlink" href="#311-deduplicacion-acotada-por-watermark" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el mismo evento, publicado dos veces por error, contado <strong>una sola vez</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">deduplicado</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span>
+    <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"30 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">])</span>
+<span class="p">)</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">deduplicado</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="s2">"/tmp/s08-chk-dedup"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"3 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">columnas</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"humedad"</span><span class="p">,</span> <span class="s2">"presion"</span><span class="p">,</span> <span class="s2">"origen"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">]</span>
+<span class="n">evento_duplicado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[(</span><span class="s2">"sensor.lectura"</span><span class="p">,</span> <span class="s2">"esp32-duplicado"</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="s2">"prueba-dedup"</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))],</span>
+    <span class="n">columnas</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">salida</span> <span class="o">=</span> <span class="n">evento_duplicado</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">evento_duplicado</span><span class="o">.</span><span class="n">sensorId</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"string"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"key"</span><span class="p">),</span>
+    <span class="n">to_json</span><span class="p">(</span><span class="n">struct</span><span class="p">(</span><span class="o">*</span><span class="n">columnas</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"value"</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">intento</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">salida</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">save</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"&gt;&gt;&gt; 'esp32-duplicado' publicado DOS veces"</span><span class="p">)</span>
+
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Busca 'esp32-duplicado' arriba: debe aparecer una sola vez, aunque se publico dos veces."</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real: <code>esp32-duplicado</code> se publicó <strong>dos veces</strong> hacia el mismo topic, y apareció <strong>una sola vez</strong> en la salida deduplicada:</p>
+<div class="highlight"><pre><span></span><code>|sensor.lectura|esp32-duplicado  |55.0       |55.0   |1000.0 |prueba-dedup|1790512922488|2026-09-27 12:42:02.488|
+</code></pre></div>
+<p><code>dropDuplicates(["sensorId", "timestamp"])</code> descarta cualquier evento cuya combinación de esas dos columnas ya se vio antes. Sin <code>withWatermark</code>, esta operación tendría que recordar <strong>todos</strong> los eventos vistos jamás, para siempre — el mismo problema sin límite de 3.6, pero sobre los propios datos en vez de sobre ventanas. El watermark acota cuánto se recuerda: pasado el margen (30 segundos), un identificador viejo se olvida, y un duplicado <em>muy</em> tardío ya no se detectaría — es el mismo balance de siempre entre memoria y exactitud.</p>
+<p>Esto responde directamente al porqué de <strong>semántica de entrega</strong> (2.6): Kafka entrega cada mensaje <strong>al menos una vez</strong> — nunca menos, a veces más, por reintentos ante fallos de red. <code>dropDuplicates</code> acotado por watermark es la pieza que convierte ese "al menos una vez" en un resultado que se comporta como "exactamente una vez", <strong>sin</strong> que el productor tenga que garantizar nada.</p>
+<h3 id="312-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar">3.12 Intervalo de disparo: el costo de decidir cada cuánto procesar<a class="headerlink" href="#312-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el mismo stream, con dos ritmos de disparo distintos, y la diferencia real en cuántos micro-lotes se alcanzan a correr.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">contar_microlotes</span><span class="p">(</span><span class="n">intervalo</span><span class="p">,</span> <span class="n">segundos_totales</span><span class="p">):</span>
+    <span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
+        <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"memory"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">queryName</span><span class="p">(</span><span class="sa">f</span><span class="s2">"conteo_</span><span class="si">{</span><span class="n">intervalo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="w"> </span><span class="s1">'_'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="n">intervalo</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="n">segundos_totales</span><span class="p">)</span>
+    <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">consulta</span><span class="o">.</span><span class="n">lastProgress</span><span class="p">[</span><span class="s2">"batchId"</span><span class="p">]</span> <span class="k">if</span> <span class="n">consulta</span><span class="o">.</span><span class="n">lastProgress</span> <span class="k">else</span> <span class="kc">None</span>
+
+<span class="n">ultimo_lote_rapido</span> <span class="o">=</span> <span class="n">contar_microlotes</span><span class="p">(</span><span class="s2">"1 second"</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+<span class="n">ultimo_lote_lento</span> <span class="o">=</span> <span class="n">contar_microlotes</span><span class="p">(</span><span class="s2">"6 seconds"</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Con disparo cada 1 segundo, ultimo batchId en 15s:"</span><span class="p">,</span> <span class="n">ultimo_lote_rapido</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Con disparo cada 6 segundos, ultimo batchId en 15s:"</span><span class="p">,</span> <span class="n">ultimo_lote_lento</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real:</p>
+<div class="highlight"><pre><span></span><code>Con disparo cada 1 segundo, ultimo batchId en 15s: 5
+Con disparo cada 6 segundos, ultimo batchId en 15s: 2
+</code></pre></div>
+<p><code>format("memory")</code> guarda la salida en una tabla temporal en vez de imprimirla — útil para inspeccionar resultados con SQL, y aquí para medir sin llenar la pantalla de filas. <code>consulta.lastProgress["batchId"]</code> es el número del último micro-lote que corrió: con el disparo de 1 segundo, en 15 segundos de reloj corrieron 6 micro-lotes (<code>batchId</code> 0 a 5); con el de 6 segundos, solo 3 (<code>batchId</code> 0 a 2).</p>
+<p>La diferencia es el compromiso entre <strong>latencia</strong> y <strong>throughput</strong> (rendimiento) que pide el sílabo: un disparo más frecuente reduce la latencia (un evento espera menos, en promedio, antes de procesarse) pero cada micro-lote es más chico y el <em>overhead</em> de coordinarlos se paga más veces por segundo; un disparo menos frecuente junta más eventos por lote (mejor throughput por lote) a cambio de que cada evento individual espere más antes de aparecer en el resultado. Ninguno es "el correcto": depende de si el sistema necesita reaccionar rápido (alertas) o procesar volumen (reportes).</p>
+<h3 id="313-escribir-la-salida-a-parquet-con-checkpoint">3.13 Escribir la salida a Parquet, con checkpoint<a class="headerlink" href="#313-escribir-la-salida-a-parquet-con-checkpoint" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.</p>
+<div class="highlight"><pre><span></span><code><span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/atmos_parquet"</span>
+<span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/chk_parquet"</span>
+
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"parquet"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">ARTIFACTS</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="n">CHECKPOINT_PARQUET</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+<span class="n">guardado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ARTIFACTS</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"filas guardadas en Parquet:"</span><span class="p">,</span> <span class="n">guardado</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+<span class="n">guardado</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"ts"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real:</p>
+<div class="highlight"><pre><span></span><code>filas guardadas en Parquet: 15
+
++-----------------+-----------+-----------------------+
+|sensorId         |temperatura|ts                     |
++-----------------+-----------+-----------------------+
+|esp32-patio      |10.6       |2026-09-27 12:43:06.138|
+|esp32-invernadero|39.6       |2026-09-27 12:43:06.142|
+|esp32-patio      |10.8       |2026-09-27 12:43:09.149|
+|esp32-invernadero|39.5       |2026-09-27 12:43:09.154|
+|esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
++-----------------+-----------+-----------------------+
+</code></pre></div>
+<p>Un <em>sink</em> de archivo (Parquet, aquí) solo acepta <code>outputMode("append")</code> — no puede "reescribir" una fila ya guardada en disco, a diferencia de <code>console</code> con <code>update</code>. Por eso esta celda escribe los eventos <strong>sin agregar</strong> (3.4), no las ventanas de 3.7-3.8: una agregación en modo <code>update</code> no se puede volcar directo a Parquet.</p>
+<p><strong>Error frecuente</strong>: con <code>startingOffsets: "latest"</code> y una corrida corta, si el productor tarda en emitir su primer evento después de que la consulta arranca, el primer micro-lote puede quedar vacío, y si la consulta se detiene antes de que llegue el segundo micro-lote, el resultado es <strong>cero filas guardadas</strong> — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, corre de nuevo confirmando primero que el productor de 3.1 sigue vivo.</p>
+<p>Vuelve a ejecutar la celda de lectura (<code>spark.read.parquet(ARTIFACTS)</code>) después de correr esta celda una segunda vez: el conteo debe <strong>crecer</strong>, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Lectura streaming de <code>atmos-eventos</code> con esquema explícito, distinguida de la lectura batch de S2-S4.</li>
+<li>Agregación por ventana fija sin watermark, mostrando el estado creciendo sin límite; la misma agregación con watermark, acotada.</li>
+<li>Ventana deslizante, con un mismo evento cayendo en varias ventanas solapadas.</li>
+<li>Contenido real de un <em>checkpoint</em> (<code>offsets/</code>, <code>commits/</code>, <code>state/</code>).</li>
+<li>Un evento tardío descartado por el watermark, y la advertencia del arranque en frío verificada.</li>
+<li>Un evento duplicado, publicado dos veces, contado una sola vez.</li>
+<li>Comparación real de dos intervalos de disparo (<code>batchId</code> alcanzado en el mismo tiempo de reloj).</li>
+<li>Salida persistida en Parquet, con checkpoint.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Aplicación del procesamiento streaming de esta sesión a una fuente de eventos del <strong>Proyecto Sello</strong> propio del equipo, con datos <strong>reales</strong>, no simulados.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Sobre un topic de Kafka de tu propio proyecto (el de S6/S7, o uno nuevo con datos reales de tu dominio), construye la lectura en modo streaming con un esquema explícito, igual que 3.3-3.4.</li>
+<li>Diseña y ejecuta al menos una agregación por ventana de tiempo (fija o deslizante) con watermarking, sobre una métrica que tenga sentido en tu dominio, y documenta qué margen de watermark elegiste y por qué.</li>
+<li>Provoca, con datos reales, un caso de dato tardío que el watermark descarte, y evidencia tanto el evento publicado como su ausencia en la salida — igual que 3.10, pero sobre tu propio topic.</li>
+<li>Provoca un caso de evento duplicado y evidencia que <code>dropDuplicates</code> acotado por watermark lo filtra.</li>
+<li>Compara al menos dos intervalos de disparo distintos sobre tu propio stream, y documenta qué <code>batchId</code> alcanzó cada uno en el mismo tiempo de reloj.</li>
+<li>Persiste el resultado (agregado o crudo) en Parquet, con checkpoint, y verifica que una segunda corrida acumula en vez de sobreescribir.</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, con datos reales de su propio Proyecto Sello — no simulados —, que puede construir un pipeline de Spark Structured Streaming con ventanas, watermarking, checkpointing y deduplicación, dejando lista la capa de procesamiento en tiempo real que S9-S11 van a observar y a alimentar con modelos.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S08_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S08 - Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Lectura streaming y agregación por ventana</em><ul>
+<li>Captura del esquema parseado, y de la agregación con watermark actualizándose sin repetir ventanas cerradas.</li>
+</ul>
+</li>
+<li><em>Dato tardío y deduplicación</em><ul>
+<li>Captura del evento tardío publicado y su ausencia en la salida; captura del evento duplicado publicado dos veces y contado una sola vez.</li>
+</ul>
+</li>
+<li><em>Intervalo de disparo y checkpoint</em><ul>
+<li>Captura de la comparación de <code>batchId</code> entre dos intervalos, y del contenido del checkpoint (<code>offsets/</code>, <code>commits/</code>, <code>state/</code>).</li>
+</ul>
+</li>
+<li><em>Persistencia en Parquet</em><ul>
+<li>Captura del conteo de filas guardadas, verificado en dos corridas sucesivas (acumula, no sobreescribe).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe un error real: una consulta que no arrancaba por falta de <code>checkpointLocation</code>, un evento tardío que sí pasó por el "arranque en frío" del watermark, o una corrida con cero filas por tener el productor detenido sin darse cuenta.</p>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>¿Por qué un sistema que agrega eventos por ventanas de tiempo no puede
+simplemente "esperar para siempre" a un dato tardío, y qué decisión de
+diseño tomaste al elegir el margen de tu watermark — qué se pierde y
+qué se gana con ese valor?
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>Lectura streaming con esquema explícito sobre datos reales del proyecto propio.</li>
+<li>Al menos una agregación por ventana con watermarking, con margen justificado.</li>
+<li>Evidencia de un dato tardío descartado y de un duplicado deduplicado, ambos con datos reales.</li>
+<li>Comparación de al menos dos intervalos de disparo, con el <code>batchId</code> alcanzado por cada uno.</li>
+<li>Persistencia en Parquet con checkpoint, verificada en dos corridas.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Qué diferencia hay entre el tiempo de evento y el tiempo de procesamiento, y por qué las ventanas de esta sesión usan el primero?</li>
+<li>¿Qué le pasaría a la memoria de una agregación por ventana que nunca declara un watermark?</li>
+<li>¿Por qué un evento tardío se descarta en silencio, sin ningún error, y qué margen decide si se descarta o no?</li>
+<li>¿Qué pasaría si intentas escribir una agregación en modo <code>update</code> directo a un archivo Parquet?</li>
+<li>¿Qué guarda un checkpoint, y qué pasa si una consulta se reinicia apuntando a uno que ya existía?</li>
+<li>¿Por qué <code>dropDuplicates</code> necesita un watermark para no crecer sin límite?</li>
+<li>Si tu sistema necesita alertas casi en tiempo real, ¿qué intervalo de disparo elegirías, y qué le costaría a tu clúster?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 8. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Lectura streaming y agregación por ventana*</td>
+<td style="text-align: right;">25</td>
+<td>Lectura con esquema explícito y agregación por ventana con watermark, funcionando sobre datos reales del proyecto propio.</td>
+<td>Funcional, con el margen del watermark sin justificar.</td>
+<td>Agregación incompleta o solo sobre datos simulados.</td>
+<td>No implementa lectura ni agregación streaming.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Dato tardío y deduplicación*</td>
+<td style="text-align: right;">25</td>
+<td>Evidencia clara de un tardío descartado y un duplicado deduplicado, ambos con datos reales.</td>
+<td>Uno de los dos casos evidenciado con claridad, el otro parcial.</td>
+<td>Ambos casos parciales o poco claros.</td>
+<td>No evidencia ninguno de los dos casos.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Intervalo de disparo y checkpoint*</td>
+<td style="text-align: right;">25</td>
+<td>Comparación real de al menos dos intervalos con su <code>batchId</code>, y contenido del checkpoint inspeccionado y explicado.</td>
+<td>Comparación o inspección del checkpoint incompleta.</td>
+<td>Solo uno de los dos elementos presente.</td>
+<td>No presenta ninguno de los dos.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Persistencia en Parquet*</td>
+<td style="text-align: right;">25</td>
+<td>Persistencia con checkpoint verificada en dos corridas que acumulan correctamente.</td>
+<td>Persistencia funcional, sin verificar la acumulación.</td>
+<td>Persistencia parcial o con errores no diagnosticados.</td>
+<td>No persiste ninguna salida.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy la telemetría de S7 dejó de procesarse mensaje por mensaje y pasó por Spark Structured Streaming: micro-lotes, ventanas de tiempo fijas y deslizantes, un watermark que decide cuánto esperar por un dato tardío antes de cerrar una ventana y liberar su memoria, un checkpoint que guarda ese progreso para sobrevivir a un reinicio, y <code>dropDuplicates</code> acotado convirtiendo el "al menos una vez" de Kafka en un resultado que se comporta como "exactamente una vez". Todo esto se verificó con datos reales llegando en vivo, no con un dataset estático.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte en una frase qué <code>batchId</code> alcanzó con el disparo de 1 segundo frente al de 6 segundos, en su propia corrida.</p>
+<p><strong>Metacognición:</strong> ¿qué te costó más entender hoy: por qué una agregación sin watermark crece para siempre, o por qué un evento tardío se descarta sin ningún error visible?</p>
+<p><strong>Proyección:</strong> S9 agrega la pieza que hoy faltó: observar todo esto desde afuera, con métricas, umbrales y estimación de costos operacionales — el <em>lag</em> de un consumer group, la latencia de un micro-lote, cuánto cuesta mantener corriendo un intervalo de disparo agresivo. S10 reutiliza el mismo patrón de streaming de hoy para aplicar un modelo de series de tiempo sobre <code>atmos-eventos</code>, en vez de una simple agregación.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Apache Software Foundation. (2024). <em>Structured Streaming Programming Guide</em>. Apache Spark Documentation. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html</li>
+<li>Apache Software Foundation. (2024). <em>Apache Kafka Documentation</em>. https://kafka.apache.org/documentation/</li>
+<li>Databricks. (2024). <em>Configure Structured Streaming trigger intervals</em>. https://docs.databricks.com/aws/en/structured-streaming/triggers</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
