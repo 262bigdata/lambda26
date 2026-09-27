@@ -43,7 +43,7 @@ Resultado esperado U2: el estudiante implementa un pipeline Big Data en tiempo r
 |---|---|---|---|
 | [S6](sesiones/S06_Ingesta_Eventos_Empresariales_Kafka.md) | Ingesta de eventos empresariales en tiempo real. | `uso-rapido` / `uso-microserv` + `kafka` | Publicación y consumo de eventos empresariales por Kafka, con contrato de evento documentado. |
 | [S7](sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real.md) | Ingesta de eventos IoT/sensores en tiempo real. | `uso-atmos` + `kafka` | Simulación de eventos de sensores integrada al pipeline de Kafka. |
-| S8 | Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega. | `uso-pyspark` (consumidor) + `kafka` | Pipeline streaming con ventanas, watermarking y checkpointing. |
+| [S8](sesiones/S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking.md) | Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega. | `uso-pyspark` (consumidor) + `kafka` | Pipeline streaming con ventanas, watermarking y checkpointing. |
 | S9 | Observabilidad con Grafana y costos. | `obs` | Tablero de observabilidad con métricas, umbrales y estimación de costos. |
 | S10 | Series de tiempo e inferencia en streaming. | `uso-pyspark` | Modelo o inferencia de series de tiempo aplicado sobre datos batch y/o streaming. |
 | S11 | BI/ML distribuido con Spark: KPIs del BI y visualización de la predicción de series de tiempo. | `uso-pyspark` + `obs` | KPIs del flujo de eventos y predicción de series de tiempo visualizados en Grafana. |
@@ -206,4 +206,5 @@ flowchart LR
 - [S5 - Evaluación de la Unidad I](sesiones/S05_Evaluacion_Unidad_1.md)
 - [S6 - Ingesta de Eventos Empresariales en Tiempo Real](sesiones/S06_Ingesta_Eventos_Empresariales_Kafka.md)
 - [S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real](sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real.md)
+- [S8 - Procesamiento en Streaming con Spark: Ventanas, Watermarking y Semántica de Entrega](sesiones/S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking.md)
 - [Guía de Proyecto Sello](proyecto-sello/index.md)
