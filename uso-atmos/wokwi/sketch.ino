@@ -29,7 +29,7 @@ DHT dht(DHT_PIN, DHT_TYPE);
 // otros proyectos son Custom Chips con archivos propios, no una pieza
 // disponible por defecto) — en su lugar, un potenciómetro (SÍ es una pieza
 // real de Wokwi, docs.wokwi.com/parts/wokwi-potentiometer) hace de sensor
-// de presión: giralo en vivo durante la simulación para cambiar el valor.
+// de presión: gíralo en vivo durante la simulación para cambiar el valor.
 #define PRESSURE_PIN 34
 
 float leerPresion() {

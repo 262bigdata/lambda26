@@ -4,9 +4,9 @@
 
 ### 1.1 Presentación de la sesión
 
-S6 dejó Kafka operativo con un flujo de eventos empresariales: bajo volumen, esquema estable, un evento cada vez que alguien registra una orden. Esta sesión reutiliza exactamente la misma infraestructura de Kafka — el mismo `kafka/compose.yml`, el mismo Kafka UI — para un productor de naturaleza distinta: **telemetría de sensores IoT**. Un sensor no espera a que ocurra un evento de negocio para publicar; publica todo el tiempo, a un ritmo fijo, sin que nadie se lo pida. Esa diferencia de frecuencia y volumen es lo que esta sesión pone a prueba, no un concepto nuevo de Kafka.
+S6 dejó Kafka operativo con un flujo de eventos empresariales: bajo volumen, esquema estable, un evento cada vez que alguien registra una orden. Esta sesión reutiliza exactamente la misma infraestructura de Kafka — el mismo `kafka/compose.yml`, el mismo Kafka UI — para un productor de naturaleza distinta: **telemetría de sensores IoT** (*Internet of Things*, internet de las cosas). Un sensor no espera a que ocurra un evento de negocio para publicar; publica todo el tiempo, a un ritmo fijo, sin que nadie se lo pida. Esa diferencia de frecuencia y volumen es lo que esta sesión pone a prueba, no un concepto nuevo de Kafka.
 
-El módulo `uso-atmos` trabaja en dos niveles, igual que S6 separó `uso-rapido` (Python simple) de `uso-microserv` (Java "real"). Primero, un simulador en Python publica lecturas de tres sensores atmosféricos ESP32 (temperatura, humedad, presión) directamente en el topic `atmos-eventos` — rápido de levantar, útil para verificar el patrón productor-consumidor y el particionado por dispositivo sin depender de hardware. Segundo, un ESP32 **real simulado en Wokwi** (firmware Arduino de verdad, sensor DHT22 virtual — temperatura y humedad — más un potenciómetro que hace de sensor de presión, ya que Wokwi no tiene una pieza de presión barométrica nativa) publica sus lecturas por **MQTT** — el protocolo que sí habla un microcontrolador — hacia un puente que las reenvía a ese mismo topic de Kafka, sin cambiar ni el esquema ni el consumer. El sílabo de esta sesión pide "simular eventos de sensores o telemetría"; Wokwi es precisamente ese tipo de simulación — de hardware, no solo de datos — y es la que se acerca más a como un dispositivo real terminaría publicando en Kafka: nunca hablando el protocolo de Kafka directamente, siempre a través de un puente. Esta misma fuente de datos es la que S10 va a consumir para entrenar e inferir un modelo de series de tiempo — todo lo que se construye hoy sigue en pie en esa sesión.
+El módulo `uso-atmos` trabaja en dos niveles, igual que S6 separó `uso-rapido` (Python simple) de `uso-microserv` (Java "real"). Primero, un simulador en Python publica lecturas de tres sensores atmosféricos ESP32 (temperatura, humedad, presión; el ESP32 es un microcontrolador de Espressif con WiFi integrado) directamente en el topic `atmos-eventos` — rápido de levantar, útil para verificar el patrón productor-consumidor y el particionado por dispositivo sin depender de hardware. Segundo, un ESP32 **real simulado en Wokwi** (firmware Arduino de verdad, sensor DHT22 virtual — temperatura y humedad — más un potenciómetro que hace de sensor de presión, ya que Wokwi no tiene una pieza de presión barométrica nativa) publica sus lecturas por **MQTT** (*Message Queuing Telemetry Transport*) — el protocolo que sí habla un microcontrolador — hacia un puente que las reenvía a ese mismo topic de Kafka, sin cambiar ni el esquema ni el consumer. El sílabo de esta sesión pide "simular eventos de sensores o telemetría"; Wokwi es precisamente ese tipo de simulación — de hardware, no solo de datos — y es la que se acerca más a como un dispositivo real terminaría publicando en Kafka: nunca hablando el protocolo de Kafka directamente, siempre a través de un puente. Esta misma fuente de datos es la que S10 va a consumir para entrenar e inferir un modelo de series de tiempo — todo lo que se construye hoy sigue en pie en esa sesión.
 
 ### 1.2 Índice
 
@@ -42,7 +42,7 @@ El módulo `uso-atmos` funcional en sus dos niveles: un productor Python que sim
 
 Una planta de monitoreo ambiental instala sensores de temperatura en distintos puntos de su instalación, cada uno publicando una lectura por segundo a un sistema central. Meses después de operar sin problemas, un sensor con un cable suelto empieza a enviar lecturas erráticas: unas veces `null`, otras veces `-999`, otras veces `4500.0` grados. El sistema central, escrito asumiendo que "un sensor siempre manda un número de temperatura válido", explota con una excepción no controlada cada vez que llega uno de esos valores — y como los sensores publican una vez por segundo, el proceso se cae varias veces por minuto hasta que alguien lo nota.
 
-El problema no es el sensor defectuoso — eso va a pasar tarde o temprano con cualquier hardware real. El problema es un consumer que no distingue entre "el dato no tiene la forma esperada" (falta un campo, no es JSON) y "el dato tiene la forma esperada pero el valor no tiene sentido físico" (una temperatura de 4500°C). Los dos son fallas reales y distintas, y ambas necesitan su propio manejo — exactamente lo que construye esta sesión.
+El problema no es el sensor defectuoso — eso va a pasar tarde o temprano con cualquier hardware real. El problema es un consumer que no distingue entre "el dato no tiene la forma esperada" (falta un campo, no es JSON, *JavaScript Object Notation*) y "el dato tiene la forma esperada pero el valor no tiene sentido físico" (una temperatura de 4500°C). Los dos son fallas reales y distintas, y ambas necesitan su propio manejo — exactamente lo que construye esta sesión.
 
 **Preguntas de análisis**
 
@@ -150,7 +150,7 @@ Ni el ESP32 (simulado en tu navegador vía Wokwi) ni el bridge (corriendo en tu 
 
 El puente no valida nada — reenvía el payload de MQTT a Kafka tal cual llegó. La validación de esquema y de rango físico sigue viviendo en un solo lugar (`consumer_sensores.py`, 3.4): para el consumer, no hay diferencia entre un evento que vino del simulador Python (Figura 2) o de un ESP32 real simulado (Figura 3) — ambos terminan en el mismo topic, con el mismo contrato.
 
-### 2.2 Telemetría IoT: qué cambia frente a un evento de negocio
+### 2.2 Diferencias entre un evento de negocio (S6) y telemetría IoT: frecuencia, volumen, esquema
 
 **Tabla 2. Conceptos de esta sesión**
 
@@ -612,7 +612,7 @@ Campos:
 | `sensorId` | string | Identificador del dispositivo — también es la `key` de Kafka. |
 | `temperatura` | number | Temperatura en grados Celsius. |
 | `humedad` | number | Humedad relativa, en porcentaje. |
-| `presion` | number | Presión atmosférica, en hPa. |
+| `presion` | number | Presión atmosférica, en hPa (hectopascales). |
 | `origen` | string | Quién publicó el evento: `"uso-atmos"` (simulador Python) o `"wokwi"` (ESP32 real simulado). |
 | `timestamp` | number | Fecha/hora en milisegundos epoch. |
 
@@ -641,7 +641,7 @@ sensorId
 
 **Producto del paso:** el puente suscrito a un broker MQTT que ya está en internet, sin infraestructura propia — sin Mosquitto, sin túnel, sin tarjeta de crédito.
 
-Un ESP32 simulado en Wokwi corre por completo en tu navegador (la CPU del ESP32 se emula en WebAssembly, del lado del cliente, no en un servidor de Wokwi) — pero sigue sin poder llegar a tu `localhost`: la red WiFi simulada (`Wokwi-GUEST`) solo sale a internet real a través del gateway de Wokwi, nunca hacia tu propia máquina. La alternativa a exponer tu propio broker con un túnel (ngrok exige tarjeta de crédito verificada para túneles TCP incluso en cuenta gratis) es no exponer nada tuyo: que el ESP32 y el puente se conecten los dos, cada uno por su cuenta, a un broker que **ya es público** — `test.mosquitto.org`, sin necesidad de cuenta ni credenciales.
+Un ESP32 simulado en Wokwi corre por completo en tu navegador (la CPU, unidad central de procesamiento, del ESP32 se emula en WebAssembly, del lado del cliente, no en un servidor de Wokwi) — pero sigue sin poder llegar a tu `localhost`: la red WiFi simulada (`Wokwi-GUEST`) solo sale a internet real a través del gateway de Wokwi, nunca hacia tu propia máquina. La alternativa a exponer tu propio broker con un túnel (ngrok exige tarjeta de crédito verificada para túneles TCP (*Transmission Control Protocol*) incluso en cuenta gratis) es no exponer nada tuyo: que el ESP32 y el puente se conecten los dos, cada uno por su cuenta, a un broker que **ya es público** — `test.mosquitto.org`, sin necesidad de cuenta ni credenciales.
 
 `test.mosquitto.org` es compartido por cualquiera en internet — cualquiera puede publicar o suscribirse a cualquier topic. Para no mezclar tus mensajes con los de otro equipo del curso que use el mismo broker al mismo tiempo, el topic incluye un identificador de equipo:
 
@@ -649,7 +649,14 @@ Un ESP32 simulado en Wokwi corre por completo en tu navegador (la CPU del ESP32 
 lambda26/atmos/equipo01/lecturas
 ```
 
-Cambia `equipo01` por tu propio identificador, tanto acá como en el firmware (3.8).
+Cambia `equipo01` por tu propio identificador, tanto aquí como en el firmware (3.8).
+
+El puente usa la librería `paho-mqtt` para hablar MQTT, que el productor y el consumidor de 3.3 y 3.4 no necesitaban. Agrégala a **`uso-atmos/app/requirements.txt`**, que queda así:
+
+```text
+kafka-python==2.0.2
+paho-mqtt==2.1.0
+```
 
 **`uso-atmos/app/bridge_mqtt_kafka.py`:**
 
@@ -767,10 +774,186 @@ En la consola del bridge debe aparecer `status: "forwarded"`, y en la del `consu
 
 **Producto del paso:** un ESP32 real simulado (firmware Arduino, sensor DHT22 virtual — temperatura y humedad) publicando lecturas de punta a punta hasta Kafka. La presión se simula con un **potenciómetro** (gíralo en vivo durante la simulación para cambiar el valor) — Wokwi no tiene ninguna pieza de sensor de presión barométrica nativa (los `chip-bmp280` que aparecen en proyectos de otras personas son *Custom Chips* con archivos propios, no piezas disponibles por defecto).
 
+Estos son los tres archivos del proyecto de Wokwi, completos; los pasos de abajo los pegan uno por uno.
+
+**`uso-atmos/wokwi/sketch.ino`:**
+
+```cpp
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <DHT.h>
+#include <ArduinoJson.h>
+#include <time.h>
+
+// --- WiFi simulado de Wokwi: sale a internet real a través del IoT Gateway ---
+const char *WIFI_SSID = "Wokwi-GUEST";
+const char *WIFI_PASSWORD = "";
+
+// --- Broker MQTT público — sin cuenta, sin túnel, sin tarjeta ---
+const char *MQTT_HOST = "test.mosquitto.org";
+const int MQTT_PORT = 1883;
+
+// test.mosquitto.org es PÚBLICO: cualquiera en internet puede publicar o
+// suscribirse a cualquier topic. "equipo01" evita que tus mensajes se
+// mezclen con los de otro equipo del curso — cambia esto por tu propio ID.
+const char *MQTT_TOPIC = "lambda26/atmos/equipo01/lecturas";
+
+// --- Identificador de este dispositivo simulado (también debe ser único) ---
+const char *SENSOR_ID = "esp32-wokwi-equipo01";
+
+#define DHT_PIN 4
+#define DHT_TYPE DHT22
+
+DHT dht(DHT_PIN, DHT_TYPE);
+
+// Wokwi no tiene una pieza BMP280 nativa (los "chip-bmp280" que existen en
+// otros proyectos son Custom Chips con archivos propios, no una pieza
+// disponible por defecto) — en su lugar, un potenciómetro (SÍ es una pieza
+// real de Wokwi, docs.wokwi.com/parts/wokwi-potentiometer) hace de sensor
+// de presión: gíralo en vivo durante la simulación para cambiar el valor.
+#define PRESSURE_PIN 34
+
+float leerPresion() {
+  int lectura = analogRead(PRESSURE_PIN); // 0-4095 (ADC de 12 bits)
+  return 995.0 + (lectura / 4095.0) * 30.0; // mapeado a 995-1025 hPa
+}
+
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
+
+unsigned long ultimaLectura = 0;
+const unsigned long INTERVALO_MS = 5000;
+
+void conectarWifi() {
+  Serial.printf("Conectando a WiFi %s...\n", WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.print("WiFi conectado, IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+void sincronizarReloj() {
+  // Necesario para que "timestamp" sea un epoch real, no segundos desde el
+  // arranque — el bridge y el consumer calculan latencyMs a partir de esto.
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  Serial.print("Sincronizando reloj por NTP");
+  time_t ahora = time(nullptr);
+  while (ahora < 1700000000) { // fecha muy antigua = todavia no sincronizo
+    delay(500);
+    Serial.print(".");
+    ahora = time(nullptr);
+  }
+  Serial.println(" listo");
+}
+
+void conectarMQTT() {
+  while (!mqttClient.connected()) {
+    Serial.printf("Conectando a MQTT %s:%d...\n", MQTT_HOST, MQTT_PORT);
+    if (mqttClient.connect(SENSOR_ID)) {
+      Serial.println("MQTT conectado");
+    } else {
+      Serial.printf("Fallo MQTT, rc=%d. Reintentando en 2s\n", mqttClient.state());
+      delay(2000);
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+
+  conectarWifi();
+  sincronizarReloj();
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  conectarMQTT();
+}
+
+void loop() {
+  if (!mqttClient.connected()) {
+    conectarMQTT();
+  }
+  mqttClient.loop();
+
+  unsigned long ahora = millis();
+  if (ahora - ultimaLectura >= INTERVALO_MS) {
+    ultimaLectura = ahora;
+
+    float temperatura = dht.readTemperature();
+    float humedad = dht.readHumidity();
+    float presion = leerPresion();
+
+    if (isnan(temperatura) || isnan(humedad)) {
+      Serial.println("Lectura invalida del DHT22, se omite esta ronda");
+      return;
+    }
+
+    StaticJsonDocument<256> doc;
+    doc["tipoEvento"] = "sensor.lectura";
+    doc["sensorId"] = SENSOR_ID;
+    doc["temperatura"] = temperatura;
+    doc["humedad"] = humedad;
+    doc["presion"] = presion;
+    doc["origen"] = "wokwi";
+    doc["timestamp"] = (unsigned long long)time(nullptr) * 1000ULL;
+
+    char payload[256];
+    serializeJson(doc, payload);
+
+    if (mqttClient.publish(MQTT_TOPIC, payload)) {
+      Serial.print("Publicado: ");
+      Serial.println(payload);
+    } else {
+      Serial.println("Fallo al publicar en MQTT");
+    }
+  }
+}
+```
+
+El firmware hace cuatro cosas, en este orden: se conecta a la red simulada `Wokwi-GUEST`; sincroniza el reloj por NTP (*Network Time Protocol*, para que `timestamp` sea un *epoch* real y no segundos desde el arranque); se conecta al broker MQTT público; y cada 5 segundos lee el DHT22 (temperatura y humedad) y el potenciómetro (presión, mapeada a 995-1025 hPa), arma el JSON con el mismo contrato de 3.6 (Tabla 3) y lo publica en `MQTT_TOPIC`. Si el DHT22 devuelve una lectura inválida, omite esa ronda en vez de publicar un dato roto.
+
+**`uso-atmos/wokwi/diagram.json`:**
+
+```json
+{
+  "version": 1,
+  "author": "lambda26",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -110, "left": 180, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 40, "left": 180, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [] ],
+    [ "dht1:GND", "esp:GND.1", "black", [] ],
+    [ "dht1:SDA", "esp:4", "green", [] ],
+    [ "pot1:VCC", "esp:3V3", "red", [] ],
+    [ "pot1:GND", "esp:GND.2", "black", [] ],
+    [ "pot1:SIG", "esp:34", "purple", [] ]
+  ]
+}
+```
+
+**`uso-atmos/wokwi/libraries.txt`:**
+
+```text
+PubSubClient
+DHT sensor library
+ArduinoJson
+```
+
+Una librería por línea, por su nombre y sin versión: el Library Manager de Wokwi agrega la más reciente de cada una.
+
 1. Entra directo a [wokwi.com/projects/new/esp32](https://wokwi.com/projects/new/esp32) — te lleva a un proyecto en blanco con el ESP32 genérico y el sketch de ejemplo (`Hello, ESP32!`). Si en cambio entras a `wokwi.com/esp32` y navegas a mano, **cuidado**: la sección "Featured projects" (arriba) son proyectos de ejemplo de otras personas, no plantillas en blanco — la plantilla correcta está más abajo, en "Starter Templates", y ahí elige la tarjeta que dice solo **"ESP32"** (no S2/S3/C3/C6/H2: son otro chip, con otros pines por defecto, y `diagram.json`/`sketch.ino` no calzan igual).
-2. Reemplaza el `sketch.ino` generado por el de `uso-atmos/wokwi/sketch.ino`.
-3. Reemplaza el `diagram.json` generado por el de `uso-atmos/wokwi/diagram.json` (agrega el DHT22 en el pin `4` y el potenciómetro en el pin `34` — sin el prefijo `D` que usan otras placas de Wokwi; esta plantilla (`board-esp32-devkit-c-v4`) nombra los GPIO con el número pelado).
-4. Click en la pestaña **"Library Manager"** (al lado de `diagram.json`) y agrega, una por una, las 3 librerías de `uso-atmos/wokwi/libraries.txt`: búscalas por nombre y agrega la que coincida exactamente (`PubSubClient` es la de **Nick O'Leary**). No basta con que el archivo `libraries.txt` exista en el proyecto — cada librería se agrega manualmente desde esta pestaña, o la compilación falla con `fatal error: ....h: No such file or directory` aunque el código esté bien. Verifica en "Installed Libraries" que las 3 aparezcan antes de compilar.
+2. Reemplaza el `sketch.ino` generado por el de arriba (`uso-atmos/wokwi/sketch.ino`).
+3. Reemplaza el `diagram.json` generado por el de arriba (agrega el DHT22 en el pin `4` y el potenciómetro en el pin `34` — sin el prefijo `D` que usan otras placas de Wokwi; esta plantilla (`board-esp32-devkit-c-v4`) nombra los GPIO (*General-Purpose Input/Output*, pines de entrada y salida de uso general) con el número pelado).
+4. Click en la pestaña **"Library Manager"** (al lado de `diagram.json`) y agrega, una por una, las 3 librerías del `libraries.txt` de arriba: búscalas por nombre y agrega la que coincida exactamente (`PubSubClient` es la de **Nick O'Leary**). No basta con que el archivo `libraries.txt` exista en el proyecto — cada librería se agrega manualmente desde esta pestaña, o la compilación falla con `fatal error: ....h: No such file or directory` aunque el código esté bien. Verifica en "Installed Libraries" que las 3 aparezcan antes de compilar.
 5. En `sketch.ino`, cambia `equipo01` (en `MQTT_TOPIC` y en `SENSOR_ID`) por tu propio identificador de equipo — el mismo que usaste en 3.7.
 6. Click en **Start Simulation**.
 
@@ -782,7 +965,7 @@ Tanto el DHT22 como el potenciómetro se pueden ajustar en vivo mientras la simu
 
 ![Circuito simulado en Wokwi con ESP32, DHT22 y potenciómetro, y el panel Editing DHT22 con sliders de temperatura y humedad](img/s07-3.8-wokwi-circuito-dht22-potenciometro.png)
 
-El `diagram.json` real, ya cableado: DHT22 (`VCC`→`3V3`, `GND`→`GND`, `SDA`→pin `4`) y potenciómetro (`VCC`→`3V3`, `GND`→`GND`, `SIG`→pin `34`), ambos alimentados por el ESP32 (`board-esp32-devkit-c-v4`).
+El `diagram.json` de arriba, ya cableado: DHT22 (`VCC`→`3V3`, `GND`→`GND`, `SDA`→pin `4`) y potenciómetro (`VCC`→`3V3`, `GND`→`GND`, `SIG`→pin `34`), ambos alimentados por el ESP32 (`board-esp32-devkit-c-v4`).
 
 Verifica de punta a punta: el log del bridge (3.7) debe mostrar `status: "forwarded"` por cada lectura del ESP32 simulado, y `consumer_sensores.py` (3.4) debe procesarla con `status: "consumed"` — mismo esquema, misma validación de rango, sin ningún cambio de código respecto al simulador Python. En dos terminales separadas, con la simulación de Wokwi corriendo:
 
@@ -803,6 +986,14 @@ Cada lectura del ESP32 (`sensorId: esp32-wokwi-equipo01`) pasa primero por el br
 **Error frecuente**: las lecturas dejan de llegar (el consumer y el bridge quedan sin mensajes nuevos) sin ningún error visible en el Monitor Serial. Como la CPU del ESP32 se emula en el navegador, Wokwi **pausa la simulación entera** (WiFi y MQTT incluidos) en cuanto la pestaña deja de estar activa — al minimizar la ventana, cambiar de pestaña o bloquear la pantalla. Es una limitación conocida y sin solución del lado de Wokwi (no de tu firmware ni de tu cuenta): mantén la pestaña de Wokwi visible y en primer plano mientras dure la prueba de punta a punta.
 
 **Error frecuente**: `fatal error: ....h: No such file or directory` — alguna librería del paso 4 no quedó realmente agregada (revisa "Installed Libraries" en el Library Manager). **Error frecuente**: una pieza aparece como un recuadro verde que dice "Missing chip Breakout" en vez de dibujarse — esa pieza no existe de verdad en el catálogo de Wokwi (le pasó a `wokwi-bmp280` y a otros nombres inventados de BMP280); usa solo piezas confirmadas como las de esta guía. **Error frecuente**: el Monitor Serial también puede quedar tapado por el panel "Editing DHT22" si lo dejaste abierto — ciérralo con la `X` de su esquina superior derecha.
+
+**Evidencia de aprendizaje:**
+
+- `uso-atmos` corriendo, con el topic `atmos-eventos` de 3 particiones y la distribución real de los `sensorId` observada en Kafka UI.
+- Productor publicando lecturas de los 3 sensores simulados, con `partition` y `sensorId` reales en el log.
+- Consumer mostrando los tres estados: `consumed` (lectura válida), `invalid` (mensaje malformado) y `alerta` (valor fuera de rango físico).
+- Contrato del evento `sensor.lectura` documentado (Tablas 3 y 4).
+- ESP32 real simulado en Wokwi publicando por MQTT: el puente reenviando a Kafka (`forwarded`) y el consumer procesando esas lecturas (`consumed`), como en la Figura 5.
 
 ## 4. Crea: actividad autónoma
 
@@ -897,7 +1088,7 @@ Tiempo: 10 min.
 
 **Dinámica participativa:** cada estudiante comparte en qué partición cayó `esp32-laboratorio` en su propia ejecución de 3.5 — ¿coincidió con la partición 0 de esta guía, o el hash dio un resultado distinto en su máquina?
 
-**Metacognición:** ¿en qué momento de hoy hubieras validado solo el esquema de un evento, sin pensar en validar también el rango de sus valores — y qué símbolo concreto del caso 1.6.1 se te habría pasado por alto?
+**Metacognición:** ¿en qué momento de hoy hubieras validado solo el esquema de un evento, sin pensar en validar también el rango de sus valores — y qué síntoma concreto del caso 1.6.1 se te habría pasado por alto?
 
 **Proyección:** S8 conecta Spark Structured Streaming como un segundo consumidor de estos mismos topics (`orden-eventos`, `pago-eventos`, `atmos-eventos`), aplicando ventanas y watermarking sobre el volumen que hoy se generó. S10 va un paso más allá: entrena e infiere un modelo de series de tiempo directamente sobre `atmos-eventos`.
 
