@@ -1046,10 +1046,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio" class="md-nav__link">
+  <a href="#22-diferencias-entre-un-evento-de-negocio-s6-y-telemetria-iot-frecuencia-volumen-esquema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.2 Telemetría IoT: qué cambia frente a un evento de negocio
+        2.2 Diferencias entre un evento de negocio (S6) y telemetría IoT: frecuencia, volumen, esquema
       
     </span>
   </a>
@@ -1586,10 +1586,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio" class="md-nav__link">
+  <a href="#22-diferencias-entre-un-evento-de-negocio-s6-y-telemetria-iot-frecuencia-volumen-esquema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2.2 Telemetría IoT: qué cambia frente a un evento de negocio
+        2.2 Diferencias entre un evento de negocio (S6) y telemetría IoT: frecuencia, volumen, esquema
       
     </span>
   </a>
@@ -1862,8 +1862,8 @@
 <h1 id="s7-ingesta-de-eventos-iotsensores-en-tiempo-real">S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real<a class="headerlink" href="#s7-ingesta-de-eventos-iotsensores-en-tiempo-real" title="Permanent link">&para;</a></h1>
 <h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
 <h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
-<p>S6 dejó Kafka operativo con un flujo de eventos empresariales: bajo volumen, esquema estable, un evento cada vez que alguien registra una orden. Esta sesión reutiliza exactamente la misma infraestructura de Kafka — el mismo <code>kafka/compose.yml</code>, el mismo Kafka UI — para un productor de naturaleza distinta: <strong>telemetría de sensores IoT</strong>. Un sensor no espera a que ocurra un evento de negocio para publicar; publica todo el tiempo, a un ritmo fijo, sin que nadie se lo pida. Esa diferencia de frecuencia y volumen es lo que esta sesión pone a prueba, no un concepto nuevo de Kafka.</p>
-<p>El módulo <code>uso-atmos</code> trabaja en dos niveles, igual que S6 separó <code>uso-rapido</code> (Python simple) de <code>uso-microserv</code> (Java "real"). Primero, un simulador en Python publica lecturas de tres sensores atmosféricos ESP32 (temperatura, humedad, presión) directamente en el topic <code>atmos-eventos</code> — rápido de levantar, útil para verificar el patrón productor-consumidor y el particionado por dispositivo sin depender de hardware. Segundo, un ESP32 <strong>real simulado en Wokwi</strong> (firmware Arduino de verdad, sensor DHT22 virtual — temperatura y humedad — más un potenciómetro que hace de sensor de presión, ya que Wokwi no tiene una pieza de presión barométrica nativa) publica sus lecturas por <strong>MQTT</strong> — el protocolo que sí habla un microcontrolador — hacia un puente que las reenvía a ese mismo topic de Kafka, sin cambiar ni el esquema ni el consumer. El sílabo de esta sesión pide "simular eventos de sensores o telemetría"; Wokwi es precisamente ese tipo de simulación — de hardware, no solo de datos — y es la que se acerca más a como un dispositivo real terminaría publicando en Kafka: nunca hablando el protocolo de Kafka directamente, siempre a través de un puente. Esta misma fuente de datos es la que S10 va a consumir para entrenar e inferir un modelo de series de tiempo — todo lo que se construye hoy sigue en pie en esa sesión.</p>
+<p>S6 dejó Kafka operativo con un flujo de eventos empresariales: bajo volumen, esquema estable, un evento cada vez que alguien registra una orden. Esta sesión reutiliza exactamente la misma infraestructura de Kafka — el mismo <code>kafka/compose.yml</code>, el mismo Kafka UI — para un productor de naturaleza distinta: <strong>telemetría de sensores IoT</strong> (<em>Internet of Things</em>, internet de las cosas). Un sensor no espera a que ocurra un evento de negocio para publicar; publica todo el tiempo, a un ritmo fijo, sin que nadie se lo pida. Esa diferencia de frecuencia y volumen es lo que esta sesión pone a prueba, no un concepto nuevo de Kafka.</p>
+<p>El módulo <code>uso-atmos</code> trabaja en dos niveles, igual que S6 separó <code>uso-rapido</code> (Python simple) de <code>uso-microserv</code> (Java "real"). Primero, un simulador en Python publica lecturas de tres sensores atmosféricos ESP32 (temperatura, humedad, presión; el ESP32 es un microcontrolador de Espressif con WiFi integrado) directamente en el topic <code>atmos-eventos</code> — rápido de levantar, útil para verificar el patrón productor-consumidor y el particionado por dispositivo sin depender de hardware. Segundo, un ESP32 <strong>real simulado en Wokwi</strong> (firmware Arduino de verdad, sensor DHT22 virtual — temperatura y humedad — más un potenciómetro que hace de sensor de presión, ya que Wokwi no tiene una pieza de presión barométrica nativa) publica sus lecturas por <strong>MQTT</strong> (<em>Message Queuing Telemetry Transport</em>) — el protocolo que sí habla un microcontrolador — hacia un puente que las reenvía a ese mismo topic de Kafka, sin cambiar ni el esquema ni el consumer. El sílabo de esta sesión pide "simular eventos de sensores o telemetría"; Wokwi es precisamente ese tipo de simulación — de hardware, no solo de datos — y es la que se acerca más a como un dispositivo real terminaría publicando en Kafka: nunca hablando el protocolo de Kafka directamente, siempre a través de un puente. Esta misma fuente de datos es la que S10 va a consumir para entrenar e inferir un modelo de series de tiempo — todo lo que se construye hoy sigue en pie en esa sesión.</p>
 <h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Diferencias entre un evento de negocio (S6) y telemetría IoT: frecuencia, volumen, esquema.</li>
@@ -1910,7 +1910,7 @@
 <h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
 <h4 id="161-caso-el-sensor-que-mando-un-dato-imposible">1.6.1 Caso: el sensor que mandó un dato imposible<a class="headerlink" href="#161-caso-el-sensor-que-mando-un-dato-imposible" title="Permanent link">&para;</a></h4>
 <p>Una planta de monitoreo ambiental instala sensores de temperatura en distintos puntos de su instalación, cada uno publicando una lectura por segundo a un sistema central. Meses después de operar sin problemas, un sensor con un cable suelto empieza a enviar lecturas erráticas: unas veces <code>null</code>, otras veces <code>-999</code>, otras veces <code>4500.0</code> grados. El sistema central, escrito asumiendo que "un sensor siempre manda un número de temperatura válido", explota con una excepción no controlada cada vez que llega uno de esos valores — y como los sensores publican una vez por segundo, el proceso se cae varias veces por minuto hasta que alguien lo nota.</p>
-<p>El problema no es el sensor defectuoso — eso va a pasar tarde o temprano con cualquier hardware real. El problema es un consumer que no distingue entre "el dato no tiene la forma esperada" (falta un campo, no es JSON) y "el dato tiene la forma esperada pero el valor no tiene sentido físico" (una temperatura de 4500°C). Los dos son fallas reales y distintas, y ambas necesitan su propio manejo — exactamente lo que construye esta sesión.</p>
+<p>El problema no es el sensor defectuoso — eso va a pasar tarde o temprano con cualquier hardware real. El problema es un consumer que no distingue entre "el dato no tiene la forma esperada" (falta un campo, no es JSON, <em>JavaScript Object Notation</em>) y "el dato tiene la forma esperada pero el valor no tiene sentido físico" (una temperatura de 4500°C). Los dos son fallas reales y distintas, y ambas necesitan su propio manejo — exactamente lo que construye esta sesión.</p>
 <p><strong>Preguntas de análisis</strong></p>
 <p><strong>Activación de conocimientos previos</strong></p>
 <ol>
@@ -1998,7 +1998,7 @@
     Consumer -.-&gt;|"S10: inferencia ML&lt;br/&gt;sobre series de tiempo&lt;br/&gt;(futuro)"| Futuro</code></pre>
 <p>Ni el ESP32 (simulado en tu navegador vía Wokwi) ni el bridge (corriendo en tu máquina) exponen nada a internet — los dos solo abren conexiones <strong>salientes</strong> hacia el mismo broker público, que ya está en internet. No hace falta Mosquitto propio, ni túnel, ni tarjeta de crédito, ni cuenta de ningún tipo: es exactamente el mismo patrón productor→broker→consumidor de toda la sesión, con la única diferencia de que este broker no es tuyo — es compartido por cualquiera en internet, por eso el topic incluye un identificador de equipo (<code>equipo01</code>), para no mezclar tus mensajes con los de otro grupo del curso que use el mismo broker al mismo tiempo.</p>
 <p>El puente no valida nada — reenvía el payload de MQTT a Kafka tal cual llegó. La validación de esquema y de rango físico sigue viviendo en un solo lugar (<code>consumer_sensores.py</code>, 3.4): para el consumer, no hay diferencia entre un evento que vino del simulador Python (Figura 2) o de un ESP32 real simulado (Figura 3) — ambos terminan en el mismo topic, con el mismo contrato.</p>
-<h3 id="22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio">2.2 Telemetría IoT: qué cambia frente a un evento de negocio<a class="headerlink" href="#22-telemetria-iot-que-cambia-frente-a-un-evento-de-negocio" title="Permanent link">&para;</a></h3>
+<h3 id="22-diferencias-entre-un-evento-de-negocio-s6-y-telemetria-iot-frecuencia-volumen-esquema">2.2 Diferencias entre un evento de negocio (S6) y telemetría IoT: frecuencia, volumen, esquema<a class="headerlink" href="#22-diferencias-entre-un-evento-de-negocio-s6-y-telemetria-iot-frecuencia-volumen-esquema" title="Permanent link">&para;</a></h3>
 <p><strong>Tabla 2. Conceptos de esta sesión</strong></p>
 <table>
 <thead>
@@ -2422,7 +2422,7 @@
 <tr>
 <td><code>presion</code></td>
 <td>number</td>
-<td>Presión atmosférica, en hPa.</td>
+<td>Presión atmosférica, en hPa (hectopascales).</td>
 </tr>
 <tr>
 <td><code>origen</code></td>
@@ -2503,11 +2503,15 @@
 </table>
 <h3 id="37-conectar-el-puente-a-un-broker-mqtt-publico">3.7 Conectar el puente a un broker MQTT público<a class="headerlink" href="#37-conectar-el-puente-a-un-broker-mqtt-publico" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el puente suscrito a un broker MQTT que ya está en internet, sin infraestructura propia — sin Mosquitto, sin túnel, sin tarjeta de crédito.</p>
-<p>Un ESP32 simulado en Wokwi corre por completo en tu navegador (la CPU del ESP32 se emula en WebAssembly, del lado del cliente, no en un servidor de Wokwi) — pero sigue sin poder llegar a tu <code>localhost</code>: la red WiFi simulada (<code>Wokwi-GUEST</code>) solo sale a internet real a través del gateway de Wokwi, nunca hacia tu propia máquina. La alternativa a exponer tu propio broker con un túnel (ngrok exige tarjeta de crédito verificada para túneles TCP incluso en cuenta gratis) es no exponer nada tuyo: que el ESP32 y el puente se conecten los dos, cada uno por su cuenta, a un broker que <strong>ya es público</strong> — <code>test.mosquitto.org</code>, sin necesidad de cuenta ni credenciales.</p>
+<p>Un ESP32 simulado en Wokwi corre por completo en tu navegador (la CPU, unidad central de procesamiento, del ESP32 se emula en WebAssembly, del lado del cliente, no en un servidor de Wokwi) — pero sigue sin poder llegar a tu <code>localhost</code>: la red WiFi simulada (<code>Wokwi-GUEST</code>) solo sale a internet real a través del gateway de Wokwi, nunca hacia tu propia máquina. La alternativa a exponer tu propio broker con un túnel (ngrok exige tarjeta de crédito verificada para túneles TCP (<em>Transmission Control Protocol</em>) incluso en cuenta gratis) es no exponer nada tuyo: que el ESP32 y el puente se conecten los dos, cada uno por su cuenta, a un broker que <strong>ya es público</strong> — <code>test.mosquitto.org</code>, sin necesidad de cuenta ni credenciales.</p>
 <p><code>test.mosquitto.org</code> es compartido por cualquiera en internet — cualquiera puede publicar o suscribirse a cualquier topic. Para no mezclar tus mensajes con los de otro equipo del curso que use el mismo broker al mismo tiempo, el topic incluye un identificador de equipo:</p>
 <div class="highlight"><pre><span></span><code>lambda26/atmos/equipo01/lecturas
 </code></pre></div>
-<p>Cambia <code>equipo01</code> por tu propio identificador, tanto acá como en el firmware (3.8).</p>
+<p>Cambia <code>equipo01</code> por tu propio identificador, tanto aquí como en el firmware (3.8).</p>
+<p>El puente usa la librería <code>paho-mqtt</code> para hablar MQTT, que el productor y el consumidor de 3.3 y 3.4 no necesitaban. Agrégala a <strong><code>uso-atmos/app/requirements.txt</code></strong>, que queda así:</p>
+<div class="highlight"><pre><span></span><code>kafka-python==2.0.2
+paho-mqtt==2.1.0
+</code></pre></div>
 <p><strong><code>uso-atmos/app/bridge_mqtt_kafka.py</code>:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -2607,11 +2611,175 @@
 <p><strong>Error frecuente</strong>: en Kafka UI aparece un mensaje con <code>key: "desconocido"</code> y el valor sin comillas (<code>{tipoEvento:sensor.lectura,...}</code> en vez de <code>{"tipoEvento":"sensor.lectura",...}</code>). No es un bug del bridge ni del consumer — es la prueba de que el JSON ya llegó roto por MQTT, típicamente porque se publicó con <code>-m "..."</code> directo en PowerShell en vez del método de archivo (<code>-f</code>) de arriba. El bridge reenvía el payload tal cual, sin corregirlo (2.1: "sin validar ni transformar") — por eso el dato malformado también queda malformado en Kafka.</p>
 <h3 id="38-simular-un-esp32-real-en-wokwi">3.8 Simular un ESP32 real en Wokwi<a class="headerlink" href="#38-simular-un-esp32-real-en-wokwi" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> un ESP32 real simulado (firmware Arduino, sensor DHT22 virtual — temperatura y humedad) publicando lecturas de punta a punta hasta Kafka. La presión se simula con un <strong>potenciómetro</strong> (gíralo en vivo durante la simulación para cambiar el valor) — Wokwi no tiene ninguna pieza de sensor de presión barométrica nativa (los <code>chip-bmp280</code> que aparecen en proyectos de otras personas son <em>Custom Chips</em> con archivos propios, no piezas disponibles por defecto).</p>
+<p>Estos son los tres archivos del proyecto de Wokwi, completos; los pasos de abajo los pegan uno por uno.</p>
+<p><strong><code>uso-atmos/wokwi/sketch.ino</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;WiFi.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;PubSubClient.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;DHT.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ArduinoJson.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;time.h&gt;</span>
+
+<span class="c1">// --- WiFi simulado de Wokwi: sale a internet real a través del IoT Gateway ---</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">WIFI_SSID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Wokwi-GUEST"</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">WIFI_PASSWORD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">""</span><span class="p">;</span>
+
+<span class="c1">// --- Broker MQTT público — sin cuenta, sin túnel, sin tarjeta ---</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">MQTT_HOST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"test.mosquitto.org"</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MQTT_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1883</span><span class="p">;</span>
+
+<span class="c1">// test.mosquitto.org es PÚBLICO: cualquiera en internet puede publicar o</span>
+<span class="c1">// suscribirse a cualquier topic. "equipo01" evita que tus mensajes se</span>
+<span class="c1">// mezclen con los de otro equipo del curso — cambia esto por tu propio ID.</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">MQTT_TOPIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"lambda26/atmos/equipo01/lecturas"</span><span class="p">;</span>
+
+<span class="c1">// --- Identificador de este dispositivo simulado (también debe ser único) ---</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">SENSOR_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"esp32-wokwi-equipo01"</span><span class="p">;</span>
+
+<span class="cp">#define DHT_PIN 4</span>
+<span class="cp">#define DHT_TYPE DHT22</span>
+
+<span class="n">DHT</span><span class="w"> </span><span class="nf">dht</span><span class="p">(</span><span class="n">DHT_PIN</span><span class="p">,</span><span class="w"> </span><span class="n">DHT_TYPE</span><span class="p">);</span>
+
+<span class="c1">// Wokwi no tiene una pieza BMP280 nativa (los "chip-bmp280" que existen en</span>
+<span class="c1">// otros proyectos son Custom Chips con archivos propios, no una pieza</span>
+<span class="c1">// disponible por defecto) — en su lugar, un potenciómetro (SÍ es una pieza</span>
+<span class="c1">// real de Wokwi, docs.wokwi.com/parts/wokwi-potentiometer) hace de sensor</span>
+<span class="c1">// de presión: gíralo en vivo durante la simulación para cambiar el valor.</span>
+<span class="cp">#define PRESSURE_PIN 34</span>
+
+<span class="kt">float</span><span class="w"> </span><span class="nf">leerPresion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">lectura</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">analogRead</span><span class="p">(</span><span class="n">PRESSURE_PIN</span><span class="p">);</span><span class="w"> </span><span class="c1">// 0-4095 (ADC de 12 bits)</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mf">995.0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">lectura</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">4095.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">30.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// mapeado a 995-1025 hPa</span>
+<span class="p">}</span>
+
+<span class="n">WiFiClient</span><span class="w"> </span><span class="n">wifiClient</span><span class="p">;</span>
+<span class="n">PubSubClient</span><span class="w"> </span><span class="nf">mqttClient</span><span class="p">(</span><span class="n">wifiClient</span><span class="p">);</span>
+
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">ultimaLectura</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">INTERVALO_MS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">conectarWifi</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="s">"Conectando a WiFi %s...</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">WIFI_SSID</span><span class="p">);</span>
+<span class="w">  </span><span class="n">WiFi</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">WIFI_SSID</span><span class="p">,</span><span class="w"> </span><span class="n">WIFI_PASSWORD</span><span class="p">);</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">WiFi</span><span class="p">.</span><span class="n">status</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">WL_CONNECTED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"."</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">();</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"WiFi conectado, IP: "</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">WiFi</span><span class="p">.</span><span class="n">localIP</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">sincronizarReloj</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Necesario para que "timestamp" sea un epoch real, no segundos desde el</span>
+<span class="w">  </span><span class="c1">// arranque — el bridge y el consumer calculan latencyMs a partir de esto.</span>
+<span class="w">  </span><span class="n">configTime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">"pool.ntp.org"</span><span class="p">,</span><span class="w"> </span><span class="s">"time.nist.gov"</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Sincronizando reloj por NTP"</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">time_t</span><span class="w"> </span><span class="n">ahora</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">ahora</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1700000000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// fecha muy antigua = todavia no sincronizo</span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"."</span><span class="p">);</span>
+<span class="w">    </span><span class="n">ahora</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">" listo"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">conectarMQTT</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mqttClient</span><span class="p">.</span><span class="n">connected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="s">"Conectando a MQTT %s:%d...</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">MQTT_HOST</span><span class="p">,</span><span class="w"> </span><span class="n">MQTT_PORT</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mqttClient</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">SENSOR_ID</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"MQTT conectado"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">printf</span><span class="p">(</span><span class="s">"Fallo MQTT, rc=%d. Reintentando en 2s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">mqttClient</span><span class="p">.</span><span class="n">state</span><span class="p">());</span>
+<span class="w">      </span><span class="n">delay</span><span class="p">(</span><span class="mi">2000</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+<span class="w">  </span><span class="n">dht</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">conectarWifi</span><span class="p">();</span>
+<span class="w">  </span><span class="n">sincronizarReloj</span><span class="p">();</span>
+<span class="w">  </span><span class="n">mqttClient</span><span class="p">.</span><span class="n">setServer</span><span class="p">(</span><span class="n">MQTT_HOST</span><span class="p">,</span><span class="w"> </span><span class="n">MQTT_PORT</span><span class="p">);</span>
+<span class="w">  </span><span class="n">conectarMQTT</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mqttClient</span><span class="p">.</span><span class="n">connected</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">conectarMQTT</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">mqttClient</span><span class="p">.</span><span class="n">loop</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">ahora</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">millis</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ahora</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ultimaLectura</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">INTERVALO_MS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ultimaLectura</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ahora</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">temperatura</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dht</span><span class="p">.</span><span class="n">readTemperature</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">humedad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dht</span><span class="p">.</span><span class="n">readHumidity</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="n">presion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">leerPresion</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isnan</span><span class="p">(</span><span class="n">temperatura</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">isnan</span><span class="p">(</span><span class="n">humedad</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"Lectura invalida del DHT22, se omite esta ronda"</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">StaticJsonDocument</span><span class="o">&lt;</span><span class="mi">256</span><span class="o">&gt;</span><span class="w"> </span><span class="n">doc</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"tipoEvento"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"sensor.lectura"</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"sensorId"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SENSOR_ID</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"temperatura"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">temperatura</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"humedad"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">humedad</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"presion"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">presion</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"origen"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"wokwi"</span><span class="p">;</span>
+<span class="w">    </span><span class="n">doc</span><span class="p">[</span><span class="s">"timestamp"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">)</span><span class="n">time</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000ULL</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">payload</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+<span class="w">    </span><span class="n">serializeJson</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mqttClient</span><span class="p">.</span><span class="n">publish</span><span class="p">(</span><span class="n">MQTT_TOPIC</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Publicado: "</span><span class="p">);</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">payload</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"Fallo al publicar en MQTT"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>El firmware hace cuatro cosas, en este orden: se conecta a la red simulada <code>Wokwi-GUEST</code>; sincroniza el reloj por NTP (<em>Network Time Protocol</em>, para que <code>timestamp</code> sea un <em>epoch</em> real y no segundos desde el arranque); se conecta al broker MQTT público; y cada 5 segundos lee el DHT22 (temperatura y humedad) y el potenciómetro (presión, mapeada a 995-1025 hPa), arma el JSON con el mismo contrato de 3.6 (Tabla 3) y lo publica en <code>MQTT_TOPIC</code>. Si el DHT22 devuelve una lectura inválida, omite esa ronda en vez de publicar un dato roto.</p>
+<p><strong><code>uso-atmos/wokwi/diagram.json</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"author"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lambda26"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"editor"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wokwi"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"parts"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"board-esp32-devkit-c-v4"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"esp"</span><span class="p">,</span><span class="w"> </span><span class="nt">"top"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">"left"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">"attrs"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wokwi-dht22"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dht1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"top"</span><span class="p">:</span><span class="w"> </span><span class="mi">-110</span><span class="p">,</span><span class="w"> </span><span class="nt">"left"</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="nt">"attrs"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"wokwi-potentiometer"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pot1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"top"</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span><span class="w"> </span><span class="nt">"left"</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="nt">"attrs"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"connections"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"esp:TX0"</span><span class="p">,</span><span class="w"> </span><span class="s2">"$serialMonitor:RX"</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"esp:RX0"</span><span class="p">,</span><span class="w"> </span><span class="s2">"$serialMonitor:TX"</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"dht1:VCC"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:3V3"</span><span class="p">,</span><span class="w"> </span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"dht1:GND"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:GND.1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"black"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"dht1:SDA"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:4"</span><span class="p">,</span><span class="w"> </span><span class="s2">"green"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"pot1:VCC"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:3V3"</span><span class="p">,</span><span class="w"> </span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"pot1:GND"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:GND.2"</span><span class="p">,</span><span class="w"> </span><span class="s2">"black"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="s2">"pot1:SIG"</span><span class="p">,</span><span class="w"> </span><span class="s2">"esp:34"</span><span class="p">,</span><span class="w"> </span><span class="s2">"purple"</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">]</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong><code>uso-atmos/wokwi/libraries.txt</code>:</strong></p>
+<div class="highlight"><pre><span></span><code>PubSubClient
+DHT sensor library
+ArduinoJson
+</code></pre></div>
+<p>Una librería por línea, por su nombre y sin versión: el Library Manager de Wokwi agrega la más reciente de cada una.</p>
 <ol>
 <li>Entra directo a <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a> — te lleva a un proyecto en blanco con el ESP32 genérico y el sketch de ejemplo (<code>Hello, ESP32!</code>). Si en cambio entras a <code>wokwi.com/esp32</code> y navegas a mano, <strong>cuidado</strong>: la sección "Featured projects" (arriba) son proyectos de ejemplo de otras personas, no plantillas en blanco — la plantilla correcta está más abajo, en "Starter Templates", y ahí elige la tarjeta que dice solo <strong>"ESP32"</strong> (no S2/S3/C3/C6/H2: son otro chip, con otros pines por defecto, y <code>diagram.json</code>/<code>sketch.ino</code> no calzan igual).</li>
-<li>Reemplaza el <code>sketch.ino</code> generado por el de <code>uso-atmos/wokwi/sketch.ino</code>.</li>
-<li>Reemplaza el <code>diagram.json</code> generado por el de <code>uso-atmos/wokwi/diagram.json</code> (agrega el DHT22 en el pin <code>4</code> y el potenciómetro en el pin <code>34</code> — sin el prefijo <code>D</code> que usan otras placas de Wokwi; esta plantilla (<code>board-esp32-devkit-c-v4</code>) nombra los GPIO con el número pelado).</li>
-<li>Click en la pestaña <strong>"Library Manager"</strong> (al lado de <code>diagram.json</code>) y agrega, una por una, las 3 librerías de <code>uso-atmos/wokwi/libraries.txt</code>: búscalas por nombre y agrega la que coincida exactamente (<code>PubSubClient</code> es la de <strong>Nick O'Leary</strong>). No basta con que el archivo <code>libraries.txt</code> exista en el proyecto — cada librería se agrega manualmente desde esta pestaña, o la compilación falla con <code>fatal error: ....h: No such file or directory</code> aunque el código esté bien. Verifica en "Installed Libraries" que las 3 aparezcan antes de compilar.</li>
+<li>Reemplaza el <code>sketch.ino</code> generado por el de arriba (<code>uso-atmos/wokwi/sketch.ino</code>).</li>
+<li>Reemplaza el <code>diagram.json</code> generado por el de arriba (agrega el DHT22 en el pin <code>4</code> y el potenciómetro en el pin <code>34</code> — sin el prefijo <code>D</code> que usan otras placas de Wokwi; esta plantilla (<code>board-esp32-devkit-c-v4</code>) nombra los GPIO (<em>General-Purpose Input/Output</em>, pines de entrada y salida de uso general) con el número pelado).</li>
+<li>Click en la pestaña <strong>"Library Manager"</strong> (al lado de <code>diagram.json</code>) y agrega, una por una, las 3 librerías del <code>libraries.txt</code> de arriba: búscalas por nombre y agrega la que coincida exactamente (<code>PubSubClient</code> es la de <strong>Nick O'Leary</strong>). No basta con que el archivo <code>libraries.txt</code> exista en el proyecto — cada librería se agrega manualmente desde esta pestaña, o la compilación falla con <code>fatal error: ....h: No such file or directory</code> aunque el código esté bien. Verifica en "Installed Libraries" que las 3 aparezcan antes de compilar.</li>
 <li>En <code>sketch.ino</code>, cambia <code>equipo01</code> (en <code>MQTT_TOPIC</code> y en <code>SENSOR_ID</code>) por tu propio identificador de equipo — el mismo que usaste en 3.7.</li>
 <li>Click en <strong>Start Simulation</strong>.</li>
 </ol>
@@ -2619,7 +2787,7 @@
 <p>Tanto el DHT22 como el potenciómetro se pueden ajustar en vivo mientras la simulación corre: click sobre el DHT22 abre un panel "Editing DHT22" con sliders de <strong>Temperature</strong> y <strong>Humidity</strong>; arrastrar el potenciómetro cambia la lectura de presión simulada (<code>leerPresion()</code> en <code>sketch.ino</code>). Sirve para probar casos de borde — valores fuera de rango físico — y ver cómo los rechaza <code>consumer_sensores.py</code>, sin tocar una línea de código.</p>
 <p><strong>Figura 4. Circuito simulado en Wokwi (ESP32 + DHT22 + potenciómetro) con el panel "Editing DHT22"</strong></p>
 <p><img alt="Circuito simulado en Wokwi con ESP32, DHT22 y potenciómetro, y el panel Editing DHT22 con sliders de temperatura y humedad" src="../img/s07-3.8-wokwi-circuito-dht22-potenciometro.png" /></p>
-<p>El <code>diagram.json</code> real, ya cableado: DHT22 (<code>VCC</code>→<code>3V3</code>, <code>GND</code>→<code>GND</code>, <code>SDA</code>→pin <code>4</code>) y potenciómetro (<code>VCC</code>→<code>3V3</code>, <code>GND</code>→<code>GND</code>, <code>SIG</code>→pin <code>34</code>), ambos alimentados por el ESP32 (<code>board-esp32-devkit-c-v4</code>).</p>
+<p>El <code>diagram.json</code> de arriba, ya cableado: DHT22 (<code>VCC</code>→<code>3V3</code>, <code>GND</code>→<code>GND</code>, <code>SDA</code>→pin <code>4</code>) y potenciómetro (<code>VCC</code>→<code>3V3</code>, <code>GND</code>→<code>GND</code>, <code>SIG</code>→pin <code>34</code>), ambos alimentados por el ESP32 (<code>board-esp32-devkit-c-v4</code>).</p>
 <p>Verifica de punta a punta: el log del bridge (3.7) debe mostrar <code>status: "forwarded"</code> por cada lectura del ESP32 simulado, y <code>consumer_sensores.py</code> (3.4) debe procesarla con <code>status: "consumed"</code> — mismo esquema, misma validación de rango, sin ningún cambio de código respecto al simulador Python. En dos terminales separadas, con la simulación de Wokwi corriendo:</p>
 <div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-atmos</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">exec</span> <span class="n">uso-atmos</span> <span class="n">python</span> <span class="p">/</span><span class="n">app</span><span class="p">/</span><span class="n">consumer_sensores</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
@@ -2630,6 +2798,14 @@
 <p>Cada lectura del ESP32 (<code>sensorId: esp32-wokwi-equipo01</code>) pasa primero por el bridge (<code>status: "forwarded"</code>, con el <code>offset</code> de Kafka asignado) y luego por el consumer (<code>status: "consumed"</code>, con <code>isValid: true</code> y <code>fueraDeRango: false</code>) — la misma cadena que ya se probó con el mensaje de prueba manual (3.7), ahora con datos reales del dispositivo simulado.</p>
 <p><strong>Error frecuente</strong>: las lecturas dejan de llegar (el consumer y el bridge quedan sin mensajes nuevos) sin ningún error visible en el Monitor Serial. Como la CPU del ESP32 se emula en el navegador, Wokwi <strong>pausa la simulación entera</strong> (WiFi y MQTT incluidos) en cuanto la pestaña deja de estar activa — al minimizar la ventana, cambiar de pestaña o bloquear la pantalla. Es una limitación conocida y sin solución del lado de Wokwi (no de tu firmware ni de tu cuenta): mantén la pestaña de Wokwi visible y en primer plano mientras dure la prueba de punta a punta.</p>
 <p><strong>Error frecuente</strong>: <code>fatal error: ....h: No such file or directory</code> — alguna librería del paso 4 no quedó realmente agregada (revisa "Installed Libraries" en el Library Manager). <strong>Error frecuente</strong>: una pieza aparece como un recuadro verde que dice "Missing chip Breakout" en vez de dibujarse — esa pieza no existe de verdad en el catálogo de Wokwi (le pasó a <code>wokwi-bmp280</code> y a otros nombres inventados de BMP280); usa solo piezas confirmadas como las de esta guía. <strong>Error frecuente</strong>: el Monitor Serial también puede quedar tapado por el panel "Editing DHT22" si lo dejaste abierto — ciérralo con la <code>X</code> de su esquina superior derecha.</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li><code>uso-atmos</code> corriendo, con el topic <code>atmos-eventos</code> de 3 particiones y la distribución real de los <code>sensorId</code> observada en Kafka UI.</li>
+<li>Productor publicando lecturas de los 3 sensores simulados, con <code>partition</code> y <code>sensorId</code> reales en el log.</li>
+<li>Consumer mostrando los tres estados: <code>consumed</code> (lectura válida), <code>invalid</code> (mensaje malformado) y <code>alerta</code> (valor fuera de rango físico).</li>
+<li>Contrato del evento <code>sensor.lectura</code> documentado (Tablas 3 y 4).</li>
+<li>ESP32 real simulado en Wokwi publicando por MQTT: el puente reenviando a Kafka (<code>forwarded</code>) y el consumer procesando esas lecturas (<code>consumed</code>), como en la Figura 5.</li>
+</ul>
 <h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
 <p>Tiempo: 3h fuera del aula.</p>
 <h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
@@ -2746,7 +2922,7 @@ cambios de fondo?
 <p>Tiempo: 10 min.</p>
 <p><strong>Resumen breve:</strong> hoy el mismo Kafka de S6 recibió un productor de naturaleza distinta — alta frecuencia, mayor volumen, particionado real por dispositivo — y el consumer aprendió a distinguir un dato con la forma incorrecta de un dato con la forma correcta pero un valor imposible. Además, un ESP32 real simulado en Wokwi llegó hasta ese mismo topic a través de un puente MQTT-Kafka, sin que el consumer necesitara enterarse de la diferencia.</p>
 <p><strong>Dinámica participativa:</strong> cada estudiante comparte en qué partición cayó <code>esp32-laboratorio</code> en su propia ejecución de 3.5 — ¿coincidió con la partición 0 de esta guía, o el hash dio un resultado distinto en su máquina?</p>
-<p><strong>Metacognición:</strong> ¿en qué momento de hoy hubieras validado solo el esquema de un evento, sin pensar en validar también el rango de sus valores — y qué símbolo concreto del caso 1.6.1 se te habría pasado por alto?</p>
+<p><strong>Metacognición:</strong> ¿en qué momento de hoy hubieras validado solo el esquema de un evento, sin pensar en validar también el rango de sus valores — y qué síntoma concreto del caso 1.6.1 se te habría pasado por alto?</p>
 <p><strong>Proyección:</strong> S8 conecta Spark Structured Streaming como un segundo consumidor de estos mismos topics (<code>orden-eventos</code>, <code>pago-eventos</code>, <code>atmos-eventos</code>), aplicando ventanas y watermarking sobre el volumen que hoy se generó. S10 va un paso más allá: entrena e infiere un modelo de series de tiempo directamente sobre <code>atmos-eventos</code>.</p>
 <h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
 <ol>
