@@ -2384,13 +2384,31 @@
 <li><strong>3.13</strong> Documentar hallazgos y responder preguntas de reflexión.</li>
 </ul>
 <h3 id="31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida">3.1 Reanudar el entorno <code>lambda26</code> y verificar el punto de partida<a class="headerlink" href="#31-reanudar-el-entorno-lambda26-y-verificar-el-punto-de-partida" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> Kafka, Kafka UI y el simulador de sensores de S7 (<code>uso-atmos</code>) corriendo, con eventos reales llegando a <code>atmos-eventos</code>.</p>
+<p><strong>Producto del paso:</strong> Kafka, Kafka UI y el simulador de sensores de S7 (<code>uso-atmos</code>) corriendo, con eventos reales llegando a <code>atmos-eventos</code>; y <code>pyspark</code> unido a la red de Kafka, algo que hasta hoy nunca necesitó.</p>
 <p>Este notebook <strong>no genera sus propios datos</strong>: consume el mismo topic que S7 ya construyó. Antes de continuar, en una terminal (fuera del notebook):</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>kafka<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 <span class="nb">cd</span><span class="w"> </span>../uso-atmos<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-d<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
 </code></pre></div>
 <p>Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos <strong>llegando en vivo</strong>, no solo los que ya están en el topic.</p>
+<p><code>pyspark/compose.yml</code> corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (<code>uso-atmos</code>, <code>ec-eventos-py</code>), nunca Spark. Hoy cambia: <code>spark.read.format("kafka")</code> (3.2) corre <strong>dentro</strong> del contenedor <code>pyspark</code>, y ese contenedor todavía no está en la misma red que <code>lambda26-kafka</code> — sin unirlo, <code>kafka:9092</code> no se resuelve. En vez de tocar <code>pyspark/compose.yml</code> (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:</p>
+<p><strong><code>pyspark/compose.kafka.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">pyspark</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lambda26-kafka-net</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+</code></pre></div>
+<p>Súbelo combinando los dos archivos — el segundo solo agrega la red, no reemplaza nada del primero:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../pyspark
+docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.yml<span class="w"> </span>-f<span class="w"> </span>compose.kafka.yml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
+</code></pre></div>
+<p><strong>Error frecuente</strong>: la celda de 3.2 falla con <code>kafka.errors.NoBrokersAvailable</code> o, en el log del driver, <code>java.net.UnknownHostException: kafka</code>. <code>pyspark</code> está corriendo, pero sin <code>compose.kafka.yml</code> — súbelo de nuevo con los dos <code>-f</code> del comando de arriba. Si ya estaba corriendo solo con <code>compose.yml</code>, <code>docker compose up</code> con los dos archivos lo recrea con la red nueva, no hace falta bajarlo a mano primero.</p>
 <p><strong>Error frecuente</strong>: el productor se detiene solo si el contenedor <code>uso-atmos</code> se recrea (por ejemplo, al bajar y volver a levantar el stack) — <code>docker exec -d</code> no sobrevive a que el contenedor se reinicie. Antes de correr una celda que depende de datos en vivo, confirma que el proceso sigue vivo (<code>docker exec lambda26-uso-atmos ps aux</code>, o revisa Kafka UI: el <em>lag</em> del topic debe estar creciendo).</p>
 <h3 id="32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka">3.2 Crear el notebook y la <code>SparkSession</code>, con el conector de Kafka<a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> notebook <code>08_streaming_estructurado_practica.ipynb</code> con una <code>SparkSession</code> capaz de leer y escribir Kafka.</p>
