@@ -239,7 +239,7 @@ Tiempo: 3h.
 
 ### 3.1 Reanudar el entorno `lambda26` y verificar el punto de partida
 
-**Producto del paso:** Kafka, Kafka UI y el simulador de sensores de S7 (`uso-atmos`) corriendo, con eventos reales llegando a `atmos-eventos`.
+**Producto del paso:** Kafka, Kafka UI y el simulador de sensores de S7 (`uso-atmos`) corriendo, con eventos reales llegando a `atmos-eventos`; y `pyspark` unido a la red de Kafka, algo que hasta hoy nunca necesitó.
 
 Este notebook **no genera sus propios datos**: consume el mismo topic que S7 ya construyó. Antes de continuar, en una terminal (fuera del notebook):
 
@@ -250,6 +250,32 @@ docker exec -d lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
 Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic.
+
+`pyspark/compose.yml` corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (`uso-atmos`, `ec-eventos-py`), nunca Spark. Hoy cambia: `spark.read.format("kafka")` (3.2) corre **dentro** del contenedor `pyspark`, y ese contenedor todavía no está en la misma red que `lambda26-kafka` — sin unirlo, `kafka:9092` no se resuelve. En vez de tocar `pyspark/compose.yml` (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:
+
+**`pyspark/compose.kafka.yml`:**
+
+```yaml
+services:
+  pyspark:
+    networks:
+      - default
+      - lambda26-kafka-net
+
+networks:
+  lambda26-kafka-net:
+    external: true
+    name: lambda26-kafka-net
+```
+
+Súbelo combinando los dos archivos — el segundo solo agrega la red, no reemplaza nada del primero:
+
+```bash
+cd ../pyspark
+docker compose -f compose.yml -f compose.kafka.yml up -d --build
+```
+
+**Error frecuente**: la celda de 3.2 falla con `kafka.errors.NoBrokersAvailable` o, en el log del driver, `java.net.UnknownHostException: kafka`. `pyspark` está corriendo, pero sin `compose.kafka.yml` — súbelo de nuevo con los dos `-f` del comando de arriba. Si ya estaba corriendo solo con `compose.yml`, `docker compose up` con los dos archivos lo recrea con la red nueva, no hace falta bajarlo a mano primero.
 
 **Error frecuente**: el productor se detiene solo si el contenedor `uso-atmos` se recrea (por ejemplo, al bajar y volver a levantar el stack) — `docker exec -d` no sobrevive a que el contenedor se reinicie. Antes de correr una celda que depende de datos en vivo, confirma que el proceso sigue vivo (`docker exec lambda26-uso-atmos ps aux`, o revisa Kafka UI: el *lag* del topic debe estar creciendo).
 
