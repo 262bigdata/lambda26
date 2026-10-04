@@ -324,7 +324,7 @@ spark.sparkContext.setLogLevel("ERROR")
 spark
 ```
 
-`spark.jars.packages` agrega el conector `spark-sql-kafka-0-10`, que Spark no trae por defecto (a diferencia de la lectura de CSV o Parquet de S2-S4). La primera vez que se ejecuta esta celda, Spark descarga el conector y sus dependencias desde Maven Central — puede tardar. `spark.sql.shuffle.partitions` se baja a 3 (el número de particiones del topic, S7): con el valor por defecto (200), cada micro-lote crearía 200 tareas para casi ningún dato.
+`spark.jars.packages` agrega el conector `spark-sql-kafka-0-10`, que Spark no trae por defecto (a diferencia de la lectura de CSV o Parquet de S2-S4). La primera vez que se ejecuta esta celda, Spark descarga el conector y sus dependencias desde Maven Central — puede tardar. `spark.sql.shuffle.partitions` se baja a 3 (pensado para las 3 particiones originales del topic, S7 — ver nota más abajo si tu topic quedó con menos): con el valor por defecto (200), cada micro-lote crearía 200 tareas para casi ningún dato.
 
 Verifica que el topic tiene mensajes, con una lectura **batch** (no streaming) — el mismo tipo de lectura que ya usaste con CSV o Parquet, aplicada a Kafka:
 
@@ -343,16 +343,18 @@ lote.selectExpr("CAST(key AS STRING) AS key", "CAST(value AS STRING) AS value", 
 Resultado real de esta corrida:
 
 ```text
-mensajes en el topic: 446
+mensajes en el topic: 1152
 
 +-----------------+--------------------------------------------------------------+---------+------+
 |key              |value                                                          |partition|offset|
 +-----------------+--------------------------------------------------------------+---------+------+
-|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |457   |
-|esp32-patio      |{"tipoEvento": "sensor.lectura", "sensorId": "esp32-patio", "te...|2        |456   |
-|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |455   |
+|esp32-laboratorio|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-laboratorio...|0        |1154  |
+|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|0        |1153  |
+|esp32-patio      |{"tipoEvento": "sensor.lectura", "sensorId": "esp32-patio", "te...|0        |1152  |
 +-----------------+--------------------------------------------------------------+---------+------+
 ```
+
+**Nota sobre particiones:** esta corrida muestra `partition` siempre en `0` — el topic quedó recreado con **una sola partición** (lo confirma también el checkpoint de 3.10 más abajo), a diferencia de las 3 particiones que tenía el topic original de S7. No es un error de esta celda; es consecuencia de haber borrado y recreado `atmos-eventos` sin fijar explícitamente el número de particiones. Si te importa conservar el comportamiento de particionado por `key` que explica 2.1/S7, hay que recrear el topic con 3 particiones a propósito — avísame si quieres el comando para hacerlo.
 
 Un numero mayor que cero, y JSON con `sensorId`, `temperatura`, `humedad`, `presion` (el contrato de S7). Una lectura **batch** de Kafka lee lo que hay **hoy** y termina; el resto del notebook usa lectura **streaming**, que no termina — sigue escuchando.
 
@@ -474,6 +476,19 @@ Batch: 1
 ### 3.6 Escribir la salida a Parquet, con checkpoint
 
 **Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados — **al mismo tiempo** que la consulta de consola de 3.5 sigue corriendo.
+
+**Opcional — filtrar antes de persistir:** `eventos` ya sale limpio de 3.4 (esquema explícito, `producer_sensores.py` siempre bien formado), así que no hace falta para este ejercicio. Pero si la fuente fuera menos confiable, podrías descartar filas incompletas antes de guardarlas, con el mismo patrón que usa `lambdalab`:
+
+```python
+eventos_validados = eventos.filter(
+    col("tipoEvento").isNotNull() &
+    col("sensorId").isNotNull() &
+    col("temperatura").isNotNull() &
+    col("ts").isNotNull()
+)
+```
+
+Con datos reales de `uso-atmos` esto no cambia ni una fila (nunca llega nada nulo), así que el resto de esta guía sigue usando `eventos` tal cual, sin esta rama adicional.
 
 ```python
 # Momento 1: arrancar el stream a Parquet (la consulta de 3.5 sigue corriendo en paralelo)
@@ -751,11 +766,11 @@ Resultado real (recortado):
 
 ```text
 v1
-{"batchWatermarkMs":1790512828406,"batchTimestampMs":1790512845013,"conf":{...}}
-{"atmos-eventos":{"0":183,"1":3,"2":506}}
+{"batchWatermarkMs":1791084138458,"batchTimestampMs":1791084155008,"conf":{...}}
+{"atmos-eventos":{"0":1752}}
 ```
 
-`offsets/` guarda, por cada micro-lote, hasta qué *offset* de cada partición de Kafka se leyó — en esta corrida, la partición 0 llegó hasta el mensaje 183, la 1 hasta el 3, la 2 hasta el 506. `commits/` confirma cuáles de esos micro-lotes terminaron de escribirse por completo. `state/` guarda el contenido de cada ventana abierta — es lo que 3.7 mostró creciendo sin límite.
+`offsets/` guarda, por cada micro-lote, hasta qué *offset* de cada partición de Kafka se leyó — en esta corrida, con el topic de una sola partición (ver nota en 3.2), la partición 0 llegó hasta el mensaje 1752. Si tu topic tiene varias particiones, acá vas a ver una clave por cada una. `commits/` confirma cuáles de esos micro-lotes terminaron de escribirse por completo. `state/` guarda el contenido de cada ventana abierta — es lo que 3.7 mostró creciendo sin límite.
 
 La consecuencia práctica: si una consulta se cae y se reinicia **apuntando al mismo `checkpointLocation`**, Spark lee `offsets/` y retoma exactamente donde se quedó — no vuelve a leer el topic desde el principio, y no pierde el estado de las ventanas que ya tenía abiertas. Es la misma idea del *offset* de un `consumer group` de Kafka (S6, S7), pero aplicada también al estado de la agregación, no solo a la posición de lectura.
 
@@ -924,6 +939,8 @@ Con disparo cada 6 segundos, ultimo batchId en 15s: 2
 ```
 
 `format("memory")` guarda la salida en una tabla temporal en vez de imprimirla — útil para inspeccionar resultados con SQL, y aquí para medir sin llenar la pantalla de filas. `consulta.lastProgress["batchId"]` es el número del último micro-lote que corrió: con el disparo de 1 segundo, en 15 segundos de reloj corrieron 6 micro-lotes (`batchId` 0 a 5); con el de 6 segundos, solo 3 (`batchId` 0 a 2).
+
+**Error frecuente**: el log puede mostrar líneas en rojo `ERROR WriteToDataSourceV2Exec`, `TaskKilledException` o `Aborting task` — igual que en 3.5, es ruido esperado del `consulta.stop()` dentro de `contar_microlotes()`, que corta la consulta a mitad de un micro-lote. No es una falla: mientras la celda termine imprimiendo los dos `print()` finales (sin lanzar una excepción de Python), los resultados son correctos.
 
 La diferencia es el compromiso entre **latencia** y **throughput** (rendimiento) que pide el sílabo: un disparo más frecuente reduce la latencia (un evento espera menos, en promedio, antes de procesarse) pero cada micro-lote es más chico y el *overhead* de coordinarlos se paga más veces por segundo; un disparo menos frecuente junta más eventos por lote (mejor throughput por lote) a cambio de que cada evento individual espere más antes de aparecer en el resultado. Ninguno es "el correcto": depende de si el sistema necesita reaccionar rápido (alertas) o procesar volumen (reportes).
 
