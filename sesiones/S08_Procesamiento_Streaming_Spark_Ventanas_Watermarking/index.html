@@ -2440,7 +2440,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> 
 <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="s2">"ERROR"</span><span class="p">)</span>
 <span class="n">spark</span>
 </code></pre></div>
-<p><code>spark.jars.packages</code> agrega el conector <code>spark-sql-kafka-0-10</code>, que Spark no trae por defecto (a diferencia de la lectura de CSV o Parquet de S2-S4). La primera vez que se ejecuta esta celda, Spark descarga el conector y sus dependencias desde Maven Central — puede tardar. <code>spark.sql.shuffle.partitions</code> se baja a 3 (el número de particiones del topic, S7): con el valor por defecto (200), cada micro-lote crearía 200 tareas para casi ningún dato.</p>
+<p><code>spark.jars.packages</code> agrega el conector <code>spark-sql-kafka-0-10</code>, que Spark no trae por defecto (a diferencia de la lectura de CSV o Parquet de S2-S4). La primera vez que se ejecuta esta celda, Spark descarga el conector y sus dependencias desde Maven Central — puede tardar. <code>spark.sql.shuffle.partitions</code> se baja a 3 (pensado para las 3 particiones originales del topic, S7 — ver nota más abajo si tu topic quedó con menos): con el valor por defecto (200), cada micro-lote crearía 200 tareas para casi ningún dato.</p>
 <p>Verifica que el topic tiene mensajes, con una lectura <strong>batch</strong> (no streaming) — el mismo tipo de lectura que ya usaste con CSV o Parquet, aplicada a Kafka:</p>
 <div class="highlight"><pre><span></span><code><span class="n">lote</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
@@ -2453,16 +2453,17 @@ docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> 
 <span class="n">lote</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"CAST(key AS STRING) AS key"</span><span class="p">,</span> <span class="s2">"CAST(value AS STRING) AS value"</span><span class="p">,</span> <span class="s2">"partition"</span><span class="p">,</span> <span class="s2">"offset"</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"offset"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Resultado real de esta corrida:</p>
-<div class="highlight"><pre><span></span><code>mensajes en el topic: 446
+<div class="highlight"><pre><span></span><code>mensajes en el topic: 1152
 
 +-----------------+--------------------------------------------------------------+---------+------+
 |key              |value                                                          |partition|offset|
 +-----------------+--------------------------------------------------------------+---------+------+
-|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |457   |
-|esp32-patio      |{"tipoEvento": "sensor.lectura", "sensorId": "esp32-patio", "te...|2        |456   |
-|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|2        |455   |
+|esp32-laboratorio|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-laboratorio...|0        |1154  |
+|esp32-invernadero|{"tipoEvento": "sensor.lectura", "sensorId": "esp32-invernadero...|0        |1153  |
+|esp32-patio      |{"tipoEvento": "sensor.lectura", "sensorId": "esp32-patio", "te...|0        |1152  |
 +-----------------+--------------------------------------------------------------+---------+------+
 </code></pre></div>
+<p><strong>Nota sobre particiones:</strong> esta corrida muestra <code>partition</code> siempre en <code>0</code> — el topic quedó recreado con <strong>una sola partición</strong> (lo confirma también el checkpoint de 3.10 más abajo), a diferencia de las 3 particiones que tenía el topic original de S7. No es un error de esta celda; es consecuencia de haber borrado y recreado <code>atmos-eventos</code> sin fijar explícitamente el número de particiones. Si te importa conservar el comportamiento de particionado por <code>key</code> que explica 2.1/S7, hay que recrear el topic con 3 particiones a propósito — avísame si quieres el comando para hacerlo.</p>
 <p>Un numero mayor que cero, y JSON con <code>sensorId</code>, <code>temperatura</code>, <code>humedad</code>, <code>presion</code> (el contrato de S7). Una lectura <strong>batch</strong> de Kafka lee lo que hay <strong>hoy</strong> y termina; el resto del notebook usa lectura <strong>streaming</strong>, que no termina — sigue escuchando.</p>
 <h3 id="33-leer-el-topic-en-modo-streaming">3.3 Leer el topic en modo streaming<a class="headerlink" href="#33-leer-el-topic-en-modo-streaming" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> un DataFrame que <strong>no se puede materializar con <code>.show()</code> ni <code>.count()</code></strong> — la primera diferencia real entre batch y streaming.</p>
@@ -2554,6 +2555,15 @@ Batch: 1
 <p><strong>Error frecuente</strong>: cuando más adelante detengas esta consulta (al final de 3.6), el log va a mostrar líneas <code>ERROR ... Aborting task</code> o <code>TaskKilledException</code>. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un <code>stop()</code> abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.</p>
 <h3 id="36-escribir-la-salida-a-parquet-con-checkpoint">3.6 Escribir la salida a Parquet, con checkpoint<a class="headerlink" href="#36-escribir-la-salida-a-parquet-con-checkpoint" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados — <strong>al mismo tiempo</strong> que la consulta de consola de 3.5 sigue corriendo.</p>
+<p><strong>Opcional — filtrar antes de persistir:</strong> <code>eventos</code> ya sale limpio de 3.4 (esquema explícito, <code>producer_sensores.py</code> siempre bien formado), así que no hace falta para este ejercicio. Pero si la fuente fuera menos confiable, podrías descartar filas incompletas antes de guardarlas, con el mismo patrón que usa <code>lambdalab</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">eventos_validados</span> <span class="o">=</span> <span class="n">eventos</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span>
+    <span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Con datos reales de <code>uso-atmos</code> esto no cambia ni una fila (nunca llega nada nulo), así que el resto de esta guía sigue usando <code>eventos</code> tal cual, sin esta rama adicional.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el stream a Parquet (la consulta de 3.5 sigue corriendo en paralelo)</span>
 <span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"./artifacts/atmos_parquet"</span>
 <span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"./artifacts/chk_parquet"</span>
@@ -2769,10 +2779,10 @@ state
 </code></pre></div>
 <p>Resultado real (recortado):</p>
 <div class="highlight"><pre><span></span><code>v1
-{"batchWatermarkMs":1790512828406,"batchTimestampMs":1790512845013,"conf":{...}}
-{"atmos-eventos":{"0":183,"1":3,"2":506}}
+{"batchWatermarkMs":1791084138458,"batchTimestampMs":1791084155008,"conf":{...}}
+{"atmos-eventos":{"0":1752}}
 </code></pre></div>
-<p><code>offsets/</code> guarda, por cada micro-lote, hasta qué <em>offset</em> de cada partición de Kafka se leyó — en esta corrida, la partición 0 llegó hasta el mensaje 183, la 1 hasta el 3, la 2 hasta el 506. <code>commits/</code> confirma cuáles de esos micro-lotes terminaron de escribirse por completo. <code>state/</code> guarda el contenido de cada ventana abierta — es lo que 3.7 mostró creciendo sin límite.</p>
+<p><code>offsets/</code> guarda, por cada micro-lote, hasta qué <em>offset</em> de cada partición de Kafka se leyó — en esta corrida, con el topic de una sola partición (ver nota en 3.2), la partición 0 llegó hasta el mensaje 1752. Si tu topic tiene varias particiones, acá vas a ver una clave por cada una. <code>commits/</code> confirma cuáles de esos micro-lotes terminaron de escribirse por completo. <code>state/</code> guarda el contenido de cada ventana abierta — es lo que 3.7 mostró creciendo sin límite.</p>
 <p>La consecuencia práctica: si una consulta se cae y se reinicia <strong>apuntando al mismo <code>checkpointLocation</code></strong>, Spark lee <code>offsets/</code> y retoma exactamente donde se quedó — no vuelve a leer el topic desde el principio, y no pierde el estado de las ventanas que ya tenía abiertas. Es la misma idea del <em>offset</em> de un <code>consumer group</code> de Kafka (S6, S7), pero aplicada también al estado de la agregación, no solo a la posición de lectura.</p>
 <h3 id="311-un-dato-tardio-y-el-watermark-descartandolo">3.11 Un dato tardío, y el watermark descartándolo<a class="headerlink" href="#311-un-dato-tardio-y-el-watermark-descartandolo" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> un evento con marca de tiempo vieja, publicado <strong>después</strong> de que el watermark ya avanzó más allá de su ventana — y la prueba de que Spark lo descarta sin avisar.</p>
@@ -2905,6 +2915,7 @@ state
 Con disparo cada 6 segundos, ultimo batchId en 15s: 2
 </code></pre></div>
 <p><code>format("memory")</code> guarda la salida en una tabla temporal en vez de imprimirla — útil para inspeccionar resultados con SQL, y aquí para medir sin llenar la pantalla de filas. <code>consulta.lastProgress["batchId"]</code> es el número del último micro-lote que corrió: con el disparo de 1 segundo, en 15 segundos de reloj corrieron 6 micro-lotes (<code>batchId</code> 0 a 5); con el de 6 segundos, solo 3 (<code>batchId</code> 0 a 2).</p>
+<p><strong>Error frecuente</strong>: el log puede mostrar líneas en rojo <code>ERROR WriteToDataSourceV2Exec</code>, <code>TaskKilledException</code> o <code>Aborting task</code> — igual que en 3.5, es ruido esperado del <code>consulta.stop()</code> dentro de <code>contar_microlotes()</code>, que corta la consulta a mitad de un micro-lote. No es una falla: mientras la celda termine imprimiendo los dos <code>print()</code> finales (sin lanzar una excepción de Python), los resultados son correctos.</p>
 <p>La diferencia es el compromiso entre <strong>latencia</strong> y <strong>throughput</strong> (rendimiento) que pide el sílabo: un disparo más frecuente reduce la latencia (un evento espera menos, en promedio, antes de procesarse) pero cada micro-lote es más chico y el <em>overhead</em> de coordinarlos se paga más veces por segundo; un disparo menos frecuente junta más eventos por lote (mejor throughput por lote) a cambio de que cada evento individual espere más antes de aparecer en el resultado. Ninguno es "el correcto": depende de si el sistema necesita reaccionar rápido (alertas) o procesar volumen (reportes).</p>
 <p><strong>Evidencia de aprendizaje:</strong></p>
 <ul>
