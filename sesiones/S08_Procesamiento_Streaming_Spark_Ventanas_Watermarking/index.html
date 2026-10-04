@@ -2390,14 +2390,21 @@
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 <span class="nb">cd</span><span class="w"> </span>../uso-atmos
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/consumer_sensores.py
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/consumer_sensores.py
 </code></pre></div>
 <p>Sin <code>-d</code>: el consumidor de S7 arranca pegado a esta terminal para que veas en vivo, línea por línea, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark. En cuanto veas pasar algunas líneas con <code>"status": "consumed"</code>, detenlo con <code>Ctrl+C</code> — ya cumplió su función, no hace falta dejarlo corriendo. Abre una <strong>pestaña nueva</strong> de terminal para el productor:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>uso-atmos
-docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
 </code></pre></div>
 <p>También sin <code>-d</code>, pero al revés que el consumidor: el productor <strong>sí</strong> debe quedar corriendo toda la sesión — varias celdas de este notebook necesitan eventos <strong>llegando en vivo</strong>, no solo los que ya están en el topic. Deja esta pestaña abierta, visible, sin tocarla (ni <code>Ctrl+C</code> ni cerrarla) hasta terminar la sesión, y abre una <strong>tercera pestaña</strong> para el resto de los comandos de este paso.</p>
 <p><strong>Error frecuente</strong>: si detienes el productor sin querer (<code>Ctrl+C</code> en su pestaña, o cerrándola), las celdas que dependen de datos en vivo dejan de recibir mensajes nuevos — no fallan con un error, simplemente no muestran filas nuevas. Como corre sin <code>-d</code>, confirmar que sigue vivo es mirar su pestaña: debe seguir imprimiendo una línea <code>"status": "published"</code> cada pocos segundos. Si se detuvo, vuelve a lanzar el comando de arriba.</p>
+<p><strong>Error frecuente</strong>: el consumidor sigue recibiendo eventos aunque creas que ya no hay ningún productor corriendo, y nunca usaste <code>-d</code>. Sin <code>-it</code>, <code>docker exec</code> no asigna una pseudo-terminal: <code>Ctrl+C</code> puede cortar la conexión de tu lado (el prompt vuelve) sin que la señal llegue de verdad al proceso de adentro, que queda corriendo invisible — el mismo síntoma de <strong>zombie</strong>, aunque nunca lo lanzaste detached. Por eso los comandos de arriba ya llevan <code>-it</code>. Si de todas formas sospechas que quedó algo vivo (por ejemplo, porque corriste el comando viejo sin <code>-it</code>, o con <code>-d</code>), confirmalo:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>top<span class="w"> </span>lambda26-uso-atmos
+</code></pre></div>
+<p>Si aparece más de un <code>producer_sensores.py</code> (o uno que no reconoces), hay un zombie. <strong>No intentes matarlo por PID</strong> con <code>docker exec lambda26-uso-atmos bash -c "kill &lt;PID&gt;"</code>: los PID que muestra <code>docker top</code> son del <em>host</em> (la VM de Docker Desktop), no los del namespace interno del contenedor, así que casi siempre da <code>No such process</code> aunque el proceso esté vivo. La forma confiable de limpiar todo es reiniciar el contenedor:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>restart<span class="w"> </span>lambda26-uso-atmos
+</code></pre></div>
+<p>Esto mata <strong>todos</strong> los procesos de adentro (productor, consumidor, cualquier zombie) y lo deja en su estado base (<code>sleep infinity</code>). Vuelve a lanzar consumidor y productor limpios, como al principio de este paso.</p>
 <p><code>pyspark/compose.yml</code> corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (<code>uso-atmos</code>, <code>ec-eventos-py</code>), nunca Spark. Hoy cambia: <code>spark.read.format("kafka")</code> (3.2) corre <strong>dentro</strong> del contenedor <code>pyspark</code>, y ese contenedor todavía no está en la misma red que <code>lambda26-kafka</code> — sin unirlo, <code>kafka:9092</code> no se resuelve. En vez de tocar <code>pyspark/compose.yml</code> (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:</p>
 <p><strong><code>pyspark/compose.kafka.yml</code>:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
@@ -2531,10 +2538,7 @@ root
 <span class="p">)</span>
 </code></pre></div>
 <p><code>writeStream</code> (no <code>write</code>) inicia una <strong>consulta continua</strong>: <code>.start()</code> la lanza en segundo plano y devuelve de inmediato un objeto <code>StreamingQuery</code>; el proceso sigue corriendo aunque la celda ya haya terminado — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre. <code>outputMode("append")</code> dice que solo se muestran filas <strong>nuevas</strong>, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. <code>trigger(processingTime="5 seconds")</code> fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en <strong>micro-lotes</strong> cada 5 segundos.</p>
-<p>Déjala corriendo unos segundos — verás una tanda de filas nuevas cada 5 segundos, una por micro-lote — y detenla cuando ya viste suficiente, desde una celda aparte:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-</code></pre></div>
+<p>Déjala corriendo — <strong>no la detengas todavía</strong>. En 3.6 vas a arrancar una segunda consulta que lee el mismo <code>eventos</code> y lo persiste en Parquet, al mismo tiempo que esta sigue imprimiendo por consola — un mismo DataFrame alimentando dos <em>sinks</em> a la vez. Las vas a detener juntas al final de 3.6.</p>
 <p>Resultado real (dos de los micro-lotes):</p>
 <div class="highlight"><pre><span></span><code>-------------------------------------------
 Batch: 1
@@ -2547,14 +2551,14 @@ Batch: 1
 |sensor.lectura|esp32-invernadero|40.0       |60.9   |1003.0 |uso-atmos|1790512778041|2026-09-27 12:39:38.041|
 +--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
 </code></pre></div>
-<p><strong>Error frecuente</strong>: al llamar <code>.stop()</code>, el log muestra líneas <code>ERROR ... Aborting task</code> o <code>TaskKilledException</code>. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un <code>stop()</code> abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.</p>
+<p><strong>Error frecuente</strong>: cuando más adelante detengas esta consulta (al final de 3.6), el log va a mostrar líneas <code>ERROR ... Aborting task</code> o <code>TaskKilledException</code>. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un <code>stop()</code> abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.</p>
 <h3 id="36-escribir-la-salida-a-parquet-con-checkpoint">3.6 Escribir la salida a Parquet, con checkpoint<a class="headerlink" href="#36-escribir-la-salida-a-parquet-con-checkpoint" title="Permanent link">&para;</a></h3>
-<p><strong>Producto del paso:</strong> los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el stream a Parquet</span>
-<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/atmos_parquet"</span>
-<span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/chk_parquet"</span>
+<p><strong>Producto del paso:</strong> los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados — <strong>al mismo tiempo</strong> que la consulta de consola de 3.5 sigue corriendo.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el stream a Parquet (la consulta de 3.5 sigue corriendo en paralelo)</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"./artifacts/atmos_parquet"</span>
+<span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"./artifacts/chk_parquet"</span>
 
-<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+<span class="n">consulta2</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
     <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"parquet"</span><span class="p">)</span>
@@ -2564,30 +2568,35 @@ Batch: 1
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
 </code></pre></div>
+<p>Nota el nombre <code>consulta2</code>, no <code>consulta</code>: la consulta de 3.5 sigue viva en la variable <code>consulta</code>, y si esta nueva reusara ese mismo nombre, perderías la única referencia que te permite detener la de 3.5 más tarde — quedaría corriendo huérfana, sin que ninguna variable la señale.</p>
 <p>Un <em>sink</em> de archivo (Parquet, aquí) solo acepta <code>outputMode("append")</code> — no puede "reescribir" una fila ya guardada en disco, a diferencia de <code>console</code> con <code>update</code>. Por eso esta celda escribe los eventos <strong>sin agregar</strong> (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo <code>update</code> no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.</p>
-<p>Déjala corriendo al menos 10-15 segundos, para que alcance a escribir un par de micro-lotes, y detenla:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener y leer lo guardado</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-
+<p>Mientras corre, puedes leer lo que ya escribió sin detenerla — cada micro-lote confirmado queda disponible de inmediato. Este paso es <strong>opcional</strong>: no hace falta para completar el ejercicio, solo sirve para confirmar que realmente se está guardando algo antes de llegar al final:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2 (opcional): leer lo guardado (se puede repetir, el stream sigue corriendo)</span>
 <span class="n">guardado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ARTIFACTS</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"filas guardadas en Parquet:"</span><span class="p">,</span> <span class="n">guardado</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
-<span class="n">guardado</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"ts"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">guardado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"filas guardadas en Parquet:"</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+<span class="n">guardado</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"ts"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
-<p>Resultado real:</p>
-<div class="highlight"><pre><span></span><code>filas guardadas en Parquet: 15
+<p>Resultado real (una foto intermedia, con el stream todavía corriendo):</p>
+<div class="highlight"><pre><span></span><code>filas guardadas en Parquet: 1146
 
 +-----------------+-----------+-----------------------+
 |sensorId         |temperatura|ts                     |
 +-----------------+-----------+-----------------------+
-|esp32-patio      |10.6       |2026-09-27 12:43:06.138|
-|esp32-invernadero|39.6       |2026-09-27 12:43:06.142|
-|esp32-patio      |10.8       |2026-09-27 12:43:09.149|
-|esp32-invernadero|39.5       |2026-09-27 12:43:09.154|
-|esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
+|esp32-patio      |11.0       |2026-09-27 12:43:12.166|
+|esp32-invernadero|39.7       |2026-09-27 12:43:12.173|
+|esp32-patio      |11.0       |2026-09-27 12:43:15.184|
+|esp32-invernadero|39.5       |2026-09-27 12:43:15.187|
+|esp32-patio      |11.2       |2026-09-27 12:43:18.193|
 +-----------------+-----------+-----------------------+
+(1146 filas en total)
 </code></pre></div>
-<p><strong>Error frecuente</strong>: si la detienes muy rápido, antes de que llegue el primer micro-lote, el resultado es <strong>cero filas guardadas</strong> — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, vuelve a correr la consulta, confirma primero que el productor de 3.1 sigue vivo, y espera un poco más antes de detenerla.</p>
-<p>Vuelve a ejecutar la celda de lectura (<code>spark.read.parquet(ARTIFACTS)</code>) después de correr esta celda una segunda vez: el conteo debe <strong>crecer</strong>, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.</p>
+<p><strong>Error frecuente</strong>: si lees muy rápido, antes de que llegue el primer micro-lote, el resultado es <strong>cero filas guardadas</strong> — no por un error, sino porque no hubo datos nuevos todavía. Espera unos segundos y vuelve a correr la celda de lectura; si sigue en 0, confirma que el productor de 3.1 sigue corriendo.</p>
+<p>Vuelve a correr esta misma celda un par de veces, dejando pasar unos segundos entre una y otra: el conteo debe <strong>crecer</strong> cada vez, porque el stream sigue escribiendo micro-lotes nuevos mientras tanto — la carpeta de Parquet acumula, no sobreescribe. Cuando ya viste suficiente, detén <strong>las dos consultas juntas</strong> — la de consola de 3.5 y la de Parquet de este paso:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 3: detener ambas consultas (la de consola de 3.5 y la de Parquet de 3.6)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="n">consulta2</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
 <h3 id="37-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-38">3.7 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.8)<a class="headerlink" href="#37-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-38" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> evidencia de que, sin watermark, el estado de una agregación por ventana <strong>crece para siempre</strong>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la agregación sin límite</span>
