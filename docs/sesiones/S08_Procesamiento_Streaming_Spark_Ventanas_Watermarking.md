@@ -283,7 +283,7 @@ Súbelo combinando los dos archivos — el segundo solo agrega la red, no reempl
 
 ```bash
 cd pyspark
-docker compose -f compose.yml -f compose.kafka.yml up -d --build
+docker compose -f compose.yml -f compose.kafka.yml up -d
 ```
 
 **Error frecuente**: la celda de 3.2 falla con `kafka.errors.NoBrokersAvailable` o, en el log del driver, `java.net.UnknownHostException: kafka`. `pyspark` está corriendo, pero sin `compose.kafka.yml` — súbelo de nuevo con los dos `-f` del comando de arriba. Si ya estaba corriendo solo con `compose.yml`, `docker compose up` con los dos archivos lo recrea con la red nueva, no hace falta bajarlo a mano primero.
