@@ -2390,9 +2390,10 @@
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 <span class="nb">cd</span><span class="w"> </span>../uso-atmos
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-d<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/consumer_sensores.py
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-d<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
 </code></pre></div>
-<p>Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos <strong>llegando en vivo</strong>, no solo los que ya están en el topic.</p>
+<p>Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos <strong>llegando en vivo</strong>, no solo los que ya están en el topic. El consumidor de S7 arranca junto a él solo para confirmar, con una fuente ya probada, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark.</p>
 <p><code>pyspark/compose.yml</code> corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (<code>uso-atmos</code>, <code>ec-eventos-py</code>), nunca Spark. Hoy cambia: <code>spark.read.format("kafka")</code> (3.2) corre <strong>dentro</strong> del contenedor <code>pyspark</code>, y ese contenedor todavía no está en la misma red que <code>lambda26-kafka</code> — sin unirlo, <code>kafka:9092</code> no se resuelve. En vez de tocar <code>pyspark/compose.yml</code> (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:</p>
 <p><strong><code>pyspark/compose.kafka.yml</code>:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
