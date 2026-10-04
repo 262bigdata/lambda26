@@ -248,19 +248,33 @@ cd kafka
 docker compose up -d
 cd ../uso-atmos
 docker compose up -d
-docker exec lambda26-uso-atmos python /app/consumer_sensores.py
+docker exec -it lambda26-uso-atmos python /app/consumer_sensores.py
 ```
 
 Sin `-d`: el consumidor de S7 arranca pegado a esta terminal para que veas en vivo, línea por línea, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark. En cuanto veas pasar algunas líneas con `"status": "consumed"`, detenlo con `Ctrl+C` — ya cumplió su función, no hace falta dejarlo corriendo. Abre una **pestaña nueva** de terminal para el productor:
 
 ```bash
 cd uso-atmos
-docker exec lambda26-uso-atmos python /app/producer_sensores.py
+docker exec -it lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
 También sin `-d`, pero al revés que el consumidor: el productor **sí** debe quedar corriendo toda la sesión — varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic. Deja esta pestaña abierta, visible, sin tocarla (ni `Ctrl+C` ni cerrarla) hasta terminar la sesión, y abre una **tercera pestaña** para el resto de los comandos de este paso.
 
 **Error frecuente**: si detienes el productor sin querer (`Ctrl+C` en su pestaña, o cerrándola), las celdas que dependen de datos en vivo dejan de recibir mensajes nuevos — no fallan con un error, simplemente no muestran filas nuevas. Como corre sin `-d`, confirmar que sigue vivo es mirar su pestaña: debe seguir imprimiendo una línea `"status": "published"` cada pocos segundos. Si se detuvo, vuelve a lanzar el comando de arriba.
+
+**Error frecuente**: el consumidor sigue recibiendo eventos aunque creas que ya no hay ningún productor corriendo, y nunca usaste `-d`. Sin `-it`, `docker exec` no asigna una pseudo-terminal: `Ctrl+C` puede cortar la conexión de tu lado (el prompt vuelve) sin que la señal llegue de verdad al proceso de adentro, que queda corriendo invisible — el mismo síntoma de **zombie**, aunque nunca lo lanzaste detached. Por eso los comandos de arriba ya llevan `-it`. Si de todas formas sospechas que quedó algo vivo (por ejemplo, porque corriste el comando viejo sin `-it`, o con `-d`), confirmalo:
+
+```bash
+docker top lambda26-uso-atmos
+```
+
+Si aparece más de un `producer_sensores.py` (o uno que no reconoces), hay un zombie. **No intentes matarlo por PID** con `docker exec lambda26-uso-atmos bash -c "kill <PID>"`: los PID que muestra `docker top` son del *host* (la VM de Docker Desktop), no los del namespace interno del contenedor, así que casi siempre da `No such process` aunque el proceso esté vivo. La forma confiable de limpiar todo es reiniciar el contenedor:
+
+```bash
+docker restart lambda26-uso-atmos
+```
+
+Esto mata **todos** los procesos de adentro (productor, consumidor, cualquier zombie) y lo deja en su estado base (`sleep infinity`). Vuelve a lanzar consumidor y productor limpios, como al principio de este paso.
 
 `pyspark/compose.yml` corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (`uso-atmos`, `ec-eventos-py`), nunca Spark. Hoy cambia: `spark.read.format("kafka")` (3.2) corre **dentro** del contenedor `pyspark`, y ese contenedor todavía no está en la misma red que `lambda26-kafka` — sin unirlo, `kafka:9092` no se resuelve. En vez de tocar `pyspark/compose.yml` (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:
 
@@ -438,12 +452,7 @@ consulta = (
 
 `writeStream` (no `write`) inicia una **consulta continua**: `.start()` la lanza en segundo plano y devuelve de inmediato un objeto `StreamingQuery`; el proceso sigue corriendo aunque la celda ya haya terminado — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre. `outputMode("append")` dice que solo se muestran filas **nuevas**, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. `trigger(processingTime="5 seconds")` fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en **micro-lotes** cada 5 segundos.
 
-Déjala corriendo unos segundos — verás una tanda de filas nuevas cada 5 segundos, una por micro-lote — y detenla cuando ya viste suficiente, desde una celda aparte:
-
-```python
-# Momento 2: detener la consulta
-consulta.stop()
-```
+Déjala corriendo — **no la detengas todavía**. En 3.6 vas a arrancar una segunda consulta que lee el mismo `eventos` y lo persiste en Parquet, al mismo tiempo que esta sigue imprimiendo por consola — un mismo DataFrame alimentando dos *sinks* a la vez. Las vas a detener juntas al final de 3.6.
 
 Resultado real (dos de los micro-lotes):
 
@@ -460,18 +469,18 @@ Batch: 1
 +--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
 ```
 
-**Error frecuente**: al llamar `.stop()`, el log muestra líneas `ERROR ... Aborting task` o `TaskKilledException`. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un `stop()` abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.
+**Error frecuente**: cuando más adelante detengas esta consulta (al final de 3.6), el log va a mostrar líneas `ERROR ... Aborting task` o `TaskKilledException`. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un `stop()` abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.
 
 ### 3.6 Escribir la salida a Parquet, con checkpoint
 
-**Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.
+**Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados — **al mismo tiempo** que la consulta de consola de 3.5 sigue corriendo.
 
 ```python
-# Momento 1: arrancar el stream a Parquet
-ARTIFACTS = "/opt/s08-streaming-estructurado/artifacts/atmos_parquet"
-CHECKPOINT_PARQUET = "/opt/s08-streaming-estructurado/artifacts/chk_parquet"
+# Momento 1: arrancar el stream a Parquet (la consulta de 3.5 sigue corriendo en paralelo)
+ARTIFACTS = "./artifacts/atmos_parquet"
+CHECKPOINT_PARQUET = "./artifacts/chk_parquet"
 
-consulta = (
+consulta2 = (
     eventos.writeStream
     .outputMode("append")
     .format("parquet")
@@ -482,38 +491,46 @@ consulta = (
 )
 ```
 
+Nota el nombre `consulta2`, no `consulta`: la consulta de 3.5 sigue viva en la variable `consulta`, y si esta nueva reusara ese mismo nombre, perderías la única referencia que te permite detener la de 3.5 más tarde — quedaría corriendo huérfana, sin que ninguna variable la señale.
+
 Un *sink* de archivo (Parquet, aquí) solo acepta `outputMode("append")` — no puede "reescribir" una fila ya guardada en disco, a diferencia de `console` con `update`. Por eso esta celda escribe los eventos **sin agregar** (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo `update` no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.
 
-Déjala corriendo al menos 10-15 segundos, para que alcance a escribir un par de micro-lotes, y detenla:
+Mientras corre, puedes leer lo que ya escribió sin detenerla — cada micro-lote confirmado queda disponible de inmediato. Este paso es **opcional**: no hace falta para completar el ejercicio, solo sirve para confirmar que realmente se está guardando algo antes de llegar al final:
 
 ```python
-# Momento 2: detener y leer lo guardado
-consulta.stop()
-
+# Momento 2 (opcional): leer lo guardado (se puede repetir, el stream sigue corriendo)
 guardado = spark.read.parquet(ARTIFACTS)
-print("filas guardadas en Parquet:", guardado.count())
-guardado.select("sensorId", "temperatura", "ts").show(5, truncate=False)
+total = guardado.count()
+print("filas guardadas en Parquet:", total)
+guardado.select("sensorId", "temperatura", "ts").show(total, truncate=False)
 ```
 
-Resultado real:
+Resultado real (una foto intermedia, con el stream todavía corriendo):
 
 ```text
-filas guardadas en Parquet: 15
+filas guardadas en Parquet: 1146
 
 +-----------------+-----------+-----------------------+
 |sensorId         |temperatura|ts                     |
 +-----------------+-----------+-----------------------+
-|esp32-patio      |10.6       |2026-09-27 12:43:06.138|
-|esp32-invernadero|39.6       |2026-09-27 12:43:06.142|
-|esp32-patio      |10.8       |2026-09-27 12:43:09.149|
-|esp32-invernadero|39.5       |2026-09-27 12:43:09.154|
-|esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
+|esp32-patio      |11.0       |2026-09-27 12:43:12.166|
+|esp32-invernadero|39.7       |2026-09-27 12:43:12.173|
+|esp32-patio      |11.0       |2026-09-27 12:43:15.184|
+|esp32-invernadero|39.5       |2026-09-27 12:43:15.187|
+|esp32-patio      |11.2       |2026-09-27 12:43:18.193|
 +-----------------+-----------+-----------------------+
+(1146 filas en total)
 ```
 
-**Error frecuente**: si la detienes muy rápido, antes de que llegue el primer micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, vuelve a correr la consulta, confirma primero que el productor de 3.1 sigue vivo, y espera un poco más antes de detenerla.
+**Error frecuente**: si lees muy rápido, antes de que llegue el primer micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos todavía. Espera unos segundos y vuelve a correr la celda de lectura; si sigue en 0, confirma que el productor de 3.1 sigue corriendo.
 
-Vuelve a ejecutar la celda de lectura (`spark.read.parquet(ARTIFACTS)`) después de correr esta celda una segunda vez: el conteo debe **crecer**, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.
+Vuelve a correr esta misma celda un par de veces, dejando pasar unos segundos entre una y otra: el conteo debe **crecer** cada vez, porque el stream sigue escribiendo micro-lotes nuevos mientras tanto — la carpeta de Parquet acumula, no sobreescribe. Cuando ya viste suficiente, detén **las dos consultas juntas** — la de consola de 3.5 y la de Parquet de este paso:
+
+```python
+# Momento 3: detener ambas consultas (la de consola de 3.5 y la de Parquet de 3.6)
+consulta.stop()
+consulta2.stop()
+```
 
 ### 3.7 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.8)
 
