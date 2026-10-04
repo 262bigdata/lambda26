@@ -2520,7 +2520,8 @@ root
 <p><code>value</code> llega en binario; <code>CAST(value AS STRING)</code> lo vuelve texto, y <code>from_json</code> lo convierte a columnas según <code>esquema_evento</code> — el mismo contrato de <code>sensor.lectura</code> que S7 documentó. Un esquema <strong>explícito</strong> (no inferido) es obligatorio en streaming: Spark no puede "mirar" todo el stream para adivinar tipos, porque el stream no tiene fin. <code>ts</code> convierte el <code>timestamp</code> (milisegundos <em>epoch</em>, un <code>Long</code>) a un tipo <code>timestamp</code> real: <strong>es la columna que 3.5 en adelante usa como reloj del evento</strong> — el momento en que el sensor midió, no el momento en que Spark lo procesa.</p>
 <h3 id="35-primera-consulta-ver-los-eventos-llegar">3.5 Primera consulta: ver los eventos llegar<a class="headerlink" href="#35-primera-consulta-ver-los-eventos-llegar" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> la primera consulta de streaming corriendo, con salida por consola.</p>
-<div class="highlight"><pre><span></span><code><span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la consulta</span>
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
     <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
@@ -2528,7 +2529,10 @@ root
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<p><code>writeStream</code> (no <code>write</code>) inicia una <strong>consulta continua</strong>: <code>.start()</code> la lanza en segundo plano y devuelve de inmediato un objeto <code>StreamingQuery</code>; el proceso sigue corriendo aunque la celda ya haya terminado — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre. <code>outputMode("append")</code> dice que solo se muestran filas <strong>nuevas</strong>, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. <code>trigger(processingTime="5 seconds")</code> fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en <strong>micro-lotes</strong> cada 5 segundos.</p>
+<p>Déjala corriendo unos segundos — verás una tanda de filas nuevas cada 5 segundos, una por micro-lote — y detenla cuando ya viste suficiente, desde una celda aparte:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
 <p>Resultado real (dos de los micro-lotes):</p>
@@ -2543,12 +2547,11 @@ Batch: 1
 |sensor.lectura|esp32-invernadero|40.0       |60.9   |1003.0 |uso-atmos|1790512778041|2026-09-27 12:39:38.041|
 +--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
 </code></pre></div>
-<p><code>writeStream</code> (no <code>write</code>) inicia una <strong>consulta continua</strong>: <code>.start()</code> la lanza en segundo plano y devuelve de inmediato un objeto <code>StreamingQuery</code>; el proceso sigue corriendo aunque la celda ya haya terminado. <code>awaitTermination(20)</code> bloquea esta celda 20 segundos para que se alcance a ver algo, y <code>.stop()</code> la detiene a mano — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre.</p>
-<p><code>outputMode("append")</code> dice que solo se muestran filas <strong>nuevas</strong>, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. <code>trigger(processingTime="5 seconds")</code> fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en <strong>micro-lotes</strong> cada 5 segundos.</p>
 <p><strong>Error frecuente</strong>: al llamar <code>.stop()</code>, el log muestra líneas <code>ERROR ... Aborting task</code> o <code>TaskKilledException</code>. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un <code>stop()</code> abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.</p>
 <h3 id="36-escribir-la-salida-a-parquet-con-checkpoint">3.6 Escribir la salida a Parquet, con checkpoint<a class="headerlink" href="#36-escribir-la-salida-a-parquet-con-checkpoint" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.</p>
-<div class="highlight"><pre><span></span><code><span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/atmos_parquet"</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el stream a Parquet</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/atmos_parquet"</span>
 <span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"/opt/s08-streaming-estructurado/artifacts/chk_parquet"</span>
 
 <span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
@@ -2560,7 +2563,10 @@ Batch: 1
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<p>Un <em>sink</em> de archivo (Parquet, aquí) solo acepta <code>outputMode("append")</code> — no puede "reescribir" una fila ya guardada en disco, a diferencia de <code>console</code> con <code>update</code>. Por eso esta celda escribe los eventos <strong>sin agregar</strong> (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo <code>update</code> no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.</p>
+<p>Déjala corriendo al menos 10-15 segundos, para que alcance a escribir un par de micro-lotes, y detenla:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener y leer lo guardado</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
 <span class="n">guardado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ARTIFACTS</span><span class="p">)</span>
@@ -2580,12 +2586,12 @@ Batch: 1
 |esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
 +-----------------+-----------+-----------------------+
 </code></pre></div>
-<p>Un <em>sink</em> de archivo (Parquet, aquí) solo acepta <code>outputMode("append")</code> — no puede "reescribir" una fila ya guardada en disco, a diferencia de <code>console</code> con <code>update</code>. Por eso esta celda escribe los eventos <strong>sin agregar</strong> (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo <code>update</code> no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.</p>
-<p><strong>Error frecuente</strong>: con <code>startingOffsets: "latest"</code> y una corrida corta, si el productor tarda en emitir su primer evento después de que la consulta arranca, el primer micro-lote puede quedar vacío, y si la consulta se detiene antes de que llegue el segundo micro-lote, el resultado es <strong>cero filas guardadas</strong> — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, corre de nuevo confirmando primero que el productor de 3.1 sigue vivo.</p>
+<p><strong>Error frecuente</strong>: si la detienes muy rápido, antes de que llegue el primer micro-lote, el resultado es <strong>cero filas guardadas</strong> — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, vuelve a correr la consulta, confirma primero que el productor de 3.1 sigue vivo, y espera un poco más antes de detenerla.</p>
 <p>Vuelve a ejecutar la celda de lectura (<code>spark.read.parquet(ARTIFACTS)</code>) después de correr esta celda una segunda vez: el conteo debe <strong>crecer</strong>, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.</p>
 <h3 id="37-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-38">3.7 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.8)<a class="headerlink" href="#37-agregar-por-ventana-de-tiempo-sin-limite-el-problema-que-resuelve-38" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> evidencia de que, sin watermark, el estado de una agregación por ventana <strong>crece para siempre</strong>.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">count</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la agregación sin límite</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="n">count</span>
 
 <span class="n">agregado_sin_limite</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"10 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
@@ -2600,7 +2606,9 @@ Batch: 1
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</code></pre></div>
+<p>Déjala correr al menos 20-25 segundos (varios micro-lotes) para que se note la tabla creciendo, y después detenla:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
 <p>Resultado real, dos micro-lotes consecutivos (nota cómo la ventana <code>12:39:50-12:40:00</code> se repite, igual, en ambos):</p>
@@ -2639,7 +2647,8 @@ Batch: 4
 <p>La tabla completa <strong>crece</strong> de un micro-lote al siguiente: la ventana <code>12:39:50-12:40:00</code> sigue apareciendo, igual, en el Batch 4, junto a las dos ventanas nuevas. Ese es el problema: Spark tiene que guardar el estado de <strong>cada ventana que existió jamás</strong>, indefinidamente — en un sistema real, que corre por días, esto agota la memoria. El watermarking (3.8) es la respuesta.</p>
 <h3 id="38-watermarking-acotar-cuanto-se-espera-por-datos-tardios">3.8 Watermarking: acotar cuánto se espera por datos tardíos<a class="headerlink" href="#38-watermarking-acotar-cuanto-se-espera-por-datos-tardios" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> la misma agregación, pero con las ventanas viejas <strong>cerradas y liberadas</strong> de la memoria.</p>
-<div class="highlight"><pre><span></span><code><span class="n">agregado_con_watermark</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la agregación con watermark</span>
+<span class="n">agregado_con_watermark</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span>
     <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"10 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"10 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
@@ -2655,7 +2664,9 @@ Batch: 4
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</code></pre></div>
+<p>Déjala correr al menos 20-25 segundos y detenla:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
 <p>Resultado real, dos micro-lotes consecutivos — compáralos con los de 3.7: aquí <strong>no</strong> se repite la ventana anterior en cada lote, solo la que cambió:</p>
@@ -2685,7 +2696,8 @@ Batch: 2
 <p><code>checkpointLocation</code> aparece por primera vez: es la carpeta donde Spark guarda el estado de la consulta (qué ventanas existen, hasta qué <em>offset</em> de Kafka se leyó). Sin ella, esta consulta con estado (una agregación) ni siquiera arrancaría. Se profundiza en 3.10.</p>
 <h3 id="39-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra">3.9 Ventana deslizante: una lectura que se actualiza más seguido que se cierra<a class="headerlink" href="#39-ventana-deslizante-una-lectura-que-se-actualiza-mas-seguido-que-se-cierra" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> ventanas que se <strong>solapan</strong>, para suavizar una métrica sin esperar a que cada bloque termine.</p>
-<div class="highlight"><pre><span></span><code><span class="n">agregado_deslizante</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la ventana deslizante</span>
+<span class="n">agregado_deslizante</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span>
     <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"15 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">),</span> <span class="s2">"15 seconds"</span><span class="p">,</span> <span class="s2">"5 seconds"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">))</span>
@@ -2701,7 +2713,9 @@ Batch: 2
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</code></pre></div>
+<p>Déjala correr al menos 20-25 segundos y detenla:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
 <p>Resultado real — un solo evento de <code>esp32-laboratorio</code> (o de <code>esp32-patio</code>, <code>esp32-invernadero</code>) aparece en <strong>tres</strong> ventanas de 15 segundos distintas, que se solapan cada 5 segundos:</p>
@@ -2754,7 +2768,8 @@ state
 <h3 id="311-un-dato-tardio-y-el-watermark-descartandolo">3.11 Un dato tardío, y el watermark descartándolo<a class="headerlink" href="#311-un-dato-tardio-y-el-watermark-descartandolo" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> un evento con marca de tiempo vieja, publicado <strong>después</strong> de que el watermark ya avanzó más allá de su ventana — y la prueba de que Spark lo descarta sin avisar.</p>
 <p><strong>Advertencia sobre el "arranque en frío":</strong> si publicas el evento tardío como el <strong>primer</strong> mensaje que la consulta ve, no se descarta — el watermark todavía no tiene ningún evento "reciente" contra el cual compararlo (2.4, Tabla 5, última fila). Por eso, primero se deja correr la consulta con datos en vivo un rato, y <strong>recién después</strong> se publica el evento tardío.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el hilo y la consulta</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_json</span><span class="p">,</span> <span class="n">struct</span>
@@ -2797,7 +2812,9 @@ state
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"4 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
+</code></pre></div>
+<p>El hilo (<code>daemon=True</code>) corre aparte de la consulta: se dispara solo, 15 segundos después de ejecutar esta celda, sin importar cuándo decidas detener <code>consulta</code>. Espera <strong>al menos 30-40 segundos</strong> antes de detenerla — necesitas ver varios micro-lotes con datos en vivo antes del evento tardío, y varios más después, para comprobar que nunca aparece:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta y revisar</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Buscando 'esp32-tardio' en la salida de arriba: si no aparece ninguna fila, el watermark lo descarto."</span><span class="p">)</span>
 </code></pre></div>
@@ -2806,7 +2823,8 @@ state
 <p>Esto se verificó dos veces antes de escribir esta guía: publicando el evento tardío <strong>antes</strong> de que el watermark avanzara (como primer mensaje de la consulta), sí se dejaba pasar — es el caso de "arranque en frío" de la advertencia de arriba. La lección no es "Spark falla a veces": es que el watermark necesita <strong>datos frescos previos</strong> para tener algo contra qué comparar.</p>
 <h3 id="312-deduplicacion-acotada-por-watermark">3.12 Deduplicación acotada por watermark<a class="headerlink" href="#312-deduplicacion-acotada-por-watermark" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el mismo evento, publicado dos veces por error, contado <strong>una sola vez</strong>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">deduplicado</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la consulta</span>
+<span class="n">deduplicado</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">eventos</span>
     <span class="o">.</span><span class="n">withWatermark</span><span class="p">(</span><span class="s2">"ts"</span><span class="p">,</span> <span class="s2">"30 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">])</span>
@@ -2821,7 +2839,9 @@ state
     <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"3 seconds"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
-
+</code></pre></div>
+<p>Con la consulta corriendo, espera unos segundos a que arranque y publica el mismo evento dos veces seguidas:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: publicar el evento duplicado</span>
 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">columnas</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"temperatura"</span><span class="p">,</span> <span class="s2">"humedad"</span><span class="p">,</span> <span class="s2">"presion"</span><span class="p">,</span> <span class="s2">"origen"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">]</span>
 <span class="n">evento_duplicado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
@@ -2838,8 +2858,9 @@ state
         <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
         <span class="o">.</span><span class="n">save</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"&gt;&gt;&gt; 'esp32-duplicado' publicado DOS veces"</span><span class="p">)</span>
-
-<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<p>Espera unos segundos más a que pasen un par de micro-lotes mostrando el filtrado, y detén la consulta:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 3: detener y revisar</span>
 <span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Busca 'esp32-duplicado' arriba: debe aparecer una sola vez, aunque se publico dos veces."</span><span class="p">)</span>
 </code></pre></div>
@@ -2850,6 +2871,7 @@ state
 <p>Esto responde directamente al porqué de <strong>semántica de entrega</strong> (2.6): Kafka entrega cada mensaje <strong>al menos una vez</strong> — nunca menos, a veces más, por reintentos ante fallos de red. <code>dropDuplicates</code> acotado por watermark es la pieza que convierte ese "al menos una vez" en un resultado que se comporta como "exactamente una vez", <strong>sin</strong> que el productor tenga que garantizar nada.</p>
 <h3 id="313-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar">3.13 Intervalo de disparo: el costo de decidir cada cuánto procesar<a class="headerlink" href="#313-intervalo-de-disparo-el-costo-de-decidir-cada-cuanto-procesar" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el mismo stream, con dos ritmos de disparo distintos, y la diferencia real en cuántos micro-lotes se alcanzan a correr.</p>
+<p>A diferencia de las consultas anteriores, esta celda sí usa <code>awaitTermination(segundos_totales)</code> en vez de un <code>stop()</code> manual aparte: la comparación solo es justa si ambos disparos corren exactamente el mismo tiempo de reloj (15 segundos cada uno) — si los detuvieras a mano, nunca sabrías si la diferencia de <code>batchId</code> vino del intervalo o de cuánto esperaste.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">contar_microlotes</span><span class="p">(</span><span class="n">intervalo</span><span class="p">,</span> <span class="n">segundos_totales</span><span class="p">):</span>
     <span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">eventos</span><span class="o">.</span><span class="n">writeStream</span>
