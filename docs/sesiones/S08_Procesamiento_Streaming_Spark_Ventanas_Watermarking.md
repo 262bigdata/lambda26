@@ -72,11 +72,12 @@ flowchart TB
     S6["`**S6:** Eventos empresariales (Kafka)`"]
     S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
     S8["`**S8:** Spark Structured Streaming`"]
-    S9["`**S9:** Observabilidad`"]
-    S10["`**S10:** BI/ML en streaming`"]
+    S9["`**S9:** Observabilidad con Grafana y costos`"]
+    S10["`**S10:** Series de tiempo e inferencia en streaming`"]
+    S11["`**S11:** BI/ML distribuido con Spark`"]
     S12["`**S12:** Producto U2`"]
 
-    S6 --> S7 --> S8 --> S9 --> S10 --> S12
+    S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12
 
     classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
     class S8 today;
