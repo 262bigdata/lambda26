@@ -248,10 +248,11 @@ cd kafka
 docker compose up -d
 cd ../uso-atmos
 docker compose up -d
+docker exec -d lambda26-uso-atmos python /app/consumer_sensores.py
 docker exec -d lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
-Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic.
+Deja el productor corriendo durante toda la sesión: varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic. El consumidor de S7 arranca junto a él solo para confirmar, con una fuente ya probada, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark.
 
 `pyspark/compose.yml` corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (`uso-atmos`, `ec-eventos-py`), nunca Spark. Hoy cambia: `spark.read.format("kafka")` (3.2) corre **dentro** del contenedor `pyspark`, y ese contenedor todavía no está en la misma red que `lambda26-kafka` — sin unirlo, `kafka:9092` no se resuelve. En vez de tocar `pyspark/compose.yml` (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:
 
