@@ -251,14 +251,16 @@ docker compose up -d
 docker exec lambda26-uso-atmos python /app/consumer_sensores.py
 ```
 
-Sin `-d`: el consumidor de S7 arranca pegado a esta terminal para que veas en vivo, línea por línea, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark. Déjalo corriendo ahí como evidencia y abre una **pestaña nueva** de terminal para el resto de comandos — no hace falta cortarlo ni dejarlo corriendo toda la sesión, pero mientras esté abierto sirve de confirmación en vivo. El productor sí debe quedar corriendo toda la sesión:
+Sin `-d`: el consumidor de S7 arranca pegado a esta terminal para que veas en vivo, línea por línea, que los eventos siguen llegando bien formados antes de confiar en la lectura nueva de Spark. En cuanto veas pasar algunas líneas con `"status": "consumed"`, detenlo con `Ctrl+C` — ya cumplió su función, no hace falta dejarlo corriendo. Abre una **pestaña nueva** de terminal para el productor:
 
 ```bash
 cd uso-atmos
-docker exec -d lambda26-uso-atmos python /app/producer_sensores.py
+docker exec lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
-Varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic.
+También sin `-d`, pero al revés que el consumidor: el productor **sí** debe quedar corriendo toda la sesión — varias celdas de este notebook necesitan eventos **llegando en vivo**, no solo los que ya están en el topic. Deja esta pestaña abierta, visible, sin tocarla (ni `Ctrl+C` ni cerrarla) hasta terminar la sesión, y abre una **tercera pestaña** para el resto de los comandos de este paso.
+
+**Error frecuente**: si detienes el productor sin querer (`Ctrl+C` en su pestaña, o cerrándola), las celdas que dependen de datos en vivo dejan de recibir mensajes nuevos — no fallan con un error, simplemente no muestran filas nuevas. Como corre sin `-d`, confirmar que sigue vivo es mirar su pestaña: debe seguir imprimiendo una línea `"status": "published"` cada pocos segundos. Si se detuvo, vuelve a lanzar el comando de arriba.
 
 `pyspark/compose.yml` corre desde S1, y nunca tuvo que hablar con Kafka: hasta S7, Kafka lo usaban otros contenedores (`uso-atmos`, `ec-eventos-py`), nunca Spark. Hoy cambia: `spark.read.format("kafka")` (3.2) corre **dentro** del contenedor `pyspark`, y ese contenedor todavía no está en la misma red que `lambda26-kafka` — sin unirlo, `kafka:9092` no se resuelve. En vez de tocar `pyspark/compose.yml` (que sirve para todo el curso, no solo para streaming), crea un segundo archivo que solo agrega esa red, igual que ya hiciste con los contenedores de S6/S7:
 
@@ -280,13 +282,13 @@ networks:
 Súbelo combinando los dos archivos — el segundo solo agrega la red, no reemplaza nada del primero:
 
 ```bash
-cd ../pyspark
+cd pyspark
 docker compose -f compose.yml -f compose.kafka.yml up -d --build
 ```
 
 **Error frecuente**: la celda de 3.2 falla con `kafka.errors.NoBrokersAvailable` o, en el log del driver, `java.net.UnknownHostException: kafka`. `pyspark` está corriendo, pero sin `compose.kafka.yml` — súbelo de nuevo con los dos `-f` del comando de arriba. Si ya estaba corriendo solo con `compose.yml`, `docker compose up` con los dos archivos lo recrea con la red nueva, no hace falta bajarlo a mano primero.
 
-**Error frecuente**: el productor se detiene solo si el contenedor `uso-atmos` se recrea (por ejemplo, al bajar y volver a levantar el stack) — `docker exec -d` no sobrevive a que el contenedor se reinicie. Antes de correr una celda que depende de datos en vivo, confirma que el proceso sigue vivo (`docker exec lambda26-uso-atmos ps aux`, o revisa Kafka UI: el *lag* del topic debe estar creciendo).
+**Error frecuente**: el productor se detiene solo si el contenedor `uso-atmos` se recrea (por ejemplo, al bajar y volver a levantar el stack) — la pestaña con `docker exec` se queda ahí, pero el proceso de adentro ya murió con el contenedor viejo. Antes de correr una celda que depende de datos en vivo, confirma que la pestaña del productor sigue imprimiendo `"status": "published"`, o revisa Kafka UI: el *lag* del topic debe estar creciendo.
 
 ### 3.2 Crear el notebook y la `SparkSession`, con el conector de Kafka
 
