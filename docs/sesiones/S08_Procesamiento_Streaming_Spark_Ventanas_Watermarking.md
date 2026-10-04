@@ -126,9 +126,9 @@ Un *sink* de salida exige declarar un **modo de salida**, porque no todos los re
 
 | Modo | Qué entrega en cada micro-lote | Cuándo se usa |
 |---|---|---|
-| `append` | Solo las filas nuevas, que ya no van a cambiar. | Eventos sin agregar (3.4), o agregaciones con watermark cuya ventana ya cerró. |
-| `update` | Las filas que cambiaron desde el último micro-lote. | Agregaciones con watermark, para ver el resultado actualizarse (3.6, 3.7). |
-| `complete` | Toda la tabla de resultados, completa, en cada micro-lote. | Agregaciones sin watermark, o tablas pequeñas donde reimprimir todo es aceptable (3.5). |
+| `append` | Solo las filas nuevas, que ya no van a cambiar. | Eventos sin agregar (3.5, 3.6), o agregaciones con watermark cuya ventana ya cerró. |
+| `update` | Las filas que cambiaron desde el último micro-lote. | Agregaciones con watermark, para ver el resultado actualizarse (3.8, 3.9). |
+| `complete` | Toda la tabla de resultados, completa, en cada micro-lote. | Agregaciones sin watermark, o tablas pequeñas donde reimprimir todo es aceptable (3.7). |
 
 `append` es el único modo que un *sink* de archivo (Parquet, JSON, CSV) acepta cuando hay una agregación de por medio: no puede "reescribir" una fila que ya guardó en disco.
 
@@ -181,7 +181,7 @@ Una ventana se cierra quando el watermark supera su límite superior. Un evento 
 | El evento llega después de que el watermark ya pasó su ventana. | Se descarta en silencio. |
 | Es de los primeros eventos que ve la consulta (el watermark todavía no tiene ninguna referencia). | Se acepta, aunque su marca de tiempo sea vieja — el watermark recién se establece con el primer lote. |
 
-Esa última fila es un caso de borde real, no teórico: se verifica con datos reales en 3.9.
+Esa última fila es un caso de borde real, no teórico: se verifica con datos reales en 3.11.
 
 ### 2.5 Checkpointing: tolerancia a fallos en una consulta que no termina
 
@@ -224,18 +224,18 @@ Tiempo: 3h.
 **Actividades para realizar:**
 
 - **3.1** Reanudar el entorno `lambda26` y verificar el punto de partida.
-- **3.2** Leer el topic en modo streaming.
-- **3.3** Parsear el JSON con un esquema explícito.
-- **3.4** Primera consulta: ver los eventos llegar.
-- **3.5** Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.6).
-- **3.6** Watermarking: acotar cuánto se espera por datos tardíos.
-- **3.7** Ventana deslizante: una lectura que se actualiza más seguido que se cierra.
-- **3.8** Checkpointing: qué guarda, y qué pasa al reiniciar.
-- **3.9** Un dato tardío, y el watermark descartándolo.
-- **3.10** Deduplicación acotada por watermark.
-- **3.11** Intervalo de disparo: el costo de decidir cada cuánto procesar.
-- **3.12** Escribir la salida a Parquet, con checkpoint.
-- **3.13** Documentar hallazgos y responder preguntas de reflexión.
+- **3.2** Crear el notebook y la `SparkSession`, con el conector de Kafka.
+- **3.3** Leer el topic en modo streaming.
+- **3.4** Parsear el JSON con un esquema explícito.
+- **3.5** Primera consulta: ver los eventos llegar.
+- **3.6** Escribir la salida a Parquet, con checkpoint.
+- **3.7** Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.8).
+- **3.8** Watermarking: acotar cuánto se espera por datos tardíos.
+- **3.9** Ventana deslizante: una lectura que se actualiza más seguido que se cierra.
+- **3.10** Checkpointing: qué guarda, y qué pasa al reiniciar.
+- **3.11** Un dato tardío, y el watermark descartándolo.
+- **3.12** Deduplicación acotada por watermark.
+- **3.13** Intervalo de disparo: el costo de decidir cada cuánto procesar.
 
 ### 3.1 Reanudar el entorno `lambda26` y verificar el punto de partida
 
@@ -244,8 +244,10 @@ Tiempo: 3h.
 Este notebook **no genera sus propios datos**: consume el mismo topic que S7 ya construyó. Antes de continuar, en una terminal (fuera del notebook):
 
 ```bash
-cd kafka && docker compose up -d
-cd ../uso-atmos && docker compose up -d
+cd kafka
+docker compose up -d
+cd ../uso-atmos
+docker compose up -d
 docker exec -d lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
@@ -363,7 +365,7 @@ root
 
 `readStream` en vez de `read` es la única diferencia de sintaxis, y cambia todo lo que viene después: `crudo` es un **plan**, no una tabla en memoria. `crudo.show()` fallaría con `AnalysisException`, porque mostrar implica materializar de una vez, y un stream no tiene un "final" que mostrar. Cada mensaje de Kafka llega con las mismas columnas, sin importar el topic: `key`, `value` (ambos en binario), `topic`, `partition`, `offset`, `timestamp`. El contenido real del evento está **adentro** de `value`, sin parsear todavía — eso es 3.4.
 
-`startingOffsets: "latest"` (no `"earliest"`) es a propósito: en un stream que corre indefinidamente, no tiene sentido reprocesar todo el historial cada vez que se reinicia una consulta de prueba — se quiere ver lo que llega **de ahora en adelante**. La diferencia importa, y se vuelve a ver en 3.9.
+`startingOffsets: "latest"` (no `"earliest"`) es a propósito: en un stream que corre indefinidamente, no tiene sentido reprocesar todo el historial cada vez que se reinicia una consulta de prueba — se quiere ver lo que llega **de ahora en adelante**. La diferencia importa, y se vuelve a ver en 3.11.
 
 ### 3.4 Parsear el JSON con un esquema explícito
 
@@ -447,7 +449,54 @@ Batch: 1
 
 **Error frecuente**: al llamar `.stop()`, el log muestra líneas `ERROR ... Aborting task` o `TaskKilledException`. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un `stop()` abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.
 
-### 3.6 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.7)
+### 3.6 Escribir la salida a Parquet, con checkpoint
+
+**Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.
+
+```python
+ARTIFACTS = "/opt/s08-streaming-estructurado/artifacts/atmos_parquet"
+CHECKPOINT_PARQUET = "/opt/s08-streaming-estructurado/artifacts/chk_parquet"
+
+consulta = (
+    eventos.writeStream
+    .outputMode("append")
+    .format("parquet")
+    .option("path", ARTIFACTS)
+    .option("checkpointLocation", CHECKPOINT_PARQUET)
+    .trigger(processingTime="5 seconds")
+    .start()
+)
+consulta.awaitTermination(20)
+consulta.stop()
+
+guardado = spark.read.parquet(ARTIFACTS)
+print("filas guardadas en Parquet:", guardado.count())
+guardado.select("sensorId", "temperatura", "ts").show(5, truncate=False)
+```
+
+Resultado real:
+
+```text
+filas guardadas en Parquet: 15
+
++-----------------+-----------+-----------------------+
+|sensorId         |temperatura|ts                     |
++-----------------+-----------+-----------------------+
+|esp32-patio      |10.6       |2026-09-27 12:43:06.138|
+|esp32-invernadero|39.6       |2026-09-27 12:43:06.142|
+|esp32-patio      |10.8       |2026-09-27 12:43:09.149|
+|esp32-invernadero|39.5       |2026-09-27 12:43:09.154|
+|esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
++-----------------+-----------+-----------------------+
+```
+
+Un *sink* de archivo (Parquet, aquí) solo acepta `outputMode("append")` — no puede "reescribir" una fila ya guardada en disco, a diferencia de `console` con `update`. Por eso esta celda escribe los eventos **sin agregar** (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo `update` no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.
+
+**Error frecuente**: con `startingOffsets: "latest"` y una corrida corta, si el productor tarda en emitir su primer evento después de que la consulta arranca, el primer micro-lote puede quedar vacío, y si la consulta se detiene antes de que llegue el segundo micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, corre de nuevo confirmando primero que el productor de 3.1 sigue vivo.
+
+Vuelve a ejecutar la celda de lectura (`spark.read.parquet(ARTIFACTS)`) después de correr esta celda una segunda vez: el conteo debe **crecer**, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.
+
+### 3.7 Agregar por ventana de tiempo, sin límite (el problema que resuelve 3.8)
 
 **Producto del paso:** evidencia de que, sin watermark, el estado de una agregación por ventana **crece para siempre**.
 
@@ -508,9 +557,9 @@ Batch: 4
 
 `window(col("ts"), "10 seconds")` agrupa los eventos en bloques de 10 segundos de tiempo de **evento** (`ts`), no de tiempo de procesamiento — dos sensores que midieron en el mismo instante caen en la misma ventana, sin importar cuándo Spark los procesó. `outputMode("complete")` es el único modo que puede acompañar a una agregación **sin** watermark: en cada micro-lote, Spark reimprime **todas** las ventanas vistas hasta ahora, porque no tiene ninguna señal de que una ventana vieja ya no va a recibir más datos.
 
-La tabla completa **crece** de un micro-lote al siguiente: la ventana `12:39:50-12:40:00` sigue apareciendo, igual, en el Batch 4, junto a las dos ventanas nuevas. Ese es el problema: Spark tiene que guardar el estado de **cada ventana que existió jamás**, indefinidamente — en un sistema real, que corre por días, esto agota la memoria. El watermarking (3.7) es la respuesta.
+La tabla completa **crece** de un micro-lote al siguiente: la ventana `12:39:50-12:40:00` sigue apareciendo, igual, en el Batch 4, junto a las dos ventanas nuevas. Ese es el problema: Spark tiene que guardar el estado de **cada ventana que existió jamás**, indefinidamente — en un sistema real, que corre por días, esto agota la memoria. El watermarking (3.8) es la respuesta.
 
-### 3.7 Watermarking: acotar cuánto se espera por datos tardíos
+### 3.8 Watermarking: acotar cuánto se espera por datos tardíos
 
 **Producto del paso:** la misma agregación, pero con las ventanas viejas **cerradas y liberadas** de la memoria.
 
@@ -535,7 +584,7 @@ consulta.awaitTermination(25)
 consulta.stop()
 ```
 
-Resultado real, dos micro-lotes consecutivos — compáralos con los de 3.6: aquí **no** se repite la ventana anterior en cada lote, solo la que cambió:
+Resultado real, dos micro-lotes consecutivos — compáralos con los de 3.7: aquí **no** se repite la ventana anterior en cada lote, solo la que cambió:
 
 ```text
 -------------------------------------------
@@ -561,11 +610,11 @@ Batch: 2
 +------------------------------------------+-----------------+------------------+---+
 ```
 
-`withWatermark("ts", "10 seconds")` es la regla que le faltaba a 3.6: le dice a Spark "una vez que veas un evento con `ts` = X, ya no esperes datos con `ts` anterior a X menos 10 segundos — cierra esas ventanas y olvídalas". El **watermark** en un momento dado es, entonces, el evento más reciente visto menos ese margen. Con el watermark, `outputMode("update")` ya es válido: en cada micro-lote solo se imprimen las ventanas que **cambiaron**, no todas — y las ventanas cerradas dejan de aparecer y dejan de ocupar memoria.
+`withWatermark("ts", "10 seconds")` es la regla que le faltaba a 3.7: le dice a Spark "una vez que veas un evento con `ts` = X, ya no esperes datos con `ts` anterior a X menos 10 segundos — cierra esas ventanas y olvídalas". El **watermark** en un momento dado es, entonces, el evento más reciente visto menos ese margen. Con el watermark, `outputMode("update")` ya es válido: en cada micro-lote solo se imprimen las ventanas que **cambiaron**, no todas — y las ventanas cerradas dejan de aparecer y dejan de ocupar memoria.
 
-`checkpointLocation` aparece por primera vez: es la carpeta donde Spark guarda el estado de la consulta (qué ventanas existen, hasta qué *offset* de Kafka se leyó). Sin ella, esta consulta con estado (una agregación) ni siquiera arrancaría. Se profundiza en 3.9.
+`checkpointLocation` aparece por primera vez: es la carpeta donde Spark guarda el estado de la consulta (qué ventanas existen, hasta qué *offset* de Kafka se leyó). Sin ella, esta consulta con estado (una agregación) ni siquiera arrancaría. Se profundiza en 3.10.
 
-### 3.8 Ventana deslizante: una lectura que se actualiza más seguido que se cierra
+### 3.9 Ventana deslizante: una lectura que se actualiza más seguido que se cierra
 
 **Producto del paso:** ventanas que se **solapan**, para suavizar una métrica sin esperar a que cada bloque termine.
 
@@ -611,11 +660,11 @@ Batch: 1
 +------------------------------------------+-----------------+---------+---+
 ```
 
-`window(col("ts"), "15 seconds", "5 seconds")` tiene un tercer argumento que 3.7 no tenía: el **paso** (5 segundos) es menor que el **ancho** (15 segundos) de la ventana. El resultado es una ventana **deslizante**: cada evento cae en **varias** ventanas de 15 segundos a la vez (una que empieza ahora, otra que empezó hace 5 segundos, otra hace 10). En 3.7, cada evento caía en **una sola** ventana (ventana **fija** o *tumbling*: el paso es igual al ancho).
+`window(col("ts"), "15 seconds", "5 seconds")` tiene un tercer argumento que 3.8 no tenía: el **paso** (5 segundos) es menor que el **ancho** (15 segundos) de la ventana. El resultado es una ventana **deslizante**: cada evento cae en **varias** ventanas de 15 segundos a la vez (una que empieza ahora, otra que empezó hace 5 segundos, otra hace 10). En 3.8, cada evento caía en **una sola** ventana (ventana **fija** o *tumbling*: el paso es igual al ancho).
 
 Para un mismo `sensorId`, aparecen varias filas con rangos de `window` que se superponen — y el mismo evento cuenta para varias de ellas. Sirve para suavizar una lectura (un promedio que no salta de golpe cada 15 segundos), a costa de guardar más estado: cada evento se cuenta varias veces en la memoria de la consulta, no una.
 
-### 3.9 Checkpointing: qué guarda, y qué pasa al reiniciar
+### 3.10 Checkpointing: qué guarda, y qué pasa al reiniciar
 
 **Producto del paso:** evidencia de que el *checkpoint* no es una carpeta vacía — ahí vive el progreso real de la consulta.
 
@@ -652,11 +701,11 @@ v1
 {"atmos-eventos":{"0":183,"1":3,"2":506}}
 ```
 
-`offsets/` guarda, por cada micro-lote, hasta qué *offset* de cada partición de Kafka se leyó — en esta corrida, la partición 0 llegó hasta el mensaje 183, la 1 hasta el 3, la 2 hasta el 506. `commits/` confirma cuáles de esos micro-lotes terminaron de escribirse por completo. `state/` guarda el contenido de cada ventana abierta — es lo que 3.6 mostró creciendo sin límite.
+`offsets/` guarda, por cada micro-lote, hasta qué *offset* de cada partición de Kafka se leyó — en esta corrida, la partición 0 llegó hasta el mensaje 183, la 1 hasta el 3, la 2 hasta el 506. `commits/` confirma cuáles de esos micro-lotes terminaron de escribirse por completo. `state/` guarda el contenido de cada ventana abierta — es lo que 3.7 mostró creciendo sin límite.
 
 La consecuencia práctica: si una consulta se cae y se reinicia **apuntando al mismo `checkpointLocation`**, Spark lee `offsets/` y retoma exactamente donde se quedó — no vuelve a leer el topic desde el principio, y no pierde el estado de las ventanas que ya tenía abiertas. Es la misma idea del *offset* de un `consumer group` de Kafka (S6, S7), pero aplicada también al estado de la agregación, no solo a la posición de lectura.
 
-### 3.10 Un dato tardío, y el watermark descartándolo
+### 3.11 Un dato tardío, y el watermark descartándolo
 
 **Producto del paso:** un evento con marca de tiempo vieja, publicado **después** de que el watermark ya avanzó más allá de su ventana — y la prueba de que Spark lo descarta sin avisar.
 
@@ -717,7 +766,7 @@ El hilo publica un evento `esp32-tardio` cuyo `timestamp` corresponde a **45 seg
 
 Esto se verificó dos veces antes de escribir esta guía: publicando el evento tardío **antes** de que el watermark avanzara (como primer mensaje de la consulta), sí se dejaba pasar — es el caso de "arranque en frío" de la advertencia de arriba. La lección no es "Spark falla a veces": es que el watermark necesita **datos frescos previos** para tener algo contra qué comparar.
 
-### 3.11 Deduplicación acotada por watermark
+### 3.12 Deduplicación acotada por watermark
 
 **Producto del paso:** el mismo evento, publicado dos veces por error, contado **una sola vez**.
 
@@ -766,11 +815,11 @@ Resultado real: `esp32-duplicado` se publicó **dos veces** hacia el mismo topic
 |sensor.lectura|esp32-duplicado  |55.0       |55.0   |1000.0 |prueba-dedup|1790512922488|2026-09-27 12:42:02.488|
 ```
 
-`dropDuplicates(["sensorId", "timestamp"])` descarta cualquier evento cuya combinación de esas dos columnas ya se vio antes. Sin `withWatermark`, esta operación tendría que recordar **todos** los eventos vistos jamás, para siempre — el mismo problema sin límite de 3.6, pero sobre los propios datos en vez de sobre ventanas. El watermark acota cuánto se recuerda: pasado el margen (30 segundos), un identificador viejo se olvida, y un duplicado *muy* tardío ya no se detectaría — es el mismo balance de siempre entre memoria y exactitud.
+`dropDuplicates(["sensorId", "timestamp"])` descarta cualquier evento cuya combinación de esas dos columnas ya se vio antes. Sin `withWatermark`, esta operación tendría que recordar **todos** los eventos vistos jamás, para siempre — el mismo problema sin límite de 3.7, pero sobre los propios datos en vez de sobre ventanas. El watermark acota cuánto se recuerda: pasado el margen (30 segundos), un identificador viejo se olvida, y un duplicado *muy* tardío ya no se detectaría — es el mismo balance de siempre entre memoria y exactitud.
 
 Esto responde directamente al porqué de **semántica de entrega** (2.6): Kafka entrega cada mensaje **al menos una vez** — nunca menos, a veces más, por reintentos ante fallos de red. `dropDuplicates` acotado por watermark es la pieza que convierte ese "al menos una vez" en un resultado que se comporta como "exactamente una vez", **sin** que el productor tenga que garantizar nada.
 
-### 3.12 Intervalo de disparo: el costo de decidir cada cuánto procesar
+### 3.13 Intervalo de disparo: el costo de decidir cada cuánto procesar
 
 **Producto del paso:** el mismo stream, con dos ritmos de disparo distintos, y la diferencia real en cuántos micro-lotes se alcanzan a correr.
 
@@ -806,53 +855,6 @@ Con disparo cada 6 segundos, ultimo batchId en 15s: 2
 
 La diferencia es el compromiso entre **latencia** y **throughput** (rendimiento) que pide el sílabo: un disparo más frecuente reduce la latencia (un evento espera menos, en promedio, antes de procesarse) pero cada micro-lote es más chico y el *overhead* de coordinarlos se paga más veces por segundo; un disparo menos frecuente junta más eventos por lote (mejor throughput por lote) a cambio de que cada evento individual espere más antes de aparecer en el resultado. Ninguno es "el correcto": depende de si el sistema necesita reaccionar rápido (alertas) o procesar volumen (reportes).
 
-### 3.13 Escribir la salida a Parquet, con checkpoint
-
-**Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.
-
-```python
-ARTIFACTS = "/opt/s08-streaming-estructurado/artifacts/atmos_parquet"
-CHECKPOINT_PARQUET = "/opt/s08-streaming-estructurado/artifacts/chk_parquet"
-
-consulta = (
-    eventos.writeStream
-    .outputMode("append")
-    .format("parquet")
-    .option("path", ARTIFACTS)
-    .option("checkpointLocation", CHECKPOINT_PARQUET)
-    .trigger(processingTime="5 seconds")
-    .start()
-)
-consulta.awaitTermination(20)
-consulta.stop()
-
-guardado = spark.read.parquet(ARTIFACTS)
-print("filas guardadas en Parquet:", guardado.count())
-guardado.select("sensorId", "temperatura", "ts").show(5, truncate=False)
-```
-
-Resultado real:
-
-```text
-filas guardadas en Parquet: 15
-
-+-----------------+-----------+-----------------------+
-|sensorId         |temperatura|ts                     |
-+-----------------+-----------+-----------------------+
-|esp32-patio      |10.6       |2026-09-27 12:43:06.138|
-|esp32-invernadero|39.6       |2026-09-27 12:43:06.142|
-|esp32-patio      |10.8       |2026-09-27 12:43:09.149|
-|esp32-invernadero|39.5       |2026-09-27 12:43:09.154|
-|esp32-laboratorio|9.3        |2026-09-27 12:43:06.146|
-+-----------------+-----------+-----------------------+
-```
-
-Un *sink* de archivo (Parquet, aquí) solo acepta `outputMode("append")` — no puede "reescribir" una fila ya guardada en disco, a diferencia de `console` con `update`. Por eso esta celda escribe los eventos **sin agregar** (3.4), no las ventanas de 3.7-3.8: una agregación en modo `update` no se puede volcar directo a Parquet.
-
-**Error frecuente**: con `startingOffsets: "latest"` y una corrida corta, si el productor tarda en emitir su primer evento después de que la consulta arranca, el primer micro-lote puede quedar vacío, y si la consulta se detiene antes de que llegue el segundo micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, corre de nuevo confirmando primero que el productor de 3.1 sigue vivo.
-
-Vuelve a ejecutar la celda de lectura (`spark.read.parquet(ARTIFACTS)`) después de correr esta celda una segunda vez: el conteo debe **crecer**, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.
-
 **Evidencia de aprendizaje:**
 
 - Lectura streaming de `atmos-eventos` con esquema explícito, distinguida de la lectura batch de S2-S4.
@@ -876,7 +878,7 @@ Completa y evidencia estas tareas:
 
 1. Sobre un topic de Kafka de tu propio proyecto (el de S6/S7, o uno nuevo con datos reales de tu dominio), construye la lectura en modo streaming con un esquema explícito, igual que 3.3-3.4.
 2. Diseña y ejecuta al menos una agregación por ventana de tiempo (fija o deslizante) con watermarking, sobre una métrica que tenga sentido en tu dominio, y documenta qué margen de watermark elegiste y por qué.
-3. Provoca, con datos reales, un caso de dato tardío que el watermark descarte, y evidencia tanto el evento publicado como su ausencia en la salida — igual que 3.10, pero sobre tu propio topic.
+3. Provoca, con datos reales, un caso de dato tardío que el watermark descarte, y evidencia tanto el evento publicado como su ausencia en la salida — igual que 3.11, pero sobre tu propio topic.
 4. Provoca un caso de evento duplicado y evidencia que `dropDuplicates` acotado por watermark lo filtra.
 5. Compara al menos dos intervalos de disparo distintos sobre tu propio stream, y documenta qué `batchId` alcanzó cada uno en el mismo tiempo de reloj.
 6. Persiste el resultado (agregado o crudo) en Parquet, con checkpoint, y verifica que una segunda corrida acumula en vez de sobreescribir.
