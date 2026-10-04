@@ -425,6 +425,7 @@ root
 **Producto del paso:** la primera consulta de streaming corriendo, con salida por consola.
 
 ```python
+# Momento 1: arrancar la consulta
 consulta = (
     eventos.writeStream
     .outputMode("append")
@@ -433,7 +434,14 @@ consulta = (
     .trigger(processingTime="5 seconds")
     .start()
 )
-consulta.awaitTermination(20)
+```
+
+`writeStream` (no `write`) inicia una **consulta continua**: `.start()` la lanza en segundo plano y devuelve de inmediato un objeto `StreamingQuery`; el proceso sigue corriendo aunque la celda ya haya terminado — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre. `outputMode("append")` dice que solo se muestran filas **nuevas**, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. `trigger(processingTime="5 seconds")` fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en **micro-lotes** cada 5 segundos.
+
+Déjala corriendo unos segundos — verás una tanda de filas nuevas cada 5 segundos, una por micro-lote — y detenla cuando ya viste suficiente, desde una celda aparte:
+
+```python
+# Momento 2: detener la consulta
 consulta.stop()
 ```
 
@@ -452,10 +460,6 @@ Batch: 1
 +--------------+-----------------+-----------+-------+-------+---------+-------------+-----------------------+
 ```
 
-`writeStream` (no `write`) inicia una **consulta continua**: `.start()` la lanza en segundo plano y devuelve de inmediato un objeto `StreamingQuery`; el proceso sigue corriendo aunque la celda ya haya terminado. `awaitTermination(20)` bloquea esta celda 20 segundos para que se alcance a ver algo, y `.stop()` la detiene a mano — en un sistema real, una consulta de streaming no se detiene sola, corre para siempre.
-
-`outputMode("append")` dice que solo se muestran filas **nuevas**, nunca modificadas — es el único modo válido para eventos sin agregar, como estos. `trigger(processingTime="5 seconds")` fija cada cuánto se arma un micro-lote: Structured Streaming no procesa evento por evento, sino en **micro-lotes** cada 5 segundos.
-
 **Error frecuente**: al llamar `.stop()`, el log muestra líneas `ERROR ... Aborting task` o `TaskKilledException`. No es una falla: es Spark cancelando, a mitad de camino, las tareas del micro-lote que estaba en curso cuando se pidió detener la consulta. Es ruido esperado de un `stop()` abrupto, no un error del notebook — mientras la celda no lance una excepción de Python, la consulta terminó bien.
 
 ### 3.6 Escribir la salida a Parquet, con checkpoint
@@ -463,6 +467,7 @@ Batch: 1
 **Producto del paso:** los eventos del stream aterrizando en disco, en Parquet, listos para que S9-S10 los lean como datos ya guardados.
 
 ```python
+# Momento 1: arrancar el stream a Parquet
 ARTIFACTS = "/opt/s08-streaming-estructurado/artifacts/atmos_parquet"
 CHECKPOINT_PARQUET = "/opt/s08-streaming-estructurado/artifacts/chk_parquet"
 
@@ -475,7 +480,14 @@ consulta = (
     .trigger(processingTime="5 seconds")
     .start()
 )
-consulta.awaitTermination(20)
+```
+
+Un *sink* de archivo (Parquet, aquí) solo acepta `outputMode("append")` — no puede "reescribir" una fila ya guardada en disco, a diferencia de `console` con `update`. Por eso esta celda escribe los eventos **sin agregar** (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo `update` no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.
+
+Déjala corriendo al menos 10-15 segundos, para que alcance a escribir un par de micro-lotes, y detenla:
+
+```python
+# Momento 2: detener y leer lo guardado
 consulta.stop()
 
 guardado = spark.read.parquet(ARTIFACTS)
@@ -499,9 +511,7 @@ filas guardadas en Parquet: 15
 +-----------------+-----------+-----------------------+
 ```
 
-Un *sink* de archivo (Parquet, aquí) solo acepta `outputMode("append")` — no puede "reescribir" una fila ya guardada en disco, a diferencia de `console` con `update`. Por eso esta celda escribe los eventos **sin agregar** (3.4), igual que la consulta de consola de 3.5 — no las ventanas con agregación que arrancan en 3.7: una agregación en modo `update` no se puede volcar directo a Parquet, se profundiza en 3.8-3.9.
-
-**Error frecuente**: con `startingOffsets: "latest"` y una corrida corta, si el productor tarda en emitir su primer evento después de que la consulta arranca, el primer micro-lote puede quedar vacío, y si la consulta se detiene antes de que llegue el segundo micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, corre de nuevo confirmando primero que el productor de 3.1 sigue vivo.
+**Error frecuente**: si la detienes muy rápido, antes de que llegue el primer micro-lote, el resultado es **cero filas guardadas** — no por un error, sino porque no hubo datos nuevos en la ventana de tiempo que la consulta estuvo viva. Esto ocurrió, de hecho, en una corrida previa de esta misma celda mientras se preparaba esta guía, con el productor de S7 detenido: la corrida real que sí se documenta arriba se hizo con el productor confirmado activo. Si esta celda muestra 0 filas, vuelve a correr la consulta, confirma primero que el productor de 3.1 sigue vivo, y espera un poco más antes de detenerla.
 
 Vuelve a ejecutar la celda de lectura (`spark.read.parquet(ARTIFACTS)`) después de correr esta celda una segunda vez: el conteo debe **crecer**, no reiniciarse — la carpeta de Parquet acumula, no sobreescribe.
 
@@ -510,6 +520,7 @@ Vuelve a ejecutar la celda de lectura (`spark.read.parquet(ARTIFACTS)`) después
 **Producto del paso:** evidencia de que, sin watermark, el estado de una agregación por ventana **crece para siempre**.
 
 ```python
+# Momento 1: arrancar la agregación sin límite
 from pyspark.sql.functions import window, avg, count
 
 agregado_sin_limite = (
@@ -525,7 +536,12 @@ consulta = (
     .trigger(processingTime="5 seconds")
     .start()
 )
-consulta.awaitTermination(25)
+```
+
+Déjala correr al menos 20-25 segundos (varios micro-lotes) para que se note la tabla creciendo, y después detenla:
+
+```python
+# Momento 2: detener la consulta
 consulta.stop()
 ```
 
@@ -573,6 +589,7 @@ La tabla completa **crece** de un micro-lote al siguiente: la ventana `12:39:50-
 **Producto del paso:** la misma agregación, pero con las ventanas viejas **cerradas y liberadas** de la memoria.
 
 ```python
+# Momento 1: arrancar la agregación con watermark
 agregado_con_watermark = (
     eventos
     .withWatermark("ts", "10 seconds")
@@ -589,7 +606,12 @@ consulta = (
     .trigger(processingTime="5 seconds")
     .start()
 )
-consulta.awaitTermination(25)
+```
+
+Déjala correr al menos 20-25 segundos y detenla:
+
+```python
+# Momento 2: detener la consulta
 consulta.stop()
 ```
 
@@ -628,6 +650,7 @@ Batch: 2
 **Producto del paso:** ventanas que se **solapan**, para suavizar una métrica sin esperar a que cada bloque termine.
 
 ```python
+# Momento 1: arrancar la ventana deslizante
 agregado_deslizante = (
     eventos
     .withWatermark("ts", "15 seconds")
@@ -644,7 +667,12 @@ consulta = (
     .trigger(processingTime="5 seconds")
     .start()
 )
-consulta.awaitTermination(25)
+```
+
+Déjala correr al menos 20-25 segundos y detenla:
+
+```python
+# Momento 2: detener la consulta
 consulta.stop()
 ```
 
@@ -721,6 +749,7 @@ La consecuencia práctica: si una consulta se cae y se reinicia **apuntando al m
 **Advertencia sobre el "arranque en frío":** si publicas el evento tardío como el **primer** mensaje que la consulta ve, no se descarta — el watermark todavía no tiene ningún evento "reciente" contra el cual compararlo (2.4, Tabla 5, última fila). Por eso, primero se deja correr la consulta con datos en vivo un rato, y **recién después** se publica el evento tardío.
 
 ```python
+# Momento 1: arrancar el hilo y la consulta
 import threading
 import time
 import json
@@ -764,7 +793,12 @@ consulta = (
     .trigger(processingTime="4 seconds")
     .start()
 )
-consulta.awaitTermination(45)
+```
+
+El hilo (`daemon=True`) corre aparte de la consulta: se dispara solo, 15 segundos después de ejecutar esta celda, sin importar cuándo decidas detener `consulta`. Espera **al menos 30-40 segundos** antes de detenerla — necesitas ver varios micro-lotes con datos en vivo antes del evento tardío, y varios más después, para comprobar que nunca aparece:
+
+```python
+# Momento 2: detener la consulta y revisar
 consulta.stop()
 print("Buscando 'esp32-tardio' en la salida de arriba: si no aparece ninguna fila, el watermark lo descarto.")
 ```
@@ -780,6 +814,7 @@ Esto se verificó dos veces antes de escribir esta guía: publicando el evento t
 **Producto del paso:** el mismo evento, publicado dos veces por error, contado **una sola vez**.
 
 ```python
+# Momento 1: arrancar la consulta
 deduplicado = (
     eventos
     .withWatermark("ts", "30 seconds")
@@ -795,7 +830,12 @@ consulta = (
     .trigger(processingTime="3 seconds")
     .start()
 )
+```
 
+Con la consulta corriendo, espera unos segundos a que arranque y publica el mismo evento dos veces seguidas:
+
+```python
+# Momento 2: publicar el evento duplicado
 time.sleep(6)
 columnas = ["tipoEvento", "sensorId", "temperatura", "humedad", "presion", "origen", "timestamp"]
 evento_duplicado = spark.createDataFrame(
@@ -812,8 +852,12 @@ for intento in range(2):
         .option("topic", "atmos-eventos")
         .save())
 print(">>> 'esp32-duplicado' publicado DOS veces")
+```
 
-consulta.awaitTermination(20)
+Espera unos segundos más a que pasen un par de micro-lotes mostrando el filtrado, y detén la consulta:
+
+```python
+# Momento 3: detener y revisar
 consulta.stop()
 print("Busca 'esp32-duplicado' arriba: debe aparecer una sola vez, aunque se publico dos veces.")
 ```
@@ -831,6 +875,8 @@ Esto responde directamente al porqué de **semántica de entrega** (2.6): Kafka 
 ### 3.13 Intervalo de disparo: el costo de decidir cada cuánto procesar
 
 **Producto del paso:** el mismo stream, con dos ritmos de disparo distintos, y la diferencia real en cuántos micro-lotes se alcanzan a correr.
+
+A diferencia de las consultas anteriores, esta celda sí usa `awaitTermination(segundos_totales)` en vez de un `stop()` manual aparte: la comparación solo es justa si ambos disparos corren exactamente el mismo tiempo de reloj (15 segundos cada uno) — si los detuvieras a mano, nunca sabrías si la diferencia de `batchId` vino del intervalo o de cuánto esperaste.
 
 ```python
 def contar_microlotes(intervalo, segundos_totales):
