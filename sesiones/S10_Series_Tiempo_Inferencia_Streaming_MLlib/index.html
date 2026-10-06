@@ -1,0 +1,2555 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S10_Series_Tiempo_Inferencia_Streaming_MLlib/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S10 - Series de tiempo e inferencia en streaming</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s10-series-de-tiempo-e-inferencia-en-streaming" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S10 - Series de tiempo e inferencia en streaming
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S06_Ingesta_Eventos_Empresariales_Kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-la-competencia-m4-y-los-modelos-de-machine-learning-que-perdieron-contra-un-promedio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: la competencia M4 y los modelos de Machine Learning que perdieron contra un promedio
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-series-de-tiempo-como-problema-supervisado-label-desde-el-futuro-de-la-propia-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Series de tiempo como problema supervisado: label desde el futuro de la propia variable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-baseline-de-persistencia-y-por-que-compararlo-primero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Baseline de persistencia y por qué compararlo primero
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-comparacion-de-modelos-con-division-cronologica-continuacion-de-s04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Comparación de modelos con división cronológica (continuación de S04)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-evaluacion-honesta-cuando-el-modelo-gana-por-muy-poco-o-no-gana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Evaluación honesta: cuando el modelo "gana" por muy poco, o no gana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-inferencia-en-tiempo-real-sin-estado-una-sola-lectura-basta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Inferencia en tiempo real sin estado: una sola lectura basta
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-fase-1-business-understanding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Fase 1 — Business Understanding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Fase 1 — Business Understanding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-crear-el-notebook-y-la-sparksession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.1 Crear el notebook y la SparkSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-definir-el-objetivo-y-el-alcance-de-la-comparacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.2 Definir el objetivo y el alcance de la comparación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-fase-2-data-understanding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Fase 2 — Data Understanding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Fase 2 — Data Understanding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#321-cargar-el-gold-de-s04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.1 Cargar el Gold de S04
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-fase-3-data-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Fase 3 — Data Preparation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Fase 3 — Data Preparation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#331-construir-label-con-leadce-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.1 Construir label con lead("CE", 1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#332-dividir-cronologicamente-en-entrenamiento-y-prueba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.2 Dividir cronológicamente en entrenamiento y prueba
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-fase-4-modeling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Fase 4 — Modeling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Fase 4 — Modeling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#341-calcular-el-baseline-de-persistencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.1 Calcular el baseline de persistencia
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#342-entrenar-y-evaluar-linearregression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.2 Entrenar y evaluar LinearRegression
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#343-entrenar-y-evaluar-randomforestregressor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.3 Entrenar y evaluar RandomForestRegressor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-fase-5-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Fase 5 — Evaluation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Fase 5 — Evaluation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#351-comparar-los-tres-candidatos-contra-el-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.1 Comparar los tres candidatos contra el baseline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#352-seleccionar-el-modelo-ganador-y-validar-si-el-resultado-es-aceptable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.2 Seleccionar el modelo ganador y validar si el resultado es aceptable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-fase-6-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Fase 6 — Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.6 Fase 6 — Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#361-guardar-y-recargar-el-pipelinemodel-ganador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.1 Guardar y recargar el PipelineModel ganador
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-inferencia-en-tiempo-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Inferencia en tiempo real
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.7 Inferencia en tiempo real">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#371-levantar-el-nuevo-productor-kafka-campo-electrico-eventos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7.1 Levantar el nuevo productor Kafka (campo-electrico-eventos)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#372-leer-el-stream-aplicar-el-modelo-y-guardar-las-predicciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7.2 Leer el stream, aplicar el modelo y guardar las predicciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s10-series-de-tiempo-e-inferencia-en-streaming">S10 - Series de tiempo e inferencia en streaming<a class="headerlink" href="#s10-series-de-tiempo-e-inferencia-en-streaming" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S04 dejó una pregunta pendiente a propósito. Esa sesión entrenó un modelo que explica <code>CE</code> a partir de otras siete variables <strong>en el mismo instante</strong> — una foto, no un pronóstico — y cerró anunciando que el historial de <code>CE</code> prediciendo su propio futuro, con inferencia en tiempo real, quedaba para esta sesión, una vez que existiera la infraestructura de streaming (S6-S9). Esa infraestructura ya existe. Hoy se construye lo que S04 dejó pendiente: un modelo que predice <code>CE</code> del minuto siguiente a partir del minuto actual, sobre el mismo Data Lake Gold de S04, y ese mismo modelo aplicado en vivo sobre lecturas que llegan por Kafka.</p>
+<p>El porqué de comparar contra un baseline antes de confiar en cualquier modelo —incluso uno que "suena" más sofisticado— se desarrolla en 1.6, con un caso real que resultó sorprendentemente parecido al de hoy.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Series de tiempo como problema supervisado: <code>label</code> desde el futuro de la propia variable.</li>
+<li>Baseline de persistencia y por qué compararlo primero.</li>
+<li>Comparación de modelos con división cronológica (continuación de S04).</li>
+<li>Inferencia en tiempo real sin estado: una sola lectura basta.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Construir y entrenar</strong> un modelo de regresión de series de tiempo sobre datos reales, <strong>compararlo contra un baseline de persistencia y contra otro algoritmo</strong>, y <strong>aplicarlo en tiempo real</strong> sobre eventos de Kafka, reportando con evidencia si la complejidad adicional del modelo se justificó o no.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>10_series_tiempo_inferencia_streaming.ipynb</code> que reutiliza el Data Lake Gold de S04 (<code>campo_electrico_particionado/</code>): dataset supervisado construido con <code>lead("CE", 1)</code> sobre el orden cronológico, división 80/20 por posición temporal (no aleatoria), baseline de persistencia evaluado primero, <code>LinearRegression</code> y <code>RandomForestRegressor</code> entrenados y comparados contra ese baseline con RMSE/MAE/R², <code>PipelineModel</code> ganador guardado y recargado, y ese mismo modelo aplicado en tiempo real sobre un nuevo productor Kafka (<code>campo-electrico-eventos</code>) vía <code>foreachBatch</code>, sin ventanas ni estado — una sola lectura es suficiente para predecir.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Confirmar que <code>campo_electrico_particionado/</code> (el Gold de S04) sigue existiendo, y repasar la Tabla 7 de esa guía ("misma salida Gold, dos preguntas distintas"). Trabajo individual, antes de clase.</td>
+<td>Guía de S04 (3.3.2, Tabla 7), este mismo documento (1.1-1.7).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>10_series_tiempo_inferencia_streaming.ipynb</code>: dataset supervisado, baseline, modelado comparado, guardado del modelo, e inferencia en tiempo real sobre un nuevo productor Kafka. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante dudas.</td>
+<td>Pasos 3.1 a 3.7 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de la tabla comparativa de modelos contra el baseline y de al menos una predicción en tiempo real. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-la-competencia-m4-y-los-modelos-de-machine-learning-que-perdieron-contra-un-promedio">1.6.1 Caso: la competencia M4 y los modelos de Machine Learning que perdieron contra un promedio<a class="headerlink" href="#161-caso-la-competencia-m4-y-los-modelos-de-machine-learning-que-perdieron-contra-un-promedio" title="Permanent link">&para;</a></h4>
+<p>En 2018, Spyros Makridakis organizó la cuarta edición de la competencia de pronóstico más grande hasta entonces: 100,000 series de tiempo reales, 61 métodos distintos compitiendo, desde estadística clásica hasta Machine Learning puro. El resultado, publicado en 2020, sorprendió a buena parte de la comunidad: de los seis métodos de Machine Learning puro que participaron (dos usados como referencia y cuatro enviados por equipos), <strong>ninguno superó al benchmark de combinación de modelos estadísticos (<code>Comb</code>), y solo uno logró superar a <code>Naïve2</code></strong> — un método que, en esencia, solo repite el último valor observado, ajustado por estacionalidad. Métodos sofisticados, entrenados con más variables y más capacidad de cómputo, perdieron contra una regla casi trivial.</p>
+<p>Fuente: Makridakis, S., Spiliotis, E., &amp; Assimakopoulos, V. (2020). <em>The M4 Competition: 100,000 time series and 61 forecasting methods</em>. International Journal of Forecasting, 36(1), 54-74.</p>
+<p>La lección no fue "el Machine Learning no sirve para series de tiempo" — los métodos híbridos (que combinaban ML con modelos estadísticos) sí ganaron la competencia. La lección fue que <strong>ningún modelo, por sofisticado que sea, se reporta sin antes compararlo contra la alternativa más simple posible</strong> — y que esa alternativa simple, en series de tiempo, casi siempre es la persistencia: asumir que el valor de mañana se parece al de hoy. Esta sesión formaliza exactamente ese hábito: antes de entrenar nada, hoy mides qué tan bueno es no hacer nada sofisticado.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>Antes de leer la causa, ¿por qué crees que un modelo de Machine Learning, con más variables y más capacidad de ajuste, podría perder contra una regla tan simple como "mañana será parecido a hoy"?</li>
+</ol>
+<p><strong>Comprensión del baseline de persistencia</strong></p>
+<ol>
+<li>Según el caso, ¿qué hubiera evitado que un equipo reportara un modelo de ML sin darse cuenta de que perdía contra <code>Naïve2</code>?</li>
+<li>¿Por qué comparar contra persistencia es especialmente importante en series de tiempo, y no tanto en el problema de regresión de S04 (donde cada fila es independiente)?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U2 - Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.</li>
+<li>Avance del producto en esta sesión: el modelo de series de tiempo que S04 dejó pendiente, entrenado, comparado contra un baseline y contra otro algoritmo, y aplicado en tiempo real — la pieza que S11 va a visualizar junto a los KPIs del flujo de eventos.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la Unidad II</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    S6["`**S6:** Eventos empresariales (Kafka)`"]
+    S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
+    S8["`**S8:** Spark Structured Streaming`"]
+    S9["`**S9:** Observabilidad con Grafana y costos`"]
+    S10["`**S10:** Series de tiempo e inferencia en streaming`"]
+    S11["`**S11:** BI/ML distribuido con Spark`"]
+    S12["`**S12:** Producto U2`"]
+
+    S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S11 --&gt; S12
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S10 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 35 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. Del Gold de S04 al modelo aplicado en vivo</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Gold[("Gold de S04&lt;br/&gt;campo_electrico_particionado")]
+    Label["label = lead(CE, 1)&lt;br/&gt;sobre orden cronologico"]
+    Split["Division 80/20&lt;br/&gt;por posicion temporal"]
+    Base["Baseline de persistencia&lt;br/&gt;CE_t+1 = CE_t"]
+    Modelos["LinearRegression vs&lt;br/&gt;RandomForestRegressor"]
+    Comparar["Comparar contra&lt;br/&gt;el baseline (1.6)"]
+    Modelo[("PipelineModel&lt;br/&gt;guardado")]
+    Stream["Inferencia en tiempo real&lt;br/&gt;una lectura, sin estado"]
+
+    Gold --&gt; Label --&gt; Split
+    Split --&gt; Base
+    Split --&gt; Modelos
+    Base --&gt; Comparar
+    Modelos --&gt; Comparar
+    Comparar --&gt; Modelo --&gt; Stream</code></pre>
+<p>A diferencia de S09 (donde la inferencia necesitaba agregar varios eventos por ventana de un minuto antes de predecir), acá el modelo entrenado consume exactamente las mismas 8 columnas que ya vienen en cada evento — ninguna requiere historial ni agregación. Eso es lo que hace posible el último bloque del diagrama sin mantener estado entre lecturas (2.6).</p>
+<h3 id="22-series-de-tiempo-como-problema-supervisado-label-desde-el-futuro-de-la-propia-variable">2.2 Series de tiempo como problema supervisado: <code>label</code> desde el futuro de la propia variable<a class="headerlink" href="#22-series-de-tiempo-como-problema-supervisado-label-desde-el-futuro-de-la-propia-variable" title="Permanent link">&para;</a></h3>
+<p>S04 (2.3, Tabla 3) ya había anticipado la diferencia: en regresión, el objetivo es la variable en el mismo instante que los predictores; en series de tiempo, el objetivo es la variable <strong>en un instante futuro</strong>. Hoy esa diferencia deja de ser teoría.</p>
+<p><code>lead(columna, n)</code> es una función de ventana análoga a <code>lag()</code> (que trae una fila <em>anterior</em>), pero hacia adelante: trae, en la fila actual, el valor de <code>columna</code> que aparece <code>n</code> filas después, según el orden definido en la ventana.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+
+<span class="n">orden_temporal</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span>
+<span class="n">dataset_ml</span> <span class="o">=</span> <span class="n">df_gold</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lead</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">orden_temporal</span><span class="p">))</span>
+</code></pre></div>
+<p>La última fila de la tabla no tiene una "fila siguiente" de la cual traer <code>label</code> — queda <code>NULL</code>, y <code>na.drop()</code> la descarta junto con cualquier predictor nulo. Con 92,847 filas en el Gold de S04, el dataset supervisado queda en 92,846: exactamente una menos.</p>
+<h3 id="23-baseline-de-persistencia-y-por-que-compararlo-primero">2.3 Baseline de persistencia y por qué compararlo primero<a class="headerlink" href="#23-baseline-de-persistencia-y-por-que-compararlo-primero" title="Permanent link">&para;</a></h3>
+<p>Después del caso de 1.6, este paso no es opcional ni decorativo: es la primera línea que se calcula, antes de entrenar cualquier modelo. En Spark, "entrenar" la persistencia no requiere ningún estimador — es una transformación directa:</p>
+<div class="highlight"><pre><span></span><code><span class="n">test_persistencia</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">))</span>
+</code></pre></div>
+<p>Esa única línea es, literalmente, el modelo <code>Naïve2</code> del caso de 1.6: predecir que el futuro se parece al presente. Cualquier modelo entrenado después tiene que justificar su complejidad superando esto — no basta con que "tenga buen R²" en términos absolutos.</p>
+<h3 id="24-comparacion-de-modelos-con-division-cronologica-continuacion-de-s04">2.4 Comparación de modelos con división cronológica (continuación de S04)<a class="headerlink" href="#24-comparacion-de-modelos-con-division-cronologica-continuacion-de-s04" title="Permanent link">&para;</a></h3>
+<p>El entrenamiento reutiliza exactamente el mismo patrón de S04 (2.3-2.6): <code>VectorAssembler</code> ensambla las 8 variables en <code>features</code>, <code>LinearRegression</code> ya estandariza internamente (sin necesidad de <code>StandardScaler</code>), y <code>RandomForestRegressor</code> se entrena sin escalar porque sus árboles dividen por umbrales. La única diferencia técnica real frente a S04 es la división: <code>randomSplit</code> queda descartado (fuga de información hacia el pasado, S04 Tabla 7) a favor de la misma división cronológica por <code>row_number()</code> que ya viste si trabajaste la guía de S09.</p>
+<p><strong>Tabla 2. Misma mecánica de S04, dos columnas distintas de la Tabla 2 original</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>S04 — Regresión</th>
+<th>S10 — Series de tiempo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>label</code></td>
+<td><code>CE</code> en el mismo instante <code>t</code></td>
+<td><code>CE</code> en el instante futuro <code>t+1</code></td>
+</tr>
+<tr>
+<td>División train/test</td>
+<td>Aleatoria (<code>randomSplit</code>)</td>
+<td>Cronológica (<code>row_number()</code> + corte por posición)</td>
+</tr>
+<tr>
+<td>Candidato obligatorio</td>
+<td>Ninguno más allá de los algoritmos elegidos</td>
+<td>Baseline de persistencia (2.3)</td>
+</tr>
+<tr>
+<td>Criterio de éxito</td>
+<td>Mejor RMSE/R²/MAE entre configuraciones</td>
+<td>Mejor RMSE/R²/MAE <strong>y que le gane al baseline</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-evaluacion-honesta-cuando-el-modelo-gana-por-muy-poco-o-no-gana">2.5 Evaluación honesta: cuando el modelo "gana" por muy poco, o no gana<a class="headerlink" href="#25-evaluacion-honesta-cuando-el-modelo-gana-por-muy-poco-o-no-gana" title="Permanent link">&para;</a></h3>
+<p>RMSE, MAE y R² se calculan exactamente igual que en S04 (<code>RegressionEvaluator</code>). Lo que cambia es la pregunta que responden: ya no es "¿cuál algoritmo es mejor entre sí?", sino "¿algún algoritmo le gana a no-hacer-nada-sofisticado?". Una mejora de RMSE del 0.68% frente al baseline no es el mismo tipo de resultado que una mejora del 30% — ambas son "una mejora", pero solo una justifica claramente la complejidad de mantener un modelo entrenado en producción. Reportar ese margen explícitamente (no solo "mi modelo ganó") es lo que el caso de 1.6 pide.</p>
+<h3 id="26-inferencia-en-tiempo-real-sin-estado-una-sola-lectura-basta">2.6 Inferencia en tiempo real sin estado: una sola lectura basta<a class="headerlink" href="#26-inferencia-en-tiempo-real-sin-estado-una-sola-lectura-basta" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 3. Qué necesita cada sesión para predecir, al momento de inferir</strong></p>
+<table>
+<thead>
+<tr>
+<th>Sesión</th>
+<th>Qué entra al modelo en producción</th>
+<th>Estado necesario entre lecturas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S09 (observabilidad)</td>
+<td>Métricas agregadas de una ventana de 1 minuto completa</td>
+<td>Sí — hay que esperar a que la ventana cierre y agregar varios eventos</td>
+</tr>
+<tr>
+<td>S10 (hoy)</td>
+<td>Las 8 variables de <strong>una sola lectura actual</strong></td>
+<td>Ninguno — cada evento nuevo se transforma solo, sin esperar ni acumular nada</td>
+</tr>
+</tbody>
+</table>
+<p>Esto no es una simplificación arbitraria de esta guía — es una consecuencia directa de cómo se construyó <code>label</code> en 2.2: el modelo aprendió a predecir el minuto siguiente <strong>a partir del estado actual</strong>, no a partir de una secuencia de minutos anteriores. Por eso la inferencia en streaming de 3.7 es, en el fondo, el mismo <code>PipelineModel.transform()</code> que ya usaste en 3.5 — solo que la fuente ahora es un <code>readStream</code> de Kafka en vez de un DataFrame estático.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>10_series_tiempo_inferencia_streaming.ipynb</code> sobre el entorno <code>lambda26</code> (<code>uso-pyspark</code>), entrenando un modelo de series de tiempo sobre el Gold de S04, comparándolo contra un baseline de persistencia y contra un segundo algoritmo, y aplicando el modelo ganador en tiempo real sobre un nuevo productor Kafka.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que puedes construir un dataset supervisado de series de tiempo a partir de datos reales, evaluarlo con honestidad frente a un baseline simple (1.6), y operacionalizar el modelo ganador aplicándolo sobre eventos que llegan en vivo — sin confundir "entrenar" con "aplicar".</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, verificando cada resultado antes de avanzar al siguiente paso.</p>
+<p><strong>Actividades para realizar</strong> (estructura CRISP-DM de S04, más un séptimo paso nuevo para la inferencia en tiempo real):</p>
+<p><strong>3.1 Fase 1 — Business Understanding</strong></p>
+<ul>
+<li><strong>3.1.1</strong> Crear el notebook y la <code>SparkSession</code>.</li>
+<li><strong>3.1.2</strong> Definir el objetivo y el alcance de la comparación.</li>
+</ul>
+<p><strong>3.2 Fase 2 — Data Understanding</strong></p>
+<ul>
+<li><strong>3.2.1</strong> Cargar el Gold de S04.</li>
+</ul>
+<p><strong>3.3 Fase 3 — Data Preparation</strong></p>
+<ul>
+<li><strong>3.3.1</strong> Construir <code>label</code> con <code>lead("CE", 1)</code>.</li>
+<li><strong>3.3.2</strong> Dividir cronológicamente en entrenamiento y prueba.</li>
+</ul>
+<p><strong>3.4 Fase 4 — Modeling</strong></p>
+<ul>
+<li><strong>3.4.1</strong> Calcular el baseline de persistencia.</li>
+<li><strong>3.4.2</strong> Entrenar y evaluar <code>LinearRegression</code>.</li>
+<li><strong>3.4.3</strong> Entrenar y evaluar <code>RandomForestRegressor</code>.</li>
+</ul>
+<p><strong>3.5 Fase 5 — Evaluation</strong></p>
+<ul>
+<li><strong>3.5.1</strong> Comparar los tres candidatos contra el baseline.</li>
+<li><strong>3.5.2</strong> Seleccionar el modelo ganador y validar si el resultado es aceptable.</li>
+</ul>
+<p><strong>3.6 Fase 6 — Deployment</strong></p>
+<ul>
+<li><strong>3.6.1</strong> Guardar y recargar el <code>PipelineModel</code> ganador.</li>
+</ul>
+<p><strong>3.7 Inferencia en tiempo real</strong></p>
+<ul>
+<li><strong>3.7.1</strong> Levantar el nuevo productor Kafka (<code>campo-electrico-eventos</code>).</li>
+<li><strong>3.7.2</strong> Leer el stream, aplicar el modelo y guardar las predicciones.</li>
+</ul>
+<h3 id="31-fase-1-business-understanding">3.1 Fase 1 — Business Understanding<a class="headerlink" href="#31-fase-1-business-understanding" title="Permanent link">&para;</a></h3>
+<h4 id="311-crear-el-notebook-y-la-sparksession">3.1.1 Crear el notebook y la <code>SparkSession</code><a class="headerlink" href="#311-crear-el-notebook-y-la-sparksession" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> notebook <code>10_series_tiempo_inferencia_streaming.ipynb</code> con una <code>SparkSession</code> capaz de leer Parquet y, más adelante, Kafka.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion10-series-tiempo-inferencia"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="s2">"WARN"</span><span class="p">)</span>
+<span class="n">spark</span>
+</code></pre></div>
+<p>El conector de Kafka se declara aquí mismo, igual que en S8, aunque no haga falta hasta 3.7 — así no hay que reiniciar la <code>SparkSession</code> a mitad de sesión.</p>
+<h4 id="312-definir-el-objetivo-y-el-alcance-de-la-comparacion">3.1.2 Definir el objetivo y el alcance de la comparación<a class="headerlink" href="#312-definir-el-objetivo-y-el-alcance-de-la-comparacion" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> una celda markdown que documenta, dentro del propio notebook, qué se predice y contra qué se compara.</p>
+<div class="highlight"><pre><span></span><code><span class="gu">## Fase 1 — Business Understanding</span>
+
+<span class="gs">**Objetivo:**</span> estimar <span class="sb">`CE`</span> en el minuto siguiente (<span class="sb">`CE_t+1`</span>) a partir de las 8 variables
+físicas medidas en el minuto actual, reutilizando el Gold de S04.
+
+<span class="gs">**Alcance:**</span> comparar un baseline de persistencia, una regresión lineal y un Random Forest,
+con división cronológica, reportando RMSE/MAE/R² contra el baseline — y aplicar el modelo
+ganador en tiempo real sobre un nuevo productor Kafka.
+</code></pre></div>
+<h3 id="32-fase-2-data-understanding">3.2 Fase 2 — Data Understanding<a class="headerlink" href="#32-fase-2-data-understanding" title="Permanent link">&para;</a></h3>
+<h4 id="321-cargar-el-gold-de-s04">3.2.1 Cargar el Gold de S04<a class="headerlink" href="#321-cargar-el-gold-de-s04" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> <code>df_gold</code>, el mismo Data Lake Gold que cerró S04 — sin nulos, sin el código de error de <code>CM</code>, sin <code>DateTime</code> duplicada.</p>
+<div class="highlight"><pre><span></span><code><span class="n">RUTA_GOLD_S04</span> <span class="o">=</span> <span class="s2">"../s04-ml-distribuido-regresion/artifacts/campo_electrico_particionado"</span>
+<span class="n">VARIABLES_8</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"CM"</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">,</span> <span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">]</span>
+
+<span class="n">df_gold</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_GOLD_S04</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas del Gold de S04: </span><span class="si">{</span><span class="n">df_gold</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">df_gold</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>En una corrida real: <strong>92,847</strong> filas — el mismo conteo con el que cerró S04. Nada de la integración ni de la calidad de datos se repite hoy; si este conteo no coincide, revisa primero que S04 terminó de escribir su Gold correctamente antes de seguir.</p>
+<h3 id="33-fase-3-data-preparation">3.3 Fase 3 — Data Preparation<a class="headerlink" href="#33-fase-3-data-preparation" title="Permanent link">&para;</a></h3>
+<h4 id="331-construir-label-con-leadce-1">3.3.1 Construir <code>label</code> con <code>lead("CE", 1)</code><a class="headerlink" href="#331-construir-label-con-leadce-1" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> <code>dataset_ml</code>, el dataset supervisado completo (2.2).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.window</span><span class="w"> </span><span class="kn">import</span> <span class="n">Window</span>
+
+<span class="n">orden_temporal</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span>
+
+<span class="n">dataset_ml</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df_gold</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lead</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">orden_temporal</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">,</span> <span class="o">*</span><span class="n">VARIABLES_8</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">na</span><span class="o">.</span><span class="n">drop</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas del Gold: </span><span class="si">{</span><span class="n">df_gold</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas del dataset supervisado: </span><span class="si">{</span><span class="n">dataset_ml</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">dataset_ml</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>En una corrida real: <strong>92,846</strong> filas — una menos que el Gold, por la última fila sin "minuto siguiente" del que tomar <code>label</code> (2.2).</p>
+<p><strong>Advertencia esperada, no error</strong>: <code>WindowExec: No Partition Defined for Window operation!</code> — Spark avisa que <code>Window.orderBy("DateTime")</code> sin <code>partitionBy</code> mueve todos los datos a una sola partición. Para el volumen de esta sesión (menos de 100,000 filas) no representa un problema real de rendimiento; es el mismo aviso que ya viste en S09 si trabajaste esa guía.</p>
+<h4 id="332-dividir-cronologicamente-en-entrenamiento-y-prueba">3.3.2 Dividir cronológicamente en entrenamiento y prueba<a class="headerlink" href="#332-dividir-cronologicamente-en-entrenamiento-y-prueba" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> <code>train</code>/<code>test</code>, división 80/20 por posición temporal — nunca aleatoria (2.4, Tabla 2).</p>
+<div class="highlight"><pre><span></span><code><span class="n">numerado</span> <span class="o">=</span> <span class="n">dataset_ml</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"numeroFila"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">row_number</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">orden_temporal</span><span class="p">))</span>
+<span class="n">total_filas</span> <span class="o">=</span> <span class="n">numerado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">corte</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_filas</span> <span class="o">*</span> <span class="mf">0.80</span><span class="p">)</span>
+
+<span class="n">train</span> <span class="o">=</span> <span class="n">numerado</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"numeroFila"</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">corte</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"numeroFila"</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">numerado</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"numeroFila"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">corte</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"numeroFila"</span><span class="p">)</span>
+
+<span class="n">fecha_max_train</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">))</span><span class="o">.</span><span class="n">first</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">fecha_min_test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">))</span><span class="o">.</span><span class="n">first</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">fecha_max_train</span> <span class="o">&gt;=</span> <span class="n">fecha_min_test</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"La division temporal no respeta el orden cronologico."</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Entrenamiento: </span><span class="si">{</span><span class="n">train</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas (hasta </span><span class="si">{</span><span class="n">fecha_max_train</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prueba: </span><span class="si">{</span><span class="n">test</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> filas (desde </span><span class="si">{</span><span class="n">fecha_min_test</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</code></pre></div>
+<p>En una corrida real: <strong>74,276</strong> filas de entrenamiento, <strong>18,570</strong> de prueba — el 80/20 esperado sobre 92,846, sin ningún minuto de prueba anterior al último minuto de entrenamiento.</p>
+<h3 id="34-fase-4-modeling">3.4 Fase 4 — Modeling<a class="headerlink" href="#34-fase-4-modeling" title="Permanent link">&para;</a></h3>
+<h4 id="341-calcular-el-baseline-de-persistencia">3.4.1 Calcular el baseline de persistencia<a class="headerlink" href="#341-calcular-el-baseline-de-persistencia" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> las tres métricas del baseline (2.3) — el número que cualquier modelo entrenado después tiene que superar.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionEvaluator</span>
+
+<span class="n">evaluador_rmse</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"rmse"</span><span class="p">)</span>
+<span class="n">evaluador_mae</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"mae"</span><span class="p">)</span>
+<span class="n">evaluador_r2</span> <span class="o">=</span> <span class="n">RegressionEvaluator</span><span class="p">(</span><span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">predictionCol</span><span class="o">=</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">metricName</span><span class="o">=</span><span class="s2">"r2"</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluar</span><span class="p">(</span><span class="n">predicciones</span><span class="p">,</span> <span class="n">nombre</span><span class="p">):</span>
+    <span class="n">resultado</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"Modelo"</span><span class="p">:</span> <span class="n">nombre</span><span class="p">,</span>
+        <span class="s2">"RMSE"</span><span class="p">:</span> <span class="n">evaluador_rmse</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones</span><span class="p">),</span>
+        <span class="s2">"MAE"</span><span class="p">:</span> <span class="n">evaluador_mae</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones</span><span class="p">),</span>
+        <span class="s2">"R2"</span><span class="p">:</span> <span class="n">evaluador_r2</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">predicciones</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: RMSE=</span><span class="si">{</span><span class="n">resultado</span><span class="p">[</span><span class="s1">'RMSE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  MAE=</span><span class="si">{</span><span class="n">resultado</span><span class="p">[</span><span class="s1">'MAE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  R2=</span><span class="si">{</span><span class="n">resultado</span><span class="p">[</span><span class="s1">'R2'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resultado</span>
+
+<span class="n">test_persistencia</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"prediction"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">))</span>
+<span class="n">resultado_persistencia</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">test_persistencia</span><span class="p">,</span> <span class="s2">"Persistencia (CE_t+1 = CE_t)"</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Tabla 4. Baseline real de persistencia</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RMSE</td>
+<td>0.2087</td>
+</tr>
+<tr>
+<td>MAE</td>
+<td>0.1316</td>
+</tr>
+<tr>
+<td>R²</td>
+<td>0.9461</td>
+</tr>
+</tbody>
+</table>
+<p>Un R² de <code>0.9461</code> en un baseline que no entrena nada puede sorprender — pero es consistente con el dominio: <code>CE</code> cambia poco de un minuto a otro (2.2), así que "asumir que no cambia" ya explica la mayor parte de su variabilidad. Guarda estos tres números: son la vara con la que se miden los dos modelos siguientes, no un resultado secundario.</p>
+<h4 id="342-entrenar-y-evaluar-linearregression">3.4.2 Entrenar y evaluar <code>LinearRegression</code><a class="headerlink" href="#342-entrenar-y-evaluar-linearregression" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> <code>modelo_lr</code> entrenado y evaluado contra <code>test</code>, con sus coeficientes visibles (mismo patrón de S04, 2.4).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.feature</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorAssembler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">ensamblador</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">VARIABLES_8</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">)</span>
+<span class="n">train_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">test_ml</span> <span class="o">=</span> <span class="n">ensamblador</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+<span class="n">lr</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">)</span>
+<span class="n">modelo_lr</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_ml</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Coeficientes (orden de VARIABLES_8):"</span><span class="p">,</span> <span class="n">modelo_lr</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Intercepto:"</span><span class="p">,</span> <span class="n">modelo_lr</span><span class="o">.</span><span class="n">intercept</span><span class="p">)</span>
+
+<span class="n">predicciones_lr</span> <span class="o">=</span> <span class="n">modelo_lr</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test_ml</span><span class="p">)</span>
+<span class="n">resultado_lr</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_lr</span><span class="p">,</span> <span class="s2">"LinearRegression"</span><span class="p">)</span>
+</code></pre></div>
+<p>En una corrida real: <code>RMSE=0.2073  MAE=0.1325  R2=0.9468</code>. El coeficiente de <code>CE</code> (<code>0.9791</code>) domina por completo la ecuación — el resto de las 7 variables quedan con coeficientes casi en cero (el mayor de los otros, <code>TempOut</code>, es <code>0.0026</code>). En otras palabras: el modelo "descubrió" por sí solo, a partir de los datos, casi exactamente lo mismo que el baseline de persistencia asume de entrada.</p>
+<h4 id="343-entrenar-y-evaluar-randomforestregressor">3.4.3 Entrenar y evaluar <code>RandomForestRegressor</code><a class="headerlink" href="#343-entrenar-y-evaluar-randomforestregressor" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> <code>modelo_rf</code> entrenado y evaluado, con <code>featureImportances</code> (mismo patrón de S04, 3.4.4-3.4.6).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">,</span> <span class="n">numTrees</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">modelo_rf</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_ml</span><span class="p">)</span>
+
+<span class="n">predicciones_rf</span> <span class="o">=</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test_ml</span><span class="p">)</span>
+<span class="n">resultado_rf</span> <span class="o">=</span> <span class="n">evaluar</span><span class="p">(</span><span class="n">predicciones_rf</span><span class="p">,</span> <span class="s2">"RandomForestRegressor"</span><span class="p">)</span>
+
+<span class="n">importancias</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">VARIABLES_8</span><span class="p">,</span> <span class="n">modelo_rf</span><span class="o">.</span><span class="n">featureImportances</span><span class="o">.</span><span class="n">toArray</span><span class="p">()),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">par</span><span class="p">:</span> <span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">importancia</span> <span class="ow">in</span> <span class="n">importancias</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">variable</span><span class="si">:</span><span class="s2">10s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">importancia</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<p>En una corrida real: <code>RMSE=0.2528  MAE=0.1692  R2=0.9209</code> — <strong>peor que el baseline de persistencia en las tres métricas</strong>. <code>CE</code> concentra el <code>0.8704</code> de la importancia total; el resto de las 7 variables se reparten apenas el <code>0.13</code> restante. A diferencia de S04 (donde Random Forest ganó claramente porque la relación real no era lineal), acá la relación entre <code>CE_t</code> y <code>CE_t+1</code> es, de fondo, casi una identidad — y forzar un modelo no lineal sobre una relación que ya es casi lineal no aportó nada; le costó precisión.</p>
+<h3 id="35-fase-5-evaluation">3.5 Fase 5 — Evaluation<a class="headerlink" href="#35-fase-5-evaluation" title="Permanent link">&para;</a></h3>
+<h4 id="351-comparar-los-tres-candidatos-contra-el-baseline">3.5.1 Comparar los tres candidatos contra el baseline<a class="headerlink" href="#351-comparar-los-tres-candidatos-contra-el-baseline" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> una sola tabla con los tres candidatos y cuánto mejora (o empeora) cada uno frente al baseline — el mismo hábito del caso de 1.6.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">comparacion</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">resultado_persistencia</span><span class="p">,</span> <span class="n">resultado_lr</span><span class="p">,</span> <span class="n">resultado_rf</span><span class="p">])</span>
+<span class="n">comparacion</span><span class="p">[</span><span class="s2">"MejoraRMSE_vs_persistencia_%"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">resultado_persistencia</span><span class="p">[</span><span class="s2">"RMSE"</span><span class="p">]</span> <span class="o">-</span> <span class="n">comparacion</span><span class="p">[</span><span class="s2">"RMSE"</span><span class="p">])</span> <span class="o">/</span> <span class="n">resultado_persistencia</span><span class="p">[</span><span class="s2">"RMSE"</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">comparacion</span>
+</code></pre></div>
+<p><strong>Tabla 5. Comparación real contra el baseline</strong></p>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>RMSE</th>
+<th>MAE</th>
+<th>R²</th>
+<th style="text-align: right;">Mejora RMSE vs. persistencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Persistencia (<code>CE_t+1 = CE_t</code>)</td>
+<td>0.2087</td>
+<td>0.1316</td>
+<td>0.9461</td>
+<td style="text-align: right;">0.00%</td>
+</tr>
+<tr>
+<td><strong>LinearRegression</strong></td>
+<td><strong>0.2073</strong></td>
+<td>0.1325</td>
+<td><strong>0.9468</strong></td>
+<td style="text-align: right;"><strong>+0.68%</strong></td>
+</tr>
+<tr>
+<td>RandomForestRegressor</td>
+<td>0.2528</td>
+<td>0.1692</td>
+<td>0.9209</td>
+<td style="text-align: right;">-21.15%</td>
+</tr>
+</tbody>
+</table>
+<p>Exactamente el patrón del caso de 1.6: el método "sofisticado" (Random Forest) perdió contra la persistencia, y el que sí ganó lo hizo por un margen minúsculo (<code>0.68%</code> de RMSE, con un MAE incluso levemente peor). Ninguno de los dos resultados es un error del notebook — es la lectura honesta de qué tan predecible es <code>CE</code> de un minuto a otro con la información disponible.</p>
+<h4 id="352-seleccionar-el-modelo-ganador-y-validar-si-el-resultado-es-aceptable">3.5.2 Seleccionar el modelo ganador y validar si el resultado es aceptable<a class="headerlink" href="#352-seleccionar-el-modelo-ganador-y-validar-si-el-resultado-es-aceptable" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> el modelo ganador señalado explícitamente, con una lectura honesta de si vale la pena mantenerlo en producción.</p>
+<p>Con la Tabla 5, <strong>LinearRegression queda seleccionado</strong> — es el único que superó al baseline, aunque sea por un margen pequeño. La lectura de negocio: una mejora de <code>0.68%</code> en RMSE probablemente no justifica, por sí sola, el costo de mantener un pipeline de entrenamiento y despliegue en producción — pero sí vale la pena guardarlo y exponerlo en tiempo real (3.7), con el entendimiento explícito de que su valor real está más en la infraestructura que se construye alrededor (inferencia en streaming, reentrenamiento futuro) que en la ganancia de precisión de hoy. Negarse a reportar esa conclusión incómoda sería repetir, en pequeño, el mismo error de no comparar contra un baseline del caso de 1.6.</p>
+<h3 id="36-fase-6-deployment">3.6 Fase 6 — Deployment<a class="headerlink" href="#36-fase-6-deployment" title="Permanent link">&para;</a></h3>
+<h4 id="361-guardar-y-recargar-el-pipelinemodel-ganador">3.6.1 Guardar y recargar el <code>PipelineModel</code> ganador<a class="headerlink" href="#361-guardar-y-recargar-el-pipelinemodel-ganador" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> el modelo de 3.5.2 guardado como <code>Pipeline</code> completo (<code>VectorAssembler</code> + <code>LinearRegression</code>), recargado y verificado.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">PipelineModel</span>
+
+<span class="n">RUTA_MODELO</span> <span class="o">=</span> <span class="s2">"./artifacts/models/modelo_ce_lr"</span>
+
+<span class="n">pipeline_ganador</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">stages</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">VARIABLES_8</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">),</span>
+    <span class="n">LinearRegression</span><span class="p">(</span><span class="n">featuresCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">,</span> <span class="n">labelCol</span><span class="o">=</span><span class="s2">"label"</span><span class="p">),</span>
+<span class="p">])</span>
+<span class="n">modelo_final</span> <span class="o">=</span> <span class="n">pipeline_ganador</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">modelo_final</span><span class="o">.</span><span class="n">write</span><span class="p">()</span><span class="o">.</span><span class="n">overwrite</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">RUTA_MODELO</span><span class="p">)</span>
+
+<span class="n">modelo_cargado</span> <span class="o">=</span> <span class="n">PipelineModel</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">RUTA_MODELO</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Modelo guardado y recargado en:"</span><span class="p">,</span> <span class="n">RUTA_MODELO</span><span class="p">)</span>
+<span class="n">modelo_cargado</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">VARIABLES_8</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">,</span> <span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>Guardar el <code>Pipeline</code> completo —no solo el estimador <code>LinearRegression</code>— es lo que permite que 3.7 aplique el modelo sobre una fila nueva sin repetir el ensamblado a mano: <code>VectorAssembler</code> ya quedó dentro del artefacto guardado.</p>
+<p><strong>Error frecuente</strong>: guardar el modelo entrenado solo sobre <code>train_ml</code> (con <code>features</code> ya ensamblado, 3.4.2) en vez de reentrenar un <code>Pipeline</code> nuevo sobre <code>train</code> (sin ensamblar). Si guardas el primero, <code>modelo_cargado.transform()</code> fallará sobre datos nuevos que todavía no tienen la columna <code>features</code> — el <code>Pipeline</code> existe precisamente para evitar ese acoplamiento.</p>
+<h3 id="37-inferencia-en-tiempo-real">3.7 Inferencia en tiempo real<a class="headerlink" href="#37-inferencia-en-tiempo-real" title="Permanent link">&para;</a></h3>
+<h4 id="371-levantar-el-nuevo-productor-kafka-campo-electrico-eventos">3.7.1 Levantar el nuevo productor Kafka (<code>campo-electrico-eventos</code>)<a class="headerlink" href="#371-levantar-el-nuevo-productor-kafka-campo-electrico-eventos" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> un nuevo productor Kafka, emitiendo lecturas sintéticas de las 8 variables físicas, calibradas sobre las estadísticas reales del Gold de S04.</p>
+<p>Crea <code>uso-campo-electrico/</code> junto a <code>uso-atmos/</code> (mismo patrón exacto de S7): un <code>Dockerfile</code>, un <code>compose.yml</code> que se conecta a la red <code>lambda26-kafka-net</code> ya existente, y el productor.</p>
+<div class="highlight"><pre><span></span><code><span class="c"># uso-campo-electrico/Dockerfile</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.11-slim</span>
+
+<span class="k">ENV</span><span class="w"> </span><span class="nv">PYTHONUNBUFFERED</span><span class="o">=</span><span class="m">1</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="k">COPY</span><span class="w"> </span>app/requirements.txt<span class="w"> </span>.
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"sleep"</span><span class="p">,</span><span class="w"> </span><span class="s2">"infinity"</span><span class="p">]</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># uso-campo-electrico/compose.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-uso-campo-electrico</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">uso-campo-electrico</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-uso-campo-electrico</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app:/app</span>
+<span class="w">    </span><span class="nt">working_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sleep infinity</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lambda26-kafka-net</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># uso-campo-electrico/app/requirements.txt
+kafka-python==2.0.2
+</code></pre></div>
+<p>El productor sigue la misma caminata aleatoria acotada de <code>uso-atmos</code> (S7) — cada lectura avanza un poco desde la anterior, no es un número independiente. Los rangos y el paso máximo de cada variable están calibrados sobre el mínimo/máximo real observado en el Gold de S04 (3.2.1):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># uso-campo-electrico/app/producer_campo_electrico.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">kafka</span><span class="w"> </span><span class="kn">import</span> <span class="n">KafkaProducer</span>
+
+<span class="n">TOPIC_CAMPO_ELECTRICO</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"KAFKA_TOPIC_CAMPO_ELECTRICO"</span><span class="p">,</span> <span class="s2">"campo-electrico-eventos"</span><span class="p">)</span>
+<span class="n">BOOTSTRAP_SERVERS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"KAFKA_BOOTSTRAP_SERVERS"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+<span class="n">INTERVAL_MS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ESTACION_INTERVAL_MS"</span><span class="p">,</span> <span class="s2">"3000"</span><span class="p">))</span>
+<span class="n">ESTACION_IDS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ESTACION_IDS"</span><span class="p">,</span> <span class="s2">"estacion-ns-01"</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span>
+
+<span class="c1"># Rangos reales observados en el Gold de S04 (campo_electrico_particionado,</span>
+<span class="c1"># 92,847 mediciones): min/max por variable.</span>
+<span class="n">RANGOS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"CE"</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.74</span><span class="p">,</span> <span class="mf">2.85</span><span class="p">),</span>
+    <span class="s2">"CM"</span><span class="p">:</span> <span class="p">(</span><span class="mf">24020.0</span><span class="p">,</span> <span class="mf">24498.4</span><span class="p">),</span>
+    <span class="s2">"TempOut"</span><span class="p">:</span> <span class="p">(</span><span class="mf">11.8</span><span class="p">,</span> <span class="mf">27.2</span><span class="p">),</span>
+    <span class="s2">"OutHum"</span><span class="p">:</span> <span class="p">(</span><span class="mf">61.0</span><span class="p">,</span> <span class="mf">92.0</span><span class="p">),</span>
+    <span class="s2">"WindSpeed"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">17.7</span><span class="p">),</span>
+    <span class="s2">"Bar"</span><span class="p">:</span> <span class="p">(</span><span class="mf">945.3</span><span class="p">,</span> <span class="mf">953.7</span><span class="p">),</span>
+    <span class="s2">"SolarRad"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">770.0</span><span class="p">),</span>
+    <span class="s2">"UVIndex"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">6.3</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">PASO_MAXIMO</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"CE"</span><span class="p">:</span> <span class="mf">0.08</span><span class="p">,</span> <span class="s2">"CM"</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">"TempOut"</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">"OutHum"</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
+    <span class="s2">"WindSpeed"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"Bar"</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">"SolarRad"</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span> <span class="s2">"UVIndex"</span><span class="p">:</span> <span class="mf">0.15</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">producer</span> <span class="o">=</span> <span class="n">KafkaProducer</span><span class="p">(</span>
+    <span class="n">bootstrap_servers</span><span class="o">=</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span>
+    <span class="n">key_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+    <span class="n">value_serializer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">estado</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">estacion_id</span><span class="p">:</span> <span class="p">{</span><span class="n">variable</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">rango</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">rango</span> <span class="ow">in</span> <span class="n">RANGOS</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">for</span> <span class="n">estacion_id</span> <span class="ow">in</span> <span class="n">ESTACION_IDS</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">siguiente_valor</span><span class="p">(</span><span class="n">valor_actual</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+    <span class="n">minimo</span><span class="p">,</span> <span class="n">maximo</span> <span class="o">=</span> <span class="n">RANGOS</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
+    <span class="n">paso</span> <span class="o">=</span> <span class="n">PASO_MAXIMO</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
+    <span class="n">nuevo</span> <span class="o">=</span> <span class="n">valor_actual</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">paso</span><span class="p">,</span> <span class="n">paso</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">nuevo</span><span class="p">,</span> <span class="n">minimo</span><span class="p">),</span> <span class="n">maximo</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">estacion_id</span> <span class="ow">in</span> <span class="n">ESTACION_IDS</span><span class="p">:</span>
+        <span class="n">lectura</span> <span class="o">=</span> <span class="n">estado</span><span class="p">[</span><span class="n">estacion_id</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">RANGOS</span><span class="p">:</span>
+            <span class="n">lectura</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">siguiente_valor</span><span class="p">(</span><span class="n">lectura</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="n">variable</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"tipoEvento"</span><span class="p">:</span> <span class="s2">"estacion.lectura"</span><span class="p">,</span>
+            <span class="s2">"estacionId"</span><span class="p">:</span> <span class="n">estacion_id</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">lectura</span><span class="p">,</span>
+            <span class="s2">"origen"</span><span class="p">:</span> <span class="s2">"uso-campo-electrico"</span><span class="p">,</span>
+            <span class="s2">"timestamp"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">producer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">TOPIC_CAMPO_ELECTRICO</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">estacion_id</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"service"</span><span class="p">:</span> <span class="s2">"uso-campo-electrico"</span><span class="p">,</span> <span class="s2">"estacionId"</span><span class="p">:</span> <span class="n">estacion_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"published"</span><span class="p">}))</span>
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">INTERVAL_MS</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+</code></pre></div>
+<p>Levántalo y córrelo:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>uso-campo-electrico
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-campo-electrico<span class="w"> </span>python<span class="w"> </span>producer_campo_electrico.py
+</code></pre></div>
+<p><strong>Error frecuente</strong>: la primera lectura puede fallar con <code>NotLeaderForPartitionError</code>. El topic <code>campo-electrico-eventos</code> todavía no existe en Kafka la primera vez que el productor intenta publicar — Kafka lo crea automáticamente, pero la elección de líder de partición tarda una fracción de segundo más que el primer intento de envío. Vuelve a correr el comando: la segunda vez el topic ya existe y publica sin error. No es necesario crear el topic a mano de antemano.</p>
+<h4 id="372-leer-el-stream-aplicar-el-modelo-y-guardar-las-predicciones">3.7.2 Leer el stream, aplicar el modelo y guardar las predicciones<a class="headerlink" href="#372-leer-el-stream-aplicar-el-modelo-y-guardar-las-predicciones" title="Permanent link">&para;</a></h4>
+<p><strong>Producto del paso:</strong> predicciones en tiempo real, una por cada lectura que llega, sin ninguna agregación por ventana (2.6).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">LongType</span>
+
+<span class="n">esquema_evento</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"estacionId"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"CM"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"TempOut"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"OutHum"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"Bar"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"SolarRad"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"UVIndex"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"origen"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">())</span>
+<span class="p">)</span>
+
+<span class="n">crudo</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"campo-electrico-eventos"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">eventos</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">crudo</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"string"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"json_str"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"json_str"</span><span class="p">),</span> <span class="n">esquema_evento</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"e"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"e.*"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">predicciones_stream</span> <span class="o">=</span> <span class="n">modelo_cargado</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">eventos</span><span class="p">)</span>
+</code></pre></div>
+<p>Nota lo que falta frente a S09: no hay <code>withWatermark</code>, no hay <code>groupBy(window(...))</code>. El modelo transforma cada fila tal como llega — exactamente lo mismo que hizo <code>modelo_cargado.transform(test)</code> en 3.6.1, solo que la fuente ahora es un stream.</p>
+<div class="highlight"><pre><span></span><code><span class="n">RUTA_PREDICCIONES_STREAM</span> <span class="o">=</span> <span class="s2">"./artifacts/predicciones_stream"</span>
+<span class="n">CHECKPOINT_STREAM</span> <span class="o">=</span> <span class="s2">"./artifacts/chk_predicciones_stream"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">guardar_predicciones_microlote</span><span class="p">(</span><span class="n">df_microlote</span><span class="p">,</span> <span class="n">id_lote</span><span class="p">):</span>
+    <span class="n">filas</span> <span class="o">=</span> <span class="n">df_microlote</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">filas</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Micro-lote </span><span class="si">{</span><span class="n">id_lote</span><span class="si">}</span><span class="s2">: sin filas"</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">df_microlote</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">id_lote</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">),</span> <span class="s2">"estacionId"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">,</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"prediccionSiguienteCE"</span><span class="p">),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Micro-lote </span><span class="si">{</span><span class="n">id_lote</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">filas</span><span class="si">}</span><span class="s2"> predicciones guardadas"</span><span class="p">)</span>
+
+<span class="c1"># Momento 1: arrancar la consulta</span>
+<span class="n">consulta_predicciones</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">predicciones_stream</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">foreachBatch</span><span class="p">(</span><span class="n">guardar_predicciones_microlote</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="n">CHECKPOINT_STREAM</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: el primer micro-lote suele imprimir <code>Micro-lote 0: sin filas</code>. No es un error — Spark dispara el primer micro-lote apenas la suscripción al topic queda lista, casi siempre antes de que el productor haya emitido su primera lectura desde ese instante. Los siguientes micro-lotes sí traen filas, uno por cada lectura publicada.</p>
+<p>Déjala correr un par de minutos mientras el productor sigue emitiendo. Cuando se haya visto suficiente, detenla:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
+<span class="n">consulta_predicciones</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+<span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: al llamar <code>.stop()</code> mientras un micro-lote todavía está escribiendo, la consola puede mostrar un <code>java.lang.InterruptedException</code> con un <code>ERROR FileFormatWriter: Aborting job...</code>. Es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos — los micro-lotes que ya terminaron de escribirse antes del <code>.stop()</code> quedan completos en el Parquet, como confirma la celda siguiente.</p>
+<p>En una corrida real, con el productor emitiendo cada 3 segundos:</p>
+<p><strong>Tabla 6. Predicciones reales en tiempo real</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">batchId</th>
+<th style="text-align: right;">CE (real)</th>
+<th style="text-align: right;">Predicción de <code>CE</code> siguiente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-6.16</td>
+<td style="text-align: right;">-6.0766</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">-6.14</td>
+<td style="text-align: right;">-6.0574</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">-6.16</td>
+<td style="text-align: right;">-6.0772</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">-6.20</td>
+<td style="text-align: right;">-6.1160</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">-6.19</td>
+<td style="text-align: right;">-6.1060</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">-6.22</td>
+<td style="text-align: right;">-6.1354</td>
+</tr>
+</tbody>
+</table>
+<p>La predicción sigue de cerca al valor real desplazado — coherente con el coeficiente dominante de <code>CE</code> (<code>0.9791</code>, 3.4.2) encontrado durante el entrenamiento: el modelo aprendió, en esencia, "el próximo minuto se parece mucho al actual, con un ajuste pequeño".</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Dataset supervisado construido con <code>lead("CE", 1)</code> sobre el Gold de S04, con división cronológica verificada.</li>
+<li>Baseline de persistencia calculado y reportado antes de entrenar cualquier modelo.</li>
+<li><code>LinearRegression</code> y <code>RandomForestRegressor</code> entrenados, evaluados y comparados contra el baseline — con el resultado honesto de cuál ganó y por cuánto margen.</li>
+<li><code>PipelineModel</code> ganador guardado, recargado y verificado.</li>
+<li>Nuevo productor Kafka (<code>uso-campo-electrico</code>) funcionando, con lecturas calibradas sobre datos reales.</li>
+<li>Inferencia en tiempo real funcionando sin estado, con al menos una predicción real capturada.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Replicación autónoma de la construcción de un modelo de series de tiempo y su inferencia en tiempo real, sobre datos del Proyecto Sello del equipo.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Sobre una fuente numérica propia de tu Proyecto Sello, construir <code>label</code> con <code>lead()</code> sobre el orden cronológico (equivalente a 3.3.1).</li>
+<li>Dividir cronológicamente en entrenamiento y prueba (equivalente a 3.3.2).</li>
+<li>Calcular un baseline de persistencia antes de entrenar cualquier modelo (equivalente a 3.4.1).</li>
+<li>Entrenar y comparar al menos dos algoritmos de MLlib contra ese baseline, reportando RMSE/MAE/R² (equivalente a 3.4.2-3.5.1).</li>
+<li>Seleccionar el modelo ganador con una lectura honesta de si justifica su complejidad frente al baseline (equivalente a 3.5.2).</li>
+<li>Guardar y recargar el <code>PipelineModel</code> ganador (equivalente a 3.6.1).</li>
+<li>Aplicar el modelo en tiempo real sobre tu propio stream de Kafka, con al menos una predicción real capturada (equivalente a 3.7).</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, con datos reales de su propio Proyecto Sello, que puede construir y evaluar honestamente un modelo de series de tiempo —incluyendo el caso en que la complejidad adicional no se justifica— y aplicarlo en producción sobre datos que llegan en vivo, sin mantener estado innecesario.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S10_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S10 - Series de tiempo e inferencia en streaming</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Dataset supervisado y baseline</em><ul>
+<li><code>label</code> construido con <code>lead()</code>, división cronológica verificada, baseline de persistencia calculado (equivalente a 3.3-3.4.1).</li>
+</ul>
+</li>
+<li><em>Modelado comparado contra el baseline</em><ul>
+<li>Al menos dos algoritmos entrenados y evaluados, tabla comparativa contra el baseline (equivalente a 3.4.2-3.5.1).</li>
+</ul>
+</li>
+<li><em>Selección honesta y despliegue</em><ul>
+<li>Modelo ganador seleccionado con su justificación (o la ausencia de ella), guardado y recargado (equivalente a 3.5.2-3.6.1).</li>
+</ul>
+</li>
+<li><em>Inferencia en tiempo real</em><ul>
+<li>Productor Kafka propio funcionando, predicciones en tiempo real capturadas sin estado (equivalente a 3.7).</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe un error real: un <code>PipelineModel</code> guardado sin el <code>VectorAssembler</code> que falló al recargarlo, una comparación donde el modelo "sofisticado" perdió contra el baseline, o un micro-lote vacío que no era un error.</p>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>En tu comparación, ¿algún modelo le ganó al baseline de persistencia?
+¿Por cuánto margen, y ese margen justifica mantener un modelo entrenado
+en producción? Relaciona tu respuesta con el caso de la competencia M4 (1.6).
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li><code>label</code> construido con <code>lead()</code> sobre una fuente propia, con división cronológica verificada (sin fuga de información).</li>
+<li>Baseline de persistencia calculado y reportado antes de cualquier modelo entrenado.</li>
+<li>Al menos dos algoritmos de MLlib comparados contra el baseline con RMSE, MAE y R².</li>
+<li>Selección del modelo ganador justificada con honestidad (incluso si ningún modelo superó al baseline).</li>
+<li><code>PipelineModel</code> guardado y recargado, con evidencia de que predice igual después de recargarlo.</li>
+<li>Productor Kafka propio funcionando y al menos una predicción en tiempo real capturada, sin agregación por ventana.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Por qué <code>lead()</code> y no <code>lag()</code> para construir el <code>label</code> de esta sesión?</li>
+<li>¿Qué le pasaría a tu modelo si usaras <code>randomSplit</code> en vez de la división cronológica?</li>
+<li>Si tu modelo ganador apenas superó al baseline por un margen pequeño, ¿qué decisión de negocio tomarías: desplegarlo igual, seguir iterando, o no desplegarlo? Justifica.</li>
+<li>¿Por qué el <code>Pipeline</code> que guardaste no necesita mantener ningún historial de lecturas anteriores para predecir en tiempo real?</li>
+<li>¿Qué pasaría si tu productor en tiempo real enviara un evento con una variable faltante respecto a las que el modelo espera?</li>
+<li>Relaciona el resultado de tu Random Forest (o el algoritmo no lineal que hayas usado) con el caso de la competencia M4 — ¿por qué un modelo más complejo no siempre gana?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 7. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Dataset supervisado y baseline*</td>
+<td style="text-align: right;">25</td>
+<td><code>label</code> correcto, división cronológica verificada, baseline de persistencia calculado y reportado.</td>
+<td>Correcto, con algún detalle de verificación faltante.</td>
+<td>Dataset o baseline incompletos.</td>
+<td>No construye el dataset supervisado ni el baseline.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Modelado comparado contra el baseline*</td>
+<td style="text-align: right;">25</td>
+<td>Dos o más algoritmos entrenados, evaluados con RMSE/MAE/R² y comparados explícitamente contra el baseline.</td>
+<td>Modelos entrenados y evaluados, comparación contra el baseline superficial.</td>
+<td>Modelos entrenados sin comparación clara contra el baseline.</td>
+<td>No presenta modelos entrenados.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Selección honesta y despliegue*</td>
+<td style="text-align: right;">25</td>
+<td>Selección justificada con honestidad (incluso si ningún modelo ganó), modelo guardado y recargado correctamente.</td>
+<td>Selección y despliegue correctos, justificación poco desarrollada.</td>
+<td>Selección sin justificar, o despliegue incompleto.</td>
+<td>No guarda ni selecciona un modelo.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Inferencia en tiempo real*</td>
+<td style="text-align: right;">25</td>
+<td>Productor propio funcionando, predicciones en tiempo real capturadas sin agregación por ventana.</td>
+<td>Inferencia funcional, con alguna detención o evidencia incompleta.</td>
+<td>Inferencia parcialmente funcional.</td>
+<td>No presenta inferencia en tiempo real.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy se cerró lo que S04 dejó pendiente a propósito — la misma familia de datos (<code>CE</code> y sus 7 variables acompañantes), ahora como problema de series de tiempo: <code>label</code> construido con <code>lead()</code> sobre el orden cronológico, un baseline de persistencia calculado antes que cualquier modelo, dos algoritmos entrenados y comparados honestamente contra ese baseline (con un resultado que, como en la competencia M4, no favoreció al modelo más sofisticado), el ganador guardado como <code>PipelineModel</code>, y ese mismo modelo aplicado en tiempo real sobre un nuevo productor Kafka — sin ventanas ni estado, porque cada lectura ya trae todo lo que el modelo necesita.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte si algún modelo le ganó a su baseline de persistencia, y por cuánto margen.</p>
+<p><strong>Metacognición:</strong> ¿qué te costó más entender hoy: por qué una división cronológica es obligatoria en series de tiempo, o aceptar que el modelo "ganador" apenas mejoró sobre no hacer nada sofisticado?</p>
+<p><strong>Proyección:</strong> S11 toma las predicciones de hoy (<code>predicciones_stream</code>) y las visualiza en el mismo tablero de Grafana de S9, junto a los KPIs del flujo de eventos en streaming — la primera vez que el BI de este curso muestra una predicción, no solo una métrica del presente.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Makridakis, S., Spiliotis, E., &amp; Assimakopoulos, V. (2020). <em>The M4 Competition: 100,000 time series and 61 forecasting methods</em>. International Journal of Forecasting, 36(1), 54-74.</li>
+<li>Apache Software Foundation. (2024). <em>Structured Streaming Programming Guide</em>. Apache Spark Documentation. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html</li>
+<li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.ml</em>. https://spark.apache.org/docs/latest/api/python/reference/pyspark.ml.html</li>
+<li>Apache Software Foundation. (2024). <em>PySpark API reference: pyspark.sql.functions</em> [<code>lead</code>, <code>lag</code>, <code>row_number</code>]. https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/functions.html</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

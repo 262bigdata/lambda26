@@ -1,0 +1,2370 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S09_Observabilidad_Pipeline_Grafana_Costos/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+  
+    <title>Big Data - S9 - Observabilidad con Grafana y costos</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s9-observabilidad-con-grafana-y-costos" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S9 - Observabilidad con Grafana y costos
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S06_Ingesta_Eventos_Empresariales_Kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-conductor-que-solo-mira-el-tanque-cuando-el-auto-se-apaga" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el conductor que solo mira el tanque cuando el auto se apaga
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-metricas-de-un-pipeline-de-streaming-disponibilidad-latencia-throughput-lag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Métricas de un pipeline de streaming: disponibilidad, latencia, throughput, lag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-prometheus-y-grafana-arquitectura-de-scraping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Prometheus y Grafana: arquitectura de scraping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-logging-estructurado-y-metricas-calculadas-dentro-de-spark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Logging estructurado y métricas calculadas dentro de Spark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-costos-y-umbrales-de-escalado-en-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Costos y umbrales de escalado en streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-y-levantar-observabilidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno y levantar observabilidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la SparkSession, con el conector de Kafka
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-leer-el-topic-y-calcular-los-campos-de-observabilidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Leer el topic y calcular los campos de observabilidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-ver-los-eventos-en-consola-con-sus-campos-de-observabilidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Ver los eventos en consola, con sus campos de observabilidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-revisar-throughput-y-lag-con-lastprogress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Revisar throughput y lag con lastProgress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-persistir-la-evidencia-observable-en-parquet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Persistir la evidencia observable en Parquet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-prometheus-verificar-targets-y-correr-consultas-promql-reales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Prometheus: verificar targets y correr consultas PromQL reales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-grafana-armar-un-tablero-con-paneles-reales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Grafana: armar un tablero con paneles reales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-analizar-la-latencia-agregada-por-ventana-de-tiempo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Analizar la latencia agregada por ventana de tiempo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-alertas-propuestas-y-umbrales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Alertas propuestas y umbrales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-estimacion-de-costos-y-plan-de-escalado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Estimación de costos y plan de escalado
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s9-observabilidad-con-grafana-y-costos">S9 - Observabilidad con Grafana y costos<a class="headerlink" href="#s9-observabilidad-con-grafana-y-costos" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S8 dejó un pipeline de Spark Structured Streaming corriendo sobre <code>atmos-eventos</code>: ventanas, watermarking, checkpointing, deduplicación. Pero nada de eso te dice, en este momento, si el pipeline está sano. ¿Está Kafka arriba? ¿Cuánto tarda un evento en pasar de <code>uso-atmos</code> a tu resultado? ¿Se está quedando atrás el consumidor? ¿Cuánto costaría mantener esto corriendo veinticuatro horas al día, siete días a la semana? Hoy se deja de mirar el pipeline <em>desde adentro</em> (el código que lo construye) y se empieza a mirarlo <em>desde afuera</em>: métricas, un tablero de Grafana, y una primera estimación de costos y umbrales de escalado — el tipo de pregunta que responde el equipo de operaciones, no el equipo que escribió el código.</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Métricas de un pipeline de streaming: disponibilidad, latencia, throughput, <em>lag</em>.</li>
+<li>Prometheus y Grafana: cómo se conectan a Kafka y a Spark.</li>
+<li>Logging estructurado y métricas calculadas dentro de Spark.</li>
+<li>Costos y umbrales de escalado en streaming.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de:</p>
+<ul>
+<li><strong>Instrumentar</strong> un pipeline de streaming con métricas reales de Prometheus y Grafana, y <strong>explicar</strong>, con evidencia propia (consultas PromQL, un tablero con paneles reales, y latencia calculada en Spark), qué tan saludable está el pipeline, qué umbrales de alerta tienen sentido, y qué costaría escalarlo.</li>
+</ul>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>09_observabilidad_pipeline_grafana_costos.ipynb</code> corriendo sobre <code>atmos-eventos</code> (el mismo topic de S7-S8): lectura streaming con campos de observabilidad (<code>processedAt</code>, <code>latencyMs</code>, <code>isValid</code>), salida simultánea por consola y en Parquet, inspección real de <code>lastProgress</code> (throughput y <em>lag</em>), consultas a Prometheus sobre <code>kafka-exporter</code>, un tablero de Grafana con paneles reales, una tabla de latencia agregada por ventana de tiempo, alertas propuestas con umbrales concretos, y una estimación de costos con plan de escalado.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Confirmar que <code>kafka</code>, <code>kafka-exporter</code> y <code>uso-atmos</code> (S6-S8) siguen arrancando, y que el productor de sensores sigue publicando en <code>atmos-eventos</code>. Repasar brevemente el pipeline construido en S8. Trabajo individual, antes de clase.</td>
+<td>Guía de S8 (3.1-3.6), este mismo documento (1.1-1.7).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook <code>09-observabilidad-pipeline</code>: campos de observabilidad, salida dual (consola + Parquet), métricas de <code>lastProgress</code>, consultas Prometheus, tablero de Grafana, latencia por ventana y alertas propuestas, sobre datos reales llegando en vivo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un target de Prometheus caído o un panel sin datos.</td>
+<td>Pasos 3.1 a 3.11 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase del tablero de Grafana con datos reales (Kafka arriba, <em>lag</em> del consumer group) y de la tabla de latencia calculada en Spark. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-el-conductor-que-solo-mira-el-tanque-cuando-el-auto-se-apaga">1.6.1 Caso: el conductor que solo mira el tanque cuando el auto se apaga<a class="headerlink" href="#161-caso-el-conductor-que-solo-mira-el-tanque-cuando-el-auto-se-apaga" title="Permanent link">&para;</a></h4>
+<p>Un conductor maneja sin mirar nunca el tablero: ni la aguja de gasolina, ni la temperatura del motor, ni la luz de aceite. Mientras el auto ande, no hay problema. El primer indicio de que algo anda mal es cuando el motor se apaga a mitad de la carretera — y para entonces ya es tarde para evitarlo, y ya no es una parada de dos minutos en un grifo, es una grúa.</p>
+<p>Otro conductor sí mira el tablero, y además sabe leerlo: una aguja de gasolina en un cuarto de tanque no es una emergencia, es una señal de que faltan unos quince minutos para que sí lo sea. Puede decidir, con tiempo, si para ahora o sigue hasta el próximo grifo — y puede calcular, más o menos, cuánto le va a costar el viaje completo antes de arrancar.</p>
+<p>Un pipeline de datos que corre sin métricas es el primer conductor: parece funcionar, hasta que deja de funcionar, y el primer aviso es un reclamo del equipo que depende de esos datos. Un pipeline con métricas, umbrales y una estimación de costos es el segundo: se sabe de antemano cuánto <em>lag</em> es normal, cuánto es alarma, y cuánto va a costar mantenerlo corriendo. Eso es lo que esta sesión construye.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>¿Alguna vez un sistema (una app, un servicio, tu propia PC) "se cayó" sin ningún aviso previo? ¿Qué hubiera cambiado si hubieras tenido una señal de alerta diez minutos antes?</li>
+<li>En S8, ¿cómo te dabas cuenta de si el pipeline estaba funcionando bien? ¿Tenías que leer el código, o había algo que lo mostrara desde afuera?</li>
+</ol>
+<p><strong>Comprensión de observabilidad, métricas y costos</strong></p>
+<ol>
+<li>¿Qué diferencia hay entre que un sistema "funcione" y que un sistema esté "observable" (que puedas saber, sin leer el código, cómo le está yendo)?</li>
+<li>Si supieras que mantener un pipeline corriendo cuesta una cantidad fija por hora, ¿qué pregunta te harías antes de dejarlo corriendo todo el día?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U2 - Sistema Big Data en tiempo real: ingesta, streaming, observabilidad y BI/ML.</li>
+<li>Producto del curso: Proyecto Sello: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML, observabilidad y visualización BI para la toma de decisiones.</li>
+<li>Producto de unidad: pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.</li>
+<li>Avance del producto en esta sesión: instrumentación del pipeline de S8 con métricas reales (Prometheus, Grafana, latencia calculada en Spark), más una primera estimación de costos y umbrales de escalado — la pieza que faltaba para confiar en el pipeline sin tener que leer el código cada vez.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la Unidad II</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    S6["`**S6:** Eventos empresariales (Kafka)`"]
+    S7["`**S7:** Eventos IoT/sensores (Kafka)`"]
+    S8["`**S8:** Spark Structured Streaming`"]
+    S9["`**S9:** Observabilidad con Grafana y costos`"]
+    S10["`**S10:** Series de tiempo e inferencia en streaming`"]
+    S11["`**S11:** BI/ML distribuido con Spark`"]
+    S12["`**S12:** Producto U2`"]
+
+    S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S11 --&gt; S12
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S9 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 30 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. De Kafka y Spark a métricas observables</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    Kafka[("Kafka&lt;br/&gt;topic atmos-eventos&lt;br/&gt;(S7-S8)")]
+    Exporter["kafka-exporter&lt;br/&gt;:9308/metrics"]
+    Prom[("Prometheus&lt;br/&gt;:9090")]
+    Graf["Grafana&lt;br/&gt;:3000"]
+    Read["readStream&lt;br/&gt;+ campos observables"]
+    Progress["lastProgress&lt;br/&gt;throughput + lag"]
+    Parquet[("Parquet&lt;br/&gt;latencyMs por evento")]
+
+    Kafka --&gt; Exporter --&gt; Prom --&gt; Graf
+    Kafka --&gt; Read --&gt; Progress
+    Read --&gt; Parquet</code></pre>
+<p>Lectura del diagrama: hay dos caminos de observabilidad, no uno solo. El de arriba (<code>Kafka → kafka-exporter → Prometheus → Grafana</code>) es infraestructura pura — no necesita que tu código de Spark esté corriendo para funcionar, mide el broker y los <em>consumer groups</em> desde afuera. El de abajo (<code>Kafka → readStream → Parquet</code>) es específico de tu aplicación — <code>latencyMs</code> es algo que solo Spark puede calcular, porque necesita comparar cuándo se publicó el evento contra cuándo Spark lo procesó. Ambos caminos son necesarios: el primero te dice si <em>la infraestructura</em> está sana, el segundo te dice si <em>tu pipeline</em> está siendo rápido.</p>
+<h3 id="22-metricas-de-un-pipeline-de-streaming-disponibilidad-latencia-throughput-lag">2.2 Métricas de un pipeline de streaming: disponibilidad, latencia, throughput, <em>lag</em><a class="headerlink" href="#22-metricas-de-un-pipeline-de-streaming-disponibilidad-latencia-throughput-lag" title="Permanent link">&para;</a></h3>
+<p>Cuatro preguntas resumen la salud de cualquier pipeline de streaming, y cada una se responde con una métrica distinta:</p>
+<p><strong>Tabla 2. Cuatro preguntas, cuatro métricas</strong></p>
+<table>
+<thead>
+<tr>
+<th>Pregunta</th>
+<th>Métrica</th>
+<th>Qué significa un valor alto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>¿Está arriba el sistema?</td>
+<td><strong>Disponibilidad</strong></td>
+<td>No aplica — es binario: arriba o caído.</td>
+</tr>
+<tr>
+<td>¿Cuánto tarda un evento en procesarse?</td>
+<td><strong>Latencia</strong></td>
+<td>El resultado llega tarde; mal para alertas en vivo.</td>
+</tr>
+<tr>
+<td>¿Cuántos eventos se procesan por segundo?</td>
+<td><strong>Throughput</strong></td>
+<td>Bueno si la latencia se mantiene baja; si no, hay saturación.</td>
+</tr>
+<tr>
+<td>¿Cuántos eventos quedan pendientes de consumir?</td>
+<td><strong><em>Lag</em></strong></td>
+<td>El consumidor no da abasto; crece sin control si no se revisa.</td>
+</tr>
+</tbody>
+</table>
+<p>Ninguna de las cuatro, sola, cuenta toda la historia: un sistema puede tener throughput alto y <em>lag</em> creciendo al mismo tiempo (está procesando mucho, pero llega más de lo que puede consumir). Por eso un tablero de observabilidad casi siempre combina varias de estas métricas, no una sola.</p>
+<h3 id="23-prometheus-y-grafana-arquitectura-de-scraping">2.3 Prometheus y Grafana: arquitectura de <em>scraping</em><a class="headerlink" href="#23-prometheus-y-grafana-arquitectura-de-scraping" title="Permanent link">&para;</a></h3>
+<p>Prometheus no recibe métricas — las va a buscar. Cada cierto intervalo (<code>scrape_interval</code>), Prometheus hace una petición HTTP a cada <em>target</em> configurado, en una ruta que por convención se llama <code>/metrics</code>, y guarda lo que esa ruta devuelve como una serie de tiempo. Un <em>exporter</em> es, entonces, un programa chico cuyo único trabajo es traducir las métricas internas de otro sistema (Kafka, en este caso) a ese formato de texto plano que Prometheus sabe leer.</p>
+<p><strong>Tabla 3. Prometheus y Grafana, quién hace qué</strong></p>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Rol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Exporter</em> (<code>kafka-exporter</code>)</td>
+<td>Traduce el estado interno de Kafka (brokers, <em>consumer groups</em>, <em>lag</em>) al formato que Prometheus entiende.</td>
+</tr>
+<tr>
+<td>Prometheus</td>
+<td>Hace <em>scraping</em> periódico de cada <em>exporter</em>, guarda las series de tiempo, y responde consultas en <strong>PromQL</strong> (<em>Prometheus Query Language</em>, el lenguaje de consulta de Prometheus).</td>
+</tr>
+<tr>
+<td>Grafana</td>
+<td>No guarda datos propios: consulta a Prometheus (u otras fuentes) y dibuja el resultado en paneles — tablas, series de tiempo, valores únicos.</td>
+</tr>
+</tbody>
+</table>
+<p>La consecuencia práctica: si un <em>target</em> aparece <code>DOWN</code> en Prometheus, el problema casi siempre está en la red entre Prometheus y ese <em>exporter</em> (contenedor caído, puerto equivocado, red de Docker distinta) — no en Prometheus mismo.</p>
+<h3 id="24-logging-estructurado-y-metricas-calculadas-dentro-de-spark">2.4 Logging estructurado y métricas calculadas dentro de Spark<a class="headerlink" href="#24-logging-estructurado-y-metricas-calculadas-dentro-de-spark" title="Permanent link">&para;</a></h3>
+<p>No todo lo que importa vive en Prometheus. <code>latencyMs</code> (cuánto tardó un evento específico en procesarse) es un cálculo que depende del <code>timestamp</code> que el propio evento trae en su JSON — eso es lógica de negocio, específica de <code>atmos-eventos</code>, y ningún <em>exporter</em> genérico de Kafka lo puede calcular por ti. Ese tipo de métrica se calcula <strong>dentro</strong> de la aplicación (en este caso, dentro del propio DataFrame de Spark) y se expone de otra forma: como columnas en la salida, como líneas de log estructurado (JSON, como ya vienes haciendo desde S7), o persistido para analizarlo después.</p>
+<p><strong>Tabla 4. Dos tipos de métrica, dos lugares donde viven</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Ejemplo</th>
+<th>Dónde se mide</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Infraestructura</td>
+<td><em>Lag</em> de un <em>consumer group</em>, brokers arriba</td>
+<td>Kafka / <code>kafka-exporter</code> → Prometheus</td>
+</tr>
+<tr>
+<td>Aplicación</td>
+<td><code>latencyMs</code>, <code>isValid</code>, throughput de un micro-lote</td>
+<td>Dentro de Spark (<code>lastProgress</code>, columnas calculadas)</td>
+</tr>
+</tbody>
+</table>
+<p>Spark además expone su propia métrica de progreso sin necesidad de ningún <em>exporter</em>: <code>query.lastProgress</code>, un diccionario con <code>numInputRows</code>, <code>inputRowsPerSecond</code>, <code>processedRowsPerSecond</code> y el <em>offset</em> de cada partición — el throughput y el <em>lag</em> del lado de Spark, en tiempo real, sin salir del notebook.</p>
+<h3 id="25-costos-y-umbrales-de-escalado-en-streaming">2.5 Costos y umbrales de escalado en streaming<a class="headerlink" href="#25-costos-y-umbrales-de-escalado-en-streaming" title="Permanent link">&para;</a></h3>
+<p>Un pipeline de streaming no tiene un costo "de una vez" como un <em>script</em> batch que corre y termina — corre indefinidamente, así que su costo se acumula por tiempo: cómputo (CPU/RAM del clúster, corriendo veinticuatro horas al día), almacenamiento (lo que se persiste, como el Parquet de S8-S9, que crece sin parar salvo que se le ponga una política de retención) y, en un entorno real de nube, tráfico de red entre servicios.</p>
+<p><strong>Tabla 5. Preguntas que debe responder una estimación de costos</strong></p>
+<table>
+<thead>
+<tr>
+<th>Pregunta</th>
+<th>Qué informa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>¿Cuánto cuesta una hora de cómputo al ritmo actual?</td>
+<td>Costo base de mantener el pipeline corriendo.</td>
+</tr>
+<tr>
+<td>¿Cuánto crece el almacenamiento por día?</td>
+<td>Costo de retener evidencia (Parquet) a largo plazo.</td>
+</tr>
+<tr>
+<td>¿A qué <em>lag</em> o latencia se vuelve necesario escalar?</td>
+<td>Umbral de decisión: cuándo agregar más cómputo.</td>
+</tr>
+<tr>
+<td>¿Qué pasa si el volumen de eventos se duplica?</td>
+<td>Plan de escalado: qué parte del pipeline se ajusta primero.</td>
+</tr>
+</tbody>
+</table>
+<p>Un <strong>umbral</strong> (<em>threshold</em>) es el valor de una métrica a partir del cual una situación normal pasa a ser una alerta — por ejemplo, un <em>lag</em> de 1 o 2 mensajes es ruido normal (S8 ya lo vio con datos reales); un <em>lag</em> que crece sostenido durante varios minutos es una señal real de que el consumidor no da abasto. Definir ese umbral <em>antes</em> de que ocurra el problema es, justamente, la diferencia entre el conductor que mira el tablero y el que no (1.6.1).</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>09_observabilidad_pipeline_grafana_costos.ipynb</code> sobre el entorno <code>lambda26</code>, instrumentando el pipeline de S8 con campos de observabilidad, un tablero de Grafana real y una estimación de costos, con datos reales llegando en vivo.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que puedes responder, con datos reales y no con una lectura del código, si el pipeline está sano, qué tan rápido procesa, y cuánto costaría mantenerlo corriendo — la diferencia entre construir un pipeline y poder operarlo.</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente guía la construcción del notebook paso a paso, alternando explicación breve y ejecución; los estudiantes replican cada celda en su propio entorno, con el productor de sensores de S7 corriendo en vivo — los paneles de Grafana y las consultas de <code>lastProgress</code> solo tienen sentido con datos reales llegando, no con un dataset estático.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno y levantar observabilidad (Prometheus + Grafana) unida a la red de Kafka.</li>
+<li><strong>3.2</strong> Crear el notebook y la <code>SparkSession</code>, con el conector de Kafka.</li>
+<li><strong>3.3</strong> Leer el topic y calcular los campos de observabilidad (<code>isValid</code>, <code>processedAt</code>, <code>latencyMs</code>).</li>
+<li><strong>3.4</strong> Ver los eventos en consola, con sus campos de observabilidad.</li>
+<li><strong>3.5</strong> Revisar throughput y <em>lag</em> con <code>lastProgress</code>.</li>
+<li><strong>3.6</strong> Persistir la evidencia observable en Parquet.</li>
+<li><strong>3.7</strong> Prometheus: verificar <em>targets</em> y correr consultas PromQL reales.</li>
+<li><strong>3.8</strong> Grafana: armar un tablero con paneles reales.</li>
+<li><strong>3.9</strong> Analizar la latencia agregada por ventana de tiempo.</li>
+<li><strong>3.10</strong> Alertas propuestas y umbrales.</li>
+<li><strong>3.11</strong> Estimación de costos y plan de escalado.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-y-levantar-observabilidad">3.1 Reanudar el entorno y levantar observabilidad<a class="headerlink" href="#31-reanudar-el-entorno-y-levantar-observabilidad" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> Kafka, <code>kafka-exporter</code>, Kafka UI y el productor de sensores de S7 corriendo, más Prometheus y Grafana unidos a la red de Kafka.</p>
+<p>Este notebook reutiliza exactamente el mismo entorno de S8. Antes de continuar, en una terminal (fuera del notebook):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>kafka
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<span class="nb">cd</span><span class="w"> </span>../uso-atmos
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
+</code></pre></div>
+<p>El productor corre sin <code>-d</code>, pegado a esta terminal — déjalo abierto y visible toda la sesión, igual que en S8. Abre una <strong>pestaña nueva</strong> para el resto de los comandos de este paso.</p>
+<p><code>kafka-exporter</code> ya viene definido en <code>kafka/compose.yml</code> desde S6 — el <code>docker compose up -d</code> de arriba ya lo levantó. Verifícalo:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="s2">"name=lambda26-kafka-exporter"</span>
+</code></pre></div>
+<p>Ahora crea la carpeta <code>obs/</code> (todavía no existe en este repo) con Prometheus y Grafana:</p>
+<p><strong><code>obs/compose.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-obs</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prometheus</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prom/prometheus:v3.5.0</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-prometheus</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"49090:9090"</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26_prometheus_data:/prometheus</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+
+<span class="w">  </span><span class="nt">grafana</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grafana/grafana:11.6.0</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-grafana</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"43000:3000"</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">GF_SECURITY_ADMIN_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">      </span><span class="nt">GF_SECURITY_ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./grafana/provisioning:/etc/grafana/provisioning:ro</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26_grafana_data:/var/lib/grafana</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lambda26_prometheus_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lambda26_grafana_data</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lambda26-kafka-net</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda26-kafka-net</span>
+</code></pre></div>
+<p><strong><code>obs/prometheus/prometheus.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+<span class="w">  </span><span class="nt">evaluation_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+
+<span class="nt">scrape_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+<span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost:9090</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-exporter</span>
+<span class="w">    </span><span class="nt">metrics_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/metrics</span>
+<span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-exporter:9308</span>
+</code></pre></div>
+<p><strong><code>obs/grafana/provisioning/datasources/datasources.yml</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">datasources</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prometheus</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+<span class="w">    </span><span class="nt">access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">proxy</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://prometheus:9090</span>
+<span class="w">    </span><span class="nt">isDefault</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Súbelo:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../obs
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<p><strong>Error frecuente</strong>: si Grafana no encuentra el <em>datasource</em> de Prometheus, confirma que el contenedor <code>lambda26-prometheus</code> esté corriendo (<code>docker ps</code>) y que la URL del <em>datasource</em> sea <code>http://prometheus:9090</code> — el nombre del servicio Docker, no <code>localhost</code> (desde adentro del contenedor de Grafana, <code>localhost</code> es el propio Grafana, no Prometheus).</p>
+<h3 id="32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka">3.2 Crear el notebook y la <code>SparkSession</code>, con el conector de Kafka<a class="headerlink" href="#32-crear-el-notebook-y-la-sparksession-con-el-conector-de-kafka" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> notebook <code>09_observabilidad_pipeline_grafana_costos.ipynb</code> con una <code>SparkSession</code> capaz de leer y escribir Kafka — el mismo arranque que ya hiciste en S8.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion9-observabilidad"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"3"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.ui.port"</span><span class="p">,</span> <span class="s2">"4040"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="s2">"ERROR"</span><span class="p">)</span>
+<span class="n">spark</span>
+</code></pre></div>
+<h3 id="33-leer-el-topic-y-calcular-los-campos-de-observabilidad">3.3 Leer el topic y calcular los campos de observabilidad<a class="headerlink" href="#33-leer-el-topic-y-calcular-los-campos-de-observabilidad" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un DataFrame con los campos de <code>atmos-eventos</code> ya tipados, más tres columnas nuevas que no existían en S8: <code>isValid</code>, <code>processedAt</code> y <code>latencyMs</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">from_json</span><span class="p">,</span> <span class="n">current_timestamp</span><span class="p">,</span> <span class="n">unix_millis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">LongType</span>
+
+<span class="n">esquema_evento</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"humedad"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"presion"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"origen"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">())</span>
+<span class="p">)</span>
+
+<span class="n">crudo</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"atmos-eventos"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">eventos</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">crudo</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"topic"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"partition"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"offset"</span><span class="p">),</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"kafkaTimestamp"</span><span class="p">),</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"string"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"json_str"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"partition"</span><span class="p">,</span> <span class="s2">"offset"</span><span class="p">,</span> <span class="s2">"kafkaTimestamp"</span><span class="p">,</span>
+        <span class="n">from_json</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"json_str"</span><span class="p">),</span> <span class="n">esquema_evento</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"e"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"topic"</span><span class="p">,</span> <span class="s2">"partition"</span><span class="p">,</span> <span class="s2">"offset"</span><span class="p">,</span> <span class="s2">"kafkaTimestamp"</span><span class="p">,</span> <span class="s2">"e.*"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">observables</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">eventos</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+        <span class="s2">"isValid"</span><span class="p">,</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+        <span class="o">&amp;</span> <span class="n">col</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+        <span class="o">&amp;</span> <span class="n">col</span><span class="p">(</span><span class="s2">"temperatura"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span>
+        <span class="o">&amp;</span> <span class="n">col</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"processedAt"</span><span class="p">,</span> <span class="n">unix_millis</span><span class="p">(</span><span class="n">current_timestamp</span><span class="p">()))</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">,</span> <span class="n">col</span><span class="p">(</span><span class="s2">"processedAt"</span><span class="p">)</span> <span class="o">-</span> <span class="n">col</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">))</span>
+<span class="p">)</span>
+<span class="n">observables</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+<p><code>kafkaTimestamp</code> (metadata de Kafka: cuándo el <em>broker</em> recibió el mensaje) es distinto de <code>timestamp</code> (un campo del propio evento: cuándo el sensor midió, igual que en S8). <code>processedAt</code> es el momento en que <em>esta celda de Spark</em> procesó el evento — y <code>latencyMs</code> es la diferencia entre ambos: cuánto tardó un evento en viajar de <code>producer_sensores.py</code>, por Kafka, hasta este punto del pipeline. <code>isValid</code> reusa la misma idea de contrato mínimo que ya viste en S7 (<code>consumer_sensores.py</code>), pero calculada en Spark en vez de en Python simple.</p>
+<h3 id="34-ver-los-eventos-en-consola-con-sus-campos-de-observabilidad">3.4 Ver los eventos en consola, con sus campos de observabilidad<a class="headerlink" href="#34-ver-los-eventos-en-consola-con-sus-campos-de-observabilidad" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la salida de consola de S8, ahora con <code>isValid</code>, <code>processedAt</code> y <code>latencyMs</code> visibles fila por fila.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar la consulta</span>
+<span class="n">consulta</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">observables</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"console"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"truncate"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Déjala corriendo — <strong>no la detengas todavía</strong>. Vas a usarla en 3.5 para revisar <code>lastProgress</code>, y en 3.6 vas a arrancar una segunda consulta que persiste en Parquet al mismo tiempo. Las vas a detener juntas al final de 3.6.</p>
+<h3 id="35-revisar-throughput-y-lag-con-lastprogress">3.5 Revisar throughput y <em>lag</em> con <code>lastProgress</code><a class="headerlink" href="#35-revisar-throughput-y-lag-con-lastprogress" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una lectura real de <code>consulta.lastProgress</code>, con el throughput del último micro-lote y el <em>offset</em> de cada partición de Kafka.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="n">progreso</span> <span class="o">=</span> <span class="n">consulta</span><span class="o">.</span><span class="n">lastProgress</span>
+
+<span class="k">if</span> <span class="n">progreso</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Todavia no hay micro-lote procesado. Espera unos segundos y corre esta celda de nuevo."</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">fuente</span> <span class="o">=</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"sources"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">metricas</span> <span class="o">=</span> <span class="n">fuente</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"metrics"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">estado</span> <span class="o">=</span> <span class="s2">"idle"</span> <span class="k">if</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"numInputRows"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">"processed"</span>
+
+    <span class="n">log</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"service"</span><span class="p">:</span> <span class="s2">"spark-streaming"</span><span class="p">,</span>
+        <span class="s2">"component"</span><span class="p">:</span> <span class="s2">"observabilidad"</span><span class="p">,</span>
+        <span class="s2">"topic"</span><span class="p">:</span> <span class="s2">"atmos-eventos"</span><span class="p">,</span>
+        <span class="s2">"batchId"</span><span class="p">:</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"batchId"</span><span class="p">],</span>
+        <span class="s2">"numInputRows"</span><span class="p">:</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"numInputRows"</span><span class="p">],</span>
+        <span class="s2">"inputRowsPerSecond"</span><span class="p">:</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"inputRowsPerSecond"</span><span class="p">],</span>
+        <span class="s2">"processedRowsPerSecond"</span><span class="p">:</span> <span class="n">progreso</span><span class="p">[</span><span class="s2">"processedRowsPerSecond"</span><span class="p">],</span>
+        <span class="s2">"avgOffsetsBehindLatest"</span><span class="p">:</span> <span class="n">metricas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"avgOffsetsBehindLatest"</span><span class="p">),</span>
+        <span class="s2">"maxOffsetsBehindLatest"</span><span class="p">:</span> <span class="n">metricas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"maxOffsetsBehindLatest"</span><span class="p">),</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="n">estado</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<p><code>numInputRows</code> es cuántos eventos trajo el último micro-lote; <code>inputRowsPerSecond</code>/<code>processedRowsPerSecond</code> son la velocidad de entrada y de procesamiento — si <code>processedRowsPerSecond</code> es mayor que <code>inputRowsPerSecond</code>, Spark está procesando más rápido de lo que llegan los datos, que es la situación sana. <code>avgOffsetsBehindLatest</code> y <code>maxOffsetsBehindLatest</code> son el <em>lag</em> visto desde el lado de Spark: cuánto <em>offset</em> de Kafka le falta por leer a esta consulta en este momento. Si <code>numInputRows</code> sale <code>0</code>, no es un error — significa que ese micro-lote en particular no encontró eventos nuevos (<code>status: "idle"</code>).</p>
+<p><strong>Evidencia alternativa — Spark UI:</strong> abre <code>http://localhost:4040</code> y entra a <code>Structured Streaming → Streaming Query Statistics</code>. Ahí ves los mismos números (<code>Input Rate</code>, <code>Process Rate</code>, <code>Batch Duration</code>) de forma gráfica, sin tener que leer <code>lastProgress</code> a mano.</p>
+<h3 id="36-persistir-la-evidencia-observable-en-parquet">3.6 Persistir la evidencia observable en Parquet<a class="headerlink" href="#36-persistir-la-evidencia-observable-en-parquet" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> los eventos con sus campos de observabilidad aterrizando en disco, al mismo tiempo que la consulta de consola de 3.4 sigue corriendo.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 1: arrancar el stream a Parquet (la consulta de 3.4 sigue corriendo en paralelo)</span>
+<span class="n">ARTIFACTS</span> <span class="o">=</span> <span class="s2">"./artifacts/atmos_eventos_observabilidad"</span>
+<span class="n">CHECKPOINT_PARQUET</span> <span class="o">=</span> <span class="s2">"./artifacts/chk_observabilidad"</span>
+
+<span class="n">consulta2</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">observables</span><span class="o">.</span><span class="n">writeStream</span>
+    <span class="o">.</span><span class="n">outputMode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"parquet"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">ARTIFACTS</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"checkpointLocation"</span><span class="p">,</span> <span class="n">CHECKPOINT_PARQUET</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">processingTime</span><span class="o">=</span><span class="s2">"5 seconds"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Nota el nombre <code>consulta2</code>, no <code>consulta</code>: la consulta de 3.4 sigue viva en la variable <code>consulta</code>, y si esta nueva reusara ese mismo nombre, perderías la única referencia que te permite detenerla más tarde.</p>
+<p>Mientras corre, puedes leer lo que ya escribió sin detenerla — este paso es <strong>opcional</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2 (opcional): leer lo guardado (se puede repetir, el stream sigue corriendo)</span>
+<span class="n">guardado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ARTIFACTS</span><span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">guardado</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"filas guardadas:"</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+<span class="n">guardado</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"sensorId"</span><span class="p">,</span> <span class="s2">"latencyMs"</span><span class="p">,</span> <span class="s2">"isValid"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Cuando ya viste suficiente, detén <strong>las dos consultas juntas</strong> — la de consola de 3.4 y la de Parquet de este paso:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 3: detener ambas consultas (la de consola de 3.4 y la de Parquet de 3.6)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="n">consulta2</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: si el log muestra líneas <code>ERROR WriteToDataSourceV2Exec</code>, <code>TaskKilledException</code> o <code>Aborting task</code> al llamar <code>.stop()</code>, es el mismo ruido benigno que ya viste en S8 — Spark cancelando una tarea a mitad de un micro-lote, no una falla real.</p>
+<h3 id="37-prometheus-verificar-targets-y-correr-consultas-promql-reales">3.7 Prometheus: verificar <em>targets</em> y correr consultas PromQL reales<a class="headerlink" href="#37-prometheus-verificar-targets-y-correr-consultas-promql-reales" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> confirmación real, en la interfaz de Prometheus, de que <code>kafka-exporter</code> está siendo monitoreado, y al menos una consulta PromQL devolviendo datos reales del clúster.</p>
+<p>Abre <code>http://localhost:49090</code> y revisa <strong>Status → Targets</strong>: <code>prometheus</code> y <code>kafka-exporter</code> deben aparecer en estado <code>UP</code>.</p>
+<p>Corre estas consultas (pestaña <strong>Graph</strong>, botón <strong>Execute</strong>):</p>
+<div class="highlight"><pre><span></span><code><span class="nv">kafka_brokers</span>
+<span class="nv">up</span><span class="p">{</span><span class="nl">job</span><span class="o">=</span><span class="p">"</span><span class="s">kafka-exporter</span><span class="p">"}</span>
+<span class="nv">kafka_broker_info</span>
+<span class="nv">kafka_consumergroup_lag</span><span class="p">{</span><span class="nl">consumergroup</span><span class="o">=</span><span class="p">"</span><span class="s">uso-atmos-group</span><span class="p">"}</span>
+</code></pre></div>
+<p><strong>Tabla 6. Interpretación rápida de cada consulta</strong></p>
+<table>
+<thead>
+<tr>
+<th>Consulta</th>
+<th>Valor esperado</th>
+<th>Qué significa si falla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kafka_brokers</code></td>
+<td><code>1</code></td>
+<td><code>kafka-exporter</code> no detecta ningún broker Kafka.</td>
+</tr>
+<tr>
+<td><code>up{job="kafka-exporter"}</code></td>
+<td><code>1</code></td>
+<td>El <em>exporter</em> está caído, o Prometheus no lo alcanza por red.</td>
+</tr>
+<tr>
+<td><code>kafka_consumergroup_lag{consumergroup="uso-atmos-group"}</code></td>
+<td>Cerca de <code>0</code>, con picos cortos</td>
+<td>Un valor alto y sostenido significa que el consumidor de S7 no da abasto.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Error frecuente</strong>: <code>kafka_consumergroup_lag</code> no devuelve nada si el <code>consumer_sensores.py</code> de S7 no ha corrido todavía con ese <em>topic</em> — el grupo <code>uso-atmos-group</code> recién existe en Kafka después de que un consumidor se conecta con ese <code>group_id</code>. Corre el consumidor de S7 (<code>docker exec -it lambda26-uso-atmos python /app/consumer_sensores.py</code>) unos segundos, y vuelve a consultar.</p>
+<h3 id="38-grafana-armar-un-tablero-con-paneles-reales">3.8 Grafana: armar un tablero con paneles reales<a class="headerlink" href="#38-grafana-armar-un-tablero-con-paneles-reales" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.</p>
+<p>Abre <code>http://localhost:43000</code> con <code>admin</code> / <code>admin</code>. Crea un <em>dashboard</em> nuevo y agrega estos paneles:</p>
+<p><strong>Tabla 7. Paneles mínimos del tablero</strong></p>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Consulta</th>
+<th>Visualización</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kafka Brokers</td>
+<td><code>kafka_brokers</code></td>
+<td>Stat</td>
+</tr>
+<tr>
+<td>Kafka Exporter Up</td>
+<td><code>up{job="kafka-exporter"}</code></td>
+<td>Stat</td>
+</tr>
+<tr>
+<td>Kafka Broker Info</td>
+<td><code>kafka_broker_info</code></td>
+<td>Table</td>
+</tr>
+<tr>
+<td>Consumer Lag</td>
+<td><code>kafka_consumergroup_lag</code></td>
+<td>Time series</td>
+</tr>
+</tbody>
+</table>
+<p>En el panel <strong>Consumer Lag</strong>, Grafana dibuja una línea por cada <code>consumergroup</code> detectado. Una línea plana en <code>0</code> es la señal sana — un pico corto que vuelve a <code>0</code> es normal (llegó un evento, el consumidor se atrasó un instante y lo alcanzó); un valor que crece y se mantiene alto es la señal real de un consumidor que no da abasto.</p>
+<h3 id="39-analizar-la-latencia-agregada-por-ventana-de-tiempo">3.9 Analizar la latencia agregada por ventana de tiempo<a class="headerlink" href="#39-analizar-la-latencia-agregada-por-ventana-de-tiempo" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una tabla con la latencia promedio, mínima y máxima por minuto, calculada sobre la evidencia real guardada en 3.6.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">window</span><span class="p">,</span> <span class="n">avg</span><span class="p">,</span> <span class="nb">min</span> <span class="k">as</span> <span class="n">spark_min</span><span class="p">,</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">spark_max</span><span class="p">,</span> <span class="n">count</span>
+
+<span class="n">guardado</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">ARTIFACTS</span><span class="p">)</span>
+
+<span class="n">latencia_por_minuto</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">guardado</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">window</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"kafkaTimestamp"</span><span class="p">),</span> <span class="s2">"1 minute"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="n">count</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"numEventos"</span><span class="p">),</span>
+        <span class="n">avg</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"avgLatencyMs"</span><span class="p">),</span>
+        <span class="n">spark_min</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"minLatencyMs"</span><span class="p">),</span>
+        <span class="n">spark_max</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"maxLatencyMs"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"window.start"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"inicioVentana"</span><span class="p">),</span>
+        <span class="n">col</span><span class="p">(</span><span class="s2">"window.end"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"finVentana"</span><span class="p">),</span>
+        <span class="s2">"numEventos"</span><span class="p">,</span> <span class="s2">"avgLatencyMs"</span><span class="p">,</span> <span class="s2">"minLatencyMs"</span><span class="p">,</span> <span class="s2">"maxLatencyMs"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"inicioVentana"</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">latencia_por_minuto</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>Esta es una lectura <strong>batch</strong> sobre el Parquet (no streaming): agrupa por <code>window(kafkaTimestamp, "1 minute")</code>, la misma función <code>window()</code> de S8, pero sobre datos ya persistidos en vez de un stream en vivo. El resultado es la base real para decidir el umbral de latencia de 3.10 — no un número inventado.</p>
+<h3 id="310-alertas-propuestas-y-umbrales">3.10 Alertas propuestas y umbrales<a class="headerlink" href="#310-alertas-propuestas-y-umbrales" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una tabla de alertas propuestas, con umbrales basados en los datos reales que obtuviste en 3.7 y 3.9.</p>
+<p><strong>Tabla 8. Alertas propuestas</strong></p>
+<table>
+<thead>
+<tr>
+<th>Situación</th>
+<th>Regla propuesta</th>
+<th>Dónde se evalúa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kafka no visible</td>
+<td><code>kafka_brokers &lt; 1</code></td>
+<td>Prometheus / Grafana</td>
+</tr>
+<tr>
+<td><em>Exporter</em> caído</td>
+<td><code>up{job="kafka-exporter"} == 0</code></td>
+<td>Prometheus / Grafana</td>
+</tr>
+<tr>
+<td><em>Lag</em> alto sostenido</td>
+<td><code>kafka_consumergroup_lag &gt; 100</code></td>
+<td>Prometheus / Grafana</td>
+</tr>
+<tr>
+<td>Latencia alta sensible</td>
+<td><code>avgLatencyMs &gt; 100</code> (por minuto)</td>
+<td>Notebook Spark / Parquet</td>
+</tr>
+<tr>
+<td>Latencia alta crítica</td>
+<td><code>avgLatencyMs &gt; 1000</code> (por minuto)</td>
+<td>Notebook Spark / Parquet</td>
+</tr>
+</tbody>
+</table>
+<p>Para esta práctica, las alertas se entregan como propuesta documentada, con los umbrales justificados por los datos reales de 3.7/3.9 — no hace falta configurarlas en Grafana Alerting para cumplir el producto de la sesión, aunque puedes hacerlo si quieres ir más allá: <strong>Alerting → Alert rules → New alert rule</strong>, <em>datasource</em> Prometheus, la consulta de la tabla de arriba, <code>Evaluate every: 1m</code>, <code>For: 2m</code> (para no disparar con picos de un solo minuto).</p>
+<h3 id="311-estimacion-de-costos-y-plan-de-escalado">3.11 Estimación de costos y plan de escalado<a class="headerlink" href="#311-estimacion-de-costos-y-plan-de-escalado" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una estimación de costos basada en lo que de verdad mediste, y un plan de escalado con al menos dos umbrales de decisión.</p>
+<p>Con los datos reales de 3.5 (throughput) y 3.9 (latencia), completa esta tabla:</p>
+<p><strong>Tabla 9. Plantilla de estimación de costos</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor medido en esta sesión</th>
+<th>Supuesto para estimar costo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eventos por segundo (pico)</td>
+<td><em>(de 3.5, <code>inputRowsPerSecond</code>)</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Latencia promedio por minuto</td>
+<td><em>(de 3.9, <code>avgLatencyMs</code>)</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Crecimiento del Parquet por hora</td>
+<td><em>(cuenta filas de 3.6 en dos momentos distintos y compara)</em></td>
+<td>Costo de almacenamiento ∝ tamaño retenido</td>
+</tr>
+<tr>
+<td>Costo de cómputo por hora</td>
+<td>—</td>
+<td>Según el proveedor/instancia que elijas documentar</td>
+</tr>
+</tbody>
+</table>
+<p>A partir de esa tabla, responde por escrito: ¿a qué <em>lag</em> o latencia promedio decidirías agregar más cómputo (más particiones de Kafka, más paralelismo en Spark)? ¿Qué parte del pipeline escalarías primero si el volumen de eventos se duplicara — el broker, el consumidor, o la escritura a Parquet? No hay una única respuesta correcta: lo que se evalúa es que la decisión esté justificada con los números que mediste, no con una suposición.</p>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Lectura streaming de <code>atmos-eventos</code> con campos de observabilidad (<code>isValid</code>, <code>processedAt</code>, <code>latencyMs</code>) calculados en Spark.</li>
+<li>Salida simultánea por consola y en Parquet, con <code>lastProgress</code> real mostrando throughput y <em>lag</em> del lado de Spark.</li>
+<li><em>Targets</em> de Prometheus confirmados <code>UP</code>, con al menos cuatro consultas PromQL reales.</li>
+<li>Tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.</li>
+<li>Tabla de latencia agregada por ventana de tiempo, calculada sobre evidencia real.</li>
+<li>Alertas propuestas con umbrales basados en los datos medidos, no inventados.</li>
+<li>Estimación de costos y plan de escalado, con al menos dos umbrales de decisión justificados.</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 3h fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Aplicación de la instrumentación de esta sesión a una fuente de eventos del <strong>Proyecto Sello</strong> propio del equipo, con datos <strong>reales</strong>, no simulados.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Sobre tu propio topic de Kafka (el de S6/S7, o uno nuevo), construye la lectura en modo streaming con campos de observabilidad (<code>isValid</code>, <code>processedAt</code>, <code>latencyMs</code>), igual que 3.3.</li>
+<li>Levanta Prometheus y Grafana sobre tu propia red de Kafka, y confirma al menos dos <em>targets</em> <code>UP</code>.</li>
+<li>Arma un tablero de Grafana con al menos tres paneles reales sobre tu propio pipeline.</li>
+<li>Calcula la latencia agregada por ventana de tiempo sobre tu propia evidencia persistida, igual que 3.9.</li>
+<li>Propón al menos tres alertas con umbrales justificados por tus propios datos, igual que 3.10.</li>
+<li>Completa la plantilla de estimación de costos y plan de escalado (3.11) con los valores reales de tu propio pipeline.</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, con datos reales de su propio Proyecto Sello — no simulados —, que puede instrumentar un pipeline de streaming con métricas de infraestructura (Prometheus/Grafana) y de aplicación (latencia calculada en Spark), y tomar decisiones de escalado justificadas con esos datos, dejando lista la capa de observabilidad que S10-S11 van a dar por sentada.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S09_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S09 - Observabilidad con Grafana y costos</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Campos de observabilidad y <code>lastProgress</code></em><ul>
+<li>Captura de la consulta de consola con <code>isValid</code>/<code>processedAt</code>/<code>latencyMs</code> visibles, y de <code>lastProgress</code> mostrando throughput real.</li>
+</ul>
+</li>
+<li><em>Prometheus y Grafana</em><ul>
+<li>Captura de <strong>Status → Targets</strong> con <code>kafka-exporter</code> en <code>UP</code>, y del tablero de Grafana con tus paneles.</li>
+</ul>
+</li>
+<li><em>Latencia agregada y alertas</em><ul>
+<li>Captura de la tabla de latencia por ventana de tiempo, y de tu tabla de alertas propuestas.</li>
+</ul>
+</li>
+<li><em>Costos y escalado</em><ul>
+<li>Captura de tu plantilla de estimación de costos completa, con los valores reales medidos.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe un error real: un <em>target</em> de Prometheus que apareció <code>DOWN</code> y por qué, un panel de Grafana sin datos al principio, o un <em>lag</em> que no bajaba de un valor esperado.</p>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>¿Por qué no alcanza con que un pipeline "funcione" — qué le agrega
+la observabilidad que el código por sí solo no te puede decir, y
+qué umbral concreto definiste hoy que antes de esta sesión no
+habrías sabido justificar con datos?
+</code></pre></div>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>Lectura streaming con campos de observabilidad sobre datos reales del proyecto propio.</li>
+<li>Al menos dos <em>targets</em> de Prometheus confirmados <code>UP</code>.</li>
+<li>Tablero de Grafana con al menos tres paneles reales.</li>
+<li>Tabla de latencia agregada por ventana de tiempo, con datos reales.</li>
+<li>Al menos tres alertas propuestas, con umbrales justificados por los datos medidos.</li>
+<li>Plantilla de estimación de costos y plan de escalado completa, con valores reales.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Qué diferencia hay entre una métrica de infraestructura (como el <em>lag</em> de Kafka) y una métrica de aplicación (como <code>latencyMs</code>), y por qué ninguna de las dos alcanza sola?</li>
+<li>¿Qué significa que un <em>target</em> de Prometheus aparezca <code>DOWN</code>, y dónde buscarías primero el problema?</li>
+<li>¿Por qué <code>kafka_consumergroup_lag</code> puede no devolver datos aunque Kafka esté funcionando bien?</li>
+<li>¿Cómo decidiste el umbral de tus alertas propuestas — con qué dato real lo justificaste?</li>
+<li>Si tu pipeline tuviera que procesar el doble de eventos por segundo, ¿qué parte escalarías primero, y por qué?</li>
+<li>¿Qué pasaría con tu estimación de costos si decides retener el Parquet para siempre, sin ninguna política de limpieza?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 10. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Campos de observabilidad y <code>lastProgress</code>*</td>
+<td style="text-align: right;">25</td>
+<td>Lectura streaming con <code>isValid</code>/<code>processedAt</code>/<code>latencyMs</code> funcionando, y <code>lastProgress</code> real interpretado correctamente.</td>
+<td>Funcional, con alguno de los campos sin interpretar bien.</td>
+<td>Campos calculados pero sin evidencia de <code>lastProgress</code>.</td>
+<td>No implementa los campos de observabilidad.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Prometheus y Grafana*</td>
+<td style="text-align: right;">25</td>
+<td><em>Targets</em> <code>UP</code> confirmados y tablero con paneles reales mostrando datos del proyecto propio.</td>
+<td>Funcional, con algún panel sin datos reales.</td>
+<td>Solo Prometheus o solo Grafana funcionando, no ambos.</td>
+<td>No presenta evidencia de Prometheus ni Grafana.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Latencia agregada y alertas*</td>
+<td style="text-align: right;">25</td>
+<td>Tabla de latencia por ventana con datos reales, y alertas con umbrales justificados por esos datos.</td>
+<td>Uno de los dos presente y correcto, el otro incompleto.</td>
+<td>Ambos parciales o con umbrales sin justificar.</td>
+<td>No presenta ninguno de los dos.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Costos y escalado*</td>
+<td style="text-align: right;">25</td>
+<td>Plantilla de costos completa con valores reales, y plan de escalado justificado con datos propios.</td>
+<td>Plantilla completa, plan de escalado sin justificar con datos.</td>
+<td>Plantilla parcial.</td>
+<td>No presenta estimación de costos.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy el pipeline de S8 dejó de ser una caja negra: se le agregaron campos de observabilidad calculados en Spark (<code>isValid</code>, <code>processedAt</code>, <code>latencyMs</code>), se conectó Kafka a Prometheus a través de <code>kafka-exporter</code>, se armó un tablero real en Grafana, se calculó latencia agregada por ventana de tiempo sobre evidencia persistida, y se propusieron alertas y una estimación de costos basadas en datos reales, no en suposiciones.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte en una frase el umbral de alerta que definió para su propio <em>lag</em> o latencia, y por qué eligió ese número y no otro.</p>
+<p><strong>Metacognición:</strong> ¿qué te costó más entender hoy: la diferencia entre métricas de infraestructura y de aplicación, o cómo traducir un número medido en una decisión de costo/escalado?</p>
+<p><strong>Proyección:</strong> S10 reutiliza el mismo pipeline de lectura streaming de S8-S9, pero en vez de calcular latencia le aplica un modelo de series de tiempo sobre <code>atmos-eventos</code>. S11 toma esas predicciones y las visualiza en un tablero de BI junto con los KPIs del flujo de eventos — el mismo Grafana que hoy mostró <em>lag</em> y brokers, mostrando mañana una predicción.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Apache Software Foundation. (2024). <em>Structured Streaming Programming Guide</em>. Apache Spark Documentation. https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html</li>
+<li>Prometheus Authors. (2024). <em>Prometheus Documentation</em>. https://prometheus.io/docs/</li>
+<li>Grafana Labs. (2024). <em>Grafana Documentation</em>. https://grafana.com/docs/grafana/latest/</li>
+<li>Qin, D. (2024). <em>kafka_exporter</em>. GitHub. https://github.com/danielqsj/kafka_exporter</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
