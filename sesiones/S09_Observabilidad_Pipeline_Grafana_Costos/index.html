@@ -2296,9 +2296,13 @@
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
 <span class="nb">cd</span><span class="w"> </span>../uso-atmos
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/consumer_sensores.py
+</code></pre></div>
+<p>Sin <code>-d</code>: el consumidor arranca pegado a esta terminal para que veas en vivo que los eventos siguen llegando bien formados antes de levantar el resto. En cuanto veas pasar algunas líneas con <code>"status": "consumed"</code>, detenlo con <code>Ctrl+C</code> — ya cumplió su función. Abre una <strong>pestaña nueva</strong> de terminal para el productor:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>uso-atmos
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>lambda26-uso-atmos<span class="w"> </span>python<span class="w"> </span>/app/producer_sensores.py
 </code></pre></div>
-<p>El productor corre sin <code>-d</code>, pegado a esta terminal — déjalo abierto y visible toda la sesión, igual que en S8. Abre una <strong>pestaña nueva</strong> para el resto de los comandos de este paso.</p>
+<p>El productor corre sin <code>-d</code>, pegado a esta terminal — déjalo abierto y visible toda la sesión, igual que en S8. Abre una <strong>tercera pestaña</strong> para el resto de los comandos de este paso.</p>
 <p><code>kafka-exporter</code> ya viene definido en <code>kafka/compose.yml</code> desde S6 — el <code>docker compose up -d</code> de arriba ya lo levantó. Verifícalo:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="s2">"name=lambda26-kafka-exporter"</span>
 </code></pre></div>
