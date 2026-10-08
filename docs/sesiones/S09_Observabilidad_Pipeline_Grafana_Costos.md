@@ -199,10 +199,17 @@ cd kafka
 docker compose up -d
 cd ../uso-atmos
 docker compose up -d
+docker exec -it lambda26-uso-atmos python /app/consumer_sensores.py
+```
+
+Sin `-d`: el consumidor arranca pegado a esta terminal para que veas en vivo que los eventos siguen llegando bien formados antes de levantar el resto. En cuanto veas pasar algunas líneas con `"status": "consumed"`, detenlo con `Ctrl+C` — ya cumplió su función. Abre una **pestaña nueva** de terminal para el productor:
+
+```bash
+cd uso-atmos
 docker exec -it lambda26-uso-atmos python /app/producer_sensores.py
 ```
 
-El productor corre sin `-d`, pegado a esta terminal — déjalo abierto y visible toda la sesión, igual que en S8. Abre una **pestaña nueva** para el resto de los comandos de este paso.
+El productor corre sin `-d`, pegado a esta terminal — déjalo abierto y visible toda la sesión, igual que en S8. Abre una **tercera pestaña** para el resto de los comandos de este paso.
 
 `kafka-exporter` ya viene definido en `kafka/compose.yml` desde S6 — el `docker compose up -d` de arriba ya lo levantó. Verifícalo:
 
