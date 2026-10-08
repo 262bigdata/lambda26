@@ -26,6 +26,8 @@ nav:
       - "S6 - Ingesta de Eventos Empresariales en Tiempo Real": sesiones/S06_Ingesta_Eventos_Empresariales_Kafka.md
       - "S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real": sesiones/S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real.md
       - "S8 - Procesamiento en Streaming con Spark": sesiones/S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking.md
+      - "S9 - Observabilidad con Grafana y Costos": sesiones/S09_Observabilidad_Pipeline_Grafana_Costos.md
+      - "S10 - Series de Tiempo e Inferencia en Streaming": sesiones/S10_Series_Tiempo_Inferencia_Streaming_MLlib.md
       - "S12 - Evaluación de la Unidad II": sesiones/S12_Evaluacion_Unidad_2.md
   - 3. Integración, DataOps y despliegue del sistema final:
       - "S15 - Evaluación de la Unidad III": sesiones/S15_Evaluacion_Unidad_3.md
