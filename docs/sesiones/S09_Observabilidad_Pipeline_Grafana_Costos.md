@@ -219,7 +219,7 @@ name: lambda26-obs
 
 services:
   prometheus:
-    image: prom/prometheus:v3.5.0
+    image: prom/prometheus:v3.14.0
     container_name: lambda26-prometheus
     restart: unless-stopped
     ports:
@@ -231,7 +231,7 @@ services:
       - lambda26-kafka-net
 
   grafana:
-    image: grafana/grafana:11.6.0
+    image: grafana/grafana:11.4.0
     container_name: lambda26-grafana
     restart: unless-stopped
     ports:
