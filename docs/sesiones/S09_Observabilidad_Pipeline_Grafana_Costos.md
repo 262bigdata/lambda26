@@ -32,7 +32,7 @@ Notebook `09_observabilidad_pipeline_grafana_costos.ipynb` corriendo sobre `atmo
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
 | Revisión previa individual | Confirmar que `kafka`, `kafka-exporter` y `uso-atmos` (S6-S8) siguen arrancando, y que el productor de sensores sigue publicando en `atmos-eventos`. Repasar brevemente el pipeline construido en S8. Trabajo individual, antes de clase. | Guía de S8 (3.1-3.6), este mismo documento (1.1-1.7). |
-| Clase presencial | Construcción guiada del notebook `09-observabilidad-pipeline`: campos de observabilidad, salida dual (consola + Parquet), métricas de `lastProgress`, consultas Prometheus, tablero de Grafana, latencia por ventana y alertas propuestas, sobre datos reales llegando en vivo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un target de Prometheus caído o un panel sin datos. | Pasos 3.1 a 3.11 de esta guía. |
+| Clase presencial | Construcción guiada del notebook `09-observabilidad-pipeline`: consultas Prometheus, tablero de Grafana, campos de observabilidad, salida dual (consola + Parquet), métricas de `lastProgress`, latencia por ventana y alertas propuestas, sobre datos reales llegando en vivo. Trabajo individual, siguiendo al docente paso a paso; consulta inmediata ante un target de Prometheus caído o un panel sin datos. | Pasos 3.1 a 3.11 de esta guía. |
 | Evaluación formativa | Revisión en clase del tablero de Grafana con datos reales (Kafka arriba, *lag* del consumer group) y de la tabla de latencia calculada en Spark. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -177,13 +177,13 @@ Tiempo: 3h.
 **Actividades para realizar:**
 
 - **3.1** Reanudar el entorno y levantar observabilidad (Prometheus + Grafana) unida a la red de Kafka.
-- **3.2** Crear el notebook y la `SparkSession`, con el conector de Kafka.
-- **3.3** Leer el topic y calcular los campos de observabilidad (`isValid`, `processedAt`, `latencyMs`).
-- **3.4** Ver los eventos en consola, con sus campos de observabilidad.
-- **3.5** Revisar throughput y *lag* con `lastProgress`.
-- **3.6** Persistir la evidencia observable en Parquet.
-- **3.7** Prometheus: verificar *targets* y correr consultas PromQL reales.
-- **3.8** Grafana: armar un tablero con paneles reales.
+- **3.2** Prometheus: verificar *targets* y correr consultas PromQL reales.
+- **3.3** Grafana: armar un tablero con paneles reales.
+- **3.4** Crear el notebook y la `SparkSession`, con el conector de Kafka.
+- **3.5** Leer el topic y calcular los campos de observabilidad (`isValid`, `processedAt`, `latencyMs`).
+- **3.6** Ver los eventos en consola, con sus campos de observabilidad.
+- **3.7** Revisar throughput y *lag* con `lastProgress`.
+- **3.8** Persistir la evidencia observable en Parquet.
 - **3.9** Analizar la latencia agregada por ventana de tiempo.
 - **3.10** Alertas propuestas y umbrales.
 - **3.11** Estimación de costos y plan de escalado.
@@ -306,7 +306,67 @@ docker compose up -d
 
 **Error frecuente**: si Grafana no encuentra el *datasource* de Prometheus, confirma que el contenedor `lambda26-prometheus` esté corriendo (`docker ps`) y que la URL del *datasource* sea `http://prometheus:9090` — el nombre del servicio Docker, no `localhost` (desde adentro del contenedor de Grafana, `localhost` es el propio Grafana, no Prometheus).
 
-### 3.2 Crear el notebook y la `SparkSession`, con el conector de Kafka
+Antes de tocar el notebook: el camino de arriba de la Figura 2 (`Kafka → kafka-exporter → Prometheus → Grafana`) no depende de Spark para nada — ya tiene datos reales desde que terminaste 3.1. Se verifica y se arma primero, para que el tablero de Grafana no se sienta como algo que depende de que el notebook esté corriendo.
+
+### 3.2 Prometheus: verificar *targets* y correr consultas PromQL reales
+
+**Producto del paso:** confirmación real, en la interfaz de Prometheus, de que `kafka-exporter` está siendo monitoreado, y al menos una consulta PromQL devolviendo datos reales del clúster.
+
+Abre `http://localhost:49090` y revisa **Status → Targets**: `prometheus` y `kafka-exporter` deben aparecer en estado `UP`.
+
+Corre estas consultas (pestaña **Graph**, botón **Execute**):
+
+```promql
+kafka_brokers
+up{job="kafka-exporter"}
+kafka_broker_info
+kafka_consumergroup_lag{consumergroup="uso-atmos-group"}
+```
+
+**Tabla 6. Interpretación rápida de cada consulta**
+
+| Consulta | Valor esperado | Qué significa si falla |
+|---|---|---|
+| `kafka_brokers` | `1` | `kafka-exporter` no detecta ningún broker Kafka. |
+| `up{job="kafka-exporter"}` | `1` | El *exporter* está caído, o Prometheus no lo alcanza por red. |
+| `kafka_consumergroup_lag{consumergroup="uso-atmos-group"}` | Cerca de `0`, con picos cortos | Un valor alto y sostenido significa que el consumidor de S7 no da abasto. |
+
+**Error frecuente**: `kafka_consumergroup_lag` no devuelve nada si el `consumer_sensores.py` de S7 no ha corrido todavía con ese *topic* — el grupo `uso-atmos-group` recién existe en Kafka después de que un consumidor se conecta con ese `group_id`. Corre el consumidor de S7 (`docker exec -it lambda26-uso-atmos python /app/consumer_sensores.py`) unos segundos, y vuelve a consultar.
+
+### 3.3 Grafana: armar un tablero con paneles reales
+
+**Producto del paso:** un tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.
+
+Abre `http://localhost:43000` con `admin` / `admin`. El *datasource* **Prometheus** ya viene provisto (3.1) — no hace falta crearlo a mano.
+
+**Tabla 7. Paneles mínimos del tablero**
+
+| Panel | Consulta | Visualización |
+|---|---|---|
+| Kafka Brokers | `kafka_brokers` | Stat |
+| Kafka Exporter Up | `up{job="kafka-exporter"}` | Stat |
+| Kafka Broker Info | `kafka_broker_info` | Table |
+| Consumer Lag | `kafka_consumergroup_lag` | Time series |
+
+Si es la primera vez que armas un *dashboard* en Grafana, los cuatro paneles se crean con el mismo flujo, repetido cuatro veces:
+
+1. **Dashboards** (menú izquierdo) → **New** → **New dashboard**.
+2. **+ Add visualization**.
+3. Elige el *datasource* **Prometheus** cuando lo pida (aparece apenas un segundo, al crear el primer panel).
+4. En la pestaña **Query**, pega la consulta PromQL de la fila correspondiente de la Tabla 7 (ej. `kafka_brokers`) en el campo de la consulta (**Metric**/*code mode* — si ves un *builder* visual en vez de un campo de texto, haz clic en **Code** a la derecha de la consulta para pegarla tal cual).
+5. En el panel derecho, cambia **Visualization** al tipo que indica la tabla (**Stat**, **Table** o **Time series**).
+6. Arriba, reemplaza **Panel Title** por el nombre de la fila (ej. "Kafka Brokers").
+7. **Apply** (arriba a la derecha) — vuelve al *dashboard*, con el panel ya agregado.
+8. Repite del paso 2 al 7 para los otros tres paneles (ya no vuelve a pedir el *datasource*, solo en el primero).
+9. Cuando tengas los cuatro, **Save dashboard** (ícono de disco, arriba) → nómbralo `S9 - Observabilidad del pipeline` → **Save**.
+
+Arrastra las esquinas de cada panel para acomodarlos en una sola fila o grilla — el orden y tamaño no afectan la evaluación, solo que los cuatro sean visibles sin desplazarte.
+
+En el panel **Consumer Lag**, Grafana dibuja una línea por cada `consumergroup` detectado. Una línea plana en `0` es la señal sana — un pico corto que vuelve a `0` es normal (llegó un evento, el consumidor se atrasó un instante y lo alcanzó); un valor que crece y se mantiene alto es la señal real de un consumidor que no da abasto.
+
+**Error frecuente**: si **+ Add visualization** no ofrece Prometheus como *datasource*, o el panel queda en blanco con "No data", confirma primero en `http://localhost:43000/connections/datasources` que el *datasource* **Prometheus** aparece y que su *health check* (**Save & test**, dentro del propio *datasource*) da verde — si no, revisa 3.1 (el contenedor `lambda26-prometheus` debe estar arriba y la URL del *datasource* debe ser `http://prometheus:9090`, no `localhost`).
+
+### 3.4 Crear el notebook y la `SparkSession`, con el conector de Kafka
 
 **Producto del paso:** notebook `09_observabilidad_pipeline_grafana_costos.ipynb` con una `SparkSession` capaz de leer y escribir Kafka — el mismo arranque que ya hiciste en S8.
 
@@ -326,7 +386,7 @@ spark.sparkContext.setLogLevel("ERROR")
 spark
 ```
 
-### 3.3 Leer el topic y calcular los campos de observabilidad
+### 3.5 Leer el topic y calcular los campos de observabilidad
 
 **Producto del paso:** un DataFrame con los campos de `atmos-eventos` ya tipados, más tres columnas nuevas que no existían en S8: `isValid`, `processedAt` y `latencyMs`.
 
@@ -383,7 +443,7 @@ observables.printSchema()
 
 `kafkaTimestamp` (metadata de Kafka: cuándo el *broker* recibió el mensaje) es distinto de `timestamp` (un campo del propio evento: cuándo el sensor midió, igual que en S8). `processedAt` es el momento en que *esta celda de Spark* procesó el evento — y `latencyMs` es la diferencia entre ambos: cuánto tardó un evento en viajar de `producer_sensores.py`, por Kafka, hasta este punto del pipeline. `isValid` reusa la misma idea de contrato mínimo que ya viste en S7 (`consumer_sensores.py`), pero calculada en Spark en vez de en Python simple.
 
-### 3.4 Ver los eventos en consola, con sus campos de observabilidad
+### 3.6 Ver los eventos en consola, con sus campos de observabilidad
 
 **Producto del paso:** la salida de consola de S8, ahora con `isValid`, `processedAt` y `latencyMs` visibles fila por fila.
 
@@ -399,9 +459,9 @@ consulta = (
 )
 ```
 
-Déjala corriendo — **no la detengas todavía**. Vas a usarla en 3.5 para revisar `lastProgress`, y en 3.6 vas a arrancar una segunda consulta que persiste en Parquet al mismo tiempo. Las vas a detener juntas al final de 3.6.
+Déjala corriendo — **no la detengas todavía**. Vas a usarla en 3.7 para revisar `lastProgress`, y en 3.8 vas a arrancar una segunda consulta que persiste en Parquet al mismo tiempo. Las vas a detener juntas al final de 3.8.
 
-### 3.5 Revisar throughput y *lag* con `lastProgress`
+### 3.7 Revisar throughput y *lag* con `lastProgress`
 
 **Producto del paso:** una lectura real de `consulta.lastProgress`, con el throughput del último micro-lote y el *offset* de cada partición de Kafka.
 
@@ -436,12 +496,12 @@ else:
 
 **Evidencia alternativa — Spark UI:** abre `http://localhost:4040` y entra a `Structured Streaming → Streaming Query Statistics`. Ahí ves los mismos números (`Input Rate`, `Process Rate`, `Batch Duration`) de forma gráfica, sin tener que leer `lastProgress` a mano.
 
-### 3.6 Persistir la evidencia observable en Parquet
+### 3.8 Persistir la evidencia observable en Parquet
 
-**Producto del paso:** los eventos con sus campos de observabilidad aterrizando en disco, al mismo tiempo que la consulta de consola de 3.4 sigue corriendo.
+**Producto del paso:** los eventos con sus campos de observabilidad aterrizando en disco, al mismo tiempo que la consulta de consola de 3.6 sigue corriendo.
 
 ```python
-# Momento 1: arrancar el stream a Parquet (la consulta de 3.4 sigue corriendo en paralelo)
+# Momento 1: arrancar el stream a Parquet (la consulta de 3.6 sigue corriendo en paralelo)
 ARTIFACTS = "./artifacts/atmos_eventos_observabilidad"
 CHECKPOINT_PARQUET = "./artifacts/chk_observabilidad"
 
@@ -456,7 +516,7 @@ consulta2 = (
 )
 ```
 
-Nota el nombre `consulta2`, no `consulta`: la consulta de 3.4 sigue viva en la variable `consulta`, y si esta nueva reusara ese mismo nombre, perderías la única referencia que te permite detenerla más tarde.
+Nota el nombre `consulta2`, no `consulta`: la consulta de 3.6 sigue viva en la variable `consulta`, y si esta nueva reusara ese mismo nombre, perderías la única referencia que te permite detenerla más tarde.
 
 Mientras corre, puedes leer lo que ya escribió sin detenerla — este paso es **opcional**:
 
@@ -468,61 +528,19 @@ print("filas guardadas:", total)
 guardado.select("sensorId", "latencyMs", "isValid").show(10, truncate=False)
 ```
 
-Cuando ya viste suficiente, detén **las dos consultas juntas** — la de consola de 3.4 y la de Parquet de este paso:
+Cuando ya viste suficiente, detén **las dos consultas juntas** — la de consola de 3.6 y la de Parquet de este paso:
 
 ```python
-# Momento 3: detener ambas consultas (la de consola de 3.4 y la de Parquet de 3.6)
+# Momento 3: detener ambas consultas (la de consola de 3.6 y la de Parquet de 3.8)
 consulta.stop()
 consulta2.stop()
 ```
 
 **Error frecuente**: si el log muestra líneas `ERROR WriteToDataSourceV2Exec`, `TaskKilledException` o `Aborting task` al llamar `.stop()`, es el mismo ruido benigno que ya viste en S8 — Spark cancelando una tarea a mitad de un micro-lote, no una falla real.
 
-### 3.7 Prometheus: verificar *targets* y correr consultas PromQL reales
-
-**Producto del paso:** confirmación real, en la interfaz de Prometheus, de que `kafka-exporter` está siendo monitoreado, y al menos una consulta PromQL devolviendo datos reales del clúster.
-
-Abre `http://localhost:49090` y revisa **Status → Targets**: `prometheus` y `kafka-exporter` deben aparecer en estado `UP`.
-
-Corre estas consultas (pestaña **Graph**, botón **Execute**):
-
-```promql
-kafka_brokers
-up{job="kafka-exporter"}
-kafka_broker_info
-kafka_consumergroup_lag{consumergroup="uso-atmos-group"}
-```
-
-**Tabla 6. Interpretación rápida de cada consulta**
-
-| Consulta | Valor esperado | Qué significa si falla |
-|---|---|---|
-| `kafka_brokers` | `1` | `kafka-exporter` no detecta ningún broker Kafka. |
-| `up{job="kafka-exporter"}` | `1` | El *exporter* está caído, o Prometheus no lo alcanza por red. |
-| `kafka_consumergroup_lag{consumergroup="uso-atmos-group"}` | Cerca de `0`, con picos cortos | Un valor alto y sostenido significa que el consumidor de S7 no da abasto. |
-
-**Error frecuente**: `kafka_consumergroup_lag` no devuelve nada si el `consumer_sensores.py` de S7 no ha corrido todavía con ese *topic* — el grupo `uso-atmos-group` recién existe en Kafka después de que un consumidor se conecta con ese `group_id`. Corre el consumidor de S7 (`docker exec -it lambda26-uso-atmos python /app/consumer_sensores.py`) unos segundos, y vuelve a consultar.
-
-### 3.8 Grafana: armar un tablero con paneles reales
-
-**Producto del paso:** un tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.
-
-Abre `http://localhost:43000` con `admin` / `admin`. Crea un *dashboard* nuevo y agrega estos paneles:
-
-**Tabla 7. Paneles mínimos del tablero**
-
-| Panel | Consulta | Visualización |
-|---|---|---|
-| Kafka Brokers | `kafka_brokers` | Stat |
-| Kafka Exporter Up | `up{job="kafka-exporter"}` | Stat |
-| Kafka Broker Info | `kafka_broker_info` | Table |
-| Consumer Lag | `kafka_consumergroup_lag` | Time series |
-
-En el panel **Consumer Lag**, Grafana dibuja una línea por cada `consumergroup` detectado. Una línea plana en `0` es la señal sana — un pico corto que vuelve a `0` es normal (llegó un evento, el consumidor se atrasó un instante y lo alcanzó); un valor que crece y se mantiene alto es la señal real de un consumidor que no da abasto.
-
 ### 3.9 Analizar la latencia agregada por ventana de tiempo
 
-**Producto del paso:** una tabla con la latencia promedio, mínima y máxima por minuto, calculada sobre la evidencia real guardada en 3.6.
+**Producto del paso:** una tabla con la latencia promedio, mínima y máxima por minuto, calculada sobre la evidencia real guardada en 3.8.
 
 ```python
 from pyspark.sql.functions import window, avg, min as spark_min, max as spark_max, count
@@ -551,7 +569,7 @@ Esta es una lectura **batch** sobre el Parquet (no streaming): agrupa por `windo
 
 ### 3.10 Alertas propuestas y umbrales
 
-**Producto del paso:** una tabla de alertas propuestas, con umbrales basados en los datos reales que obtuviste en 3.7 y 3.9.
+**Producto del paso:** una tabla de alertas propuestas, con umbrales basados en los datos reales que obtuviste en 3.2 y 3.9.
 
 **Tabla 8. Alertas propuestas**
 
@@ -563,21 +581,21 @@ Esta es una lectura **batch** sobre el Parquet (no streaming): agrupa por `windo
 | Latencia alta sensible | `avgLatencyMs > 100` (por minuto) | Notebook Spark / Parquet |
 | Latencia alta crítica | `avgLatencyMs > 1000` (por minuto) | Notebook Spark / Parquet |
 
-Para esta práctica, las alertas se entregan como propuesta documentada, con los umbrales justificados por los datos reales de 3.7/3.9 — no hace falta configurarlas en Grafana Alerting para cumplir el producto de la sesión, aunque puedes hacerlo si quieres ir más allá: **Alerting → Alert rules → New alert rule**, *datasource* Prometheus, la consulta de la tabla de arriba, `Evaluate every: 1m`, `For: 2m` (para no disparar con picos de un solo minuto).
+Para esta práctica, las alertas se entregan como propuesta documentada, con los umbrales justificados por los datos reales de 3.2/3.9 — no hace falta configurarlas en Grafana Alerting para cumplir el producto de la sesión, aunque puedes hacerlo si quieres ir más allá: **Alerting → Alert rules → New alert rule**, *datasource* Prometheus, la consulta de la tabla de arriba, `Evaluate every: 1m`, `For: 2m` (para no disparar con picos de un solo minuto).
 
 ### 3.11 Estimación de costos y plan de escalado
 
 **Producto del paso:** una estimación de costos basada en lo que de verdad mediste, y un plan de escalado con al menos dos umbrales de decisión.
 
-Con los datos reales de 3.5 (throughput) y 3.9 (latencia), completa esta tabla:
+Con los datos reales de 3.7 (throughput) y 3.9 (latencia), completa esta tabla:
 
 **Tabla 9. Plantilla de estimación de costos**
 
 | Variable | Valor medido en esta sesión | Supuesto para estimar costo |
 |---|---|---|
-| Eventos por segundo (pico) | *(de 3.5, `inputRowsPerSecond`)* | — |
+| Eventos por segundo (pico) | *(de 3.7, `inputRowsPerSecond`)* | — |
 | Latencia promedio por minuto | *(de 3.9, `avgLatencyMs`)* | — |
-| Crecimiento del Parquet por hora | *(cuenta filas de 3.6 en dos momentos distintos y compara)* | Costo de almacenamiento ∝ tamaño retenido |
+| Crecimiento del Parquet por hora | *(cuenta filas de 3.8 en dos momentos distintos y compara)* | Costo de almacenamiento ∝ tamaño retenido |
 | Costo de cómputo por hora | — | Según el proveedor/instancia que elijas documentar |
 
 A partir de esa tabla, responde por escrito: ¿a qué *lag* o latencia promedio decidirías agregar más cómputo (más particiones de Kafka, más paralelismo en Spark)? ¿Qué parte del pipeline escalarías primero si el volumen de eventos se duplicara — el broker, el consumidor, o la escritura a Parquet? No hay una única respuesta correcta: lo que se evalúa es que la decisión esté justificada con los números que mediste, no con una suposición.
@@ -602,7 +620,7 @@ Aplicación de la instrumentación de esta sesión a una fuente de eventos del *
 
 Completa y evidencia estas tareas:
 
-1. Sobre tu propio topic de Kafka (el de S6/S7, o uno nuevo), construye la lectura en modo streaming con campos de observabilidad (`isValid`, `processedAt`, `latencyMs`), igual que 3.3.
+1. Sobre tu propio topic de Kafka (el de S6/S7, o uno nuevo), construye la lectura en modo streaming con campos de observabilidad (`isValid`, `processedAt`, `latencyMs`), igual que 3.5.
 2. Levanta Prometheus y Grafana sobre tu propia red de Kafka, y confirma al menos dos *targets* `UP`.
 3. Arma un tablero de Grafana con al menos tres paneles reales sobre tu propio pipeline.
 4. Calcula la latencia agregada por ventana de tiempo sobre tu propia evidencia persistida, igual que 3.9.
