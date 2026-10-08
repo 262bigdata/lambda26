@@ -78,9 +78,8 @@ lambda26-kafka-net
 (`networks: - lambda26-kafka-net`, con `external: true`) — por eso Kafka
 **siempre tiene que estar arriba primero**: si intentas levantar cualquiera de
 esos tres sin haber corrido este `compose.yml` antes, Docker Compose falla con
-un error de red no encontrada. `obs/` (Prometheus + Grafana, todavía no
-existe en este repositorio) se unirá a esta misma red más adelante en el
-curso, para scrapear `kafka-exporter`.
+un error de red no encontrada. `obs/` (Prometheus + Grafana, S9) también se
+une a esta misma red, para scrapear `kafka-exporter` — ver su propio README.
 
 ## Cambiar a Kafka Debezium
 
