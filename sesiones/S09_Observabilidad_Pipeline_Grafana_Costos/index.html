@@ -2633,6 +2633,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="n">latencia_por_minuto</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Esta es una lectura <strong>batch</strong> sobre el Parquet (no streaming): agrupa por <code>window(kafkaTimestamp, "1 minute")</code>, la misma función <code>window()</code> de S8, pero sobre datos ya persistidos en vez de un stream en vivo. El resultado es la base real para decidir el umbral de latencia de 3.10 — no un número inventado.</p>
+<p><strong>Por qué <code>minLatencyMs</code> y <code>maxLatencyMs</code> pueden variar mucho dentro de la misma ventana, con el sistema sano.</strong> Dos números fijan este comportamiento, en archivos distintos:</p>
+<ul>
+<li><code>SENSOR_INTERVAL_MS</code> (<code>uso-atmos/app/producer_sensores.py</code>, S7), <strong>3000 ms</strong> por defecto: cada cuánto el productor manda una ronda de los 3 sensores.</li>
+<li><code>trigger(processingTime="5 seconds")</code> (3.6 y 3.8 de esta sesión), <strong>5000 ms</strong>: cada cuánto Spark revisa si hay eventos nuevos y arma un micro-lote.</li>
+</ul>
+<p>3 y 5 no comparten múltiplo hasta 15 (su mínimo común múltiplo) — así que la espera de un evento hasta el próximo disparo de Spark no es constante, cicla entre un máximo cercano a 5s (un evento que llegó justo después del último disparo) y un mínimo cercano a 0s (uno que llegó justo antes del siguiente), repitiéndose cada 15 segundos. Eso es precisamente lo que terminas viendo en <code>minLatencyMs</code>/<code>maxLatencyMs</code>: no es un problema de rendimiento ni una señal de alerta, es la consecuencia aritmética de que el intervalo del productor y el <em>trigger</em> de Spark no son múltiplos entre sí. Si alguna vez fijaras ambos al mismo valor (por ejemplo, los dos a 3s), ese ciclo desaparecería y la latencia quedaría mucho más pareja entre eventos — a cambio de micro-lotes más frecuentes (más <em>overhead</em> por cada uno, el mismo <em>trade-off</em> de 2.4).</p>
 <h3 id="310-alertas-propuestas-y-umbrales">3.10 Alertas propuestas y umbrales<a class="headerlink" href="#310-alertas-propuestas-y-umbrales" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> una tabla de alertas propuestas, con umbrales basados en los datos reales que obtuviste en 3.2 y 3.9.</p>
 <p><strong>Tabla 8. Alertas propuestas</strong></p>
@@ -2708,6 +2714,20 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </tr>
 </tbody>
 </table>
+<p><strong>Montos de referencia, para calibrar tu propia estimación</strong> (AWS, us-east-1, octubre 2026 — verifica el precio vigente antes de entregar, estos cambian con el tiempo):</p>
+<ul>
+<li><strong>Cómputo:</strong> una instancia pequeña tipo <code>t3.medium</code> (2 vCPU, 4 GB RAM — similar a lo que usa este pipeline) cuesta <strong>≈ US$ 0.0416/hora</strong> bajo demanda, unos <strong>≈ US$ 30/mes</strong> si la dejas corriendo 24/7 (Amazon Web Services, 2026a).</li>
+<li><strong>Almacenamiento:</strong> S3 Standard cuesta <strong>≈ US$ 0.023 por GB-mes</strong> (Amazon Web Services, 2026b). Con eso, convierte tu propio "crecimiento del Parquet por hora" (la fila de arriba) a GB/mes y multiplica — ej.: si tu Parquet crece 50 MB/hora, son ≈ 36 GB/mes ≈ <strong>US$ 0.83/mes</strong> solo de almacenamiento.</li>
+</ul>
+<p>Son solo dos de los componentes del costo real (falta tráfico de red saliente, por ejemplo) — alcanza para que tu estimación tenga un ancla real en vez de ser un número inventado, no para ser una cotización completa.</p>
+<p><strong>Cómo estimar el costo mensual del pipeline completo</strong> (no solo una fila suelta de la tabla), si tuvieras que llevarlo a la nube:</p>
+<ol>
+<li><strong>Lista qué correría 24/7 en producción</strong> — no todo lo de tu <code>docker compose</code> local califica. Kafka UI y el propio Jupyter de <code>pyspark</code> son herramientas de <em>desarrollo</em>: sirven para construir y depurar, no se dejan corriendo indefinidamente en un entorno real. Lo que sí corre siempre: el <em>broker</em> de Kafka, el script de inferencia/observabilidad en <em>streaming</em> (S8-S9, el que nunca termina), y <code>obs/</code> (Prometheus + Grafana).</li>
+<li><strong>Agrupa por instancia.</strong> <code>kafka-exporter</code> es liviano y puede compartir la máquina del <em>broker</em>; Prometheus y Grafana pueden compartir otra. Con el volumen de este laboratorio (3 sensores, ≈1 evento/segundo), tres instancias pequeñas alcanzan: una para Kafka, una para el <em>script</em> de <em>streaming</em>, una para <code>obs/</code>.</li>
+<li><strong>Multiplica cómputo:</strong> 3 instancias × US$ 0.0416/hora × 730 horas/mes ≈ <strong>US$ 91/mes</strong>.</li>
+<li><strong>Súmale almacenamiento:</strong> tu propio crecimiento de Parquet (fila de la Tabla 9) más las métricas de Prometheus (crecen más lento, pero también acumulan) al precio de S3 Standard — con el ejemplo de 50 MB/hora de arriba, ≈ US$ 1/mes más.</li>
+<li><strong>Total de este laboratorio, a modo de ejemplo:</strong> ≈ <strong>US$ 92/mes</strong> solo de infraestructura base — sin tráfico de red ni el tiempo de quien lo mantiene. Repite este mismo cálculo con <em>tus</em> valores medidos (no los de este ejemplo) para la tabla de arriba.</li>
+</ol>
 <p>A partir de esa tabla, responde por escrito: ¿a qué <em>lag</em> o latencia promedio decidirías agregar más cómputo (más particiones de Kafka, más paralelismo en Spark)? ¿Qué parte del pipeline escalarías primero si el volumen de eventos se duplicara — el broker, el consumidor, o la escritura a Parquet? No hay una única respuesta correcta: lo que se evalúa es que la decisión esté justificada con los números que mediste, no con una suposición.</p>
 <p><strong>Evidencia de aprendizaje:</strong></p>
 <ul>
@@ -2717,7 +2737,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <li>Tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.</li>
 <li>Tabla de latencia agregada por ventana de tiempo, calculada sobre evidencia real.</li>
 <li>Alertas propuestas con umbrales basados en los datos medidos, no inventados.</li>
-<li>Estimación de costos y plan de escalado, con al menos dos umbrales de decisión justificados.</li>
+<li>Estimación de costos anclada en precios de referencia reales (no inventados), y plan de escalado con al menos dos umbrales de decisión justificados.</li>
 </ul>
 <h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
 <p>Tiempo: 3h fuera del aula.</p>
@@ -2875,6 +2895,8 @@ Indica 2 fortalezas y 2 recomendaciones.
 <li>Prometheus Authors. (2024). <em>Prometheus Documentation</em>. https://prometheus.io/docs/</li>
 <li>Grafana Labs. (2024). <em>Grafana Documentation</em>. https://grafana.com/docs/grafana/latest/</li>
 <li>Qin, D. (2024). <em>kafka_exporter</em>. GitHub. https://github.com/danielqsj/kafka_exporter</li>
+<li>Amazon Web Services. (2026a). <em>Amazon EC2 On-Demand Pricing</em>. https://aws.amazon.com/ec2/pricing/on-demand/</li>
+<li>Amazon Web Services. (2026b). <em>Amazon S3 Pricing</em>. https://aws.amazon.com/s3/pricing/</li>
 </ol>
 
 
