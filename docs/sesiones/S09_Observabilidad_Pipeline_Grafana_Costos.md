@@ -588,7 +588,39 @@ Esta es una lectura **batch** sobre el Parquet (no streaming): agrupa por `windo
 | Latencia alta sensible | `avgLatencyMs > 100` (por minuto) | Notebook Spark / Parquet |
 | Latencia alta crítica | `avgLatencyMs > 1000` (por minuto) | Notebook Spark / Parquet |
 
-Para esta práctica, las alertas se entregan como propuesta documentada, con los umbrales justificados por los datos reales de 3.2/3.9 — no hace falta configurarlas en Grafana Alerting para cumplir el producto de la sesión, aunque puedes hacerlo si quieres ir más allá: **Alerting → Alert rules → New alert rule**, *datasource* Prometheus, la consulta de la tabla de arriba, `Evaluate every: 1m`, `For: 2m` (para no disparar con picos de un solo minuto).
+Para esta práctica, las alertas se entregan como propuesta documentada, con los umbrales justificados por los datos reales de 3.2/3.9 — **no hace falta configurarlas en Grafana Alerting para cumplir el producto de la sesión.**
+
+**Si quieres ir más allá, así se configura una de verdad** (ejemplo con la fila *Lag alto sostenido*):
+
+1. **Alerting → Alert rules → New alert rule**.
+2. **1. Enter alert rule name**: un nombre que identifique la situación de la Tabla 8 (ej. `Lag alto sostenido`).
+3. **2. Define query and alert condition**:
+   - *Datasource* **Prometheus**, modo **Code**. Pega la consulta con el umbral incluido: `kafka_consumergroup_lag > 100` (para probarlo rápido sin esperar a que el *lag* real suba, bájalo temporalmente a `> 1` o `> 10`, y vuelve a `100` antes de entregar). Deja `Type: Instant` tal cual viene por defecto.
+   - En la expresión **B (Reduce)**: `Function: Last`, `Mode: Strict` — toma el valor más reciente, y distingue "sin datos" de "lag es 0" (relevante por el Error frecuente de 3.2). Puede aparecer un aviso ("*Reduce operation is not needed*") porque una consulta `Instant` ya devuelve un único valor por serie — es solo un aviso, no bloquea nada; si prefieres evitarlo, puedes borrar esta expresión y conectar `C` directo a `A`.
+   - En la expresión **C (Threshold)**, marcada como *Alert condition*: `Input: B`, `IS ABOVE 0` — como la consulta de `A` ya viene filtrada por `> 100`, cualquier resultado que llegue hasta acá ya cumple la condición real; comparar contra `0` solo confirma que *existe* un resultado.
+   - **Rule type: Grafana-managed** (no `Data source-managed` — tu `prometheus.yml` no tiene Alertmanager propio configurado).
+4. **3. Set evaluation behavior**: elige una carpeta (`Folder`), crea un grupo de evaluación con intervalo **1m** (`Evaluate every: 1m`), y fija **`Pending period: 2m`** (no el `1m` por defecto) — para no disparar con un pico de un solo minuto, el mismo criterio que ya viste con `kafka_consumergroup_lag` en 3.2. Abre **"Configure no data and error handling"** y confirma que `No Data` quede en su opción por defecto (ni `Alerting` ni `Normal` automático) — así un *consumer group* que todavía no existe no dispara una falsa alerta.
+5. **4. Configure labels and notifications**: las *labels* son opcionales (sirven para organizar muchas reglas, no hace falta ninguna acá). En *Notifications*, elige **Select contact point** y usa el *contact point* por defecto de Grafana (`grafana-default-email`) — no hay servidor de correo configurado en `obs/`, así que no va a enviar nada real; solo es necesario para poder guardar.
+6. **5. Configure notification message** (todo opcional): escribe un **Summary** corto (ej. "El *consumer group* `uso-atmos-group` tiene más de 100 mensajes pendientes") y usa **Link dashboard and panel** para apuntar al panel **Consumer Lag** de tu tablero (3.3) — así la alerta queda conectada al mismo gráfico donde verificaste el disparo.
+7. **Save rule and exit**.
+
+Para confirmar que funciona: con el umbral bajado (`> 1` o `> 10`), mira **Alerting → Alert rules** — tu regla pasa de `Normal` a `Pending` y, pasado el `Pending period`, a `Firing`. Compáralo con el panel **Consumer Lag** del mismo momento: debe mostrar el mismo valor que cruzó el umbral. Cuando confirmes que el mecanismo funciona, sube el umbral de vuelta a `100` y documenta ambos — la prueba con el valor bajo, y el valor real con el que lo dejas.
+
+**Qué hace falta para que la alerta se envíe de verdad, y una regla más simple para probar esto sin tanta espera.**
+
+Que la regla pase a `Firing` **no** significa que llegue un correo o un mensaje a algún lado — eso depende del *contact point* (sección 4), y el que usaste (`grafana-default-email`) no tiene ningún servidor SMTP real configurado detrás en `obs/`. Para que una notificación *salga* de Grafana de verdad, haría falta un *contact point* real: un *webhook* (el más simple de configurar sin cuenta externa, apunta a cualquier URL que reciba el POST) o SMTP de verdad — ninguno de los dos está en el alcance de esta sesión. Lo que sí es evidencia suficiente para el producto de esta sesión es el **cambio de estado dentro de Grafana**: `Normal → Pending → Firing`, visible en **Alerting → Alert rules** y en el panel afectado, con la hora coincidiendo entre ambos.
+
+Si `kafka_consumergroup_lag > 100` te resulta lento de provocar de verdad (necesitas que se acumule un backlog real, sin bajar el umbral), hay una situación de la Tabla 8 mucho más simple e inmediata: ***Exporter* caído** (`up{job="kafka-exporter"} == 0`). A diferencia del *lag*, que depende de volumen acumulado, `up` es un metadato del propio Prometheus — dice si el último *scrape* a ese *target* tuvo éxito o no, sin importar qué datos devuelva. Provocarla de verdad, sin inventar nada:
+
+```bash
+docker stop lambda26-kafka-exporter
+```
+
+Espera lo que tarde el próximo *scrape* de Prometheus (hasta `scrape_interval: 15s`, 3.1) más el intervalo de evaluación (`1m`) — en menos de un par de minutos la regla pasa a `Pending` y, si dejas el *Pending period* corto (`None` o `1m` alcanza aquí: a diferencia del *lag*, un *exporter* caído no es un pico pasajero que te interese ignorar), a `Firing`. Confírmalo también en el panel **Kafka Exporter Up** de tu tablero (3.3): debe caer a `0` al mismo tiempo. Para devolver todo a su estado normal:
+
+```bash
+docker start lambda26-kafka-exporter
+```
 
 ### 3.11 Estimación de costos y plan de escalado
 
