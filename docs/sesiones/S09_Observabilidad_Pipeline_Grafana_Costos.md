@@ -356,7 +356,7 @@ Si es la primera vez que armas un *dashboard* en Grafana, los cuatro paneles se 
 4. En la pestaña **Query**, pega la consulta PromQL de la fila correspondiente de la Tabla 7 (ej. `kafka_brokers`) en el campo de la consulta (**Metric**/*code mode* — si ves un *builder* visual en vez de un campo de texto, haz clic en **Code** a la derecha de la consulta para pegarla tal cual).
 5. En el panel derecho, cambia **Visualization** al tipo que indica la tabla (**Stat**, **Table** o **Time series**).
 6. Arriba, reemplaza **Panel Title** por el nombre de la fila (ej. "Kafka Brokers").
-7. **Apply** (arriba a la derecha) — vuelve al *dashboard*, con el panel ya agregado.
+7. **Back to dashboard** (arriba a la derecha) — vuelve al *dashboard*, con el panel ya agregado.
 8. Repite del paso 2 al 7 para los otros tres paneles (ya no vuelve a pedir el *datasource*, solo en el primero).
 9. Cuando tengas los cuatro, **Save dashboard** (ícono de disco, arriba) → nómbralo `S9 - Observabilidad del pipeline` → **Save**.
 

@@ -44,16 +44,30 @@ Desde `lambda26/pyspark`, copia las variables de entorno (una sola vez):
 cp .env.example .env
 ```
 
-Luego levanta el laboratorio:
+Luego levanta el laboratorio. Para las sesiones batch (S1-S4), sin Kafka:
 
 ```powershell
 docker compose up -d
 ```
 
-La integración con Kafka (módulo `kafka/` y el override
-`pyspark/compose.kafka.yml`) todavía no existe en este repositorio: se crea
-recién en la Unidad 2 (S6), cuando el curso pasa de batch a streaming. Hasta
-entonces, este entorno corre solo (PySpark + Jupyter, sin Kafka).
+Desde S6 (ingesta en tiempo real) en adelante, `pyspark` necesita hablar con
+Kafka — y para eso tiene que estar en la misma red Docker que `kafka/compose.yml`
+crea (`lambda26-kafka-net`). `pyspark/compose.yml` no se toca para esto (sirve
+para todo el curso, no solo para streaming): en vez de eso, `pyspark/compose.kafka.yml`
+es un segundo archivo que solo agrega esa red, sin reemplazar nada del primero.
+Levanta primero Kafka, y después combina los dos archivos con dos `-f`:
+
+```powershell
+cd ../kafka
+docker compose up -d
+cd ../pyspark
+docker compose -f compose.yml -f compose.kafka.yml up -d
+```
+
+**Error frecuente**: si una celda que lee Kafka falla con `kafka.errors.NoBrokersAvailable`
+o, en el log del driver, `java.net.UnknownHostException: kafka`, el contenedor
+`pyspark` está arriba pero sin `compose.kafka.yml` — vuelve a levantarlo con los
+dos `-f` del comando de arriba.
 
 Luego abre JupyterLab:
 
