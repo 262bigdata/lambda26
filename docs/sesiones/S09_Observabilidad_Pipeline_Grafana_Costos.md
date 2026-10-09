@@ -567,6 +567,13 @@ latencia_por_minuto.show(20, truncate=False)
 
 Esta es una lectura **batch** sobre el Parquet (no streaming): agrupa por `window(kafkaTimestamp, "1 minute")`, la misma función `window()` de S8, pero sobre datos ya persistidos en vez de un stream en vivo. El resultado es la base real para decidir el umbral de latencia de 3.10 — no un número inventado.
 
+**Por qué `minLatencyMs` y `maxLatencyMs` pueden variar mucho dentro de la misma ventana, con el sistema sano.** Dos números fijan este comportamiento, en archivos distintos:
+
+- `SENSOR_INTERVAL_MS` (`uso-atmos/app/producer_sensores.py`, S7), **3000 ms** por defecto: cada cuánto el productor manda una ronda de los 3 sensores.
+- `trigger(processingTime="5 seconds")` (3.6 y 3.8 de esta sesión), **5000 ms**: cada cuánto Spark revisa si hay eventos nuevos y arma un micro-lote.
+
+3 y 5 no comparten múltiplo hasta 15 (su mínimo común múltiplo) — así que la espera de un evento hasta el próximo disparo de Spark no es constante, cicla entre un máximo cercano a 5s (un evento que llegó justo después del último disparo) y un mínimo cercano a 0s (uno que llegó justo antes del siguiente), repitiéndose cada 15 segundos. Eso es precisamente lo que terminas viendo en `minLatencyMs`/`maxLatencyMs`: no es un problema de rendimiento ni una señal de alerta, es la consecuencia aritmética de que el intervalo del productor y el *trigger* de Spark no son múltiplos entre sí. Si alguna vez fijaras ambos al mismo valor (por ejemplo, los dos a 3s), ese ciclo desaparecería y la latencia quedaría mucho más pareja entre eventos — a cambio de micro-lotes más frecuentes (más *overhead* por cada uno, el mismo *trade-off* de 2.4).
+
 ### 3.10 Alertas propuestas y umbrales
 
 **Producto del paso:** una tabla de alertas propuestas, con umbrales basados en los datos reales que obtuviste en 3.2 y 3.9.
@@ -598,6 +605,21 @@ Con los datos reales de 3.7 (throughput) y 3.9 (latencia), completa esta tabla:
 | Crecimiento del Parquet por hora | *(cuenta filas de 3.8 en dos momentos distintos y compara)* | Costo de almacenamiento ∝ tamaño retenido |
 | Costo de cómputo por hora | — | Según el proveedor/instancia que elijas documentar |
 
+**Montos de referencia, para calibrar tu propia estimación** (AWS, us-east-1, octubre 2026 — verifica el precio vigente antes de entregar, estos cambian con el tiempo):
+
+- **Cómputo:** una instancia pequeña tipo `t3.medium` (2 vCPU, 4 GB RAM — similar a lo que usa este pipeline) cuesta **≈ US$ 0.0416/hora** bajo demanda, unos **≈ US$ 30/mes** si la dejas corriendo 24/7 (Amazon Web Services, 2026a).
+- **Almacenamiento:** S3 Standard cuesta **≈ US$ 0.023 por GB-mes** (Amazon Web Services, 2026b). Con eso, convierte tu propio "crecimiento del Parquet por hora" (la fila de arriba) a GB/mes y multiplica — ej.: si tu Parquet crece 50 MB/hora, son ≈ 36 GB/mes ≈ **US$ 0.83/mes** solo de almacenamiento.
+
+Son solo dos de los componentes del costo real (falta tráfico de red saliente, por ejemplo) — alcanza para que tu estimación tenga un ancla real en vez de ser un número inventado, no para ser una cotización completa.
+
+**Cómo estimar el costo mensual del pipeline completo** (no solo una fila suelta de la tabla), si tuvieras que llevarlo a la nube:
+
+1. **Lista qué correría 24/7 en producción** — no todo lo de tu `docker compose` local califica. Kafka UI y el propio Jupyter de `pyspark` son herramientas de *desarrollo*: sirven para construir y depurar, no se dejan corriendo indefinidamente en un entorno real. Lo que sí corre siempre: el *broker* de Kafka, el script de inferencia/observabilidad en *streaming* (S8-S9, el que nunca termina), y `obs/` (Prometheus + Grafana).
+2. **Agrupa por instancia.** `kafka-exporter` es liviano y puede compartir la máquina del *broker*; Prometheus y Grafana pueden compartir otra. Con el volumen de este laboratorio (3 sensores, ≈1 evento/segundo), tres instancias pequeñas alcanzan: una para Kafka, una para el *script* de *streaming*, una para `obs/`.
+3. **Multiplica cómputo:** 3 instancias × US$ 0.0416/hora × 730 horas/mes ≈ **US$ 91/mes**.
+4. **Súmale almacenamiento:** tu propio crecimiento de Parquet (fila de la Tabla 9) más las métricas de Prometheus (crecen más lento, pero también acumulan) al precio de S3 Standard — con el ejemplo de 50 MB/hora de arriba, ≈ US$ 1/mes más.
+5. **Total de este laboratorio, a modo de ejemplo:** ≈ **US$ 92/mes** solo de infraestructura base — sin tráfico de red ni el tiempo de quien lo mantiene. Repite este mismo cálculo con *tus* valores medidos (no los de este ejemplo) para la tabla de arriba.
+
 A partir de esa tabla, responde por escrito: ¿a qué *lag* o latencia promedio decidirías agregar más cómputo (más particiones de Kafka, más paralelismo en Spark)? ¿Qué parte del pipeline escalarías primero si el volumen de eventos se duplicara — el broker, el consumidor, o la escritura a Parquet? No hay una única respuesta correcta: lo que se evalúa es que la decisión esté justificada con los números que mediste, no con una suposición.
 
 **Evidencia de aprendizaje:**
@@ -608,7 +630,7 @@ A partir de esa tabla, responde por escrito: ¿a qué *lag* o latencia promedio 
 - Tablero de Grafana con al menos cuatro paneles mostrando datos reales del clúster.
 - Tabla de latencia agregada por ventana de tiempo, calculada sobre evidencia real.
 - Alertas propuestas con umbrales basados en los datos medidos, no inventados.
-- Estimación de costos y plan de escalado, con al menos dos umbrales de decisión justificados.
+- Estimación de costos anclada en precios de referencia reales (no inventados), y plan de escalado con al menos dos umbrales de decisión justificados.
 
 ## 4. Crea: actividad autónoma
 
@@ -746,3 +768,5 @@ Tiempo: 5 min.
 2. Prometheus Authors. (2024). *Prometheus Documentation*. https://prometheus.io/docs/
 3. Grafana Labs. (2024). *Grafana Documentation*. https://grafana.com/docs/grafana/latest/
 4. Qin, D. (2024). *kafka_exporter*. GitHub. https://github.com/danielqsj/kafka_exporter
+5. Amazon Web Services. (2026a). *Amazon EC2 On-Demand Pricing*. https://aws.amazon.com/ec2/pricing/on-demand/
+6. Amazon Web Services. (2026b). *Amazon S3 Pricing*. https://aws.amazon.com/s3/pricing/
