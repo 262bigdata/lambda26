@@ -1463,6 +1463,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cierre-detener-la-consulta-y-revisar-resultados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cierre: detener la consulta y revisar resultados
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2238,6 +2249,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cierre-detener-la-consulta-y-revisar-resultados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cierre: detener la consulta y revisar resultados
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2970,6 +2992,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"campo-electrico-eventos"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"failOnDataLoss"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">load</span><span class="p">()</span>
 <span class="p">)</span>
 
@@ -2982,16 +3005,49 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <span class="n">predicciones_stream</span> <span class="o">=</span> <span class="n">modelo_cargado</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">eventos</span><span class="p">)</span>
 </code></pre></div>
 <p>Nota lo que falta frente a S09: no hay <code>withWatermark</code>, no hay <code>groupBy(window(...))</code>. El modelo transforma cada fila tal como llega — exactamente lo mismo que hizo <code>modelo_cargado.transform(test)</code> en 3.6.1, solo que la fuente ahora es un stream.</p>
+<p><code>failOnDataLoss</code> en <code>false</code> no es un detalle cosmético: <code>kafka/compose.yml</code> no tiene volumen persistente para el broker (a propósito, es un clúster de laboratorio, no de producción) — cualquier <code>docker compose down</code> seguido de <code>up</code> recrea el topic vacío. El <em>checkpoint</em> de la consulta (<code>CHECKPOINT_STREAM</code>, más abajo) vive en el disco del notebook, ajeno a Kafka, y sigue recordando el último <em>offset</em> leído — si ese <em>offset</em> ya no existe en el topic recién creado, Spark lanza <code>KafkaIllegalStateException</code> (<code>OffsetOutOfRangeException</code>) y la consulta muere. Con <code>failOnDataLoss=false</code>, en vez de morir, la consulta salta lo que ya no está disponible y sigue consumiendo lo nuevo.</p>
+<p><strong>Antes de arrancar nada, detén cualquier consulta anterior que haya quedado viva</strong> — si vuelves a correr esta sección sin reiniciar el <em>kernel</em>, la consulta de una corrida pasada puede seguir corriendo en segundo plano:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="s2">"consulta_predicciones"</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">consulta_predicciones</span><span class="o">.</span><span class="n">isActive</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Deteniendo la consulta anterior antes de arrancar una nueva..."</span><span class="p">)</span>
+    <span class="n">consulta_predicciones</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Error frecuente</strong>: saltarte esta celda y volver a correr "Momento 1" con una consulta anterior todavía viva. La consola muestra <code>WARN StreamingQueryManager: Stopping existing streaming query [id=...], as a new run is being started</code> justo antes de una cascada de errores (<code>InterruptedException</code>, <code>TaskKilledException</code>, hasta <code>FileNotFoundException</code> sobre <code>_temporary/0</code>) — Spark detiene la consulta vieja a la fuerza para arrancar la nueva, y las dos terminan pisándose sobre el mismo directorio de salida. Ni borrar los directorios a mano arregla esto a mitad de la carrera — lo correcto es este chequeo, o en su defecto reiniciar el <em>kernel</em> antes de volver a correr la sección desde cero.</p>
 <div class="highlight"><pre><span></span><code><span class="n">RUTA_PREDICCIONES_STREAM</span> <span class="o">=</span> <span class="s2">"./artifacts/predicciones_stream"</span>
 <span class="n">CHECKPOINT_STREAM</span> <span class="o">=</span> <span class="s2">"./artifacts/chk_predicciones_stream"</span>
+</code></pre></div>
+<p><strong>Limpia el <em>checkpoint</em> y las predicciones anteriores solo si el <em>esquema</em> ya no coincide</strong> — por ejemplo, si cambiaste qué columnas guarda <code>guardar_predicciones_microlote</code> (como <code>timestamp</code> → <code>fechaHora</code>, abajo) desde la última corrida. No hace falta adivinar "¿corro esto o no?": compara las columnas que ya hay en disco contra las que el código de hoy espera, y limpia únicamente si no coinciden:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnalysisException</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">guardar_predicciones_microlote</span><span class="p">(</span><span class="n">df_microlote</span><span class="p">,</span> <span class="n">id_lote</span><span class="p">):</span>
+<span class="n">COLUMNAS_ESPERADAS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"batchId"</span><span class="p">,</span> <span class="s2">"estacionId"</span><span class="p">,</span> <span class="s2">"fechaHora"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"prediccionSiguienteCE"</span><span class="p">}</span>
+
+<span class="n">limpiar</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">columnas_actuales</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">limpiar</span> <span class="o">=</span> <span class="n">columnas_actuales</span> <span class="o">!=</span> <span class="n">COLUMNAS_ESPERADAS</span>
+        <span class="k">if</span> <span class="n">limpiar</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Esquema desactualizado (</span><span class="si">{</span><span class="n">columnas_actuales</span><span class="si">}</span><span class="s2">) — limpiando checkpoint y predicciones."</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">AnalysisException</span><span class="p">:</span>
+        <span class="n">limpiar</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># carpeta corrupta o vacía, mejor empezar de cero</span>
+
+<span class="k">if</span> <span class="n">limpiar</span><span class="p">:</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">CHECKPOINT_STREAM</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Esquema al día — no hace falta limpiar nada."</span><span class="p">)</span>
+</code></pre></div>
+<p>Nota el orden: este chequeo va <strong>antes</strong> de arrancar la consulta (Momento 1, abajo), no después — limpiar un directorio mientras una consulta ya activa le está escribiendo es exactamente el mismo problema de carrera que el chequeo anterior evita.</p>
+<p>Recién ahora, con todo eso resuelto, arranca la consulta:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">guardar_predicciones_microlote</span><span class="p">(</span><span class="n">df_microlote</span><span class="p">,</span> <span class="n">id_lote</span><span class="p">):</span>
     <span class="n">filas</span> <span class="o">=</span> <span class="n">df_microlote</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">filas</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Micro-lote </span><span class="si">{</span><span class="n">id_lote</span><span class="si">}</span><span class="s2">: sin filas"</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="n">df_microlote</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-        <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">id_lote</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">),</span> <span class="s2">"estacionId"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">,</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">id_lote</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">),</span> <span class="s2">"estacionId"</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"fechaHora"</span><span class="p">),</span> <span class="s2">"CE"</span><span class="p">,</span>
         <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"prediccionSiguienteCE"</span><span class="p">),</span>
     <span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Micro-lote </span><span class="si">{</span><span class="n">id_lote</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">filas</span><span class="si">}</span><span class="s2"> predicciones guardadas"</span><span class="p">)</span>
@@ -3004,14 +3060,17 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="p">)</span>
 </code></pre></div>
+<p><code>timestamp</code> llega del productor como milisegundos desde el <em>epoch</em> (<code>LongType</code>, 2.3) — ilegible a simple vista. <code>(F.col("timestamp") / 1000).cast("timestamp")</code> lo convierte a <code>TimestampType</code> real (<code>fechaHora</code>), que Spark ya sabe imprimir como fecha legible en el <code>show()</code> de más abajo — sin cambiar lo que viaja por Kafka, solo cómo se guarda en el Parquet de salida.</p>
 <p><strong>Error frecuente</strong>: el primer micro-lote suele imprimir <code>Micro-lote 0: sin filas</code>. No es un error — Spark dispara el primer micro-lote apenas la suscripción al topic queda lista, casi siempre antes de que el productor haya emitido su primera lectura desde ese instante. Los siguientes micro-lotes sí traen filas, uno por cada lectura publicada.</p>
-<p>Déjala correr un par de minutos mientras el productor sigue emitiendo. Cuando se haya visto suficiente, detenla:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta</span>
+<p><strong>Con la consulta arrancada, no la detengas todavía.</strong> En producción real, una consulta de streaming se queda corriendo indefinidamente — detenerla aquí es una conveniencia de este notebook, no cómo funciona streaming en general. Dale la vuelta: sigue con el resto de la sesión (3.8, evidencia) con la consulta corriendo en segundo plano, y vuelve recién al final de la clase a detenerla — así tienes varios minutos reales de lecturas acumuladas, no solo un par.</p>
+<h3 id="cierre-detener-la-consulta-y-revisar-resultados">Cierre: detener la consulta y revisar resultados<a class="headerlink" href="#cierre-detener-la-consulta-y-revisar-resultados" title="Permanent link">&para;</a></h3>
+<p>Esto es lo último que corres en esta sesión, después de haber trabajado el resto de la guía con la consulta corriendo en segundo plano todo ese tiempo — en <strong>su propia celda</strong>, separada de la lectura de resultados:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Momento 2: detener la consulta (al final de la sesión, no antes)</span>
 <span class="n">consulta_predicciones</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-
-<span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
-<p><strong>Error frecuente</strong>: al llamar <code>.stop()</code> mientras un micro-lote todavía está escribiendo, la consola puede mostrar un <code>java.lang.InterruptedException</code> con un <code>ERROR FileFormatWriter: Aborting job...</code>. Es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos — los micro-lotes que ya terminaron de escribirse antes del <code>.stop()</code> quedan completos en el Parquet, como confirma la celda siguiente.</p>
+<p><code>.stop()</code> puede atrapar un micro-lote justo mientras está escribiendo, y la consola muestra un <code>java.lang.InterruptedException</code> con un <code>ERROR FileFormatWriter: Aborting job...</code> — es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos: los micro-lotes que ya terminaron de escribirse antes del <code>.stop()</code> quedan completos en el Parquet. Aun así, no combines esta celda con la lectura de abajo: hacerlo en una sola celda vuelve el error mucho más frecuente (el <em>driver</em> todavía está liberando recursos del <em>job</em> interrumpido cuando arranca la siguiente instrucción). En una celda <strong>nueva</strong>, después de confirmar que <code>.stop()</code> terminó:</p>
+<div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 <p>En una corrida real, con el productor emitiendo cada 3 segundos:</p>
 <p><strong>Tabla 6. Predicciones reales en tiempo real</strong></p>
 <table>
