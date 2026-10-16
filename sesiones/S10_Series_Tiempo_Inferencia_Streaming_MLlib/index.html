@@ -1474,6 +1474,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#entrenamiento-prueba-y-streaming-en-un-solo-grafico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entrenamiento, prueba y streaming, en un solo gráfico
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2254,6 +2265,17 @@
     <span class="md-ellipsis">
       
         Cierre: detener la consulta y revisar resultados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entrenamiento-prueba-y-streaming-en-un-solo-grafico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entrenamiento, prueba y streaming, en un solo gráfico
       
     </span>
   </a>
@@ -3071,6 +3093,50 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><code>.stop()</code> puede atrapar un micro-lote justo mientras está escribiendo, y la consola muestra un <code>java.lang.InterruptedException</code> con un <code>ERROR FileFormatWriter: Aborting job...</code> — es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos: los micro-lotes que ya terminaron de escribirse antes del <code>.stop()</code> quedan completos en el Parquet. Aun así, no combines esta celda con la lectura de abajo: hacerlo en una sola celda vuelve el error mucho más frecuente (el <em>driver</em> todavía está liberando recursos del <em>job</em> interrumpido cuando arranca la siguiente instrucción). En una celda <strong>nueva</strong>, después de confirmar que <code>.stop()</code> terminó:</p>
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"batchId"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="entrenamiento-prueba-y-streaming-en-un-solo-grafico">Entrenamiento, prueba y streaming, en un solo gráfico<a class="headerlink" href="#entrenamiento-prueba-y-streaming-en-un-solo-grafico" title="Permanent link">&para;</a></h3>
+<p><code>train</code>/<code>test</code> son datos <strong>históricos</strong> (el Gold de S04); el streaming de arriba es de <strong>hoy</strong>. Usar fechas reales en el eje X dejaría un hueco de semanas entre donde termina <code>test</code> y donde empieza el streaming — en vez de eso, el eje X es <strong>secuencia</strong> (posición), no tiempo real: cada etapa va una después de la otra, separadas por una línea vertical, sin fingir que son continuas en el calendario.</p>
+<p><code>matplotlib</code> no viene en la imagen de <code>pyspark/</code> (el <code>Dockerfile</code> solo fija <code>pyspark</code>/<code>notebook</code>/<code>pandas</code>) — instálalo en la propia sesión del contenedor:</p>
+<div class="highlight"><pre><span></span><code><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">matplotlib</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">N_COLA</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">cola_train</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">train</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">))</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">N_COLA</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">cola_test</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">test</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">desc</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">))</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">N_COLA</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"DateTime"</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">stream_pd</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_PREDICCIONES_STREAM</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"fechaHora"</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+
+<span class="n">n_train</span><span class="p">,</span> <span class="n">n_test</span><span class="p">,</span> <span class="n">n_stream</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cola_train</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cola_test</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream_pd</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_train</span><span class="p">),</span> <span class="n">cola_train</span><span class="p">[</span><span class="s2">"CE"</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Entrenamiento (cola)"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#9AA7B0"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_train</span><span class="p">,</span> <span class="n">n_train</span> <span class="o">+</span> <span class="n">n_test</span><span class="p">),</span> <span class="n">cola_test</span><span class="p">[</span><span class="s2">"CE"</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Prueba (offline)"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#4C78A8"</span><span class="p">)</span>
+<span class="n">x_stream</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_train</span> <span class="o">+</span> <span class="n">n_test</span><span class="p">,</span> <span class="n">n_train</span> <span class="o">+</span> <span class="n">n_test</span> <span class="o">+</span> <span class="n">n_stream</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_stream</span><span class="p">,</span> <span class="n">stream_pd</span><span class="p">[</span><span class="s2">"CE"</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Streaming (en vivo)"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#2E8B57"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_stream</span><span class="p">],</span> <span class="n">stream_pd</span><span class="p">[</span><span class="s2">"prediccionSiguienteCE"</span><span class="p">],</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"#C00000"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Predicción t+1"</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">n_train</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#222222"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">n_train</span> <span class="o">+</span> <span class="n">n_test</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#222222"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Entrenamiento -&gt; prueba -&gt; streaming en vivo, con la prediccion t+1"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Secuencia (no es una sola linea de tiempo real: train/test son historicos, streaming es de hoy)"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>La línea gris (entrenamiento) y la azul (prueba) muestran el mismo comportamiento que ya viste al evaluar los modelos (5.1) — ahora en contexto, justo antes del punto donde arrancó la inferencia real. La línea verde es exactamente lo que capturó <code>guardar_predicciones_microlote</code> en esta corrida; los puntos rojos son la predicción de cada micro-lote para el minuto siguiente, desplazados un paso a la derecha de su <code>CE</code> observado — así quedan alineados con el instante que en realidad predicen.</p>
+<p><strong>No te alarmes si hay un salto grande de nivel entre <code>test</code> y el streaming</strong> — no es un modelo malo. <code>producer_campo_electrico.py</code> arranca <code>CE</code> en un punto <strong>aleatorio dentro de todo el rango histórico calibrado</strong> (<code>-6.74</code> a <code>2.85</code>) cada vez que el contenedor inicia — no continúa desde el último valor real de <code>test</code>. El punto de comparación correcto no es "¿el streaming sigue donde terminó <code>test</code>?" (no tiene por qué), sino "¿la línea roja (predicción) sigue de cerca a la verde (<code>CE</code> real), sin importar en qué nivel estén ambas?" — esa es la pregunta que sí mide si el modelo funciona.</p>
 <p>En una corrida real, con el productor emitiendo cada 3 segundos:</p>
 <p><strong>Tabla 6. Predicciones reales en tiempo real</strong></p>
 <table>
