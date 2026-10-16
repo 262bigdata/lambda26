@@ -615,6 +615,7 @@ crudo = (
     .option("kafka.bootstrap.servers", "kafka:9092")
     .option("subscribe", "campo-electrico-eventos")
     .option("startingOffsets", "latest")
+    .option("failOnDataLoss", "false")
     .load()
 )
 
@@ -629,17 +630,62 @@ predicciones_stream = modelo_cargado.transform(eventos)
 
 Nota lo que falta frente a S09: no hay `withWatermark`, no hay `groupBy(window(...))`. El modelo transforma cada fila tal como llega — exactamente lo mismo que hizo `modelo_cargado.transform(test)` en 3.6.1, solo que la fuente ahora es un stream.
 
+`failOnDataLoss` en `false` no es un detalle cosmético: `kafka/compose.yml` no tiene volumen persistente para el broker (a propósito, es un clúster de laboratorio, no de producción) — cualquier `docker compose down` seguido de `up` recrea el topic vacío. El *checkpoint* de la consulta (`CHECKPOINT_STREAM`, más abajo) vive en el disco del notebook, ajeno a Kafka, y sigue recordando el último *offset* leído — si ese *offset* ya no existe en el topic recién creado, Spark lanza `KafkaIllegalStateException` (`OffsetOutOfRangeException`) y la consulta muere. Con `failOnDataLoss=false`, en vez de morir, la consulta salta lo que ya no está disponible y sigue consumiendo lo nuevo.
+
+**Antes de arrancar nada, detén cualquier consulta anterior que haya quedado viva** — si vuelves a correr esta sección sin reiniciar el *kernel*, la consulta de una corrida pasada puede seguir corriendo en segundo plano:
+
+```python
+if "consulta_predicciones" in dir() and consulta_predicciones.isActive:
+    print("Deteniendo la consulta anterior antes de arrancar una nueva...")
+    consulta_predicciones.stop()
+```
+
+**Error frecuente**: saltarte esta celda y volver a correr "Momento 1" con una consulta anterior todavía viva. La consola muestra `WARN StreamingQueryManager: Stopping existing streaming query [id=...], as a new run is being started` justo antes de una cascada de errores (`InterruptedException`, `TaskKilledException`, hasta `FileNotFoundException` sobre `_temporary/0`) — Spark detiene la consulta vieja a la fuerza para arrancar la nueva, y las dos terminan pisándose sobre el mismo directorio de salida. Ni borrar los directorios a mano arregla esto a mitad de la carrera — lo correcto es este chequeo, o en su defecto reiniciar el *kernel* antes de volver a correr la sección desde cero.
+
 ```python
 RUTA_PREDICCIONES_STREAM = "./artifacts/predicciones_stream"
 CHECKPOINT_STREAM = "./artifacts/chk_predicciones_stream"
+```
 
+**Limpia el *checkpoint* y las predicciones anteriores solo si el *esquema* ya no coincide** — por ejemplo, si cambiaste qué columnas guarda `guardar_predicciones_microlote` (como `timestamp` → `fechaHora`, abajo) desde la última corrida. No hace falta adivinar "¿corro esto o no?": compara las columnas que ya hay en disco contra las que el código de hoy espera, y limpia únicamente si no coinciden:
+
+```python
+import os
+import shutil
+from pyspark.sql.utils import AnalysisException
+
+COLUMNAS_ESPERADAS = {"batchId", "estacionId", "fechaHora", "CE", "prediccionSiguienteCE"}
+
+limpiar = False
+if os.path.exists(RUTA_PREDICCIONES_STREAM):
+    try:
+        columnas_actuales = set(spark.read.parquet(RUTA_PREDICCIONES_STREAM).columns)
+        limpiar = columnas_actuales != COLUMNAS_ESPERADAS
+        if limpiar:
+            print(f"Esquema desactualizado ({columnas_actuales}) — limpiando checkpoint y predicciones.")
+    except AnalysisException:
+        limpiar = True  # carpeta corrupta o vacía, mejor empezar de cero
+
+if limpiar:
+    shutil.rmtree(CHECKPOINT_STREAM, ignore_errors=True)
+    shutil.rmtree(RUTA_PREDICCIONES_STREAM, ignore_errors=True)
+else:
+    print("Esquema al día — no hace falta limpiar nada.")
+```
+
+Nota el orden: este chequeo va **antes** de arrancar la consulta (Momento 1, abajo), no después — limpiar un directorio mientras una consulta ya activa le está escribiendo es exactamente el mismo problema de carrera que el chequeo anterior evita.
+
+Recién ahora, con todo eso resuelto, arranca la consulta:
+
+```python
 def guardar_predicciones_microlote(df_microlote, id_lote):
     filas = df_microlote.count()
     if filas == 0:
         print(f"Micro-lote {id_lote}: sin filas")
         return
     df_microlote.select(
-        F.lit(id_lote).alias("batchId"), "estacionId", "timestamp", "CE",
+        F.lit(id_lote).alias("batchId"), "estacionId",
+        (F.col("timestamp") / 1000).cast("timestamp").alias("fechaHora"), "CE",
         F.col("prediction").alias("prediccionSiguienteCE"),
     ).write.mode("append").parquet(RUTA_PREDICCIONES_STREAM)
     print(f"Micro-lote {id_lote}: {filas} predicciones guardadas")
@@ -653,18 +699,26 @@ consulta_predicciones = (
 )
 ```
 
+`timestamp` llega del productor como milisegundos desde el *epoch* (`LongType`, 2.3) — ilegible a simple vista. `(F.col("timestamp") / 1000).cast("timestamp")` lo convierte a `TimestampType` real (`fechaHora`), que Spark ya sabe imprimir como fecha legible en el `show()` de más abajo — sin cambiar lo que viaja por Kafka, solo cómo se guarda en el Parquet de salida.
+
 **Error frecuente**: el primer micro-lote suele imprimir `Micro-lote 0: sin filas`. No es un error — Spark dispara el primer micro-lote apenas la suscripción al topic queda lista, casi siempre antes de que el productor haya emitido su primera lectura desde ese instante. Los siguientes micro-lotes sí traen filas, uno por cada lectura publicada.
 
-Déjala correr un par de minutos mientras el productor sigue emitiendo. Cuando se haya visto suficiente, detenla:
+**Con la consulta arrancada, no la detengas todavía.** En producción real, una consulta de streaming se queda corriendo indefinidamente — detenerla aquí es una conveniencia de este notebook, no cómo funciona streaming en general. Dale la vuelta: sigue con el resto de la sesión (3.8, evidencia) con la consulta corriendo en segundo plano, y vuelve recién al final de la clase a detenerla — así tienes varios minutos reales de lecturas acumuladas, no solo un par.
+
+### Cierre: detener la consulta y revisar resultados
+
+Esto es lo último que corres en esta sesión, después de haber trabajado el resto de la guía con la consulta corriendo en segundo plano todo ese tiempo — en **su propia celda**, separada de la lectura de resultados:
 
 ```python
-# Momento 2: detener la consulta
+# Momento 2: detener la consulta (al final de la sesión, no antes)
 consulta_predicciones.stop()
-
-spark.read.parquet(RUTA_PREDICCIONES_STREAM).orderBy(F.desc("batchId")).show(20, truncate=False)
 ```
 
-**Error frecuente**: al llamar `.stop()` mientras un micro-lote todavía está escribiendo, la consola puede mostrar un `java.lang.InterruptedException` con un `ERROR FileFormatWriter: Aborting job...`. Es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos — los micro-lotes que ya terminaron de escribirse antes del `.stop()` quedan completos en el Parquet, como confirma la celda siguiente.
+`.stop()` puede atrapar un micro-lote justo mientras está escribiendo, y la consola muestra un `java.lang.InterruptedException` con un `ERROR FileFormatWriter: Aborting job...` — es la consecuencia esperada de interrumpir una escritura en curso, no una pérdida de datos: los micro-lotes que ya terminaron de escribirse antes del `.stop()` quedan completos en el Parquet. Aun así, no combines esta celda con la lectura de abajo: hacerlo en una sola celda vuelve el error mucho más frecuente (el *driver* todavía está liberando recursos del *job* interrumpido cuando arranca la siguiente instrucción). En una celda **nueva**, después de confirmar que `.stop()` terminó:
+
+```python
+spark.read.parquet(RUTA_PREDICCIONES_STREAM).orderBy(F.desc("batchId")).show(20, truncate=False)
+```
 
 En una corrida real, con el productor emitiendo cada 3 segundos:
 

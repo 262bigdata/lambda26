@@ -58,13 +58,15 @@ Abre JupyterLab en `http://localhost:4488/lab?token=sintoken`.
 docker compose -f obs/compose.yml up -d
 ```
 
-**4. El caso de uso de tu sesión** — publica eventos a Kafka:
+**4. El caso de uso de tu sesión** — publica eventos a Kafka; levanta **uno solo**, el que corresponda a la sesión en la que estás, no los dos:
 
 ```powershell
+# S7-S9: sensores/MQTT
 docker compose -f uso-atmos/compose.yml up -d
 ```
 
 ```powershell
+# S10: campo eléctrico
 docker compose -f uso-campo-electrico/compose.yml up -d
 ```
 
