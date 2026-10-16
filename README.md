@@ -14,6 +14,7 @@ lambda26/
 ├── docs/                 # Documentación del curso (MkDocs), sesiones S0X
 ├── pyspark/              # Entorno Docker + Spark + Jupyter (S1 en adelante)
 ├── kafka/                # Kafka, Kafka UI y exporter (S6+)
+├── obs/                  # Prometheus + Grafana, observa a Kafka (S9+)
 ├── uso-atmos/             # Caso de uso: sensores/MQTT → Kafka
 ├── uso-campo-electrico/  # Caso de uso: otro flujo de sensores → Kafka
 ├── uso-microserv/        # (vacío por diseño) microservicio propio del equipo
@@ -31,12 +32,30 @@ construye en su propia sesión, no vienen prearmados (ver `CLAUDE.md`).
 ## Arranque rápido en DEV
 
 Cada carpeta con un `compose.yml` se levanta por separado, solo cuando la
-necesitas — no hay un único comando que levante todo el workspace. Detalle
-completo en el `README.md` de cada una:
+necesitas — no hay un único comando que levante todo el workspace. El
+**orden importa**: algunas carpetas se unen a la red Docker que otra ya creó,
+y fallan si esa otra no está arriba primero. Detalle completo en el
+`README.md` de cada una:
 
-- [`pyspark/README.md`](pyspark/README.md) — entorno Spark + Jupyter.
-- [`kafka/README.md`](kafka/README.md) — broker, Kafka UI, exporter.
-- [`uso-atmos/README.md`](uso-atmos/README.md) — caso de uso de sensores.
+**1. `pyspark/`** — entorno Spark + Jupyter, base para toda sesión desde S1:
+
+- [`pyspark/README.md`](pyspark/README.md)
+
+**2. `kafka/`** — broker, Kafka UI y *exporter* (S6+); varias carpetas de
+abajo dependen de que esta ya esté arriba:
+
+- [`kafka/README.md`](kafka/README.md)
+
+**3. `obs/`** (opcional) — Prometheus + Grafana (S9+); se une a la red de
+`kafka/`, así que falla si Kafka no está arriba primero:
+
+- [`obs/README.md`](obs/README.md)
+
+**4. El caso de uso de tu sesión** — cada uno publica a Kafka, así que
+también necesita el paso 2 ya arriba:
+
+- [`uso-atmos/README.md`](uso-atmos/README.md) — sensores/MQTT.
+- `uso-campo-electrico/` — otro flujo de sensores (S8/S10).
 
 `.\mvnw.cmd spring-boot:run`, `npm start` o cualquier proceso en primer
 plano de un caso de uso (`uso-microserv/`) queda corriendo en su propia
