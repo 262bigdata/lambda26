@@ -720,6 +720,59 @@ consulta_predicciones.stop()
 spark.read.parquet(RUTA_PREDICCIONES_STREAM).orderBy(F.desc("batchId")).show(20, truncate=False)
 ```
 
+### Entrenamiento, prueba y streaming, en un solo gráfico
+
+`train`/`test` son datos **históricos** (el Gold de S04); el streaming de arriba es de **hoy**. Usar fechas reales en el eje X dejaría un hueco de semanas entre donde termina `test` y donde empieza el streaming — en vez de eso, el eje X es **secuencia** (posición), no tiempo real: cada etapa va una después de la otra, separadas por una línea vertical, sin fingir que son continuas en el calendario.
+
+`matplotlib` no viene en la imagen de `pyspark/` (el `Dockerfile` solo fija `pyspark`/`notebook`/`pandas`) — instálalo en la propia sesión del contenedor:
+
+```python
+!pip install matplotlib
+```
+
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+
+N_COLA = 60
+cola_train = (
+    train.orderBy(F.desc("DateTime")).limit(N_COLA)
+    .orderBy("DateTime").select("CE").toPandas()
+)
+cola_test = (
+    test.orderBy(F.desc("DateTime")).limit(N_COLA)
+    .orderBy("DateTime").select("CE").toPandas()
+)
+stream_pd = spark.read.parquet(RUTA_PREDICCIONES_STREAM).orderBy("fechaHora").toPandas()
+
+n_train, n_test, n_stream = len(cola_train), len(cola_test), len(stream_pd)
+
+fig, ax = plt.subplots(figsize=(15, 5.5))
+ax.plot(range(n_train), cola_train["CE"], label="Entrenamiento (cola)", color="#9AA7B0")
+ax.plot(range(n_train, n_train + n_test), cola_test["CE"], label="Prueba (offline)", color="#4C78A8")
+x_stream = list(range(n_train + n_test, n_train + n_test + n_stream))
+ax.plot(x_stream, stream_pd["CE"], label="Streaming (en vivo)", color="#2E8B57")
+ax.scatter(
+    [x + 1 for x in x_stream], stream_pd["prediccionSiguienteCE"],
+    color="#C00000", label="Predicción t+1", zorder=5, s=25,
+)
+
+ax.axvline(n_train, color="#222222", linestyle="--", linewidth=1)
+ax.axvline(n_train + n_test, color="#222222", linestyle="--", linewidth=1)
+
+ax.set_title("Entrenamiento -> prueba -> streaming en vivo, con la prediccion t+1")
+ax.set_xlabel("Secuencia (no es una sola linea de tiempo real: train/test son historicos, streaming es de hoy)")
+ax.set_ylabel("CE")
+ax.legend(ncol=4)
+ax.grid(alpha=0.2)
+plt.tight_layout()
+plt.show()
+```
+
+La línea gris (entrenamiento) y la azul (prueba) muestran el mismo comportamiento que ya viste al evaluar los modelos (5.1) — ahora en contexto, justo antes del punto donde arrancó la inferencia real. La línea verde es exactamente lo que capturó `guardar_predicciones_microlote` en esta corrida; los puntos rojos son la predicción de cada micro-lote para el minuto siguiente, desplazados un paso a la derecha de su `CE` observado — así quedan alineados con el instante que en realidad predicen.
+
+**No te alarmes si hay un salto grande de nivel entre `test` y el streaming** — no es un modelo malo. `producer_campo_electrico.py` arranca `CE` en un punto **aleatorio dentro de todo el rango histórico calibrado** (`-6.74` a `2.85`) cada vez que el contenedor inicia — no continúa desde el último valor real de `test`. El punto de comparación correcto no es "¿el streaming sigue donde terminó `test`?" (no tiene por qué), sino "¿la línea roja (predicción) sigue de cerca a la verde (`CE` real), sin importar en qué nivel estén ambas?" — esa es la pregunta que sí mide si el modelo funciona.
+
 En una corrida real, con el productor emitiendo cada 3 segundos:
 
 **Tabla 6. Predicciones reales en tiempo real**
