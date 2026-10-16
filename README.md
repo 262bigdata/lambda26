@@ -31,31 +31,50 @@ construye en su propia sesión, no vienen prearmados (ver `CLAUDE.md`).
 
 ## Arranque rápido en DEV
 
-Cada carpeta con un `compose.yml` se levanta por separado, solo cuando la
-necesitas — no hay un único comando que levante todo el workspace. El
-**orden importa**: algunas carpetas se unen a la red Docker que otra ya creó,
-y fallan si esa otra no está arriba primero. Detalle completo en el
-`README.md` de cada una:
+Ya pasamos Unidad 1 (S1-S5, solo `pyspark/`, sin Kafka) — en Unidad 2 el
+curso ya es streaming de punta a punta, así que **Kafka va primero**: `obs/`
+y `pyspark` (con `compose.kafka.yml`) se unen a su red Docker, y fallan si
+Kafka no está arriba todavía.
 
-**1. `pyspark/`** — entorno Spark + Jupyter, base para toda sesión desde S1:
+**1. Kafka** — broker, Kafka UI y *exporter*:
 
-- [`pyspark/README.md`](pyspark/README.md)
+```powershell
+cd kafka
+docker compose up -d
+```
 
-**2. `kafka/`** — broker, Kafka UI y *exporter* (S6+); varias carpetas de
-abajo dependen de que esta ya esté arriba:
+**2. PySpark + Jupyter**, ya unido a la red de Kafka (no el `docker compose up -d` solo, ese es el de Unidad 1, sin streaming):
 
-- [`kafka/README.md`](kafka/README.md)
+```powershell
+cd ../pyspark
+docker compose -f compose.yml -f compose.kafka.yml up -d
+```
 
-**3. `obs/`** (opcional) — Prometheus + Grafana (S9+); se une a la red de
-`kafka/`, así que falla si Kafka no está arriba primero:
+Abre JupyterLab en `http://localhost:4488/lab?token=sintoken`.
 
-- [`obs/README.md`](obs/README.md)
+**3. `obs/`** (opcional) — Prometheus + Grafana:
 
-**4. El caso de uso de tu sesión** — cada uno publica a Kafka, así que
-también necesita el paso 2 ya arriba:
+```powershell
+cd ../obs
+docker compose up -d
+```
 
-- [`uso-atmos/README.md`](uso-atmos/README.md) — sensores/MQTT.
-- `uso-campo-electrico/` — otro flujo de sensores (S8/S10).
+**4. El caso de uso de tu sesión** — publica eventos a Kafka:
+
+```powershell
+cd ../uso-atmos
+docker compose up -d
+```
+
+```powershell
+cd ../uso-campo-electrico
+docker compose up -d
+```
+
+Detalle completo (puertos, verificación, *errores frecuentes*) en el
+`README.md` de cada carpeta: [`kafka/`](kafka/README.md),
+[`pyspark/`](pyspark/README.md), [`obs/`](obs/README.md),
+[`uso-atmos/`](uso-atmos/README.md).
 
 `.\mvnw.cmd spring-boot:run`, `npm start` o cualquier proceso en primer
 plano de un caso de uso (`uso-microserv/`) queda corriendo en su propia
