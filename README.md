@@ -36,18 +36,18 @@ curso ya es streaming de punta a punta, así que **Kafka va primero**: `obs/`
 y `pyspark` (con `compose.kafka.yml`) se unen a su red Docker, y fallan si
 Kafka no está arriba todavía.
 
+Todos los comandos corren desde la **raíz del repositorio** (`-f <carpeta>/compose.yml`), sin entrar ni volver a salir de cada carpeta:
+
 **1. Kafka** — broker, Kafka UI y *exporter*:
 
 ```powershell
-cd kafka
-docker compose up -d
+docker compose -f kafka/compose.yml up -d
 ```
 
-**2. PySpark + Jupyter**, ya unido a la red de Kafka (no el `docker compose up -d` solo, ese es el de Unidad 1, sin streaming):
+**2. PySpark + Jupyter**, ya unido a la red de Kafka (no `pyspark/compose.yml` solo, ese es el de Unidad 1, sin streaming):
 
 ```powershell
-cd ../pyspark
-docker compose -f compose.yml -f compose.kafka.yml up -d
+docker compose -f pyspark/compose.yml -f pyspark/compose.kafka.yml up -d
 ```
 
 Abre JupyterLab en `http://localhost:4488/lab?token=sintoken`.
@@ -55,20 +55,17 @@ Abre JupyterLab en `http://localhost:4488/lab?token=sintoken`.
 **3. `obs/`** (opcional) — Prometheus + Grafana:
 
 ```powershell
-cd ../obs
-docker compose up -d
+docker compose -f obs/compose.yml up -d
 ```
 
 **4. El caso de uso de tu sesión** — publica eventos a Kafka:
 
 ```powershell
-cd ../uso-atmos
-docker compose up -d
+docker compose -f uso-atmos/compose.yml up -d
 ```
 
 ```powershell
-cd ../uso-campo-electrico
-docker compose up -d
+docker compose -f uso-campo-electrico/compose.yml up -d
 ```
 
 Detalle completo (puertos, verificación, *errores frecuentes*) en el
@@ -83,10 +80,14 @@ terminal — para el siguiente paso, duplica la pestaña en vez de cerrarla
 
 ## Detener
 
-Cada carpeta baja solo sus propios contenedores:
+Mismo criterio que el arranque: cada stack baja por separado, desde la raíz, con `-f`:
 
 ```powershell
-docker compose down
+docker compose -f kafka/compose.yml down
+docker compose -f pyspark/compose.yml -f pyspark/compose.kafka.yml down
+docker compose -f obs/compose.yml down
+docker compose -f uso-atmos/compose.yml down
+docker compose -f uso-campo-electrico/compose.yml down
 ```
 
 Todos los contenedores de `lambda26` se nombran con el prefijo `lambda26-`
