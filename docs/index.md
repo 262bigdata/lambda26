@@ -46,7 +46,7 @@ Resultado esperado U2: el estudiante implementa un pipeline Big Data en tiempo r
 | [S8](sesiones/S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking.md) | Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega. | `uso-pyspark` (consumidor) + `kafka` | Pipeline streaming con ventanas, watermarking y checkpointing. |
 | S9 | Observabilidad con Grafana y costos. | `obs` | Tablero de observabilidad con métricas, umbrales y estimación de costos. |
 | S10 | Series de tiempo e inferencia en streaming. | `uso-pyspark` | Modelo o inferencia de series de tiempo aplicado sobre datos batch y/o streaming. |
-| S11 | BI/ML distribuido con Spark: KPIs del BI y visualización de la predicción de series de tiempo. | `uso-pyspark` + `obs` | KPIs del flujo de eventos y predicción de series de tiempo visualizados en Grafana. |
+| [S11](sesiones/S11_BI_ML_Distribuido_Spark_Grafana.md) | BI/ML distribuido con Spark: KPIs del BI y visualización de la predicción de series de tiempo. | `uso-pyspark` + `obs` (+ `pushgateway`) | KPI del flujo de eventos (volumen, validez, latencia) y error de predicción en producción de S10, publicados vía Pushgateway y visualizados en un tablero de Grafana. |
 | S12 | Integración del procesamiento en tiempo real: Kafka, eventos empresariales e IoT, Spark Structured Streaming, observabilidad, costos y salidas BI/ML. | — | **Producto U2:** pipeline en tiempo real con ingesta, streaming, observabilidad/costos y salidas BI/ML distribuidas. |
 
 ### U3: Integración, DataOps y despliegue del sistema final
