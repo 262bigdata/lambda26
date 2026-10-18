@@ -410,6 +410,7 @@ crudo = (
     .option("kafka.bootstrap.servers", "kafka:9092")
     .option("subscribe", "atmos-eventos")
     .option("startingOffsets", "latest")
+    .option("failOnDataLoss", "false")
     .load()
 )
 
@@ -440,6 +441,8 @@ observables = (
 )
 observables.printSchema()
 ```
+
+`failOnDataLoss` en `false` no es un detalle cosmético: `kafka/compose.yml` no tiene volumen persistente para el *broker* (a propósito, es un clúster de laboratorio, no de producción) — el *topic* tiene retención limitada y los mensajes viejos envejecen y desaparecen con el tiempo, aunque el contenedor nunca se reinicie. El *checkpoint* de la consulta (`chk_observabilidad`, más abajo) vive en el disco del notebook, ajeno a Kafka, y sigue recordando el último *offset* leído — si retomas la consulta días después y ese *offset* ya no existe en el *topic*, Spark lanza `KafkaIllegalStateException` (`OffsetOutOfRangeException`) y la consulta muere a mitad de un micro-lote, sin confirmar nada. Con `failOnDataLoss=false`, en vez de morir, la consulta salta lo que ya no está disponible y sigue consumiendo lo nuevo.
 
 `kafkaTimestamp` (metadata de Kafka: cuándo el *broker* recibió el mensaje) es distinto de `timestamp` (un campo del propio evento: cuándo el sensor midió, igual que en S8). `processedAt` es el momento en que *esta celda de Spark* procesó el evento — y `latencyMs` es la diferencia entre ambos: cuánto tardó un evento en viajar de `producer_sensores.py`, por Kafka, hasta este punto del pipeline. `isValid` reusa la misma idea de contrato mínimo que ya viste en S7 (`consumer_sensores.py`), pero calculada en Spark en vez de en Python simple.
 

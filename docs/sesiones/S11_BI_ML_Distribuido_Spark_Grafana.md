@@ -8,6 +8,8 @@ Tiempo: 20 min.
 
 S9 dejó un Grafana mostrando si la infraestructura está sana (brokers, *lag*, latencia de Spark). S10 dejó un modelo de series de tiempo aplicado en vivo, con predicciones ya guardadas en Parquet (`predicciones_stream`) — pero esas predicciones nunca llegaron a ningún tablero, se quedaron en un archivo. Hoy se cierra ese círculo: un notebook calcula, sobre la evidencia **ya persistida** por S9 y S10 (no se vuelve a leer Kafka en streaming), KPIs de negocio del flujo de eventos y el error real de la predicción **en producción** —distinto del error de prueba que S10 ya midió offline—, y los publica en el mismo Prometheus de S9 para visualizarlos en Grafana. La pieza nueva de infraestructura es el **Pushgateway**: el mecanismo correcto para que un job que corre una vez y termina (este notebook) le entregue métricas a Prometheus, que solo sabe *ir a buscar* datos, no recibirlos.
 
+El nombre de la sesión no es redundante: trae dos capas distintas, calculadas sobre dos fuentes distintas, y publicadas juntas en el mismo tablero (2.5). La capa **BI** (3.3) audita el *flujo de eventos* de S9 — volumen, ratio de válidos, latencia — y responde "¿es bueno el dato que le está llegando al negocio?". La capa **ML** (3.4) audita el *modelo* de S10 ya desplegado — el error real de sus predicciones contra lo que de verdad ocurrió después, según la Regla #37 (1.6) — y responde "¿sigue siendo bueno el modelo, ahora que está en producción?". Son preguntas distintas, sobre objetos distintos, que comparten el mismo mecanismo de publicación (Pushgateway) y el mismo tablero.
+
 ### 1.2 Índice
 
 1. KPI de negocio frente a métrica de infraestructura y de aplicación (continuación de S9).
@@ -387,6 +389,8 @@ Abre `http://localhost:43000` con `admin`/`admin` (S9, 3.3) — el mismo Grafana
 | Ratio de eventos válidos | `lambda26_bi_eventos_validos_ratio` | Stat (formato en porcentaje, *Unit* → *Percent (0.0-1.0)*) |
 | MAE de la predicción en producción | `lambda26_bi_prediccion_mae` | Stat |
 | Última lectura real vs. predicha | `lambda26_bi_prediccion_ultima_real` y `lambda26_bi_prediccion_ultima_predicha` (dos consultas en el mismo panel) | Time series |
+
+Los cuatro paneles comparten la misma naturaleza: **ninguno incrementa ni cambia solo**, ni siquiera con `Refresh: 5s`. `lambda26_bi_eventos_total` (como los otros cinco) es una foto fija que el notebook calculó y empujó **una sola vez** en 3.5 — Prometheus la *scrapea* cada 15s y reporta siempre el mismo número, hasta que vuelvas a correr 3.3-3.5 con un `PUT` nuevo (y, si `atmos_eventos_observabilidad` creció mientras tanto, con un total distinto). No es un panel en vivo — es el mismo tipo de "valor puntual repetido" que el panel de "Última lectura real vs. predicha" de más abajo, solo que sin el detalle visual de la línea plana por tratarse de un solo número (*Stat*).
 
 Repite el mismo flujo de S9 (3.3, pasos 1-9) para los cuatro paneles — **New dashboard** → **Add visualization** → pega la consulta en modo **Code** → elige la visualización de la Tabla 7 → **Save dashboard**, nómbralo `S11 - BI/ML distribuido`.
 
