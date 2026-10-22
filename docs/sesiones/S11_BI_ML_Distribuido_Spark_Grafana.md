@@ -34,7 +34,7 @@ Notebook `11_bi_ml_distribuido.ipynb` que reutiliza, sin recalcularlos, el Parqu
 | Actividades a Realizar en el Periodo | Orientaciones generales (Orientaciones Metodológicas) | Material de estudio recomendado |
 |---|---|---|
 | Revisión previa individual | Confirmar que los Parquet de S9 (`atmos_eventos_observabilidad`) y S10 (`predicciones_stream`) siguen existiendo, y repasar la Tabla 4 de S9 ("dos tipos de métrica") y la Tabla 5 de S10 (comparación contra el baseline). Trabajo individual, antes de clase. | S9 (2.4, Tabla 4), S10 (3.5.1, Tabla 5). |
-| Clase presencial | Construcción guiada del notebook `11_bi_ml_distribuido.ipynb`: KPIs del flujo de eventos, error de predicción en producción, publicación en Pushgateway, verificación en Prometheus, y armado del tablero de Grafana. Trabajo individual, siguiendo al docente paso a paso. | Pasos 3.1 a 3.6 de esta guía. |
+| Clase presencial | Construcción guiada del notebook `11_bi_ml_distribuido.ipynb`: KPIs del flujo de eventos, error de predicción en producción, publicación en Pushgateway, verificación en Prometheus, y armado del tablero de Grafana. Trabajo individual, siguiendo al docente paso a paso. | Pasos 3.1 a 3.7 de esta guía. |
 | Evaluación formativa | Revisión en clase de las seis métricas confirmadas en Prometheus y del tablero de Grafana con datos reales. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4. | Indicaciones de entrega (4.3), rúbrica de evaluación (4.6). |
 
 ### 1.6 Motivación de la sesión
@@ -257,7 +257,7 @@ print(f"Filas eventos (S9): {eventos.count():,}")
 print(f"Filas predicciones (S10): {predicciones.count():,}")
 ```
 
-En una corrida real: **93** filas de eventos, **6** de predicciones — el mismo volumen con el que S9 y S10 cerraron sus propias guías. Si tu propio conteo es distinto, no hay problema: es exactamente el volumen real que tus notebooks de S9/S10 dejaron guardado, y es sobre ese volumen que corre el resto de esta sesión.
+En una corrida real: **1,080** filas de eventos, **6** de predicciones — el volumen real que S9 y S10 dejaron guardado al momento de correr este notebook. Si tu propio conteo es distinto, no hay problema: es exactamente el volumen real que tus notebooks de S9/S10 dejaron guardado, y es sobre ese volumen que corre el resto de esta sesión.
 
 **Error frecuente**: `Path does not exist` al leer cualquiera de las dos rutas. No se repite el streaming de S9/S10 hoy — si no llegaste a correr completas esas secciones (S9 3.8, S10 3.7.2), vuelve a esa guía y completa solo esa persistencia antes de seguir aquí; no hace falta rehacer la sesión completa.
 
@@ -277,9 +277,9 @@ print(f"Ratio de validos:     {kpi_eventos['ratioValidos']:.4f}")
 print(f"Latencia promedio:    {kpi_eventos['avgLatencyMs']:.2f} ms")
 ```
 
-Verificado contra la evidencia real de S9: **93** eventos, ratio de válidos **1.0000** (todos cumplieron el contrato mínimo de S7), y latencia promedio **2563.61 ms**.
+Verificado contra la evidencia real de S9: **1,080** eventos, ratio de válidos **1.0000** (todos cumplieron el contrato mínimo de S7), y latencia promedio **686465.43 ms** (~11.4 minutos).
 
-**Este último número merece atención, no solo reportarse.** La Tabla 8 de S9 propuso `avgLatencyMs > 1000` como umbral de "Latencia alta crítica" — y el valor real de esta evidencia (`2563.61 ms`) está **por encima** de ambos umbrales de esa tabla, no solo del sensible. Esto no significa que el pipeline de S9 esté roto: esa evidencia se generó mientras la consulta de consola (S9, 3.6) corría al mismo tiempo que se explicaba cada celda frente a la clase, con minutos reales transcurriendo entre que un evento se publicó y que Spark lo procesó — muy distinto de un pipeline de producción corriendo sin interrupciones. Lo que sí es un hallazgo real y honesto: la propuesta de alertas de S9 no era un ejercicio teórico, esta misma evidencia ya la habría disparado. Documenta este resultado tal como salga en tu propia evidencia, sea cual sea.
+**Este último número merece atención, no solo reportarse — y esta vez por un margen mucho mayor del que podrías esperar.** La Tabla 8 de S9 propuso `avgLatencyMs > 1000` (un segundo) como umbral de "Latencia alta crítica" — el valor real de esta evidencia lo supera por varios órdenes de magnitud. No es un error del cálculo: `latencyMs = processedAt - timestamp` (S9, 3.5) mide cuánto tardó cada evento en viajar desde que se publicó hasta que Spark lo procesó — un promedio tan alto, sobre 1,080 eventos, indica que buena parte de ellos esperaron minutos u horas reales antes de ser leídos, consistente con un `atmos_eventos_observabilidad` que acumuló evidencia de más de una corrida del pipeline, con intervalos reales entre sesión y sesión — muy distinto de un pipeline de producción corriendo sin interrupciones. Lo que sí es un hallazgo real y honesto: la propuesta de alertas de S9 no era un ejercicio teórico — esta misma evidencia ya la habría disparado, y por un margen que ningún umbral razonable dejaría pasar. Documenta este resultado tal como salga en tu propia evidencia, sea cual sea.
 
 ### 3.4 Calcular el error de predicción en producción
 
@@ -312,21 +312,23 @@ ultima = predicciones.orderBy(F.desc("batchId")).first()
 
 print(f"Predicciones comparables: {kpi_prediccion['totalComparado']}")
 print(f"MAE en produccion:        {kpi_prediccion['maeProduccion']:.4f}")
+print(f"Ultimo CE real:           {ultima['CE']}")
+print(f"Ultima prediccion:        {ultima['prediccionSiguienteCE']:.4f}")
 ```
 
 El truco está en el `select` de `actual_siguiente`: restarle `1` a `batchId` antes de unir hace que la predicción hecha **en** el batch `N` (que predice el minuto `N+1`) se junte con el valor real de `CE` que la propia tabla ya trae **en** el batch `N+1`. No hace falta ningún dato nuevo — el "futuro" de cada predicción ya estaba guardado.
 
 **Tabla 6. Comparación real, batch por batch**
 
-| batchId | CE (en el momento de predecir) | Predicción de `CE` siguiente | `CE` real que llegó después | Error absoluto |
-|---:|---:|---:|---:|---:|
-| 1 | -6.16 | -6.0766 | -6.14 | 0.0634 |
-| 2 | -6.14 | -6.0574 | -6.16 | 0.1026 |
-| 3 | -6.16 | -6.0772 | -6.20 | 0.1228 |
-| 4 | -6.20 | -6.1160 | -6.19 | 0.0740 |
-| 5 | -6.19 | -6.1060 | -6.22 | 0.1140 |
+| batchId | estacionId | CE (en el momento de predecir) | Predicción de `CE` siguiente | `CE` real que llegó después | Error absoluto |
+|---:|---|---:|---:|---:|---:|
+| 1 | estacion-ns-01 | -5.71 | -5.6223 | -5.68 | 0.0577 |
+| 2 | estacion-ns-01 | -5.68 | -5.5931 | -5.64 | 0.0469 |
+| 3 | estacion-ns-01 | -5.64 | -5.5542 | -5.58 | 0.0258 |
+| 4 | estacion-ns-01 | -5.58 | -5.4951 | -5.56 | 0.0649 |
+| 5 | estacion-ns-01 | -5.56 | -5.4756 | -5.49 | 0.0144 |
 
-Verificado con la evidencia real de S10: **5** predicciones comparables (una menos que las 6 totales — la última todavía no tiene un "batch siguiente" del cual tomar el valor real, la misma razón por la que la última fila del Gold de S04 se quedó sin `label` en S10, 2.2) y **MAE en producción = 0.0954**. Compáralo con el MAE de prueba de S10 (Tabla 5, `0.1325`): en esta evidencia, el error en producción fue incluso *menor* que el de prueba — un resultado tranquilizador, aunque con solo 5 observaciones comparables no alcanza para una conclusión estadística fuerte, solo para una primera lectura honesta.
+Verificado con la evidencia real de S10: **5** predicciones comparables (una menos que las 6 totales — la última todavía no tiene un "batch siguiente" del cual tomar el valor real, la misma razón por la que la última fila del Gold de S04 se quedó sin `label` en S10, 2.2) y **MAE en producción = 0.0420**. Compáralo con el MAE de prueba de S10 (Tabla 5, `0.1325`): en esta evidencia, el error en producción fue menos de un tercio del de prueba — un resultado tranquilizador, aunque con solo 5 observaciones comparables no alcanza para una conclusión estadística fuerte, solo para una primera lectura honesta.
 
 **Error frecuente**: comparar la predicción del batch `N` contra el `CE` del **mismo** batch `N`, en vez del siguiente. Eso compararía la predicción contra el dato que la generó, no contra el resultado real que debía anticipar — un error de un paso en el índice que invalida completamente la métrica, aunque el número que salga "se vea razonable".
 
