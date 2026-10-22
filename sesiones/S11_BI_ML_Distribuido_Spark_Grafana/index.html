@@ -2032,7 +2032,7 @@
 <tr>
 <td>Clase presencial</td>
 <td>Construcción guiada del notebook <code>11_bi_ml_distribuido.ipynb</code>: KPIs del flujo de eventos, error de predicción en producción, publicación en Pushgateway, verificación en Prometheus, y armado del tablero de Grafana. Trabajo individual, siguiendo al docente paso a paso.</td>
-<td>Pasos 3.1 a 3.6 de esta guía.</td>
+<td>Pasos 3.1 a 3.7 de esta guía.</td>
 </tr>
 <tr>
 <td>Evaluación formativa</td>
@@ -2269,7 +2269,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas eventos (S9): </span><span class="si">{</span><span class="n">eventos</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filas predicciones (S10): </span><span class="si">{</span><span class="n">predicciones</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
-<p>En una corrida real: <strong>93</strong> filas de eventos, <strong>6</strong> de predicciones — el mismo volumen con el que S9 y S10 cerraron sus propias guías. Si tu propio conteo es distinto, no hay problema: es exactamente el volumen real que tus notebooks de S9/S10 dejaron guardado, y es sobre ese volumen que corre el resto de esta sesión.</p>
+<p>En una corrida real: <strong>1,080</strong> filas de eventos, <strong>6</strong> de predicciones — el volumen real que S9 y S10 dejaron guardado al momento de correr este notebook. Si tu propio conteo es distinto, no hay problema: es exactamente el volumen real que tus notebooks de S9/S10 dejaron guardado, y es sobre ese volumen que corre el resto de esta sesión.</p>
 <p><strong>Error frecuente</strong>: <code>Path does not exist</code> al leer cualquiera de las dos rutas. No se repite el streaming de S9/S10 hoy — si no llegaste a correr completas esas secciones (S9 3.8, S10 3.7.2), vuelve a esa guía y completa solo esa persistencia antes de seguir aquí; no hace falta rehacer la sesión completa.</p>
 <h3 id="33-calcular-el-kpi-del-flujo-de-eventos">3.3 Calcular el KPI del flujo de eventos<a class="headerlink" href="#33-calcular-el-kpi-del-flujo-de-eventos" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> tres números reales —volumen, ratio de válidos, latencia promedio— que resumen la salud del flujo de eventos como KPI de negocio (2.2).</p>
@@ -2283,8 +2283,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ratio de validos:     </span><span class="si">{</span><span class="n">kpi_eventos</span><span class="p">[</span><span class="s1">'ratioValidos'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Latencia promedio:    </span><span class="si">{</span><span class="n">kpi_eventos</span><span class="p">[</span><span class="s1">'avgLatencyMs'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ms"</span><span class="p">)</span>
 </code></pre></div>
-<p>Verificado contra la evidencia real de S9: <strong>93</strong> eventos, ratio de válidos <strong>1.0000</strong> (todos cumplieron el contrato mínimo de S7), y latencia promedio <strong>2563.61 ms</strong>.</p>
-<p><strong>Este último número merece atención, no solo reportarse.</strong> La Tabla 8 de S9 propuso <code>avgLatencyMs &gt; 1000</code> como umbral de "Latencia alta crítica" — y el valor real de esta evidencia (<code>2563.61 ms</code>) está <strong>por encima</strong> de ambos umbrales de esa tabla, no solo del sensible. Esto no significa que el pipeline de S9 esté roto: esa evidencia se generó mientras la consulta de consola (S9, 3.6) corría al mismo tiempo que se explicaba cada celda frente a la clase, con minutos reales transcurriendo entre que un evento se publicó y que Spark lo procesó — muy distinto de un pipeline de producción corriendo sin interrupciones. Lo que sí es un hallazgo real y honesto: la propuesta de alertas de S9 no era un ejercicio teórico, esta misma evidencia ya la habría disparado. Documenta este resultado tal como salga en tu propia evidencia, sea cual sea.</p>
+<p>Verificado contra la evidencia real de S9: <strong>1,080</strong> eventos, ratio de válidos <strong>1.0000</strong> (todos cumplieron el contrato mínimo de S7), y latencia promedio <strong>686465.43 ms</strong> (~11.4 minutos).</p>
+<p><strong>Este último número merece atención, no solo reportarse — y esta vez por un margen mucho mayor del que podrías esperar.</strong> La Tabla 8 de S9 propuso <code>avgLatencyMs &gt; 1000</code> (un segundo) como umbral de "Latencia alta crítica" — el valor real de esta evidencia lo supera por varios órdenes de magnitud. No es un error del cálculo: <code>latencyMs = processedAt - timestamp</code> (S9, 3.5) mide cuánto tardó cada evento en viajar desde que se publicó hasta que Spark lo procesó — un promedio tan alto, sobre 1,080 eventos, indica que buena parte de ellos esperaron minutos u horas reales antes de ser leídos, consistente con un <code>atmos_eventos_observabilidad</code> que acumuló evidencia de más de una corrida del pipeline, con intervalos reales entre sesión y sesión — muy distinto de un pipeline de producción corriendo sin interrupciones. Lo que sí es un hallazgo real y honesto: la propuesta de alertas de S9 no era un ejercicio teórico — esta misma evidencia ya la habría disparado, y por un margen que ningún umbral razonable dejaría pasar. Documenta este resultado tal como salga en tu propia evidencia, sea cual sea.</p>
 <h3 id="34-calcular-el-error-de-prediccion-en-produccion">3.4 Calcular el error de predicción en producción<a class="headerlink" href="#34-calcular-el-error-de-prediccion-en-produccion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el error real de la predicción de S10, medido con el propio valor que llegó después — no el de prueba offline (2.3).</p>
 <div class="highlight"><pre><span></span><code><span class="n">actual_siguiente</span> <span class="o">=</span> <span class="n">predicciones</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
@@ -2313,6 +2313,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicciones comparables: </span><span class="si">{</span><span class="n">kpi_prediccion</span><span class="p">[</span><span class="s1">'totalComparado'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"MAE en produccion:        </span><span class="si">{</span><span class="n">kpi_prediccion</span><span class="p">[</span><span class="s1">'maeProduccion'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ultimo CE real:           </span><span class="si">{</span><span class="n">ultima</span><span class="p">[</span><span class="s1">'CE'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ultima prediccion:        </span><span class="si">{</span><span class="n">ultima</span><span class="p">[</span><span class="s1">'prediccionSiguienteCE'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <p>El truco está en el <code>select</code> de <code>actual_siguiente</code>: restarle <code>1</code> a <code>batchId</code> antes de unir hace que la predicción hecha <strong>en</strong> el batch <code>N</code> (que predice el minuto <code>N+1</code>) se junte con el valor real de <code>CE</code> que la propia tabla ya trae <strong>en</strong> el batch <code>N+1</code>. No hace falta ningún dato nuevo — el "futuro" de cada predicción ya estaba guardado.</p>
 <p><strong>Tabla 6. Comparación real, batch por batch</strong></p>
@@ -2320,6 +2322,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <thead>
 <tr>
 <th style="text-align: right;">batchId</th>
+<th>estacionId</th>
 <th style="text-align: right;">CE (en el momento de predecir)</th>
 <th style="text-align: right;">Predicción de <code>CE</code> siguiente</th>
 <th style="text-align: right;"><code>CE</code> real que llegó después</th>
@@ -2329,42 +2332,47 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-6.16</td>
-<td style="text-align: right;">-6.0766</td>
-<td style="text-align: right;">-6.14</td>
-<td style="text-align: right;">0.0634</td>
+<td>estacion-ns-01</td>
+<td style="text-align: right;">-5.71</td>
+<td style="text-align: right;">-5.6223</td>
+<td style="text-align: right;">-5.68</td>
+<td style="text-align: right;">0.0577</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">-6.14</td>
-<td style="text-align: right;">-6.0574</td>
-<td style="text-align: right;">-6.16</td>
-<td style="text-align: right;">0.1026</td>
+<td>estacion-ns-01</td>
+<td style="text-align: right;">-5.68</td>
+<td style="text-align: right;">-5.5931</td>
+<td style="text-align: right;">-5.64</td>
+<td style="text-align: right;">0.0469</td>
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">-6.16</td>
-<td style="text-align: right;">-6.0772</td>
-<td style="text-align: right;">-6.20</td>
-<td style="text-align: right;">0.1228</td>
+<td>estacion-ns-01</td>
+<td style="text-align: right;">-5.64</td>
+<td style="text-align: right;">-5.5542</td>
+<td style="text-align: right;">-5.58</td>
+<td style="text-align: right;">0.0258</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">-6.20</td>
-<td style="text-align: right;">-6.1160</td>
-<td style="text-align: right;">-6.19</td>
-<td style="text-align: right;">0.0740</td>
+<td>estacion-ns-01</td>
+<td style="text-align: right;">-5.58</td>
+<td style="text-align: right;">-5.4951</td>
+<td style="text-align: right;">-5.56</td>
+<td style="text-align: right;">0.0649</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">-6.19</td>
-<td style="text-align: right;">-6.1060</td>
-<td style="text-align: right;">-6.22</td>
-<td style="text-align: right;">0.1140</td>
+<td>estacion-ns-01</td>
+<td style="text-align: right;">-5.56</td>
+<td style="text-align: right;">-5.4756</td>
+<td style="text-align: right;">-5.49</td>
+<td style="text-align: right;">0.0144</td>
 </tr>
 </tbody>
 </table>
-<p>Verificado con la evidencia real de S10: <strong>5</strong> predicciones comparables (una menos que las 6 totales — la última todavía no tiene un "batch siguiente" del cual tomar el valor real, la misma razón por la que la última fila del Gold de S04 se quedó sin <code>label</code> en S10, 2.2) y <strong>MAE en producción = 0.0954</strong>. Compáralo con el MAE de prueba de S10 (Tabla 5, <code>0.1325</code>): en esta evidencia, el error en producción fue incluso <em>menor</em> que el de prueba — un resultado tranquilizador, aunque con solo 5 observaciones comparables no alcanza para una conclusión estadística fuerte, solo para una primera lectura honesta.</p>
+<p>Verificado con la evidencia real de S10: <strong>5</strong> predicciones comparables (una menos que las 6 totales — la última todavía no tiene un "batch siguiente" del cual tomar el valor real, la misma razón por la que la última fila del Gold de S04 se quedó sin <code>label</code> en S10, 2.2) y <strong>MAE en producción = 0.0420</strong>. Compáralo con el MAE de prueba de S10 (Tabla 5, <code>0.1325</code>): en esta evidencia, el error en producción fue menos de un tercio del de prueba — un resultado tranquilizador, aunque con solo 5 observaciones comparables no alcanza para una conclusión estadística fuerte, solo para una primera lectura honesta.</p>
 <p><strong>Error frecuente</strong>: comparar la predicción del batch <code>N</code> contra el <code>CE</code> del <strong>mismo</strong> batch <code>N</code>, en vez del siguiente. Eso compararía la predicción contra el dato que la generó, no contra el resultado real que debía anticipar — un error de un paso en el índice que invalida completamente la métrica, aunque el número que salga "se vea razonable".</p>
 <h3 id="35-publicar-las-seis-metricas-en-pushgateway-y-verificarlas-en-prometheus">3.5 Publicar las seis métricas en Pushgateway y verificarlas en Prometheus<a class="headerlink" href="#35-publicar-las-seis-metricas-en-pushgateway-y-verificarlas-en-prometheus" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> las seis métricas del flujo de eventos y de la predicción, publicadas en el Pushgateway y confirmadas con PromQL real.</p>
