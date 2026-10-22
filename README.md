@@ -52,11 +52,13 @@ docker compose -f pyspark/compose.yml -f pyspark/compose.kafka.yml up -d
 
 Abre JupyterLab en `http://localhost:4488/lab?token=sintoken`.
 
-**3. `obs/`** (opcional) — Prometheus + Grafana:
+**3. `obs/`** (opcional) — Prometheus + Grafana + Pushgateway:
 
 ```powershell
 docker compose -f obs/compose.yml up -d
 ```
+
+Prometheus en `http://localhost:49090`, Grafana en `http://localhost:43000` (`admin`/`admin`, *datasource* Prometheus ya provisto).
 
 **4. El caso de uso de tu sesión** — publica eventos a Kafka; levanta **uno solo**, el que corresponda a la sesión en la que estás, no los dos:
 

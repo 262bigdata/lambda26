@@ -17,6 +17,7 @@ real — brokers arriba, *exporter* arriba, y el *lag* del consumer group de
 |---|---|---|
 | Prometheus | `prom/prometheus:v3.14.0` | `http://localhost:49090` |
 | Grafana | `grafana/grafana:11.4.0` | `http://localhost:43000` (admin/admin) |
+| Pushgateway | `prom/pushgateway:v1.11.1` | `http://localhost:49091` (S11) |
 
 Mismas versiones que usa `pagatu` (DIST) para estas dos piezas — reusar la
 versión ya descargada en vez de fijar una distinta evita bajar imágenes
