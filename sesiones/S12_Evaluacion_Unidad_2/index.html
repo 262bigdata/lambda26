@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
   
@@ -29,7 +29,7 @@
   
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1335,32 +1335,32 @@
 <tr>
 <td>S6</td>
 <td>Ingesta de eventos empresariales en tiempo real</td>
-<td>Publicación y consumo con Kafka, contrato de evento, tópico, particionado.</td>
+<td>Conceptos de Kafka (<em>topic</em>, <em>broker</em>, partición, <em>offset</em>, <em>consumer group</em>, <em>key</em>), publicación y consumo, contrato de evento versionable.</td>
 </tr>
 <tr>
 <td>S7</td>
 <td>Ingesta de eventos IoT/sensores en tiempo real</td>
-<td>Esquema de evento, frecuencia, volumen y validaciones de datos para telemetría o sensores.</td>
+<td>Diferencia de frecuencia/volumen frente a un evento de negocio (S6), particionado por dispositivo (<em>key</em>) verificado en Kafka UI, validación de esquema y de rango físico, y por qué un dispositivo real publica por MQTT hacia un puente, nunca hablando Kafka directo.</td>
 </tr>
 <tr>
 <td>S8</td>
 <td>Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega</td>
-<td>Agregaciones en ventana, tratamiento de datos tardíos con <em>watermarking</em>, <em>checkpointing</em> y su efecto en latencia y throughput.</td>
+<td>Ventanas fijas y deslizantes, tratamiento de datos tardíos con <em>watermarking</em>, <em>checkpointing</em>, semántica "al menos una vez" y deduplicación, y su efecto en latencia y throughput.</td>
 </tr>
 <tr>
 <td>S9</td>
 <td>Observabilidad con Grafana y costos</td>
-<td>Métricas, tablero de observabilidad, umbrales, riesgos operativos y estimación de costos de escalado.</td>
+<td>Métricas de streaming (disponibilidad, latencia, throughput, <em>lag</em> del consumidor), cómo se conectan Prometheus/Grafana a Kafka y Spark, umbrales de alerta, riesgos operativos y estimación de costos de escalado.</td>
 </tr>
 <tr>
 <td>S10</td>
 <td>Series de tiempo e inferencia en streaming</td>
-<td>Modelo o inferencia de series de tiempo sobre datos batch y/o streaming, comparación de resultados y supuestos.</td>
+<td>Comparación contra un <em>baseline</em> de persistencia (por qué compararlo primero), división cronológica de entrenamiento/prueba (nunca aleatoria), e inferencia en tiempo real sin estado: una sola lectura basta, sin mantener historial en memoria.</td>
 </tr>
 <tr>
 <td>S11</td>
 <td>BI/ML distribuido con Spark: KPIs y visualización de la predicción</td>
-<td>Preparación de KPIs del flujo de eventos, relación entre la predicción de S10 y su visualización en el tablero BI.</td>
+<td>Diferencia entre un KPI de negocio y una métrica de infraestructura o de aplicación, <em>Pushgateway</em> como atajo pragmático para un <em>job</em> que no termina (no la forma recomendada), error de predicción medido en vivo en producción, y un tablero con un panel batch (estático) y uno streaming (en vivo) lado a lado.</td>
 </tr>
 </tbody>
 </table>
@@ -1371,36 +1371,54 @@
 <li>¿Qué métrica de tu panel de observabilidad te alertaría primero si el pipeline empieza a acumular retraso (<em>backpressure</em>), y por qué esa y no otra?</li>
 <li>¿Por qué estimar el costo de escalar tu pipeline streaming no es lo mismo que estimar el costo de tu pipeline batch de Unidad 1?</li>
 <li>¿Qué gana tu tablero BI al mostrar la predicción de series de tiempo junto a los KPIs del negocio, en vez de mostrarlos por separado?</li>
+<li>¿Por qué tu modelo de series de tiempo se compara primero contra un baseline de persistencia, y qué significaría que tu modelo no le gane?</li>
+<li>¿Qué diferencia hay entre un KPI de negocio y una métrica de infraestructura o de aplicación, y por qué Pushgateway es un atajo pragmático —no la forma recomendada— para exponer la de un job que no termina?</li>
 </ol>
 <h2 id="4-sustentacion-de-tu-dimension-u2">4. Sustentación de tu dimensión U2<a class="headerlink" href="#4-sustentacion-de-tu-dimension-u2" title="Permanent link">&para;</a></h2>
-<p><strong>Tabla 2. Distribución de tiempo por integrante</strong></p>
+<p><strong>Tabla 3. Distribución de tiempo de la sustentación</strong></p>
 <table>
 <thead>
 <tr>
 <th>Momento</th>
 <th style="text-align: right;">Tiempo</th>
+<th>Quién</th>
 <th>Propósito</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Presentación técnica</td>
-<td style="text-align: right;">8 min</td>
-<td>Explicar tu dimensión U2 (sección 2), las decisiones tomadas y su evolución desde S5.</td>
+<td>Alcance del proyecto (diapositiva)</td>
+<td style="text-align: right;">2-3 min</td>
+<td>Grupal</td>
+<td>Pregunta central de negocio (<code>brief.md</code>, sección 2), para quién, y su relación con el Proyecto Sello.</td>
 </tr>
 <tr>
-<td>Demo técnica</td>
-<td style="text-align: right;">8 min</td>
-<td>Ejecutar en vivo la publicación/consumo de eventos, el procesamiento streaming, el panel de observabilidad y el tablero BI.</td>
+<td>Arquitectura (diapositiva)</td>
+<td style="text-align: right;">2-3 min</td>
+<td>Grupal</td>
+<td>Componentes reales del pipeline (ingesta Kafka empresarial/IoT, Spark streaming, Grafana) — diagrama simple: fuentes → Kafka → Spark → Grafana/BI.</td>
 </tr>
 <tr>
-<td>Preguntas individuales</td>
-<td style="text-align: right;">5 min</td>
+<td>Asignación de tareas (diapositiva)</td>
+<td style="text-align: right;">2-3 min</td>
+<td>Grupal</td>
+<td>Asignación por dimensión de negocio: cada integrante presenta sus dos dimensiones de la pregunta central (U1 batch y U2 streaming, <code>brief.md</code> sección 3), no un módulo aparte.</td>
+</tr>
+<tr>
+<td>Demo y sustentación</td>
+<td style="text-align: right;">3 min por integrante</td>
+<td>Individual</td>
+<td>Cada integrante ejecuta en vivo su propia dimensión U2 (streaming) en el tablero Grafana compartido, y la contrasta con su dimensión U1.</td>
+</tr>
+<tr>
+<td>Preguntas</td>
+<td style="text-align: right;">3 min por integrante</td>
+<td>Individual</td>
 <td>Verificar dominio y aporte propio, con base en la Tabla 1.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Tabla 3. Entregables obligatorios</strong></p>
+<p><strong>Tabla 4. Entregables obligatorios</strong></p>
 <table>
 <thead>
 <tr>
@@ -1513,10 +1531,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>
