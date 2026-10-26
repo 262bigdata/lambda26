@@ -27,12 +27,12 @@ Cubre los seis temas dictados antes de esta sesión. El docente puede tomarla es
 
 | Sesión | Tema | Qué puede evaluar el docente |
 |---|---|---|
-| S6 | Ingesta de eventos empresariales en tiempo real | Publicación y consumo con Kafka, contrato de evento, tópico, particionado. |
-| S7 | Ingesta de eventos IoT/sensores en tiempo real | Esquema de evento, frecuencia, volumen y validaciones de datos para telemetría o sensores. |
-| S8 | Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega | Agregaciones en ventana, tratamiento de datos tardíos con *watermarking*, *checkpointing* y su efecto en latencia y throughput. |
-| S9 | Observabilidad con Grafana y costos | Métricas, tablero de observabilidad, umbrales, riesgos operativos y estimación de costos de escalado. |
-| S10 | Series de tiempo e inferencia en streaming | Modelo o inferencia de series de tiempo sobre datos batch y/o streaming, comparación de resultados y supuestos. |
-| S11 | BI/ML distribuido con Spark: KPIs y visualización de la predicción | Preparación de KPIs del flujo de eventos, relación entre la predicción de S10 y su visualización en el tablero BI. |
+| S6 | Ingesta de eventos empresariales en tiempo real | Conceptos de Kafka (*topic*, *broker*, partición, *offset*, *consumer group*, *key*), publicación y consumo, contrato de evento versionable. |
+| S7 | Ingesta de eventos IoT/sensores en tiempo real | Diferencia de frecuencia/volumen frente a un evento de negocio (S6), particionado por dispositivo (*key*) verificado en Kafka UI, validación de esquema y de rango físico, y por qué un dispositivo real publica por MQTT hacia un puente, nunca hablando Kafka directo. |
+| S8 | Procesamiento en streaming con Spark: ventanas, watermarking y semántica de entrega | Ventanas fijas y deslizantes, tratamiento de datos tardíos con *watermarking*, *checkpointing*, semántica "al menos una vez" y deduplicación, y su efecto en latencia y throughput. |
+| S9 | Observabilidad con Grafana y costos | Métricas de streaming (disponibilidad, latencia, throughput, *lag* del consumidor), cómo se conectan Prometheus/Grafana a Kafka y Spark, umbrales de alerta, riesgos operativos y estimación de costos de escalado. |
+| S10 | Series de tiempo e inferencia en streaming | Comparación contra un *baseline* de persistencia (por qué compararlo primero), división cronológica de entrenamiento/prueba (nunca aleatoria), e inferencia en tiempo real sin estado: una sola lectura basta, sin mantener historial en memoria. |
+| S11 | BI/ML distribuido con Spark: KPIs y visualización de la predicción | Diferencia entre un KPI de negocio y una métrica de infraestructura o de aplicación, *Pushgateway* como atajo pragmático para un *job* que no termina (no la forma recomendada), error de predicción medido en vivo en producción, y un tablero con un panel batch (estático) y uno streaming (en vivo) lado a lado. |
 
 Preguntas de referencia (el docente puede formular equivalentes):
 
@@ -41,18 +41,22 @@ Preguntas de referencia (el docente puede formular equivalentes):
 3. ¿Qué métrica de tu panel de observabilidad te alertaría primero si el pipeline empieza a acumular retraso (*backpressure*), y por qué esa y no otra?
 4. ¿Por qué estimar el costo de escalar tu pipeline streaming no es lo mismo que estimar el costo de tu pipeline batch de Unidad 1?
 5. ¿Qué gana tu tablero BI al mostrar la predicción de series de tiempo junto a los KPIs del negocio, en vez de mostrarlos por separado?
+6. ¿Por qué tu modelo de series de tiempo se compara primero contra un baseline de persistencia, y qué significaría que tu modelo no le gane?
+7. ¿Qué diferencia hay entre un KPI de negocio y una métrica de infraestructura o de aplicación, y por qué Pushgateway es un atajo pragmático —no la forma recomendada— para exponer la de un job que no termina?
 
 ## 4. Sustentación de tu dimensión U2
 
-**Tabla 2. Distribución de tiempo por integrante**
+**Tabla 3. Distribución de tiempo de la sustentación**
 
-| Momento | Tiempo | Propósito |
-|---|---:|---|
-| Presentación técnica | 8 min | Explicar tu dimensión U2 (sección 2), las decisiones tomadas y su evolución desde S5. |
-| Demo técnica | 8 min | Ejecutar en vivo la publicación/consumo de eventos, el procesamiento streaming, el panel de observabilidad y el tablero BI. |
-| Preguntas individuales | 5 min | Verificar dominio y aporte propio, con base en la Tabla 1. |
+| Momento | Tiempo | Quién | Propósito |
+|---|---:|---|---|
+| Alcance del proyecto (diapositiva) | 2-3 min | Grupal | Pregunta central de negocio (`brief.md`, sección 2), para quién, y su relación con el Proyecto Sello. |
+| Arquitectura (diapositiva) | 2-3 min | Grupal | Componentes reales del pipeline (ingesta Kafka empresarial/IoT, Spark streaming, Grafana) — diagrama simple: fuentes → Kafka → Spark → Grafana/BI. |
+| Asignación de tareas (diapositiva) | 2-3 min | Grupal | Asignación por dimensión de negocio: cada integrante presenta sus dos dimensiones de la pregunta central (U1 batch y U2 streaming, `brief.md` sección 3), no un módulo aparte. |
+| Demo y sustentación | 3 min por integrante | Individual | Cada integrante ejecuta en vivo su propia dimensión U2 (streaming) en el tablero Grafana compartido, y la contrasta con su dimensión U1. |
+| Preguntas | 3 min por integrante | Individual | Verificar dominio y aporte propio, con base en la Tabla 1. |
 
-**Tabla 3. Entregables obligatorios**
+**Tabla 4. Entregables obligatorios**
 
 | Entregable | Evidencia mínima | Criterio de aceptación |
 |---|---|---|

@@ -2,9 +2,6 @@
 
 **Esta es la plantilla-ejemplo del producto de Unidad 2 de Big Data.** La estructura (ingesta de eventos empresariales e IoT, procesamiento streaming, observabilidad y costos, series de tiempo, BI/ML distribuido) es exigible a todos. El contenido usa el ejemplo de referencia del docente — cada equipo lo reemplaza por el de su propio instrumento, declarado en su [Brief técnico-analítico](brief.md) de S2.
 
-!!! note "Contenido en construcción"
-    Las sesiones S6-S11 (donde se construye cada capacidad de esta unidad) todavía no están publicadas. Esta plantilla ya fija la estructura exigible y la rúbrica, verificadas contra el sílabo; el detalle sesión por sesión del ejemplo (código, comandos exactos) se completa a medida que S6-S11 se publiquen — igual que hizo `u1-producto.md` con S1-S4.
-
 ## Producto
 
 **Pipeline en tiempo real con ingesta de eventos empresariales e IoT/sensores, procesamiento streaming con Spark, observabilidad/costos y salidas BI/ML distribuidas.**
