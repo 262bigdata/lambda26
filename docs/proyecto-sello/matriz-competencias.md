@@ -28,7 +28,7 @@ El criterio de "Sustentación" en Unidad 1 y Unidad 2 **no evidencia ninguna de 
 | U1 | S5 | 3. Datos cargados y particionados en formatos analíticos | 16% | ≥70% en B o superior | Pendiente |
 | U1 | S5 | 4. Pipeline batch reproducible | 12% | ≥70% en B o superior | Pendiente |
 | U1 | S5 | 6. Evidencias técnicas y documentación de ejecución (apoyo) | 8% | ≥70% en B o superior | Pendiente |
-| U3 | S15 | 1. Integración end-to-end (integración, junto con CE043/CE044) | 20% | ≥70% en B o superior | Pendiente — S6-S14 aún no dictadas |
+| U3 | S15 | 1. Integración end-to-end (integración, junto con CE043/CE044) | 20% | ≥70% en B o superior | Pendiente |
 | U3 | S15 | 6. Sustentación técnica (cierre, junto con CE043/CE044) | 25% | ≥70% en B o superior | Pendiente |
 
 **Tabla 2. CE043 — Genera Modelos, Nivel 3 (evidencia técnica, en dos mitades)**

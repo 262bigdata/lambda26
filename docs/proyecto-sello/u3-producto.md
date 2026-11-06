@@ -19,7 +19,8 @@ Al cierre de Unidad 3, el sistema debe integrar — sin excepción — todo lo c
 - Procesamiento streaming con Spark Structured Streaming (ventanas, watermarking) (Unidad 2).
 - Observabilidad técnica con métricas, paneles y estimación de costos (Unidad 2).
 - Modelo ML, inferencia de series de tiempo o salida BI según el alcance del proyecto (Unidad 1 y 2).
-- Prácticas de DataOps/DevOps para la integración, empaquetado o despliegue del sistema.
+- Prácticas de DataOps/DevOps para la integración, empaquetado o despliegue del sistema: servicios con comprobación de salud y espera por dependencias, configuración y credenciales fuera del código, y una ejecución integrada con compuertas de calidad y manifiesto de ejecución.
+- Revisión técnica final: lista de comprobación de configuración aplicada, prueba de no regresión tras cada cambio y tabla de riesgos aceptados con su justificación.
 - Evidencias reproducibles de ejecución en el laboratorio.
 - Documentación técnica, operativa y demo final end-to-end.
 
@@ -30,13 +31,13 @@ Al cierre de Unidad 3, el sistema debe integrar — sin excepción — todo lo c
 | Criterio | Peso | CE / Nivel | A (20 pts) | B (15 pts) | C (10 pts) | D (5 pts) | Calificación obtenida |
 |---|---:|---|---|---|---|---|---:|
 | 1. Integración end-to-end de batch, streaming y BI/ML | 20% | CE042/043/044-N3 (integración) | Los tres flujos (batch, streaming, BI/ML) integrados y verificados juntos en un solo sistema. | Integración funcional, con alguno de los tres flujos parcialmente conectado. | Integración parcial, flujos aislados entre sí. | No presenta integración end-to-end. | |
-| 2. Prácticas DataOps/DevOps aplicadas al empaquetado o despliegue | 15% | — (apoyo) | Empaquetado o despliegue reproducible con prácticas DataOps/DevOps verificables (Docker, CI, scripts). | Prácticas aplicadas parcialmente, con reproducibilidad limitada. | Prácticas mencionadas, sin evidencia clara de aplicación. | No aplica prácticas de DataOps/DevOps. | |
+| 2. Prácticas DataOps/DevOps aplicadas al empaquetado o despliegue | 15% | — (apoyo) | Empaquetado o despliegue reproducible con prácticas DataOps/DevOps verificables (contenedores con comprobación de salud, configuración por variables, ejecución integrada con compuertas y manifiesto; CI o scripts si el equipo los usa). | Prácticas aplicadas parcialmente, con reproducibilidad limitada. | Prácticas mencionadas, sin evidencia clara de aplicación. | No aplica prácticas de DataOps/DevOps. | |
 | 3. Documentación operativa completa | 15% | — (apoyo) | Documentación publicada en MkDocs o equivalente, completa y reproducible por otra persona sin ayuda del equipo. | Documentación completa, con pasos de reproducción menores por aclarar. | Documentación parcial o con vacíos que dificultan reproducirla. | No presenta documentación operativa. | |
-| 4. Hardening y revisión técnica final | 10% | — (apoyo) | Checklist de hardening aplicado, fallos corregidos y sistema estabilizado, verificable en vivo. | Hardening aplicado parcialmente, con fallos menores pendientes. | Revisión técnica superficial, sin corrección verificable. | No presenta evidencia de hardening ni revisión técnica. | |
+| 4. Hardening y revisión técnica final | 10% | — (apoyo) | Lista de comprobación de hardening aplicada, fallos corregidos con prueba de no regresión, riesgos aceptados justificados y sistema estabilizado, verificable en vivo. | Hardening aplicado parcialmente, con fallos menores pendientes. | Revisión técnica superficial, sin corrección verificable. | No presenta evidencia de hardening ni revisión técnica. | |
 | 5. Demo reproducible | 15% | — (apoyo) | Demo end-to-end reproducible por otra persona siguiendo la documentación, sin ayuda del equipo. | Demo reproducible con ajustes menores necesarios. | Demo parcialmente reproducible. | Demo no reproducible fuera del equipo. | |
 | 6. Sustentación técnica con evidencias de ejecución, métricas, resultados y valor para la toma de decisiones | 25% | CE042/043/044-N3 (cierre) + CG | Explica y defiende el producto con solvencia; demuestra aporte individual, dominio técnico, comunicación clara, repositorio, documentación y actitud profesional. | Sustentación clara y funcional, con detalles menores en defensa técnica, evidencias, comunicación o documentación. | Sustentación parcial; dominio, evidencias, comunicación o aporte individual insuficientemente demostrados. | No sustenta adecuadamente, no demuestra autoría o no presenta evidencias mínimas del producto. | |
 
-Nota final = suma de (`Peso` × `Puntos de la calificación obtenida`) / 100 × 20.
+Nota final = suma de (`Peso` / 100 × `Puntos de la calificación obtenida`) = ____ / 20.
 
 `CE042/043/044-N3` = las tres competencias que Big Data evidencia en Nivel 3, ya cerradas por separado en Unidad 1 y 2; aquí no se genera evidencia de Nivel nueva, se integra o se cierra. `— (apoyo)` = infraestructura técnica (DataOps, documentación, hardening, demo) sin Nivel propio. `CG` = Competencia General "Investigación e Innovación" del sílabo.
 
@@ -61,7 +62,7 @@ Evalúa la sustentación y el producto (u3-producto.md, adaptada al instrumento 
 Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta del sistema completo (Unidades 1 y 2 integradas).
 Para el criterio 6, verifica explícitamente los 7 subaspectos de la Tabla 2 antes de asignar el nivel.
-Calcula la nota final con la fórmula: suma de (Peso × Puntos de la calificación obtenida) / 100 × 20.
+Calcula la nota final con la fórmula: suma de (Peso / 100 × Puntos de la calificación obtenida), directamente sobre 20.
 Indica 2 fortalezas y 2 recomendaciones finales del producto.
 ```
 
@@ -90,7 +91,7 @@ La presentación puede organizarse con una secuencia breve de apoyo visual. El v
 | 9 | Demo end-to-end | Ejecutar o evidenciar el flujo batch/streaming completo del sistema. | CE042 + CE043 |
 | 10 | Aporte individual | Indicar qué hizo cada integrante. | CE044 |
 | 11 | Repositorio y estándares | Mostrar repositorio, topics, estructura, documentación publicada en MkDocs o equivalente, y forma de ejecución. | CE044 |
-| 12 | Limitaciones y mejoras | Reconocer límites del producto y mejoras posibles. | CE044 |
+| 12 | Limitaciones y mejoras | Reconocer límites del producto, los riesgos aceptados con su justificación y las mejoras posibles. | CE044 |
 
 ## 5. Documentación y reporte del producto final
 
@@ -130,7 +131,7 @@ El informe debe documentar el producto de manera breve, verificable y alineada a
 | Ingesta y streaming | Flujo de eventos empresariales e IoT, procesamiento con Spark Structured Streaming y resultados. | Evidencias de ejecución o simulación. |
 | Observabilidad y costos | Métricas, paneles, logs y estimación de costos operacionales. | Capturas, instrucciones y resultados reproducibles. |
 | Resultados BI/ML | Modelo, inferencia, series de tiempo o tablero BI generado. | Métricas, tablas o visualizaciones. |
-| Integración y DataOps | Prácticas de integración, empaquetado o despliegue del sistema final. | Evidencias de hardening y ejecución end-to-end. |
+| Integración y DataOps | Prácticas de integración, empaquetado o despliegue del sistema final; compuertas, manifiesto y bitácora de la revisión técnica. | Evidencias de hardening, prueba de no regresión y ejecución end-to-end. |
 | Repositorio y documentación | Repositorio, topics, estructura, notebooks y documentación publicada. | URL del repositorio y MkDocs o equivalente. |
 | Aporte individual | Responsabilidad de cada integrante. | Tabla de tareas, commits o evidencias por integrante. |
-| Limitaciones y mejoras | Límites técnicos y mejoras posibles. | Lista priorizada y realista. |
+| Limitaciones y mejoras | Límites técnicos, riesgos aceptados con su justificación y mejoras posibles. | Lista priorizada y realista. |

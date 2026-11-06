@@ -96,7 +96,7 @@ A diferencia del roadmap de S4 (donde el componente ML era lo único nuevo del d
 | 6. Evidencias técnicas y documentación de ejecución | 8% | CE042-N3 (apoyo) | Evidencias completas, reproducibles por otra persona, con documentación clara y reloj/usuario visibles. | Evidencias suficientes, con vacíos menores de documentación. | Evidencias parciales o poco reproducibles. | No presenta evidencias ni documentación. | |
 | 7. Sustentación | 20% | CG | Sustenta con claridad y profesionalismo su aporte individual, respondiendo con precisión las preguntas del jurado. | Sustenta con solvencia, con detalles menores en claridad, orden o precisión. | Sustenta con dificultad; claridad, orden o precisión insuficientes. | No sustenta adecuadamente ni demuestra su aporte individual. | |
 
-Nota final = suma de (`Peso` × `Puntos de la calificación obtenida`) / 100 × 20.
+Nota final = suma de (`Peso` / 100 × `Puntos de la calificación obtenida`) = ____ / 20.
 
 `CE042-N3` = Nivel 3 de CE042 (Construye Dataset). `CE043-N3 (parcial)` = primera mitad del Nivel 3 de CE043 (Genera Modelos) — la segunda mitad se completa en Unidad 2. `CG` = Competencia General "Investigación e Innovación" del sílabo — no es una de las tres competencias CD/IA: los criterios 1-6 ya son la evidencia técnica, incluida su verificación en vivo; el criterio 7 verifica aporte individual y comunicación.
 
@@ -121,7 +121,7 @@ Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta (código, capturas, métricas reales).
 Para el criterio 7, verifica explícitamente los 6 subaspectos de la Tabla 4 antes de asignar el nivel.
 Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
-Calcula la nota final con la fórmula: suma de (Peso × Puntos de la calificación obtenida) / 100 × 20.
+Calcula la nota final con la fórmula: suma de (Peso / 100 × Puntos de la calificación obtenida), directamente sobre 20.
 Indica 2 fortalezas y 2 recomendaciones para lo que sigue en Unidad II.
 ```
 
