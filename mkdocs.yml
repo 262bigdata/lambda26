@@ -31,7 +31,10 @@ nav:
       - "S11 - BI/ML Distribuido con Spark": sesiones/S11_BI_ML_Distribuido_Spark_Grafana.md
       - "S12 - Evaluación de la Unidad II": sesiones/S12_Evaluacion_Unidad_2.md
   - 3. Integración, DataOps y despliegue del sistema final:
+      - "S13 - Integración del sistema, DataOps y BI": sesiones/S13_Integracion_Sistema_DataOps_BI.md
+      - "S14 - Revisión técnica final y hardening": sesiones/S14_Revision_Tecnica_Hardening.md
       - "S15 - Evaluación de la Unidad III": sesiones/S15_Evaluacion_Unidad_3.md
+      - "S16 - Continuación de la evaluación de la Unidad III": sesiones/S16_Continuacion_Evaluacion.md
 
 theme:
   name: material

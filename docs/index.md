@@ -57,10 +57,10 @@ Resultado esperado U3: el estudiante integra los componentes desarrollados en la
 
 | Sesión | Tema (sílabo) | Módulo `lambda26` | Trabajo principal |
 |---|---|---|---|
-| S13 | Integración del sistema, DataOps y BI. | todos | Demo end-to-end de batch, streaming, observabilidad y BI/ML integrados. |
-| S14 | Revisión técnica final y hardening. | todos | Checklist de hardening, guion de demostración y documentación operativa. |
-| S15 | Integración del sistema Big Data end-to-end: procesamiento batch y streaming, DataOps, observabilidad, BI/ML, documentación y despliegue. | — | **Producto final:** sistema Big Data distribuido end-to-end, defendido técnicamente. |
-| S16 | Integración de sistemas Big Data: evaluación final. | — | Evaluación final individual: demostración y preguntas técnicas pendientes. |
+| [S13](sesiones/S13_Integracion_Sistema_DataOps_BI.md) | Integración del sistema, DataOps y BI. | todos | Ejecución integrada de batch, streaming, modelo y observabilidad, con compuertas de calidad y manifiesto de ejecución. |
+| [S14](sesiones/S14_Revision_Tecnica_Hardening.md) | Revisión técnica final y hardening. | todos | Lista de comprobación de configuración, healthchecks, prueba de no regresión, riesgos aceptados y guion de demostración. |
+| [S15](sesiones/S15_Evaluacion_Unidad_3.md) | Integración del sistema Big Data end-to-end: procesamiento batch y streaming, DataOps, observabilidad, BI/ML, documentación y despliegue. | — | **Producto final:** sistema Big Data distribuido end-to-end, defendido técnicamente. |
+| [S16](sesiones/S16_Continuacion_Evaluacion.md) | Integración de sistemas Big Data: evaluación final. | — | Evaluación final individual: demostración y preguntas técnicas pendientes. |
 
 ## Arquitectura `lambda26`
 

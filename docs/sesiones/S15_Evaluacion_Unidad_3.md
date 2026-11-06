@@ -9,7 +9,7 @@ Esta sesión no enseña contenido nuevo: cierra la Unidad III de **Big Data** y,
 
 **Esta sesión no repite lo evaluado en S5 ni en S12**: la Unidad I (batch) y la Unidad II (tiempo real) ya quedaron certificadas por separado; S15 evalúa la integración, DataOps y estabilización final de ambas juntas — el sistema completo, no una capacidad nueva.
 
-**S16 (Continuación de la evaluación de la Unidad III)** no es una evaluación distinta: es la misma evaluación de esta guía, para los equipos o integrantes cuya presentación, sustentación o evidencia quedó pendiente en S15.
+**S16 (Continuación de la evaluación de la Unidad III)** no es una evaluación distinta ni una rúbrica nueva. Sirve a dos situaciones: completar esta misma evaluación para los equipos o integrantes cuya presentación, sustentación o evidencia quedó pendiente, y, para quienes ya sustentaron, entregar la versión final del producto con las observaciones incorporadas y una reflexión individual de cierre.
 
 ## 2. Producto evaluado
 
@@ -29,8 +29,8 @@ Cubre la integración y el hardening final dictados antes de esta sesión. El do
 
 | Sesión | Tema | Qué puede evaluar el docente |
 |---|---|---|
-| S13 | Integración del sistema, DataOps y BI | Cómo se integran los componentes batch, streaming, observabilidad y BI/ML en un solo flujo, y qué prácticas de DataOps/DevOps se aplicaron al empaquetado o despliegue. |
-| S14 | Revisión técnica final y hardening | Qué se estabilizó (configuración, documentación, evidencias) y por qué un sistema "que funciona en la demo" no es lo mismo que un sistema reproducible. |
+| S13 | Integración del sistema, DataOps y BI | Cómo se integran batch, streaming, modelo y observabilidad en una sola ejecución; para qué sirven las compuertas previas y de calidad; por qué se publican percentiles (p50/p95) y no el promedio; qué registra el manifiesto de ejecución; y por qué un valor viejo en Prometheus puede parecer vivo. |
+| S14 | Revisión técnica final y hardening | Qué diferencia hay entre un contenedor que arrancó y uno que está listo (`healthcheck`, `depends_on` con `service_healthy`, `up -d --wait`); por qué las credenciales se leen de variables; para qué sirve una prueba de no regresión; y qué distingue un riesgo aceptado de un descuido. |
 
 Preguntas de referencia (el docente puede formular equivalentes):
 
@@ -39,6 +39,11 @@ Preguntas de referencia (el docente puede formular equivalentes):
 3. ¿Qué tuviste que estabilizar entre la Unidad II y esta evaluación para que el sistema fuera reproducible por otra persona?
 4. Si otra persona clona tu repositorio hoy, ¿qué pasos exactos necesita seguir para levantar el sistema completo, y dónde están documentados?
 5. ¿Qué limitación real del producto reconoces, y por qué no la resolviste dentro del alcance del curso?
+6. En tu pipeline, ¿qué compuerta detiene la ejecución y cuál solo advierte? ¿Por qué elegiste esa diferencia?
+7. ¿Por qué el promedio de latencia no representa a tus eventos y qué métrica usas en su lugar?
+8. ¿Qué diferencia hay entre un servicio en ejecución y uno listo, y qué configuración de tu sistema lo expresa?
+9. Después de un cambio de configuración, ¿qué prueba repetiste para saber que no rompiste nada, y qué diferencias entre antes y después serían esperables?
+10. Elige un riesgo que aceptaste en tu sistema: ¿cuál es su justificación y qué cambiarías en producción?
 
 ## 4. Sustentación del producto final
 
