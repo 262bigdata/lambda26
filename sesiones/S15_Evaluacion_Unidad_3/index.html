@@ -11,8 +11,10 @@
         <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S15_Evaluacion_Unidad_3/">
       
       
-        <link rel="prev" href="../S12_Evaluacion_Unidad_2/">
+        <link rel="prev" href="../S14_Revision_Tecnica_Hardening/">
       
+      
+        <link rel="next" href="../S16_Continuacion_Evaluacion/">
       
       
         
@@ -1069,6 +1071,62 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../S13_Integracion_Sistema_DataOps_BI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S13 - Integración del sistema, DataOps y BI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S14_Revision_Tecnica_Hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S14 - Revisión técnica final y hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1195,6 +1253,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S16_Continuacion_Evaluacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S16 - Continuación de la evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1311,7 +1397,7 @@
 <li>Presentar y sustentar el Sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML y visualización BI.</li>
 </ol>
 <p><strong>Esta sesión no repite lo evaluado en S5 ni en S12</strong>: la Unidad I (batch) y la Unidad II (tiempo real) ya quedaron certificadas por separado; S15 evalúa la integración, DataOps y estabilización final de ambas juntas — el sistema completo, no una capacidad nueva.</p>
-<p><strong>S16 (Continuación de la evaluación de la Unidad III)</strong> no es una evaluación distinta: es la misma evaluación de esta guía, para los equipos o integrantes cuya presentación, sustentación o evidencia quedó pendiente en S15.</p>
+<p><strong>S16 (Continuación de la evaluación de la Unidad III)</strong> no es una evaluación distinta ni una rúbrica nueva. Sirve a dos situaciones: completar esta misma evaluación para los equipos o integrantes cuya presentación, sustentación o evidencia quedó pendiente, y, para quienes ya sustentaron, entregar la versión final del producto con las observaciones incorporadas y una reflexión individual de cierre.</p>
 <h2 id="2-producto-evaluado">2. Producto evaluado<a class="headerlink" href="#2-producto-evaluado" title="Permanent link">&para;</a></h2>
 <p>Del sílabo, el producto de la Unidad III es:</p>
 <blockquote>
@@ -1334,12 +1420,12 @@
 <tr>
 <td>S13</td>
 <td>Integración del sistema, DataOps y BI</td>
-<td>Cómo se integran los componentes batch, streaming, observabilidad y BI/ML en un solo flujo, y qué prácticas de DataOps/DevOps se aplicaron al empaquetado o despliegue.</td>
+<td>Cómo se integran batch, streaming, modelo y observabilidad en una sola ejecución; para qué sirven las compuertas previas y de calidad; por qué se publican percentiles (p50/p95) y no el promedio; qué registra el manifiesto de ejecución; y por qué un valor viejo en Prometheus puede parecer vivo.</td>
 </tr>
 <tr>
 <td>S14</td>
 <td>Revisión técnica final y hardening</td>
-<td>Qué se estabilizó (configuración, documentación, evidencias) y por qué un sistema "que funciona en la demo" no es lo mismo que un sistema reproducible.</td>
+<td>Qué diferencia hay entre un contenedor que arrancó y uno que está listo (<code>healthcheck</code>, <code>depends_on</code> con <code>service_healthy</code>, <code>up -d --wait</code>); por qué las credenciales se leen de variables; para qué sirve una prueba de no regresión; y qué distingue un riesgo aceptado de un descuido.</td>
 </tr>
 </tbody>
 </table>
@@ -1350,6 +1436,11 @@
 <li>¿Qué tuviste que estabilizar entre la Unidad II y esta evaluación para que el sistema fuera reproducible por otra persona?</li>
 <li>Si otra persona clona tu repositorio hoy, ¿qué pasos exactos necesita seguir para levantar el sistema completo, y dónde están documentados?</li>
 <li>¿Qué limitación real del producto reconoces, y por qué no la resolviste dentro del alcance del curso?</li>
+<li>En tu pipeline, ¿qué compuerta detiene la ejecución y cuál solo advierte? ¿Por qué elegiste esa diferencia?</li>
+<li>¿Por qué el promedio de latencia no representa a tus eventos y qué métrica usas en su lugar?</li>
+<li>¿Qué diferencia hay entre un servicio en ejecución y uno listo, y qué configuración de tu sistema lo expresa?</li>
+<li>Después de un cambio de configuración, ¿qué prueba repetiste para saber que no rompiste nada, y qué diferencias entre antes y después serían esperables?</li>
+<li>Elige un riesgo que aceptaste en tu sistema: ¿cuál es su justificación y qué cambiarías en producción?</li>
 </ol>
 <h2 id="4-sustentacion-del-producto-final">4. Sustentación del producto final<a class="headerlink" href="#4-sustentacion-del-producto-final" title="Permanent link">&para;</a></h2>
 <p><strong>Tabla 2. Distribución de tiempo por integrante</strong></p>

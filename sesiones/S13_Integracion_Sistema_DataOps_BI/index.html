@@ -1,0 +1,2918 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S13_Integracion_Sistema_DataOps_BI/">
+      
+      
+        <link rel="prev" href="../S12_Evaluacion_Unidad_2/">
+      
+      
+        <link rel="next" href="../S14_Revision_Tecnica_Hardening/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+  
+    <title>Big Data - S13 - Integración del sistema, DataOps y BI</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s13-integracion-del-sistema-dataops-y-bi" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S13 - Integración del sistema, DataOps y BI
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S06_Ingesta_Eventos_Empresariales_Kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S09_Observabilidad_Pipeline_Grafana_Costos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S9 - Observabilidad con Grafana y Costos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S10_Series_Tiempo_Inferencia_Streaming_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S10 - Series de Tiempo e Inferencia en Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S11_BI_ML_Distribuido_Spark_Grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S11 - BI/ML Distribuido con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S13 - Integración del sistema, DataOps y BI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S13 - Integración del sistema, DataOps y BI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-respaldo-que-corria-todos-los-dias-y-estaba-vacio-gitlab-2017" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el respaldo que "corría" todos los días y estaba vacío (GitLab, 2017)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-dataops-automatizar-y-verificar-la-ejecucion-de-un-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 DataOps: automatizar y verificar la ejecución de un pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-compuertas-previas-y-compuertas-de-calidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Compuertas previas y compuertas de calidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-cuando-un-kpi-promedio-engana-percentiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Cuando un KPI promedio engaña: percentiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-un-manifiesto-de-ejecucion-que-es-reproducible-y-que-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Un manifiesto de ejecución: qué es reproducible y qué no
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sesion-de-spark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la sesión de Spark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-compuertas-previas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Compuertas previas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-batch-kpi-con-compuertas-de-calidad-y-de-plausibilidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Batch: KPI con compuertas de calidad y de plausibilidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-streaming-el-modelo-de-s10-sobre-kafka-en-una-ventana-fija" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Streaming: el modelo de S10 sobre Kafka, en una ventana fija
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-error-de-prediccion-en-produccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Error de predicción en producción
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-publicar-en-pushgateway-y-confirmar-en-prometheus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Publicar en Pushgateway y confirmar en Prometheus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-escribir-el-manifiesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Escribir el manifiesto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-tablero-de-integracion-en-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Tablero de integración en Grafana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-registrar-los-hallazgos-en-la-bitacora" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Registrar los hallazgos en la bitácora
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S14_Revision_Tecnica_Hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S14 - Revisión técnica final y hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S16_Continuacion_Evaluacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S16 - Continuación de la evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-el-respaldo-que-corria-todos-los-dias-y-estaba-vacio-gitlab-2017" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: el respaldo que "corría" todos los días y estaba vacío (GitLab, 2017)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-dataops-automatizar-y-verificar-la-ejecucion-de-un-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 DataOps: automatizar y verificar la ejecución de un pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-compuertas-previas-y-compuertas-de-calidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Compuertas previas y compuertas de calidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-cuando-un-kpi-promedio-engana-percentiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Cuando un KPI promedio engaña: percentiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-un-manifiesto-de-ejecucion-que-es-reproducible-y-que-no" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Un manifiesto de ejecución: qué es reproducible y qué no
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-crear-el-notebook-y-la-sesion-de-spark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Crear el notebook y la sesión de Spark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-compuertas-previas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Compuertas previas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-batch-kpi-con-compuertas-de-calidad-y-de-plausibilidad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Batch: KPI con compuertas de calidad y de plausibilidad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-streaming-el-modelo-de-s10-sobre-kafka-en-una-ventana-fija" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Streaming: el modelo de S10 sobre Kafka, en una ventana fija
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-error-de-prediccion-en-produccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Error de predicción en producción
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-publicar-en-pushgateway-y-confirmar-en-prometheus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Publicar en Pushgateway y confirmar en Prometheus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-escribir-el-manifiesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Escribir el manifiesto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-tablero-de-integracion-en-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Tablero de integración en Grafana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-registrar-los-hallazgos-en-la-bitacora" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Registrar los hallazgos en la bitácora
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s13-integracion-del-sistema-dataops-y-bi">S13 - Integración del sistema, DataOps y BI<a class="headerlink" href="#s13-integracion-del-sistema-dataops-y-bi" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>Entre S6 y S11 el sistema ganó una pieza por sesión: ingesta con Kafka, <em>streaming</em> con Spark, observabilidad con Prometheus y Grafana, un modelo de series de tiempo y un tablero de BI. Cada pieza se probó en su propio notebook, se arrancó a mano y se validó mirando la salida. Nunca se ejecutaron <strong>juntas, en una sola corrida, con una forma de saber si esa corrida fue buena</strong>. Esta sesión construye esa corrida: un solo notebook que comprueba sus dependencias antes de empezar, procesa el batch, procesa el <em>stream</em> con el modelo, publica los resultados en Prometheus y deja un manifiesto que describe qué pasó. Al preparar la guía, esa corrida encontró algo que los notebooks de S9 y S11 no habían mostrado: un KPI de latencia que pasaba todas las comprobaciones de calidad y, aun así, describía al 45 % de los eventos de forma engañosa (3.4).</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>DataOps: automatizar y verificar la ejecución de un pipeline de datos.</li>
+<li>Compuertas previas y compuertas de calidad.</li>
+<li>Cuando un KPI promedio engaña: percentiles y compuertas de plausibilidad.</li>
+<li>Integración de batch, <em>streaming</em>, modelo y observabilidad en una sola ejecución.</li>
+<li>El manifiesto de ejecución: qué es reproducible y qué no.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de: <strong>integrar</strong> componentes batch y de <em>streaming</em> en una ejecución única de punta a punta, <strong>comprobar</strong> dependencias y calidad de datos con compuertas que detienen la ejecución con un mensaje claro, <strong>detectar</strong> un KPI que pasa las comprobaciones y aun así engaña, <strong>publicar</strong> los resultados de una ejecución en Prometheus, y <strong>registrar</strong> cada ejecución en un manifiesto que permita auditarla.</p>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>Notebook <code>13_integracion_dataops.ipynb</code> que, en una sola ejecución: comprueba seis dependencias (los artefactos de S9 y S10, Kafka, Pushgateway, Prometheus y Grafana); calcula sobre el Parquet de S9 los KPI de calidad y de flujo, con compuertas de calidad y de plausibilidad; procesa durante una ventana fija el <em>stream</em> real de <code>campo-electrico-eventos</code> con el modelo de S10; publica las métricas de la ejecución en Pushgateway y las confirma en Prometheus; y escribe un manifiesto JSON de la ejecución. Más la bitácora de integración con los hallazgos de esta sesión.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Confirmar que el Parquet de S9 (<code>atmos_eventos_observabilidad</code>) y el modelo de S10 (<code>artifacts/models/modelo_ce_lr</code>) existen en tu copia: <code>artifacts/</code> no se versiona en git, así que cada equipo los genera con su propia corrida. Repasar S9 (Tabla 4, dos tipos de métrica) y S11 (Pushgateway). Trabajo individual, antes de clase.</td>
+<td>S9, S10 (3.5), S11 (3.1, 3.4, 3.8).</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Construcción guiada del notebook de integración: compuertas previas, batch con compuertas de calidad, <em>streaming</em> con el modelo, publicación en Prometheus y manifiesto. Trabajo individual, siguiendo al docente paso a paso.</td>
+<td>Stack completo de <code>lambda26</code> corriendo (Kafka, PySpark, <code>obs/</code> y el productor de <code>campo-electrico</code>), pasos 3.1 a 3.10 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de la corrida integrada y del manifiesto, y del hallazgo sobre el KPI de latencia. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-el-respaldo-que-corria-todos-los-dias-y-estaba-vacio-gitlab-2017">1.6.1 Caso: el respaldo que "corría" todos los días y estaba vacío (GitLab, 2017)<a class="headerlink" href="#161-caso-el-respaldo-que-corria-todos-los-dias-y-estaba-vacio-gitlab-2017" title="Permanent link">&para;</a></h4>
+<p>El 31 de enero de 2017, GitLab.com sufrió una caída mayor: un ingeniero, al intentar reparar la replicación de su base de datos, borró los datos del servidor primario — unos 300 GB — creyendo que trabajaba en el secundario. Al ir a recuperarlos, la compañía descubrió que el informe posterior resume así su situación: "the process of both finding and using backups failed completely". Tenía cuatro mecanismos de protección — copias con <code>pg_dump</code>, <em>snapshots</em> de LVM, <em>snapshots</em> de disco en Azure y replicación — y el <em>bucket</em> de S3 donde debían estar las copias de <code>pg_dump</code> "was empty": se ejecutaba la versión 9.2 de <code>pg_dump</code> contra un PostgreSQL 9.6. Terminaron restaurando desde un <em>snapshot</em> de LVM de seis horas antes, y el propio informe nombra la causa de fondo: "nobody was responsible for testing this procedure".</p>
+<p>Fuente: GitLab. (2017, 10 de febrero). <em>Postmortem of database outage of January 31</em>. https://about.gitlab.com/blog/postmortem-of-database-outage-of-january-31/</p>
+<p>El detalle que importa para esta sesión: el trabajo de respaldo <strong>se ejecutaba</strong> — y no devolvía ningún error. Lo que no existía era una comprobación del <strong>resultado</strong>: nadie verificaba que el <em>bucket</em> tuviera contenido. Un pipeline de datos que termina sin error no ha demostrado que produjo algo útil. Es el mismo hueco que S13 cierra: comprobar antes de empezar que las dependencias están, y después de cada etapa que lo producido tiene sentido.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>En los notebooks de S9 y S11, ¿cómo supiste que la ejecución había salido bien: porque no hubo errores, o porque comprobaste algún resultado?</li>
+</ol>
+<p><strong>Comprensión del caso</strong></p>
+<ol>
+<li>Según el caso, ¿qué comprobación faltaba si el trabajo de respaldo ya terminaba sin error?</li>
+<li>¿Por qué una ejecución sin errores no demuestra que el resultado sea correcto?</li>
+<li>En tu propio pipeline, ¿qué etapa podría terminar "bien" y dejar un resultado vacío o sin sentido sin que nadie se entere?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U3 - Integración, DataOps y despliegue del sistema final.</li>
+<li>Producto del curso: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML y visualización BI, defendido técnicamente.</li>
+<li>Producto de unidad: sistema Big Data end-to-end, integrado, estabilizado y documentado.</li>
+<li>Avance del producto en esta sesión: una ejecución integrada de batch, <em>streaming</em>, modelo y observabilidad, con compuertas de calidad y manifiesto.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la unidad</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    S13["`**S13:** Integración, DataOps y BI`"]
+    S14["`**S14:** Revisión técnica final y hardening`"]
+    S15["`**S15:** Evaluación de la Unidad III`"]
+    S16["`**S16:** Continuación de la evaluación`"]
+
+    S13 --&gt; S14 --&gt; S15 --&gt; S16
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S13 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 40 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. Una ejecución integrada y dónde se comprueba cada cosa</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    PRE["Compuertas previas&lt;br/&gt;(3.3)"]
+    PQ[("Parquet de S9&lt;br/&gt;(batch)")]
+    BAT["Batch: KPI + compuertas&lt;br/&gt;de calidad (3.4)"]
+    K[("Kafka&lt;br/&gt;campo-electrico-eventos")]
+    MOD["Modelo de S10&lt;br/&gt;(3.5)"]
+    PG["Pushgateway (3.7)"]
+    PR[("Prometheus")]
+    GR["Grafana (3.9)"]
+    MAN[/"Manifiesto JSON&lt;br/&gt;(3.8)"/]
+
+    PRE --&gt; BAT
+    PQ --&gt; BAT
+    PRE --&gt; MOD
+    K --&gt; MOD
+    BAT --&gt; PG
+    MOD --&gt; PG
+    PG --&gt; PR --&gt; GR
+    BAT --&gt; MAN
+    MOD --&gt; MAN
+    PR --&gt; MAN
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class PRE,BAT,MAN today;</code></pre>
+<p>Lectura del diagrama: ninguna etapa es nueva — el Parquet, el <em>stream</em>, el modelo, el Pushgateway y Grafana ya existen desde S9-S11. Lo nuevo son los tres componentes marcados: las compuertas que deciden si la ejecución puede empezar, las que deciden si el batch es confiable, y el manifiesto que deja registro de lo que ocurrió.</p>
+<h3 id="22-dataops-automatizar-y-verificar-la-ejecucion-de-un-pipeline">2.2 DataOps: automatizar y verificar la ejecución de un pipeline<a class="headerlink" href="#22-dataops-automatizar-y-verificar-la-ejecucion-de-un-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>DataOps</strong> es el conjunto de prácticas que tratan un pipeline de datos como un sistema que se ejecuta, se prueba y se vigila de forma repetible, en lugar de como una secuencia de pasos que alguien lanza a mano y revisa a ojo. Tiene tres rasgos concretos: <strong>dependencias declaradas</strong> (el pipeline sabe qué necesita antes de empezar), <strong>comprobaciones automáticas</strong> (la calidad de los datos se verifica en el propio pipeline, no al final y a mano) y <strong>registro de cada ejecución</strong> (se puede saber después qué corrió, con qué y con qué resultado).</p>
+<p><strong>Tabla 2. Comprobar antes frente a fallar después</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sin compuerta previa</th>
+<th>Con compuerta previa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Una dependencia está caída</td>
+<td>El pipeline arranca y falla minutos después, dentro de Spark, con un error largo sobre otra cosa.</td>
+<td>Se detiene en el primer segundo con una línea que dice qué dependencia falta.</td>
+</tr>
+<tr>
+<td>Falta un artefacto de una sesión anterior</td>
+<td>Error de ruta en mitad de la ejecución.</td>
+<td>La compuerta "el artefacto existe" falla con ese nombre.</td>
+</tr>
+<tr>
+<td>Quién lo detecta</td>
+<td>Quien lee el error, si lo entiende.</td>
+<td>El propio pipeline.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-compuertas-previas-y-compuertas-de-calidad">2.3 Compuertas previas y compuertas de calidad<a class="headerlink" href="#23-compuertas-previas-y-compuertas-de-calidad" title="Permanent link">&para;</a></h3>
+<p>Una <strong>compuerta</strong> (<em>gate</em>) es una comprobación que, si falla, detiene la ejecución. Hay dos familias, y se distinguen por cuándo corren:</p>
+<ul>
+<li><strong>Compuertas previas</strong> (<em>preflight</em>): corren antes de procesar nada y verifican que las dependencias existen y responden.</li>
+<li><strong>Compuertas de calidad</strong>: corren sobre los datos ya leídos y verifican que son utilizables.</li>
+</ul>
+<p><strong>Tabla 3. Qué verifica cada tipo de compuerta de calidad</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Pregunta que responde</th>
+<th>Ejemplo en esta sesión</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Existencia</td>
+<td>¿Hay datos?</td>
+<td>El Parquet tiene filas.</td>
+</tr>
+<tr>
+<td>Completitud</td>
+<td>¿Faltan valores en las columnas que se van a usar?</td>
+<td><code>isValid</code> y <code>latencyMs</code> sin nulos.</td>
+</tr>
+<tr>
+<td>Rango</td>
+<td>¿Los valores caen en el dominio posible?</td>
+<td><code>ratioValidos</code> entre 0 y 1.</td>
+</tr>
+<tr>
+<td>Plausibilidad</td>
+<td>¿El valor típico es creíble para este dominio?</td>
+<td>La latencia mediana (p50) es menor a 60 s.</td>
+</tr>
+</tbody>
+</table>
+<p>Las tres primeras son las que casi siempre se escriben. La cuarta es la que cuesta más, porque exige saber <strong>qué valores son creíbles para tu dominio</strong> — y es exactamente la que 3.4 muestra que hacía falta.</p>
+<h3 id="24-cuando-un-kpi-promedio-engana-percentiles">2.4 Cuando un KPI promedio engaña: percentiles<a class="headerlink" href="#24-cuando-un-kpi-promedio-engana-percentiles" title="Permanent link">&para;</a></h3>
+<p>El <strong>promedio</strong> resume una distribución en un solo número, y ese número solo es representativo cuando los valores se agrupan alrededor de él. Cuando la distribución tiene una "cola" larga o dos grupos distintos, el promedio cae en un punto donde casi no hay datos. Un <strong>percentil</strong> describe la distribución sin ese problema: el <strong>p50</strong> (mediana) es el valor que deja a la mitad de los datos por debajo; el <strong>p95</strong> es el valor que deja al 95 % por debajo, y por tanto muestra cuán mala es la cola.</p>
+<p>La regla práctica para métricas de latencia: <strong>nunca publiques solo el promedio</strong>. Publica el p50 (qué experimenta un evento típico) y el p95 (qué tan mal le va a los peores), y calcula además qué fracción supera un umbral que importa en tu dominio.</p>
+<h3 id="25-un-manifiesto-de-ejecucion-que-es-reproducible-y-que-no">2.5 Un manifiesto de ejecución: qué es reproducible y qué no<a class="headerlink" href="#25-un-manifiesto-de-ejecucion-que-es-reproducible-y-que-no" title="Permanent link">&para;</a></h3>
+<p>Un <strong>manifiesto</strong> es un archivo, escrito al final de cada ejecución, con lo necesario para entenderla después: identificador de la ejecución, versiones del software, resultado de cada compuerta, volúmenes procesados y resultados clave. Permite comparar dos ejecuciones y auditar una.</p>
+<p>Un detalle de honestidad: un pipeline con una fuente en vivo <strong>no es reproducible valor por valor</strong>. Dos corridas sobre el mismo <em>stream</em> en momentos distintos procesan lecturas distintas y producen un error de predicción distinto. Lo que sí se puede reproducir es el <strong>procedimiento</strong> (los mismos pasos, las mismas compuertas, las mismas dependencias) y lo que sí se puede auditar es <strong>qué dio cada corrida</strong>: para eso existe el manifiesto.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h 30 min.</p>
+<p><strong>Actividad:</strong> construir el notebook <code>13_integracion_dataops.ipynb</code>: una ejecución integrada que comprueba sus dependencias, procesa el batch con compuertas de calidad, procesa el <em>stream</em> con el modelo de S10, publica sus resultados en Prometheus y deja un manifiesto.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que puedes ensamblar las piezas de las unidades anteriores en una sola ejecución verificable, y de que sabes detectar un resultado que "se ve bien" y no lo es.</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente construye el notebook celda por celda; los estudiantes replican cada una sobre su propia evidencia de S9/S10. Si algún equipo no completó S9 o S10, la compuerta de 3.3 se lo indica con el nombre exacto del artefacto que falta, y avanza con lo que sí tenga.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno completo.</li>
+<li><strong>3.2</strong> Crear el notebook y la sesión de Spark.</li>
+<li><strong>3.3</strong> Compuertas previas.</li>
+<li><strong>3.4</strong> Batch: KPI con compuertas de calidad y de plausibilidad.</li>
+<li><strong>3.5</strong> <em>Streaming</em>: el modelo de S10 sobre Kafka, en una ventana fija.</li>
+<li><strong>3.6</strong> Error de predicción en producción.</li>
+<li><strong>3.7</strong> Publicar en Pushgateway y confirmar en Prometheus.</li>
+<li><strong>3.8</strong> Escribir el manifiesto.</li>
+<li><strong>3.9</strong> Tablero de integración en Grafana.</li>
+<li><strong>3.10</strong> Registrar los hallazgos en la bitácora.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-completo">3.1 Reanudar el entorno completo<a class="headerlink" href="#31-reanudar-el-entorno-completo" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> los cuatro grupos de contenedores de <code>lambda26</code> arriba y el productor de eventos publicando.</p>
+<p>Desde la raíz del repositorio, en este orden (Kafka primero, porque <code>obs/</code> y <code>pyspark</code> se unen a su red):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">kafka</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">obs</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-campo-electrico</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+</code></pre></div>
+<p>Y, en una terminal aparte que dejes abierta, el productor (el contenedor arranca en <code>sleep infinity</code>; el productor lo lanzas tú):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">-it</span> <span class="n">lambda26-uso-campo-electrico</span> <span class="n">python</span> <span class="n">producer_campo_electrico</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<p>Confirma que publica leyendo dos mensajes del topic:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">lambda26-kafka</span> <span class="p">/</span><span class="n">opt</span><span class="p">/</span><span class="n">kafka</span><span class="p">/</span><span class="n">bin</span><span class="p">/</span><span class="n">kafka-console-consumer</span><span class="p">.</span><span class="n">sh</span> <span class="p">-</span><span class="n">-bootstrap-server</span> <span class="n">localhost</span><span class="p">:</span><span class="n">9092</span> <span class="p">-</span><span class="n">-topic</span> <span class="n">campo-electrico-eventos</span> <span class="p">-</span><span class="n">-from-beginning</span> <span class="p">-</span><span class="n">-max-messages</span> <span class="n">2</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: dos JSON con <code>tipoEvento: estacion.lectura</code>, <code>estacionId: estacion-ns-01</code> y las lecturas de <code>CE</code>, <code>TempOut</code>, <code>Bar</code>, etcétera.</p>
+<p><strong>Error frecuente</strong>: lanzar los comandos de <code>docker exec</code> desde Git Bash en Windows con una ruta absoluta (<code>/opt/kafka/...</code>): Git Bash la convierte en una ruta de Windows y el comando falla con <code>no such file or directory</code>. Usa PowerShell, o antepón <code>MSYS_NO_PATHCONV=1</code> en Git Bash.</p>
+<h3 id="32-crear-el-notebook-y-la-sesion-de-spark">3.2 Crear el notebook y la sesión de Spark<a class="headerlink" href="#32-crear-el-notebook-y-la-sesion-de-spark" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>pyspark/sesiones/s13-integracion-dataops/13_integracion_dataops.ipynb</code> con la sesión de Spark lista, y la carpeta <code>artifacts/</code> para el manifiesto.</p>
+<p>Crea la carpeta <code>s13-integracion-dataops/</code> dentro de <code>pyspark/sesiones/</code> (la única que se monta en el contenedor) y, en JupyterLab (<code>http://localhost:4488/lab?token=sintoken</code>), un notebook nuevo con esta primera celda — la misma configuración de S11:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span>
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"sesion13-integracion-dataops"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.spark:spark-sql-kafka-0-10_2.13:4.2.0"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"8"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="s2">"ERROR"</span><span class="p">)</span>
+<span class="n">spark</span>
+</code></pre></div>
+<h3 id="33-compuertas-previas">3.3 Compuertas previas<a class="headerlink" href="#33-compuertas-previas" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> una celda que comprueba seis dependencias y detiene la ejecución si alguna falla.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">platform</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+
+<span class="n">RUN_ID</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%SZ"</span><span class="p">)</span>
+<span class="n">INICIO</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">manifiesto</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"runId"</span><span class="p">:</span> <span class="n">RUN_ID</span><span class="p">,</span> <span class="s2">"sparkVersion"</span><span class="p">:</span> <span class="n">spark</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="s2">"python"</span><span class="p">:</span> <span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">(),</span>
+              <span class="s2">"compuertas"</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">"batch"</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">"streaming"</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">"observabilidad"</span><span class="p">:</span> <span class="p">{}}</span>
+
+<span class="n">RUTA_EVENTOS_S9</span> <span class="o">=</span> <span class="s2">"../s09-observabilidad-pipeline/artifacts/atmos_eventos_observabilidad"</span>
+<span class="n">RUTA_MODELO_S10</span> <span class="o">=</span> <span class="s2">"../s10-series-tiempo-inferencia-streaming/artifacts/models/modelo_ce_lr"</span>
+<span class="n">TOPIC</span> <span class="o">=</span> <span class="s2">"campo-electrico-eventos"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">http_ok</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">kafka_filas</span><span class="p">(</span><span class="n">topic</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"earliest"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"endingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">load</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+
+<span class="n">compuertas</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Parquet de S9 existe"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">RUTA_EVENTOS_S9</span><span class="p">),</span>
+    <span class="s2">"Modelo de S10 existe"</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">RUTA_MODELO_S10</span><span class="p">),</span>
+    <span class="s2">"Pushgateway listo"</span><span class="p">:</span> <span class="n">http_ok</span><span class="p">(</span><span class="s2">"http://pushgateway:9091/-/ready"</span><span class="p">),</span>
+    <span class="s2">"Prometheus listo"</span><span class="p">:</span> <span class="n">http_ok</span><span class="p">(</span><span class="s2">"http://prometheus:9090/-/ready"</span><span class="p">),</span>
+    <span class="s2">"Grafana saludable"</span><span class="p">:</span> <span class="n">http_ok</span><span class="p">(</span><span class="s2">"http://grafana:3000/api/health"</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">filas_topic</span> <span class="o">=</span> <span class="n">kafka_filas</span><span class="p">(</span><span class="n">TOPIC</span><span class="p">)</span>
+    <span class="n">compuertas</span><span class="p">[</span><span class="s2">"Kafka: topic "</span> <span class="o">+</span> <span class="n">TOPIC</span> <span class="o">+</span> <span class="s2">" con datos"</span><span class="p">]</span> <span class="o">=</span> <span class="n">filas_topic</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">filas_topic</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">compuertas</span><span class="p">[</span><span class="s2">"Kafka: topic "</span> <span class="o">+</span> <span class="n">TOPIC</span> <span class="o">+</span> <span class="s2">" con datos"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">for</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">ok</span> <span class="ow">in</span> <span class="n">compuertas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">((</span><span class="s2">"OK    "</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="s2">"FALLA "</span><span class="p">)</span> <span class="o">+</span> <span class="n">nombre</span><span class="p">)</span>
+<span class="n">manifiesto</span><span class="p">[</span><span class="s2">"compuertas"</span><span class="p">]</span> <span class="o">=</span> <span class="n">compuertas</span>
+<span class="n">manifiesto</span><span class="p">[</span><span class="s2">"kafkaFilasTopic"</span><span class="p">]</span> <span class="o">=</span> <span class="n">filas_topic</span>
+<span class="n">fallidas</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">ok</span> <span class="ow">in</span> <span class="n">compuertas</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">]</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">fallidas</span><span class="p">,</span> <span class="s2">"Compuertas que fallan: "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fallidas</span><span class="p">)</span>
+</code></pre></div>
+<p>Resultado real de esta sesión:</p>
+<div class="highlight"><pre><span></span><code>OK    Parquet de S9 existe
+OK    Modelo de S10 existe
+OK    Pushgateway listo
+OK    Prometheus listo
+OK    Grafana saludable
+OK    Kafka: topic campo-electrico-eventos con datos
+</code></pre></div>
+<p>Los nombres de host (<code>pushgateway</code>, <code>prometheus</code>, <code>grafana</code>, <code>kafka</code>) son los de la red Docker <code>lambda26-kafka-net</code>, a la que el contenedor de PySpark ya está unido (S11, 3.1). Para ver la compuerta actuar, detén uno de los servicios (<code>docker stop lambda26-pushgateway</code>) y vuelve a ejecutar la celda: el <code>assert</code> se detiene en el acto con <code>Compuertas que fallan: ['Pushgateway listo']</code>, en vez de dejar que Spark falle más adelante. Vuelve a levantarlo antes de seguir (<code>docker start lambda26-pushgateway</code>).</p>
+<p><strong>Error frecuente</strong>: que "Parquet de S9 existe" o "Modelo de S10 existe" falle en una copia recién clonada. <code>pyspark/sesiones/*/artifacts/</code> está en el <code>.gitignore</code> del repositorio: esos artefactos no viajan con <code>git clone</code>, se generan ejecutando S9 y S10. La compuerta existe justamente para decírtelo con ese nombre.</p>
+<h3 id="34-batch-kpi-con-compuertas-de-calidad-y-de-plausibilidad">3.4 Batch: KPI con compuertas de calidad y de plausibilidad<a class="headerlink" href="#34-batch-kpi-con-compuertas-de-calidad-y-de-plausibilidad" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> los KPI del Parquet de S9 calculados con percentiles de latencia, y las compuertas de calidad aplicadas.</p>
+<div class="highlight"><pre><span></span><code><span class="n">eventos</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">parquet</span><span class="p">(</span><span class="n">RUTA_EVENTOS_S9</span><span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">eventos</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">nulos</span> <span class="o">=</span> <span class="n">eventos</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"isValid"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"isValid"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="n">kpi</span> <span class="o">=</span> <span class="n">eventos</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">avg</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"isValid"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"ratioValidos"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">avg</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"latenciaPromedioMs"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"percentile_approx(latencyMs, 0.5)"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"latenciaP50Ms"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"percentile_approx(latencyMs, 0.95)"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"latenciaP95Ms"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"latenciaMaxMs"</span><span class="p">),</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">avg</span><span class="p">((</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"latencyMs"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">60000</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"fraccionMayor1Min"</span><span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+<span class="n">compuertas_calidad</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Hay filas"</span><span class="p">:</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"isValid sin nulos"</span><span class="p">:</span> <span class="p">(</span><span class="n">nulos</span><span class="p">[</span><span class="s2">"isValid"</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"latencyMs sin nulos"</span><span class="p">:</span> <span class="p">(</span><span class="n">nulos</span><span class="p">[</span><span class="s2">"latencyMs"</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"ratioValidos en [0, 1]"</span><span class="p">:</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"ratioValidos"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">"Latencia tipica (p50) menor a 60 s"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaP50Ms"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">60000</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">ok</span> <span class="ow">in</span> <span class="n">compuertas_calidad</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">((</span><span class="s2">"OK    "</span> <span class="k">if</span> <span class="n">ok</span> <span class="k">else</span> <span class="s2">"FALLA "</span><span class="p">)</span> <span class="o">+</span> <span class="n">nombre</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">compuertas_calidad</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="s2">"La calidad del batch no pasa"</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Eventos: </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">  |  ratio de validos: </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'ratioValidos'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Latencia: promedio </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'latenciaPromedioMs'</span><span class="p">]</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> ms | p50 </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'latenciaP50Ms'</span><span class="p">]</span><span class="si">}</span><span class="s2"> ms | p95 </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'latenciaP95Ms'</span><span class="p">]</span><span class="si">}</span><span class="s2"> ms | max </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'latenciaMaxMs'</span><span class="p">]</span><span class="si">}</span><span class="s2"> ms"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Eventos con mas de 1 minuto de latencia: </span><span class="si">{</span><span class="n">kpi</span><span class="p">[</span><span class="s1">'fraccionMayor1Min'</span><span class="p">]</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">advertencias</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">if</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaP95Ms"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">300000</span><span class="p">:</span>
+    <span class="n">advertencias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"p95 de latencia mayor a 5 minutos: el promedio no representa a la mayoria de los eventos"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">advertencias</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"ADVERTENCIA:"</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">manifiesto</span><span class="p">[</span><span class="s2">"batch"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"filas"</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span> <span class="s2">"ratioValidos"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"ratioValidos"</span><span class="p">],</span> <span class="s2">"latenciaPromedioMs"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaPromedioMs"</span><span class="p">],</span>
+                       <span class="s2">"latenciaP50Ms"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaP50Ms"</span><span class="p">],</span> <span class="s2">"latenciaP95Ms"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaP95Ms"</span><span class="p">],</span>
+                       <span class="s2">"latenciaMaxMs"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"latenciaMaxMs"</span><span class="p">],</span> <span class="s2">"fraccionMayor1Min"</span><span class="p">:</span> <span class="n">kpi</span><span class="p">[</span><span class="s2">"fraccionMayor1Min"</span><span class="p">],</span>
+                       <span class="s2">"calidad"</span><span class="p">:</span> <span class="n">compuertas_calidad</span><span class="p">,</span> <span class="s2">"advertencias"</span><span class="p">:</span> <span class="n">advertencias</span><span class="p">}</span>
+</code></pre></div>
+<p>Resultado real de esta sesión:</p>
+<div class="highlight"><pre><span></span><code>OK    Hay filas
+OK    isValid sin nulos
+OK    latencyMs sin nulos
+OK    ratioValidos en [0, 1]
+OK    Latencia tipica (p50) menor a 60 s
+Eventos: 1,866  |  ratio de validos: 1.0000
+Latencia: promedio 398793 ms | p50 11491 ms | p95 1488930 ms | max 1582393 ms
+Eventos con mas de 1 minuto de latencia: 45.3%
+ADVERTENCIA: p95 de latencia mayor a 5 minutos: el promedio no representa a la mayoria de los eventos
+</code></pre></div>
+<p>Este es el hallazgo central de la sesión. El KPI de latencia que S11 publicó —el promedio— valía <strong>398 793 ms, unos 6,6 minutos</strong>, y ninguna comprobación de nulos o de rango lo habría puesto en duda. Pero la distribución dice otra cosa: la mediana es de <strong>11,5 segundos</strong>, y el p95 es de <strong>1 489 segundos (casi 25 minutos)</strong>. El 45,3 % de los eventos esperó más de un minuto. El promedio de 6,6 minutos no describe a ningún grupo: ni al evento típico (11,5 s) ni a los lentos (hasta ~26 minutos). La distribución es de dos grupos, y un promedio publicado solo, en un tablero, sugiere un sistema con una latencia estable de 6,6 minutos que no existe.</p>
+<p>Qué lo causa no lo comprueba esta guía; el patrón es consistente con eventos que esperaron en el topic antes de que S9 los procesara (la latencia de S9 es <code>processedAt - timestamp</code>, y <code>timestamp</code> lo pone el sensor), pero confirmarlo exigiría reconstruir la corrida de S9. Lo que sí queda establecido es la conclusión práctica: <strong>publica percentiles, no solo el promedio</strong>, y agrega una compuerta de plausibilidad. La compuerta de esta celda usa la mediana (que pasa) y deja el p95 como <strong>advertencia</strong>, no como falla: un p95 alto es una señal que el equipo debe mirar, pero detener todo el pipeline por ello sería una decisión de negocio, no técnica.</p>
+<p><strong>Error frecuente</strong>: poner la compuerta de plausibilidad sobre el promedio. Aquí el promedio (398 s) habría fallado cualquier umbral razonable y detenido el pipeline por un valor que no representa a nadie; el p50 es el que mide lo que experimenta un evento típico.</p>
+<h3 id="35-streaming-el-modelo-de-s10-sobre-kafka-en-una-ventana-fija">3.5 <em>Streaming</em>: el modelo de S10 sobre Kafka, en una ventana fija<a class="headerlink" href="#35-streaming-el-modelo-de-s10-sobre-kafka-en-una-ventana-fija" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el modelo de S10 aplicado al <em>stream</em> real durante 45 segundos, con las filas procesadas acumuladas en memoria.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.ml</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StringType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">LongType</span>
+
+<span class="n">modelo</span> <span class="o">=</span> <span class="n">PipelineModel</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">RUTA_MODELO_S10</span><span class="p">)</span>
+<span class="n">esquema_evento</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"tipoEvento"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"estacionId"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"CE"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"CM"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"TempOut"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"OutHum"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"WindSpeed"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"Bar"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"SolarRad"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"UVIndex"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"origen"</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">())</span>
+<span class="p">)</span>
+<span class="n">crudo</span> <span class="o">=</span> <span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">readStream</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"kafka"</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"kafka.bootstrap.servers"</span><span class="p">,</span> <span class="s2">"kafka:9092"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"subscribe"</span><span class="p">,</span> <span class="n">TOPIC</span><span class="p">)</span>
+         <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"startingOffsets"</span><span class="p">,</span> <span class="s2">"latest"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"failOnDataLoss"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">())</span>
+<span class="n">eventos_stream</span> <span class="o">=</span> <span class="p">(</span><span class="n">crudo</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"string"</span><span class="p">),</span> <span class="n">esquema_evento</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"e"</span><span class="p">))</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"e.*"</span><span class="p">))</span>
+<span class="n">predicciones</span> <span class="o">=</span> <span class="n">modelo</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">eventos_stream</span><span class="p">)</span>
+
+<span class="n">acumulado</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">microlotes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">procesar_microlote</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_lote</span><span class="p">):</span>
+    <span class="n">filas</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"estacionId"</span><span class="p">,</span> <span class="s2">"timestamp"</span><span class="p">,</span> <span class="s2">"CE"</span><span class="p">,</span> <span class="s2">"prediction"</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="n">microlotes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"batchId"</span><span class="p">:</span> <span class="n">id_lote</span><span class="p">,</span> <span class="s2">"filas"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">filas</span><span class="p">)})</span>
+    <span class="n">acumulado</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">f</span><span class="p">[</span><span class="s2">"estacionId"</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="s2">"timestamp"</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="s2">"CE"</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="s2">"prediction"</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filas</span><span class="p">)</span>
+
+<span class="n">DURACION_S</span> <span class="o">=</span> <span class="mi">45</span>
+<span class="n">consulta</span> <span class="o">=</span> <span class="n">predicciones</span><span class="o">.</span><span class="n">writeStream</span><span class="o">.</span><span class="n">foreachBatch</span><span class="p">(</span><span class="n">procesar_microlote</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">awaitTermination</span><span class="p">(</span><span class="n">DURACION_S</span><span class="p">)</span>
+<span class="n">consulta</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Micro-lotes con datos:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">([</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">microlotes</span> <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s2">"filas"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Filas procesadas en"</span><span class="p">,</span> <span class="n">DURACION_S</span><span class="p">,</span> <span class="s2">"s:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">acumulado</span><span class="p">))</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: 15 micro-lotes con datos y 15 filas procesadas en 45 segundos. A diferencia de S11 (que dejaba la consulta corriendo indefinidamente), <code>awaitTermination(DURACION_S)</code> seguido de <code>stop()</code> la acota en el tiempo: una ejecución integrada tiene que <strong>terminar</strong> para poder comprobarse y registrarse. <code>startingOffsets</code> queda en <code>latest</code>, así que solo cuenta lo que publica el productor mientras la ventana está abierta: por eso el productor de 3.1 tiene que estar corriendo.</p>
+<p><strong>Error frecuente</strong>: el <code>assert</code> de la celda siguiente (3.6) falla con <code>El stream no entrego ninguna fila: esta corriendo el productor?</code>. Casi siempre es que el productor de 3.1 se detuvo (cerrar su terminal lo apaga).</p>
+<h3 id="36-error-de-prediccion-en-produccion">3.6 Error de predicción en producción<a class="headerlink" href="#36-error-de-prediccion-en-produccion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el error absoluto medio (MAE) del modelo frente a la lectura real siguiente, calculado sobre lo que acaba de procesar el <em>stream</em>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># MAE de produccion: la prediccion de una lectura contra el CE real de la lectura siguiente de la misma estacion</span>
+<span class="n">por_estacion</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">estacion</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">ce</span><span class="p">,</span> <span class="n">pred</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">acumulado</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+    <span class="n">por_estacion</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">estacion</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ce</span><span class="p">,</span> <span class="n">pred</span><span class="p">))</span>
+
+<span class="n">errores</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">lecturas</span> <span class="ow">in</span> <span class="n">por_estacion</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">ce_actual</span><span class="p">,</span> <span class="n">pred_actual</span><span class="p">),</span> <span class="p">(</span><span class="n">ce_siguiente</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lecturas</span><span class="p">,</span> <span class="n">lecturas</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">errores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">pred_actual</span> <span class="o">-</span> <span class="n">ce_siguiente</span><span class="p">))</span>
+
+<span class="n">mae</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">errores</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">errores</span><span class="p">)</span> <span class="k">if</span> <span class="n">errores</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Pares comparables:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">errores</span><span class="p">),</span> <span class="s2">" | MAE en produccion:"</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">mae</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">mae</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">assert</span> <span class="n">acumulado</span><span class="p">,</span> <span class="s2">"El stream no entrego ninguna fila: esta corriendo el productor?"</span>
+<span class="n">manifiesto</span><span class="p">[</span><span class="s2">"streaming"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"duracionS"</span><span class="p">:</span> <span class="n">DURACION_S</span><span class="p">,</span> <span class="s2">"filas"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">acumulado</span><span class="p">),</span> <span class="s2">"microlotes"</span><span class="p">:</span> <span class="n">microlotes</span><span class="p">,</span>
+                           <span class="s2">"paresComparables"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">errores</span><span class="p">),</span> <span class="s2">"maeProduccion"</span><span class="p">:</span> <span class="n">mae</span><span class="p">}</span>
+</code></pre></div>
+<p>Resultado real de esta sesión, en dos corridas distintas: 14 pares comparables y un MAE de <strong>0,0330</strong> en la primera, <strong>0,0426</strong> en la segunda. Los dos valores son distintos porque cada corrida procesó lecturas distintas de un <em>stream</em> en vivo (2.5): es el comportamiento esperado, no un defecto, y es exactamente lo que el manifiesto de 3.8 deja registrado para poder compararlas.</p>
+<h3 id="37-publicar-en-pushgateway-y-confirmar-en-prometheus">3.7 Publicar en Pushgateway y confirmar en Prometheus<a class="headerlink" href="#37-publicar-en-pushgateway-y-confirmar-en-prometheus" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> las métricas de la ejecución en Prometheus, confirmadas con una consulta.</p>
+<div class="highlight"><pre><span></span><code><span class="n">metricas</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"lambda26_int_batch_eventos_total"</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="s2">"batch"</span><span class="p">][</span><span class="s2">"filas"</span><span class="p">],</span>
+    <span class="s2">"lambda26_int_batch_validos_ratio"</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="s2">"batch"</span><span class="p">][</span><span class="s2">"ratioValidos"</span><span class="p">],</span>
+    <span class="s2">"lambda26_int_batch_latencia_p50_ms"</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="s2">"batch"</span><span class="p">][</span><span class="s2">"latenciaP50Ms"</span><span class="p">],</span>
+    <span class="s2">"lambda26_int_batch_latencia_p95_ms"</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="s2">"batch"</span><span class="p">][</span><span class="s2">"latenciaP95Ms"</span><span class="p">],</span>
+    <span class="s2">"lambda26_int_stream_filas_total"</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="s2">"streaming"</span><span class="p">][</span><span class="s2">"filas"</span><span class="p">],</span>
+    <span class="s2">"lambda26_int_stream_mae"</span><span class="p">:</span> <span class="n">mae</span> <span class="k">if</span> <span class="n">mae</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"lambda26_int_ultima_ejecucion_timestamp"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
+<span class="p">}</span>
+<span class="n">cuerpo</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"# TYPE "</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="s2">" gauge</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">n</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metricas</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"http://pushgateway:9091/metrics/job/lambda26_integracion/instance/s13"</span>
+<span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">cuerpo</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">method</span><span class="o">=</span><span class="s2">"PUT"</span><span class="p">))</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Pushgateway respondio:"</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">consultar</span><span class="p">(</span><span class="n">nombre</span><span class="p">):</span>
+    <span class="n">resultado</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">"http://prometheus:9090/api/v1/query?query="</span> <span class="o">+</span> <span class="n">nombre</span><span class="p">))[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"result"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">resultado</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"value"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">resultado</span> <span class="k">else</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">coincide</span><span class="p">(</span><span class="n">obtenido</span><span class="p">,</span> <span class="n">esperado</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">obtenido</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">obtenido</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">esperado</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">esperado</span><span class="p">)))</span>
+
+<span class="n">confirmadas</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">limite</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mi">90</span>
+<span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">limite</span><span class="p">:</span>
+    <span class="n">confirmadas</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">consultar</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">metricas</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">coincide</span><span class="p">(</span><span class="n">confirmadas</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metricas</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">break</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metricas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="s2">":"</span><span class="p">,</span> <span class="n">confirmadas</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="s2">"(publicado:"</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s2">")"</span><span class="p">)</span>
+<span class="n">todas</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">coincide</span><span class="p">(</span><span class="n">confirmadas</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metricas</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="n">manifiesto</span><span class="p">[</span><span class="s2">"observabilidad"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"metricas"</span><span class="p">:</span> <span class="n">confirmadas</span><span class="p">,</span> <span class="s2">"todasEnPrometheus"</span><span class="p">:</span> <span class="n">todas</span><span class="p">}</span>
+<span class="k">assert</span> <span class="n">todas</span><span class="p">,</span> <span class="s2">"Prometheus no devolvio los valores recien publicados"</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: <code>Pushgateway respondio: 200</code> y las siete métricas devueltas por Prometheus (entre ellas <code>lambda26_int_batch_latencia_p50_ms: 11491</code> y <code>lambda26_int_batch_latencia_p95_ms: 1488930</code>). El bucle de espera existe porque Prometheus no recibe el dato en el instante del <code>PUT</code>: el Pushgateway lo guarda y Prometheus lo recoge en su siguiente <em>scrape</em>; la celda espera hasta 90 segundos en lugar de asumirlo. Y compara cada valor devuelto con el que <strong>acabas de publicar</strong>, no solo con que exista: una versión anterior de esta celda se daba por satisfecha en cuanto cada métrica tenía <em>algún</em> valor, y en una segunda corrida validó los de la corrida anterior (devolvió el MAE y la marca de tiempo de la ejecución previa mientras la actual había calculado otro MAE). Con esta celda, las compuertas de 3.3 y 3.4 y la confirmación final cubren el principio y el final de la ejecución.</p>
+<p><strong>Error frecuente</strong>: confirmar una publicación comprobando solo que "hay un valor". Si la métrica ya existía de una corrida anterior, esa comprobación pasa sin que tu publicación nueva haya llegado.</p>
+<h3 id="38-escribir-el-manifiesto">3.8 Escribir el manifiesto<a class="headerlink" href="#38-escribir-el-manifiesto" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un archivo <code>artifacts/manifiesto_&lt;runId&gt;.json</code> con el registro de la ejecución.</p>
+<div class="highlight"><pre><span></span><code><span class="n">manifiesto</span><span class="p">[</span><span class="s2">"duracionTotalS"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">INICIO</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ruta_manifiesto</span> <span class="o">=</span> <span class="s2">"./artifacts/manifiesto_"</span> <span class="o">+</span> <span class="n">RUN_ID</span> <span class="o">+</span> <span class="s2">".json"</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ruta_manifiesto</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">manifiesto</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Manifiesto escrito en"</span><span class="p">,</span> <span class="n">ruta_manifiesto</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">manifiesto</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"runId"</span><span class="p">,</span> <span class="s2">"sparkVersion"</span><span class="p">,</span> <span class="s2">"duracionTotalS"</span><span class="p">)},</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: <code>manifiesto_20261106T031314Z.json</code>, con <code>sparkVersion: 4.2.0</code>. La primera corrida tardó 76,8 s y la segunda 304,5 s: la diferencia está en lo que cada una esperó (el bucle de 3.7 hasta que Prometheus recogió las métricas, y la carga de la laptop), no en un cambio del código — otra razón para registrar la duración en el manifiesto en vez de recordarla. El manifiesto guarda el resultado de cada compuerta, los percentiles, el MAE y los micro-lotes; abre el JSON y confirma que están todos.</p>
+<p><code>artifacts/</code> está en el <code>.gitignore</code> de <code>pyspark/</code>, así que el manifiesto no se versiona: es evidencia de <strong>tu</strong> corrida, y la guarda tu equipo para la sustentación.</p>
+<h3 id="39-tablero-de-integracion-en-grafana">3.9 Tablero de integración en Grafana<a class="headerlink" href="#39-tablero-de-integracion-en-grafana" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> un tablero con los resultados de la última ejecución integrada.</p>
+<p>En Grafana (<code>http://localhost:43000</code>, <code>admin</code>/<code>admin</code>, <em>datasource</em> Prometheus), crea un tablero nuevo con estos paneles. Las consultas son las métricas que 3.7 acaba de dejar en Prometheus:</p>
+<p><strong>Tabla 4. Paneles del tablero de integración</strong></p>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Tipo</th>
+<th>Consulta PromQL</th>
+<th>Qué responde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latencia: p50 frente a p95</td>
+<td>Estadística (dos valores)</td>
+<td><code>lambda26_int_batch_latencia_p50_ms</code> y <code>lambda26_int_batch_latencia_p95_ms</code></td>
+<td>¿Qué experimenta un evento típico y qué tan mal le va a los peores?</td>
+</tr>
+<tr>
+<td>Ratio de eventos válidos</td>
+<td>Medidor</td>
+<td><code>lambda26_int_batch_validos_ratio</code></td>
+<td>¿Qué fracción de lo procesado es utilizable?</td>
+</tr>
+<tr>
+<td>Error del modelo en producción</td>
+<td>Estadística</td>
+<td><code>lambda26_int_stream_mae</code></td>
+<td>¿Cuánto se equivoca el modelo frente a la realidad?</td>
+</tr>
+<tr>
+<td>Antigüedad de la última ejecución</td>
+<td>Estadística</td>
+<td><code>time() - lambda26_int_ultima_ejecucion_timestamp</code></td>
+<td>¿Cuándo corrió por última vez la ejecución integrada?</td>
+</tr>
+</tbody>
+</table>
+<p>El cuarto panel es el que convierte al tablero en parte de DataOps: sin él, una ejecución que dejó de correr hace tres días deja un tablero que sigue mostrando los valores de esa última vez, con apariencia de estar vivo. Esta guía verificó las cuatro métricas en Prometheus (3.7); la construcción de los paneles en Grafana es parte de tu evidencia.</p>
+<p><strong>Error frecuente</strong>: dejar el panel de latencia mostrando solo el promedio, ya que <code>lambda26_bi_latencia_promedio_ms</code> (de S11) sigue publicado en el Pushgateway. Reemplázalo por p50 y p95 — es la corrección de 3.4 llevada al tablero.</p>
+<h3 id="310-registrar-los-hallazgos-en-la-bitacora">3.10 Registrar los hallazgos en la bitácora<a class="headerlink" href="#310-registrar-los-hallazgos-en-la-bitacora" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la bitácora de integración de esta sesión, una fila por hallazgo.</p>
+<p><strong>Tabla 5. Bitácora de integración</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Hallazgo</th>
+<th>Causa</th>
+<th>Corrección</th>
+<th>Prueba de corrección</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>El KPI de latencia promedio (S11) valía 6,6 minutos y describía solo a una minoría.</td>
+<td>Se publicaba el promedio de una distribución de dos grupos; las compuertas de nulos y rango no lo detectan.</td>
+<td>Percentiles p50 y p95, fracción mayor a 1 minuto, compuerta de plausibilidad sobre el p50 y advertencia sobre el p95 (3.4).</td>
+<td>La celda de 3.4 imprime p50 = 11 491 ms y p95 = 1 488 930 ms junto al promedio, y la advertencia.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Una copia clonada del repositorio no puede ejecutar la integración: faltan los artefactos de S9 y S10.</td>
+<td><code>artifacts/</code> está en el <code>.gitignore</code>: no viaja con <code>git clone</code>.</td>
+<td>Compuertas previas que nombran el artefacto que falta (3.3).</td>
+<td>Con el Parquet o el modelo ausente, la celda de 3.3 se detiene con <code>Compuertas que fallan: ['Parquet de S9 existe']</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Entorno completo de <code>lambda26</code> levantado y productor publicando (3.1).</li>
+<li>Compuertas previas con sus seis resultados, y la prueba de una compuerta fallando (3.3).</li>
+<li>KPI del batch con percentiles y compuertas de calidad y de plausibilidad (3.4).</li>
+<li><em>Stream</em> procesado con el modelo en una ventana fija, y MAE de producción (3.5-3.6).</li>
+<li>Las siete métricas confirmadas en Prometheus (3.7).</li>
+<li>Manifiesto de la ejecución (3.8) y tablero de integración (3.9).</li>
+<li>Bitácora de integración con la prueba de cada corrección (3.10).</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h 30 min fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Integración y documentación del sistema del <strong>Proyecto Sello</strong> propio del equipo.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Construye una ejecución integrada de tu propio pipeline —que combine tu componente batch y tu componente de <em>streaming</em>— con al menos <strong>cuatro compuertas previas</strong> sobre tus propias dependencias.</li>
+<li>Calcula al menos un KPI de latencia o de tiempo de tu propio dominio con <strong>percentiles (p50 y p95)</strong>, no solo con promedio, y agrega una compuerta de plausibilidad con un umbral que justifiques para tu dominio.</li>
+<li>Ejecuta tu pipeline de punta a punta una vez y publica sus resultados en Prometheus, confirmándolos con una consulta.</li>
+<li>Escribe el manifiesto de esa ejecución, y compara el de dos corridas distintas: qué cambió y por qué.</li>
+<li>Documenta tu sistema: el <strong>flujo completo</strong> (diagrama), sus <strong>dependencias</strong> (tabla: qué necesita cada componente), los <strong>pasos de ejecución</strong> (en el orden exacto en que los ejecutaste) y las <strong>evidencias de integración</strong> (la corrida, el manifiesto, la consulta de Prometheus).</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual y fuera del aula, que puede integrar los componentes de su propio sistema Big Data en una ejecución verificable, y que su documentación basta para que otra persona la repita.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S13_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S13 - Integración del sistema, DataOps y BI</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Compuertas previas y de calidad</em><ul>
+<li>Los resultados de tus compuertas previas y de calidad, y una compuerta fallando a propósito para demostrar que detiene la ejecución.</li>
+</ul>
+</li>
+<li><em>Integración de punta a punta</em><ul>
+<li>La ejecución integrada de tu pipeline (batch, <em>streaming</em> y publicación en Prometheus), con la consulta que confirma las métricas.</li>
+</ul>
+</li>
+<li><em>Manifiesto de ejecución</em><ul>
+<li>El manifiesto de al menos dos corridas, y la comparación de qué cambió entre ellas.</li>
+</ul>
+</li>
+<li><em>Documentación del sistema</em><ul>
+<li>El diagrama del flujo completo, la tabla de dependencias, los pasos de ejecución y las evidencias de integración.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe un error real: una compuerta que falló y por qué, un KPI de tu propio dominio cuyo promedio no representaba a la mayoría de los datos, un artefacto de una sesión anterior que no estaba en tu copia, o cualquier otro obstáculo real de esta sesión.</p>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>Relaciona el caso de GitLab (1.6) con tu propio pipeline: ¿qué etapa
+tuya podría terminar sin error y dejar un resultado vacío o sin sentido,
+qué compuerta lo detectaría, y por qué no bastaba con que la ejecución
+terminara bien?
+</code></pre></div>
+<p><strong>Anexo: Feedback de la sesión</strong></p>
+<p>Pega esta página como la última hoja del PDF, con tus respuestas.</p>
+<ol>
+<li>¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?</li>
+<li>¿Qué punto de la clase te resultó más confuso o te dejó con dudas?</li>
+<li>¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?</li>
+<li>Sobre tu nivel de comprensión de la clase de hoy, marca una opción:<ul>
+<li>¡Entendido! - Lo domino y podría explicarlo.</li>
+<li>Más o menos. - Entendí la idea general, pero tengo dudas.</li>
+<li>Necesito ayuda. - Me siento perdido/a con este tema.</li>
+</ul>
+</li>
+<li>¿Cómo puedo ayudarte a comprender mejor el tema?</li>
+<li>Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías? Marca una opción:<ul>
+<li>Muy Comprometido/a: Me esforcé al máximo.</li>
+<li>Comprometido/a: Sé que podría haberme esforzado un poco más.</li>
+<li>Poco Comprometido/a: Hoy no di mi mejor esfuerzo.</li>
+</ul>
+</li>
+<li>Mi satisfacción con la clase fue... (califica del 1 al 10, donde 1 es insatisfecho y 10 es muy satisfecho).</li>
+</ol>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>Al menos cuatro compuertas previas sobre dependencias propias, con una demostrada fallando.</li>
+<li>Al menos un KPI de tiempo con percentiles (p50 y p95) y una compuerta de plausibilidad con umbral justificado.</li>
+<li>Ejecución de punta a punta de un pipeline propio con componente batch y de <em>streaming</em>, con resultados confirmados en Prometheus.</li>
+<li>Manifiesto de al menos dos corridas, con la comparación entre ellas.</li>
+<li>Documentación con flujo completo, dependencias, pasos de ejecución y evidencias de integración.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+<li>Incluye el Anexo de feedback de la sesión respondido, como última página del PDF.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Qué diferencia hay entre una compuerta previa y una compuerta de calidad, y por qué conviene que la primera corra antes de que Spark lea nada?</li>
+<li>¿Por qué una ejecución que termina sin error no demuestra que el resultado sea correcto? Relaciónalo con el caso de GitLab.</li>
+<li>En tu KPI de tiempo, ¿qué mostró el p95 que el promedio ocultaba, y qué decisión tomaste al respecto?</li>
+<li>¿Por qué la compuerta de plausibilidad usa el p50 y el p95 queda como advertencia, y no al revés?</li>
+<li>Tus dos manifiestos dieron valores distintos de error del modelo: ¿es un defecto o es esperable, y qué parte de la ejecución sí es reproducible?</li>
+<li>¿Para qué sirve el panel "antigüedad de la última ejecución" en un tablero alimentado por un Pushgateway?</li>
+<li>Si otra persona clonara tu repositorio hoy, ¿qué compuerta le diría primero qué le falta, y por qué?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 6. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Compuertas previas y de calidad*</td>
+<td style="text-align: right;">25</td>
+<td>Al menos cuatro compuertas previas y compuertas de calidad con una de plausibilidad sobre percentiles, con una demostrada fallando.</td>
+<td>Compuertas presentes, con la de plausibilidad o la demostración de fallo ausente.</td>
+<td>Solo compuertas previas, o solo de calidad.</td>
+<td>No presenta compuertas.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Integración de punta a punta*</td>
+<td style="text-align: right;">25</td>
+<td>Pipeline propio con batch y <em>streaming</em> ejecutado de punta a punta, con resultados confirmados en Prometheus.</td>
+<td>Ejecutado, con la confirmación en Prometheus incompleta.</td>
+<td>Componentes ejecutados por separado, sin integrar.</td>
+<td>No presenta ejecución integrada.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Manifiesto de ejecución*</td>
+<td style="text-align: right;">25</td>
+<td>Manifiesto de al menos dos corridas con la comparación entre ellas explicada.</td>
+<td>Manifiesto de una corrida, o dos sin comparar.</td>
+<td>Registro parcial de la ejecución.</td>
+<td>No presenta manifiesto.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Documentación del sistema*</td>
+<td style="text-align: right;">25</td>
+<td>Flujo completo, dependencias, pasos de ejecución y evidencias, suficientes para que otra persona repita la corrida.</td>
+<td>Documentación completa, con algún paso que requiere aclaración.</td>
+<td>Documentación parcial.</td>
+<td>No presenta documentación.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy las piezas de S6 a S11 dejaron de ser seis notebooks sueltos y pasaron a ser una sola ejecución que sabe si puede empezar, sabe si lo que procesa es utilizable, publica lo que encontró y deja registro de lo que hizo. Esa ejecución integrada mostró algo que ningún notebook anterior había mostrado: un KPI de latencia de 6,6 minutos que pasaba todas las comprobaciones de calidad y, sin embargo, no describía a ningún grupo real de eventos — la mediana era de 11,5 segundos y el p95 de casi 25 minutos. El caso de GitLab lo resume: un proceso que termina sin error no ha demostrado que produjo algo útil.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte en una frase qué compuerta de su propio pipeline habría detectado un problema que hoy solo se vería leyendo la salida a ojo.</p>
+<p><strong>Metacognición:</strong> ¿qué te costó más entender hoy: por qué un promedio puede ser un número que no representa a ningún dato, o por qué una compuerta de plausibilidad exige conocer el dominio y no solo los tipos de columna?</p>
+<p><strong>Proyección:</strong> S14 hace la revisión técnica final y el <em>hardening</em> del sistema: estabilizar la configuración, corregir fallos y completar el checklist y el guion de la demostración — con la ejecución integrada de hoy como la prueba de que todo sigue funcionando después de cada cambio.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>GitLab. (2017, 10 de febrero). <em>Postmortem of database outage of January 31</em>. https://about.gitlab.com/blog/postmortem-of-database-outage-of-january-31/</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

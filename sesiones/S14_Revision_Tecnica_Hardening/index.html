@@ -1,0 +1,2986 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://262bigdata.github.io/lambda26/sesiones/S14_Revision_Tecnica_Hardening/">
+      
+      
+        <link rel="prev" href="../S13_Integracion_Sistema_DataOps_BI/">
+      
+      
+        <link rel="next" href="../S15_Evaluacion_Unidad_3/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+  
+    <title>Big Data - S14 - Revisión técnica final y hardening</title>
+  
+
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s14-revision-tecnica-final-y-hardening" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Big Data" class="md-header__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Big Data
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S14 - Revisión técnica final y hardening
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Big Data" class="md-nav__button md-logo" aria-label="Big Data" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Big Data
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/262bigdata/lambda26" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    262bigdata/lambda26
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía de Proyecto Sello
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guía de Proyecto Sello
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guía del proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/brief/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brief técnico-analítico (plantilla)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u1-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U1 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u2-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U2 (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/u3-producto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Producto U3 / Producto Final (plantilla-ejemplo)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proyecto-sello/matriz-competencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matriz de competencias (ICACIT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Silabos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../silabo_bigdata_2026_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Silabo 2026-2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    1. Arquitecturas Big Data y ETL batch distribuido
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S01_Arquitectura_Big_Data_Lambda_Kappa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S1 - Arquitectura Big Data: Lambda y Kappa, batch vs. streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S02_Fundamentos_PySpark_Transformaciones_Lazy_Evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S2 - Fundamentos PySpark: transformaciones, funciones, agrupaciones y evaluación perezosa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S03_Procesamiento_Calidad_Datos_Particionamiento/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S3 - Procesamiento y Calidad de Datos: filtrado, duplicados, nulos y particionamiento analítico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S04_ML_Distribuido_Regresion_Spark_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S4 - ML Distribuido con Spark MLlib (Regresión)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S05_Evaluacion_Unidad_1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S5 - Evaluación de la Unidad I
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Sistema Big Data en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    2. Sistema Big Data en tiempo real
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S06_Ingesta_Eventos_Empresariales_Kafka/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S6 - Ingesta de Eventos Empresariales en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S07_Ingesta_Eventos_IoT_Sensores_Tiempo_Real/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S7 - Ingesta de Eventos IoT/Sensores en Tiempo Real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S08_Procesamiento_Streaming_Spark_Ventanas_Watermarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S8 - Procesamiento en Streaming con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S09_Observabilidad_Pipeline_Grafana_Costos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S9 - Observabilidad con Grafana y Costos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S10_Series_Tiempo_Inferencia_Streaming_MLlib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S10 - Series de Tiempo e Inferencia en Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S11_BI_ML_Distribuido_Spark_Grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S11 - BI/ML Distribuido con Spark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S12_Evaluacion_Unidad_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S12 - Evaluación de la Unidad II
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    3. Integración, DataOps y despliegue del sistema final
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S13_Integracion_Sistema_DataOps_BI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S13 - Integración del sistema, DataOps y BI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S14 - Revisión técnica final y hardening
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S14 - Revisión técnica final y hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-cloudflare-2019-un-cambio-de-configuracion-que-llego-a-todo-el-mundo-a-la-vez" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: Cloudflare (2019), un cambio de configuración que llegó a todo el mundo a la vez
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-hardening-y-revision-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Hardening y revisión técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-listo-no-es-lo-mismo-que-arrancado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Listo no es lo mismo que arrancado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-configuracion-sin-secretos-escritos-en-el-archivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Configuración sin secretos escritos en el archivo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-prueba-de-no-regresion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Prueba de no regresión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-riesgos-aceptados-frente-a-riesgos-corregidos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Riesgos aceptados frente a riesgos corregidos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-y-confirmar-el-punto-de-partida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno y confirmar el punto de partida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-revisar-la-configuracion-con-la-lista-de-comprobacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Revisar la configuración con la lista de comprobación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-agregar-comprobaciones-de-salud-y-esperas-por-dependencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Agregar comprobaciones de salud y esperas por dependencia
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-parametrizar-las-credenciales-de-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Parametrizar las credenciales de Grafana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-prueba-de-no-regresion-repetir-la-ejecucion-integrada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Prueba de no regresión: repetir la ejecución integrada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-riesgos-aceptados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Riesgos aceptados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-metricas-y-evidencias-para-la-demostracion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Métricas y evidencias para la demostración
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-guion-de-demostracion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Guion de demostración
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-explicacion-tecnica-del-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Explicación técnica del sistema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-registrar-los-hallazgos-en-la-bitacora" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Registrar los hallazgos en la bitácora
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S15_Evaluacion_Unidad_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S15 - Evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S16_Continuacion_Evaluacion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    S16 - Continuación de la evaluación de la Unidad III
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introducción
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introducción">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-presentacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Presentación de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-indice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Índice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-proposito-de-aprendizaje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Propósito de aprendizaje
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-producto-de-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Producto de sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-metodologia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 Metodología
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-motivacion-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6 Motivación de la sesión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.6 Motivación de la sesión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-caso-cloudflare-2019-un-cambio-de-configuracion-que-llego-a-todo-el-mundo-a-la-vez" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.6.1 Caso: Cloudflare (2019), un cambio de configuración que llegó a todo el mundo a la vez
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-ubicacion-en-el-curso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.7 Ubicación en el curso
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-explica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Explica
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Explica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-arquitectura-de-la-sesion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Arquitectura de la sesión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-hardening-y-revision-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Hardening y revisión técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-listo-no-es-lo-mismo-que-arrancado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Listo no es lo mismo que arrancado
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-configuracion-sin-secretos-escritos-en-el-archivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Configuración sin secretos escritos en el archivo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-prueba-de-no-regresion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Prueba de no regresión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-riesgos-aceptados-frente-a-riesgos-corregidos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Riesgos aceptados frente a riesgos corregidos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-aplica-actividad-practica-guiada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Aplica: actividad práctica guiada
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Aplica: actividad práctica guiada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-reanudar-el-entorno-y-confirmar-el-punto-de-partida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Reanudar el entorno y confirmar el punto de partida
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-revisar-la-configuracion-con-la-lista-de-comprobacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Revisar la configuración con la lista de comprobación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-agregar-comprobaciones-de-salud-y-esperas-por-dependencia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Agregar comprobaciones de salud y esperas por dependencia
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-parametrizar-las-credenciales-de-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Parametrizar las credenciales de Grafana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-prueba-de-no-regresion-repetir-la-ejecucion-integrada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Prueba de no regresión: repetir la ejecución integrada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-riesgos-aceptados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Riesgos aceptados
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-metricas-y-evidencias-para-la-demostracion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Métricas y evidencias para la demostración
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-guion-de-demostracion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Guion de demostración
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-explicacion-tecnica-del-sistema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Explicación técnica del sistema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-registrar-los-hallazgos-en-la-bitacora" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Registrar los hallazgos en la bitácora
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-crea-actividad-autonoma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Crea: actividad autónoma
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Crea: actividad autónoma">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-actividad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Actividad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-proposito" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Propósito
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-indicaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Indicaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Indicaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-estructura-del-informe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Estructura del informe
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-criterios-minimos-de-aceptacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Criterios mínimos de aceptación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-preguntas-de-defensa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Preguntas de defensa
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-rubrica-de-evaluacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Rúbrica de evaluación
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-cierre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Cierre
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bibliografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bibliografía
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="s14-revision-tecnica-final-y-hardening">S14 - Revisión técnica final y hardening<a class="headerlink" href="#s14-revision-tecnica-final-y-hardening" title="Permanent link">&para;</a></h1>
+<h2 id="1-introduccion">1. Introducción<a class="headerlink" href="#1-introduccion" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 20 min.</p>
+<h3 id="11-presentacion-de-la-sesion">1.1 Presentación de la sesión<a class="headerlink" href="#11-presentacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p>S13 dejó una ejecución integrada que recorre batch, <em>streaming</em>, modelo y observabilidad. Pero el sistema donde corre esa ejecución —los contenedores de Kafka, Prometheus, Grafana y Spark— se levantó en S6-S11 con la configuración mínima para que funcionara en clase, y nadie la revisó como un conjunto. Esta sesión hace esa revisión: recorre la configuración real de <code>lambda26</code> con una lista de comprobación, corrige lo que falla, y vuelve a ejecutar la integración de S13 para demostrar que los cambios no rompieron nada. La revisión encontró tres hallazgos reales, y uno de ellos estaba en la propia comprobación de S13 (3.5).</p>
+<h3 id="12-indice">1.2 Índice<a class="headerlink" href="#12-indice" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Qué es el <em>hardening</em> y qué es una revisión técnica.</li>
+<li>Comprobar que un servicio está listo, no solo que arrancó.</li>
+<li>Configuración sin secretos escritos en el código.</li>
+<li>Prueba de no regresión: cambiar sin romper.</li>
+<li>Riesgos aceptados frente a riesgos corregidos.</li>
+</ol>
+<h3 id="13-proposito-de-aprendizaje">1.3 Propósito de aprendizaje<a class="headerlink" href="#13-proposito-de-aprendizaje" title="Permanent link">&para;</a></h3>
+<p>Al concluir la clase, estarás en condiciones de: <strong>revisar</strong> la configuración de un sistema distribuido contra una lista de comprobación, <strong>corregir</strong> los fallos de configuración que encuentres, <strong>demostrar</strong> con una ejecución integrada que un cambio no introdujo una regresión, <strong>distinguir</strong> un riesgo que se corrige de uno que se acepta con justificación, y <strong>preparar</strong> la demostración y la explicación técnica del sistema con evidencia y métricas reales.</p>
+<h3 id="14-producto-de-sesion">1.4 Producto de sesión<a class="headerlink" href="#14-producto-de-sesion" title="Permanent link">&para;</a></h3>
+<p>La configuración de <code>lambda26</code> revisada con la lista de comprobación de 3.2, con los fallos corregidos (comprobaciones de salud en <code>kafka/</code> y <code>obs/</code>, credenciales de Grafana parametrizadas); la ejecución integrada de S13 repetida como prueba de no regresión, con el defecto que esa repetición encontró corregido; la tabla de riesgos aceptados; el guion de la demostración; y la explicación técnica del sistema con sus decisiones y lo que cada una cuesta.</p>
+<h3 id="15-metodologia">1.5 Metodología<a class="headerlink" href="#15-metodologia" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 1. Metodología de la sesión</strong></p>
+<table>
+<thead>
+<tr>
+<th>Actividades a Realizar en el Periodo</th>
+<th>Orientaciones generales (Orientaciones Metodológicas)</th>
+<th>Material de estudio recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revisión previa individual</td>
+<td>Releer los <code>compose.yml</code> de <code>kafka/</code>, <code>obs/</code> y <code>pyspark/</code> sin ejecutar nada, y anotar qué hace cada uno cuando falla una dependencia. Confirmar que la ejecución integrada de S13 corre en tu copia. Trabajo individual, antes de clase.</td>
+<td>S13 (3.3-3.8), <code>README.md</code> raíz, <code>kafka/README.md</code>, <code>obs/README.md</code>.</td>
+</tr>
+<tr>
+<td>Clase presencial</td>
+<td>Revisión guiada de la configuración con la lista de comprobación, corrección de fallos, prueba de no regresión y preparación del guion. Trabajo individual en la propia laptop, siguiendo al docente paso a paso.</td>
+<td>Stack de <code>lambda26</code> corriendo, ejecución integrada de S13, pasos 3.1 a 3.9 de esta guía.</td>
+</tr>
+<tr>
+<td>Evaluación formativa</td>
+<td>Revisión en clase de los fallos encontrados, de la prueba de no regresión y del guion. La evidencia se completa y sustenta de forma individual, fuera del aula, según los criterios mínimos de la sección 4.4.</td>
+<td>Indicaciones de entrega (4.3), rúbrica de evaluación (4.6).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16-motivacion-de-la-sesion">1.6 Motivación de la sesión<a class="headerlink" href="#16-motivacion-de-la-sesion" title="Permanent link">&para;</a></h3>
+<h4 id="161-caso-cloudflare-2019-un-cambio-de-configuracion-que-llego-a-todo-el-mundo-a-la-vez">1.6.1 Caso: Cloudflare (2019), un cambio de configuración que llegó a todo el mundo a la vez<a class="headerlink" href="#161-caso-cloudflare-2019-un-cambio-de-configuracion-que-llego-a-todo-el-mundo-a-la-vez" title="Permanent link">&para;</a></h4>
+<p>El 2 de julio de 2019, el servicio de Cloudflare "went down for 27 minutes", según su propio informe. La causa fue un cambio en las reglas administradas de su cortafuegos de aplicaciones web (WAF): una regla nueva contra ataques XSS "contained a regular expression that backtracked enormously and exhausted CPU used for HTTP/HTTPS serving" — consumió la CPU de todos los núcleos que atienden tráfico HTTP/HTTPS, y los clientes recibieron errores 502. El cambio estaba pensado para ejecutarse en modo "simulate" (solo registrar, sin bloquear).</p>
+<p>Fuente: Cloudflare. (2019, 12 de julio). <em>Details of the Cloudflare outage on July 2, 2019</em>. https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/</p>
+<p>Lo que importa para esta sesión es <strong>cómo se desplegó</strong>: automáticamente y de forma global, de una sola vez. El informe lo dice sin rodeos: el procedimiento operativo permitía que "a non-emergency rule change" fuera "globally into production without a staged rollout". Entre las medidas posteriores, Cloudflare lista cambiar ese procedimiento para hacer despliegues escalonados de las reglas y agregar perfiles de rendimiento al conjunto de pruebas. Y hubo una segunda lección: el interruptor global de emergencia se usó a las 14:07, pero el informe reconoce que "getting to the global WAF termination was another story" — el servicio de acceso de los ingenieros también estaba caído.</p>
+<p>Un cambio de <strong>configuración</strong> merece el mismo rigor que un cambio de código: se prueba antes de generalizarlo, y quien lo hace necesita una forma de comprobar que no rompió nada. Hoy aplicas eso en pequeño: cambias la configuración de <code>lambda26</code> y repites la prueba que demuestra que el sistema sigue funcionando.</p>
+<p><strong>Preguntas de análisis</strong></p>
+<p><strong>Activación de conocimientos previos</strong></p>
+<ol>
+<li>La última vez que cambiaste la configuración de uno de tus contenedores, ¿cómo comprobaste que todo seguía funcionando: mirando que arrancara, o repitiendo una prueba?</li>
+</ol>
+<p><strong>Comprensión del caso</strong></p>
+<ol>
+<li>Según el caso, ¿qué tenía de distinto el procedimiento de despliegue de las reglas frente al de código, y qué consecuencia tuvo?</li>
+<li>¿Por qué un despliegue escalonado habría limitado el daño aunque la regla fuera igual de mala?</li>
+<li>En tu propio sistema, ¿qué cambio de configuración podría llegar a todos los componentes a la vez sin que nadie lo pruebe antes?</li>
+</ol>
+<h3 id="17-ubicacion-en-el-curso">1.7 Ubicación en el curso<a class="headerlink" href="#17-ubicacion-en-el-curso" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Unidad: U3 - Integración, DataOps y despliegue del sistema final.</li>
+<li>Producto del curso: sistema Big Data distribuido end-to-end para procesamiento batch y streaming, analítica/ML y visualización BI, defendido técnicamente.</li>
+<li>Producto de unidad: sistema Big Data end-to-end, integrado, estabilizado y documentado.</li>
+<li>Avance del producto en esta sesión: configuración revisada y endurecida, prueba de no regresión ejecutada, guion de demostración y explicación técnica.</li>
+</ul>
+<p><strong>Figura 1. Roadmap del producto de la unidad</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    S13["`**S13:** Integración, DataOps y BI`"]
+    S14["`**S14:** Revisión técnica final y hardening`"]
+    S15["`**S15:** Evaluación de la Unidad III`"]
+    S16["`**S16:** Continuación de la evaluación`"]
+
+    S13 --&gt; S14 --&gt; S15 --&gt; S16
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class S14 today;</code></pre>
+<h2 id="2-explica">2. Explica<a class="headerlink" href="#2-explica" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 40 min.</p>
+<h3 id="21-arquitectura-de-la-sesion">2.1 Arquitectura de la sesión<a class="headerlink" href="#21-arquitectura-de-la-sesion" title="Permanent link">&para;</a></h3>
+<p><strong>Figura 2. El ciclo de la sesión: revisar, corregir, demostrar que no se rompió nada</strong></p>
+<pre class="mermaid"><code>flowchart TB
+    REV["Revisar la configuración&lt;br/&gt;con la lista (3.2)"]
+    COR["Corregir los fallos&lt;br/&gt;(3.3, 3.4)"]
+    REG["Repetir la ejecución&lt;br/&gt;integrada de S13 (3.5)"]
+    OK{"¿Sigue&lt;br/&gt;funcionando?"}
+    RIE["Registrar riesgos&lt;br/&gt;aceptados (3.6)"]
+
+    REV --&gt; COR --&gt; REG --&gt; OK
+    OK --&gt;|"sí"| RIE
+    OK --&gt;|"no: se corrige la regresión"| COR
+
+    classDef today fill:#ffe08a,stroke:#9a6b00,stroke-width:2px,color:#111;
+    class REV,COR,REG today;</code></pre>
+<p>Lectura del diagrama: la sesión no agrega componentes. Es un ciclo sobre los que ya existen, y su salida es la evidencia de que, después de cada cambio, la ejecución integrada de S13 sigue pasando.</p>
+<h3 id="22-hardening-y-revision-tecnica">2.2 <em>Hardening</em> y revisión técnica<a class="headerlink" href="#22-hardening-y-revision-tecnica" title="Permanent link">&para;</a></h3>
+<p><strong>Hardening</strong> (endurecimiento) es el trabajo de reducir los puntos débiles de un sistema ya construido: no agrega funcionalidad, quita fragilidad. Una <strong>revisión técnica</strong> es el procedimiento ordenado para encontrar esos puntos: se recorre una lista de comprobación, y cada punto termina en una de tres salidas — cumple, se corrige, o se acepta como riesgo con una justificación escrita.</p>
+<p><strong>Tabla 2. Lista de comprobación de configuración</strong></p>
+<table>
+<thead>
+<tr>
+<th>Punto</th>
+<th>Pregunta</th>
+<th>Dónde se mira</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Versión de las imágenes</td>
+<td>¿Cada imagen tiene una versión exacta, no <code>latest</code>?</td>
+<td><code>image:</code> de cada servicio.</td>
+</tr>
+<tr>
+<td>Reinicio</td>
+<td>¿Qué hace el contenedor si el proceso cae?</td>
+<td><code>restart:</code>.</td>
+</tr>
+<tr>
+<td>Salud</td>
+<td>¿Hay una forma automática de saber si el servicio está <strong>listo</strong>?</td>
+<td><code>healthcheck:</code>.</td>
+</tr>
+<tr>
+<td>Orden de arranque</td>
+<td>¿Un servicio espera a que su dependencia esté lista, o solo a que haya arrancado?</td>
+<td><code>depends_on:</code>.</td>
+</tr>
+<tr>
+<td>Secretos</td>
+<td>¿Hay usuarios o contraseñas escritos directamente en el archivo versionado?</td>
+<td><code>environment:</code>.</td>
+</tr>
+<tr>
+<td>Superficie expuesta</td>
+<td>¿Qué puertos se publican al exterior y por qué?</td>
+<td><code>ports:</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-listo-no-es-lo-mismo-que-arrancado">2.3 Listo no es lo mismo que arrancado<a class="headerlink" href="#23-listo-no-es-lo-mismo-que-arrancado" title="Permanent link">&para;</a></h3>
+<p>Un contenedor puede estar <strong>en ejecución</strong> y no estar <strong>listo</strong>: el proceso existe, pero todavía no responde. Docker Compose, por defecto, considera que un servicio "arrancó" cuando su proceso inició; no sabe si ya atiende peticiones. Un <strong><em>healthcheck</em></strong> es un comando que Docker ejecuta periódicamente dentro del contenedor y cuyo código de salida declara si el servicio está sano. Con él, el estado del contenedor pasa a ser <code>(healthy)</code> o <code>(unhealthy)</code>, y dos cosas nuevas son posibles: que otro servicio espere a que esta dependencia esté <strong>sana</strong> (<code>depends_on</code> con <code>condition: service_healthy</code>) y que quien levanta el sistema espere a que todo esté listo (<code>docker compose up -d --wait</code>).</p>
+<h3 id="24-configuracion-sin-secretos-escritos-en-el-archivo">2.4 Configuración sin secretos escritos en el archivo<a class="headerlink" href="#24-configuracion-sin-secretos-escritos-en-el-archivo" title="Permanent link">&para;</a></h3>
+<p>Un archivo de configuración versionado se copia, se comparte y se publica. Un usuario y una contraseña escritos dentro de él viajan con cada copia. La práctica mínima es <strong>leer el valor de una variable</strong> (<code>${VARIABLE}</code>) en lugar de escribirlo, y definir la variable fuera del archivo versionado — en el entorno o en un archivo <code>.env</code> que no se versiona. La sintaxis <code>${VARIABLE:-valor}</code> agrega un valor por defecto: en un laboratorio, el sistema sigue arrancando sin configurar nada; en un entorno real, la misma variable permite poner un valor distinto sin tocar el archivo.</p>
+<h3 id="25-prueba-de-no-regresion">2.5 Prueba de no regresión<a class="headerlink" href="#25-prueba-de-no-regresion" title="Permanent link">&para;</a></h3>
+<p>Una <strong>regresión</strong> es algo que funcionaba y dejó de funcionar a raíz de un cambio. Una <strong>prueba de no regresión</strong> es una prueba que ya existe y que se repite después de cada cambio para demostrar que nada se rompió. Su valor depende de que sea de punta a punta: una prueba que solo revisa que el contenedor arrancó no detecta que, por ejemplo, un servicio ya no puede conectarse a su dependencia. La ejecución integrada de S13 es esa prueba para <code>lambda26</code>: recorre el batch, el <em>stream</em>, el modelo y la observabilidad, y deja un resultado comparable.</p>
+<h3 id="26-riesgos-aceptados-frente-a-riesgos-corregidos">2.6 Riesgos aceptados frente a riesgos corregidos<a class="headerlink" href="#26-riesgos-aceptados-frente-a-riesgos-corregidos" title="Permanent link">&para;</a></h3>
+<p>No todo punto débil se corrige. Algunos se <strong>aceptan</strong>: se decide conscientemente no corregirlos, porque corregirlos cuesta más de lo que protegen en este contexto. Lo que distingue un riesgo aceptado de un descuido es que el primero tiene una <strong>justificación escrita</strong> y dice <strong>qué cambiaría en producción</strong>. Un riesgo sin esa constancia no está aceptado: está olvidado.</p>
+<h2 id="3-aplica-actividad-practica-guiada">3. Aplica: actividad práctica guiada<a class="headerlink" href="#3-aplica-actividad-practica-guiada" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h 30 min.</p>
+<p><strong>Actividad:</strong> revisar la configuración de <code>lambda26</code> con la lista de comprobación, corregir los fallos, demostrar con la ejecución integrada de S13 que no hubo regresión, y preparar el guion y la explicación técnica del sistema.</p>
+<p><strong>Propósito de la actividad:</strong> dejar evidencia ejecutable de que puedes revisar un sistema ya construido, corregirlo y demostrar que sigue funcionando, y de que sabes decidir qué riesgos se corrigen y cuáles se aceptan.</p>
+<p><strong>Orientaciones metodológicas:</strong> en clase, el docente recorre la lista de comprobación frente a la clase y corrige cada fallo en vivo; los estudiantes repiten el recorrido sobre su copia y, en la sección 4, sobre el sistema de su propio proyecto.</p>
+<p><strong>Actividades para realizar:</strong></p>
+<ul>
+<li><strong>3.1</strong> Reanudar el entorno y confirmar el punto de partida.</li>
+<li><strong>3.2</strong> Revisar la configuración con la lista de comprobación.</li>
+<li><strong>3.3</strong> Agregar comprobaciones de salud y esperas por dependencia.</li>
+<li><strong>3.4</strong> Parametrizar las credenciales de Grafana.</li>
+<li><strong>3.5</strong> Prueba de no regresión: repetir la ejecución integrada.</li>
+<li><strong>3.6</strong> Riesgos aceptados.</li>
+<li><strong>3.7</strong> Métricas y evidencias para la demostración.</li>
+<li><strong>3.8</strong> Guion de demostración.</li>
+<li><strong>3.9</strong> Explicación técnica del sistema.</li>
+<li><strong>3.10</strong> Registrar los hallazgos en la bitácora.</li>
+</ul>
+<h3 id="31-reanudar-el-entorno-y-confirmar-el-punto-de-partida">3.1 Reanudar el entorno y confirmar el punto de partida<a class="headerlink" href="#31-reanudar-el-entorno-y-confirmar-el-punto-de-partida" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el stack de <code>lambda26</code> arriba y la ejecución integrada de S13 corriendo antes de cambiar nada.</p>
+<p>Levanta los cuatro grupos como en S13 (3.1) y el productor de <code>campo-electrico</code>. Antes de tocar la configuración, ejecuta <code>13_integracion_dataops.ipynb</code> completo una vez: si no pasa <strong>antes</strong> de tus cambios, no puedes saber si algo que falle después lo causaste tú. Guarda el manifiesto que deja (<code>artifacts/manifiesto_&lt;runId&gt;.json</code>) como punto de comparación.</p>
+<h3 id="32-revisar-la-configuracion-con-la-lista-de-comprobacion">3.2 Revisar la configuración con la lista de comprobación<a class="headerlink" href="#32-revisar-la-configuracion-con-la-lista-de-comprobacion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la Tabla 2 completada con el resultado real de cada punto.</p>
+<p>Recorre los tres archivos de Docker Compose con comandos de lectura (desde la raíz del repositorio):</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">"image:"</span><span class="w"> </span>kafka/compose.yml<span class="w"> </span>obs/compose.yml<span class="w"> </span>pyspark/compose.yml
+grep<span class="w"> </span>-c<span class="w"> </span><span class="s2">"healthcheck"</span><span class="w"> </span>kafka/compose.yml<span class="w"> </span>obs/compose.yml<span class="w"> </span>pyspark/compose.yml
+grep<span class="w"> </span>-rn<span class="w"> </span>-i<span class="w"> </span><span class="s2">"password\|token\|admin"</span><span class="w"> </span>kafka/compose.yml<span class="w"> </span>obs/compose.yml<span class="w"> </span>pyspark/compose.yml
+grep<span class="w"> </span>-n<span class="w"> </span><span class="s1">'^\s*- "[0-9]*:[0-9]*"'</span><span class="w"> </span>kafka/compose.yml<span class="w"> </span>obs/compose.yml<span class="w"> </span>pyspark/compose.yml
+</code></pre></div>
+<p>Resultado real de esta sesión, <strong>antes</strong> de los cambios de esta guía:</p>
+<p><strong>Tabla 3. Resultado de la revisión de configuración</strong></p>
+<table>
+<thead>
+<tr>
+<th>Punto</th>
+<th>Resultado</th>
+<th>Salida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Versión de las imágenes</td>
+<td>Cumple</td>
+<td>Las seis imágenes de <code>kafka/</code> y <code>obs/</code> tienen versión exacta (<code>apache/kafka:4.3.1</code>, <code>prom/prometheus:v3.14.0</code>, <code>grafana/grafana:11.4.0</code>, etc.).</td>
+</tr>
+<tr>
+<td>Reinicio</td>
+<td>Cumple</td>
+<td><code>restart: unless-stopped</code> en los servicios de <code>kafka/</code>, <code>obs/</code> y <code>pyspark/</code>.</td>
+</tr>
+<tr>
+<td>Salud</td>
+<td><strong>Falla</strong></td>
+<td><code>grep -c "healthcheck"</code> devuelve <code>0</code> en los tres archivos: ningún servicio declara cómo saber si está listo.</td>
+</tr>
+<tr>
+<td>Orden de arranque</td>
+<td><strong>Falla</strong></td>
+<td><code>kafka-exporter</code> y <code>kafka-ui</code> declaran <code>depends_on: - kafka</code>: esperan a que Kafka <strong>arranque</strong>, no a que esté <strong>listo</strong>.</td>
+</tr>
+<tr>
+<td>Secretos</td>
+<td><strong>Falla</strong></td>
+<td><code>obs/compose.yml</code> escribe <code>GF_SECURITY_ADMIN_USER: admin</code> y <code>GF_SECURITY_ADMIN_PASSWORD: admin</code> directamente. (El token de Jupyter ya se lee de <code>pyspark/.env</code>.)</td>
+</tr>
+<tr>
+<td>Superficie expuesta</td>
+<td>Revisar</td>
+<td>Se publican <code>49092</code> (Kafka), <code>49308</code>, <code>48085</code>, <code>49090</code>, <code>49091</code>, <code>43000</code>, <code>4488</code> y <code>4042</code>; todos son de laboratorio. Se registra en 3.6.</td>
+</tr>
+</tbody>
+</table>
+<p>Tres fallos y una decisión pendiente. Los tres fallos se corrigen en 3.3 y 3.4.</p>
+<p><strong>Error frecuente</strong>: dar por correcto un punto porque "funciona". La falla de salud no se ve mientras todo está arriba; solo aparece cuando algo tarda en estar listo, y esa es justamente la situación que la lista existe para cubrir.</p>
+<h3 id="33-agregar-comprobaciones-de-salud-y-esperas-por-dependencia">3.3 Agregar comprobaciones de salud y esperas por dependencia<a class="headerlink" href="#33-agregar-comprobaciones-de-salud-y-esperas-por-dependencia" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> los servicios de <code>kafka/</code> y <code>obs/</code> con su <code>healthcheck</code>, y los que dependen de otro esperando a que esté sano.</p>
+<p>Antes de escribir un <code>healthcheck</code>, <strong>pruébalo a mano dentro del contenedor ya corriendo</strong>: un comando que falla siempre dejaría el servicio <code>unhealthy</code> para siempre.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-kafka<span class="w"> </span>/opt/kafka/bin/kafka-broker-api-versions.sh<span class="w"> </span>--bootstrap-server<span class="w"> </span>localhost:9092
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-prometheus<span class="w"> </span>wget<span class="w"> </span>-q<span class="w"> </span>--spider<span class="w"> </span>http://localhost:9090/-/ready
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-pushgateway<span class="w"> </span>wget<span class="w"> </span>-q<span class="w"> </span>--spider<span class="w"> </span>http://localhost:9091/-/ready
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>lambda26-grafana<span class="w"> </span>wget<span class="w"> </span>-q<span class="w"> </span>--spider<span class="w"> </span>http://localhost:3000/api/health
+</code></pre></div>
+<p>Resultado real de esta sesión: los cuatro terminan con código de salida <code>0</code>. En <code>kafka/compose.yml</code>, agrega el bloque al servicio <code>kafka</code> y cambia las dos dependencias para que esperen a que esté sano:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># ... (sin cambios)</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"/opt/kafka/bin/kafka-broker-api-versions.sh"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"--bootstrap-server"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"localhost:9092"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20s</span>
+
+<span class="w">  </span><span class="nt">kafka-exporter</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span>
+
+<span class="w">  </span><span class="nt">kafka-ui</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kafka</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span>
+</code></pre></div>
+<p>En <code>obs/compose.yml</code>, el mismo patrón para <code>prometheus</code>, <code>pushgateway</code> y <code>grafana</code> (cada uno con su URL), y <code>grafana</code> pasa a esperar a que Prometheus esté sano:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">prometheus</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># ... (sin cambios)</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"wget"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"-q"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"--spider"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"http://localhost:9090/-/ready"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+
+<span class="w">  </span><span class="nt">grafana</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># ... (sin cambios)</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prometheus</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span>
+</code></pre></div>
+<p><code>pushgateway</code> y <code>grafana</code> llevan el mismo bloque <code>healthcheck</code> con <code>http://localhost:9091/-/ready</code> y <code>http://localhost:3000/api/health</code>. Valida la sintaxis y aplica los cambios:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>kafka/compose.yml<span class="w"> </span>config<span class="w"> </span>-q
+docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>obs/compose.yml<span class="w"> </span>config<span class="w"> </span>-q
+docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>kafka/compose.yml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>obs/compose.yml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--wait
+docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="nv">name</span><span class="o">=</span>lambda26<span class="w"> </span>--format<span class="w"> </span><span class="s2">"{{.Names}}\t{{.Status}}"</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: ambas validaciones sin errores, <code>up -d --wait</code> termina con código <code>0</code> (espera a que cada servicio con <code>healthcheck</code> esté <code>Healthy</code> antes de devolver el control), y <code>docker ps</code> muestra <code>lambda26-kafka</code>, <code>lambda26-prometheus</code>, <code>lambda26-pushgateway</code> y <code>lambda26-grafana</code> con <code>(healthy)</code>.</p>
+<p>Un efecto que debes conocer: cambiar la configuración de un servicio <strong>recrea su contenedor</strong>. <code>kafka/compose.yml</code> no define ningún volumen, así que recrear el contenedor de Kafka vacía sus <em>topics</em> (3.6). Tras recrearlo, el productor de <code>campo-electrico</code> se reconectó solo y el topic volvió a llenarse; verifícalo con una lectura del topic antes de seguir.</p>
+<p><strong>Error frecuente</strong>: dejar <code>start_period</code> en cero. Kafka tarda unos segundos en aceptar conexiones y, sin un periodo de gracia, esos segundos cuentan como fallos del <code>healthcheck</code>; con suficientes reintentos fallidos el contenedor queda <code>unhealthy</code> aunque termine arrancando bien.</p>
+<h3 id="34-parametrizar-las-credenciales-de-grafana">3.4 Parametrizar las credenciales de Grafana<a class="headerlink" href="#34-parametrizar-las-credenciales-de-grafana" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> <code>obs/compose.yml</code> sin usuario ni contraseña de Grafana escritos en el archivo.</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">GF_SECURITY_ADMIN_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${GRAFANA_ADMIN_USER:-admin}</span>
+<span class="w">      </span><span class="nt">GF_SECURITY_ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${GRAFANA_ADMIN_PASSWORD:-admin}</span>
+</code></pre></div>
+<p>El <code>:-admin</code> mantiene el laboratorio funcionando sin configurar nada (el <code>admin</code>/<code>admin</code> de S9 sigue sirviendo), y permite cambiarlos sin editar el archivo. Compruébalo con la configuración ya interpolada:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">GRAFANA_ADMIN_PASSWORD</span><span class="o">=</span>otra-clave<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>obs/compose.yml<span class="w"> </span>config<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>GF_SECURITY
+</code></pre></div>
+<p>Resultado real de esta sesión: <code>GF_SECURITY_ADMIN_PASSWORD: otra-clave</code> y <code>GF_SECURITY_ADMIN_USER: admin</code> (el valor por defecto de la variable no definida). Con un archivo <code>obs/.env</code> que contenga <code>GRAFANA_ADMIN_USER=equipo1</code>, la misma consulta devuelve <code>GF_SECURITY_ADMIN_USER: equipo1</code>.</p>
+<p>Un límite que debes saber: Grafana guarda el usuario administrador en su volumen la <strong>primera</strong> vez que arranca. Cambiar las variables después, con el volumen <code>lambda26_grafana_data</code> ya creado, no cambia la contraseña existente; para eso hay que cambiarla desde Grafana, o recrear el volumen y perder los tableros.</p>
+<h3 id="35-prueba-de-no-regresion-repetir-la-ejecucion-integrada">3.5 Prueba de no regresión: repetir la ejecución integrada<a class="headerlink" href="#35-prueba-de-no-regresion-repetir-la-ejecucion-integrada" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la ejecución de S13 repetida sobre la configuración corregida, con su resultado comparado contra el punto de partida de 3.1.</p>
+<p>Con la configuración de 3.3 y 3.4 aplicada, ejecuta de nuevo <code>13_integracion_dataops.ipynb</code> completo. Resultado real de esta sesión, comparado con la corrida previa a los cambios:</p>
+<p><strong>Tabla 4. Comparación antes y después de los cambios</strong></p>
+<table>
+<thead>
+<tr>
+<th>Comprobación</th>
+<th>Antes (S13)</th>
+<th>Después (esta guía)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seis compuertas previas</td>
+<td>Todas <code>OK</code></td>
+<td>Todas <code>OK</code></td>
+</tr>
+<tr>
+<td>Eventos del batch / ratio de válidos</td>
+<td>1 866 / 1,0000</td>
+<td>1 866 / 1,0000</td>
+</tr>
+<tr>
+<td>Latencia p50 / p95</td>
+<td>11 491 ms / 1 488 930 ms</td>
+<td>11 491 ms / 1 488 930 ms</td>
+</tr>
+<tr>
+<td>Filas procesadas por el <em>stream</em> en 45 s</td>
+<td>15</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Error del modelo (MAE)</td>
+<td>0,0330 y 0,0426 en dos corridas</td>
+<td>0,0423</td>
+</tr>
+<tr>
+<td>Duración</td>
+<td>76,8 s y 304,5 s</td>
+<td>90,0 s</td>
+</tr>
+</tbody>
+</table>
+<p>Los valores del batch son idénticos porque salen del mismo Parquet; los del <em>stream</em> varían porque cada corrida procesa lecturas en vivo distintas (S13, 2.5). Que el MAE cambie <strong>no</strong> es una regresión; que dejaran de pasar las compuertas, o que el <em>stream</em> procesara cero filas, sí lo sería.</p>
+<p>Esta repetición encontró un defecto, y estaba en la propia comprobación de S13. En la línea de confirmación de Prometheus, la celda mostró <code>lambda26_int_stream_mae: 0.0426</code> y la marca de tiempo de la corrida <strong>anterior</strong>, mientras esa corrida acababa de calcular un MAE distinto. La celda de S13 (3.7) se daba por satisfecha en cuanto cada métrica tenía <em>algún</em> valor, así que validaba datos viejos. Se corrigió para comparar cada valor devuelto con el que acaba de publicarse (<code>coincide(...)</code>), y se volvió a ejecutar: ahora cada línea imprime el valor devuelto junto al publicado, y la celda falla con <code>Prometheus no devolvio los valores recien publicados</code> si no coinciden.</p>
+<p><strong>Error frecuente</strong>: dar por pasada la prueba de no regresión porque "no hubo errores". Un resultado sin errores solo demuestra que nada falló de forma ruidosa; la tabla compara resultados, que es lo que detecta un cambio silencioso.</p>
+<h3 id="36-riesgos-aceptados">3.6 Riesgos aceptados<a class="headerlink" href="#36-riesgos-aceptados" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la tabla de riesgos que no se corrigen en este laboratorio, cada uno con su justificación y lo que cambiaría en producción.</p>
+<p><strong>Tabla 5. Riesgos aceptados de <code>lambda26</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Riesgo</th>
+<th>Por qué se acepta aquí</th>
+<th>Qué cambiaría en producción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kafka sin volumen: recrear el contenedor vacía los <em>topics</em>.</td>
+<td>Es un laboratorio: los datos de los <em>topics</em> son reproducibles por el productor, y un volumen agregaría estado que complica reiniciar desde cero.</td>
+<td>Volumen persistente para el directorio de datos del broker, y replicación entre más de un broker.</td>
+</tr>
+<tr>
+<td>Kafka en <code>PLAINTEXT</code>, sin autenticación.</td>
+<td>La red <code>lambda26-kafka-net</code> es local; añadir TLS y SASL complica cada ejemplo sin enseñar el tema de la unidad.</td>
+<td>Cifrado y autenticación en cada <em>listener</em>.</td>
+</tr>
+<tr>
+<td>Grafana con <code>admin</code>/<code>admin</code> por defecto.</td>
+<td>El sistema debe arrancar sin configuración previa en clase.</td>
+<td>Contraseña propia desde el primer arranque, en una variable no versionada (3.4).</td>
+</tr>
+<tr>
+<td>Jupyter con el token <code>sintoken</code> y puertos publicados al <em>host</em>.</td>
+<td>Es una herramienta de trabajo local del estudiante.</td>
+<td>Un token no trivial y el servicio detrás de un acceso autenticado.</td>
+</tr>
+<tr>
+<td>Todos los puertos (<code>49092</code>, <code>49090</code>, <code>43000</code>, <code>4488</code>…) publicados.</td>
+<td>Se necesita llegar a cada herramienta desde el navegador.</td>
+<td>Publicar solo el punto de entrada; el resto, dentro de la red.</td>
+</tr>
+</tbody>
+</table>
+<p>Esta tabla es lo que diferencia un riesgo aceptado de un descuido: cada fila dice por qué se acepta y qué se haría distinto. Si en la demostración alguien pregunta "¿Kafka no tiene autenticación?", la respuesta no es "no lo pensamos", es la fila de la tabla.</p>
+<h3 id="37-metricas-y-evidencias-para-la-demostracion">3.7 Métricas y evidencias para la demostración<a class="headerlink" href="#37-metricas-y-evidencias-para-la-demostracion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> las cifras reales del sistema que sostendrás en la demostración, cada una con su origen.</p>
+<p><strong>Tabla 6. Métricas del sistema y de dónde salen</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor de esta sesión</th>
+<th>Origen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eventos en el Parquet de S9</td>
+<td>1 866</td>
+<td>Celda de batch (S13, 3.4), manifiesto.</td>
+</tr>
+<tr>
+<td>Ratio de eventos válidos</td>
+<td>1,0000</td>
+<td>Ídem.</td>
+</tr>
+<tr>
+<td>Latencia típica (p50)</td>
+<td>11 491 ms</td>
+<td>Ídem.</td>
+</tr>
+<tr>
+<td>Latencia de la cola (p95)</td>
+<td>1 488 930 ms (~25 min)</td>
+<td>Ídem.</td>
+</tr>
+<tr>
+<td>Eventos con más de 1 minuto de latencia</td>
+<td>45,3 %</td>
+<td>Ídem.</td>
+</tr>
+<tr>
+<td>Filas procesadas por el <em>stream</em> en 45 s</td>
+<td>14 a 15</td>
+<td>Celda de <em>streaming</em> (S13, 3.5).</td>
+</tr>
+<tr>
+<td>Error del modelo en producción</td>
+<td>0,03 a 0,05 (MAE, varía por corrida)</td>
+<td>Celda de MAE (S13, 3.6).</td>
+</tr>
+<tr>
+<td>Duración de la ejecución integrada</td>
+<td>75 s a 305 s</td>
+<td>Manifiesto.</td>
+</tr>
+</tbody>
+</table>
+<p>Cada cifra que digas en la demostración debe poder señalarse en el manifiesto o en una consulta de Prometheus. Una cifra sin origen es una afirmación.</p>
+<h3 id="38-guion-de-demostracion">3.8 Guion de demostración<a class="headerlink" href="#38-guion-de-demostracion" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> el guion de la demostración con tiempos, qué muestras, qué debe verse y un plan alternativo por paso.</p>
+<p><strong>Tabla 7. Guion de demostración (plantilla con el ejemplo de <code>lambda26</code>)</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Min.</th>
+<th>Qué muestras</th>
+<th>Comando o URL</th>
+<th>Qué debe verse</th>
+<th>Plan alternativo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0-1</td>
+<td>Entorno sano.</td>
+<td><code>docker ps --filter name=lambda26</code></td>
+<td>Los servicios con <code>(healthy)</code>.</td>
+<td>Captura con fecha y hora.</td>
+</tr>
+<tr>
+<td style="text-align: right;">1-3</td>
+<td>Compuertas previas.</td>
+<td>Celda de 3.3 de S13.</td>
+<td>Seis <code>OK</code>.</td>
+<td>Captura de una corrida anterior.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3-5</td>
+<td>Batch y su hallazgo.</td>
+<td>Celda de 3.4 de S13.</td>
+<td>p50 frente a p95 y la advertencia.</td>
+<td>Salida guardada del notebook.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5-7</td>
+<td><em>Streaming</em> con el modelo.</td>
+<td>Celda de 3.5-3.6 de S13.</td>
+<td>Micro-lotes con filas y el MAE.</td>
+<td>Manifiesto de una corrida anterior.</td>
+</tr>
+<tr>
+<td style="text-align: right;">7-9</td>
+<td>Observabilidad.</td>
+<td>Consulta en Prometheus y tablero en Grafana.</td>
+<td>Las métricas <code>lambda26_int_*</code> con la marca de la última ejecución.</td>
+<td>Captura del tablero.</td>
+</tr>
+<tr>
+<td style="text-align: right;">9-10</td>
+<td>Registro de la ejecución.</td>
+<td><code>artifacts/manifiesto_&lt;runId&gt;.json</code>.</td>
+<td>Compuertas, KPI y duración.</td>
+<td>El archivo abierto.</td>
+</tr>
+</tbody>
+</table>
+<p>Reglas del guion: ensáyalo completo con cronómetro; el <em>stream</em> depende del productor, así que <strong>verifica que esté publicando antes de empezar</strong>; y todo plan alternativo debe existir antes de la demostración. Una captura de plan alternativo sin fecha y hora no demuestra nada.</p>
+<h3 id="39-explicacion-tecnica-del-sistema">3.9 Explicación técnica del sistema<a class="headerlink" href="#39-explicacion-tecnica-del-sistema" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> media página que nombra decisiones del sistema, por qué se tomaron y qué cuestan.</p>
+<p><strong>Tabla 8. Decisiones de <code>lambda26</code> y su costo</strong></p>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Por qué</th>
+<th>Qué se pierde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Publicar los resultados de una ejecución en Pushgateway.</td>
+<td>Es el mecanismo correcto para un <em>job</em> que corre y termina (S11).</td>
+<td>Prometheus no sabe si el dato es reciente: un valor viejo parece vivo, de ahí el panel de antigüedad (S13, 3.9).</td>
+</tr>
+<tr>
+<td>Publicar percentiles de latencia y no el promedio.</td>
+<td>El promedio de una distribución de dos grupos no representa a ninguno (S13, 3.4).</td>
+<td>Más métricas y más paneles que explicar.</td>
+</tr>
+<tr>
+<td>Compuertas que detienen la ejecución.</td>
+<td>Un resultado vacío o absurdo se detecta donde nace (S13, 3.3-3.4).</td>
+<td>Una compuerta mal calibrada detiene un pipeline sano: por eso el p95 es advertencia y el p50 es compuerta.</td>
+</tr>
+<tr>
+<td>Kafka sin volumen y sin autenticación.</td>
+<td>Es un laboratorio reproducible desde cero (3.6).</td>
+<td>Los <em>topics</em> no sobreviven a recrear el contenedor.</td>
+</tr>
+<tr>
+<td>Una ventana de <em>streaming</em> acotada en la ejecución integrada.</td>
+<td>Una ejecución integrada tiene que terminar para poder comprobarse (S13, 3.5).</td>
+<td>Solo se evalúa el modelo sobre unas pocas lecturas por corrida.</td>
+</tr>
+</tbody>
+</table>
+<p>Para tu proyecto, elige tres o cuatro decisiones propias y completa las tres columnas sin dejar ninguna vacía.</p>
+<h3 id="310-registrar-los-hallazgos-en-la-bitacora">3.10 Registrar los hallazgos en la bitácora<a class="headerlink" href="#310-registrar-los-hallazgos-en-la-bitacora" title="Permanent link">&para;</a></h3>
+<p><strong>Producto del paso:</strong> la bitácora de esta revisión, una fila por hallazgo.</p>
+<p><strong>Tabla 9. Bitácora de la revisión técnica</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Hallazgo</th>
+<th>Causa</th>
+<th>Corrección</th>
+<th>Prueba de corrección</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Ningún servicio declaraba si estaba listo; las dependencias esperaban solo a que arrancara el contenedor.</td>
+<td>Se escribieron los <code>compose</code> con la configuración mínima de clase, sin <code>healthcheck</code>.</td>
+<td><code>healthcheck</code> en <code>kafka</code>, <code>prometheus</code>, <code>pushgateway</code> y <code>grafana</code>, y <code>depends_on</code> con <code>service_healthy</code> (3.3).</td>
+<td><code>docker ps</code> muestra <code>(healthy)</code> y <code>up -d --wait</code> termina con código <code>0</code>.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Usuario y contraseña de Grafana escritos en <code>obs/compose.yml</code>.</td>
+<td>Valor fijo en el archivo versionado.</td>
+<td>Variables <code>${GRAFANA_ADMIN_USER:-admin}</code> y <code>${GRAFANA_ADMIN_PASSWORD:-admin}</code> (3.4).</td>
+<td><code>docker compose config</code> con una variable definida devuelve el valor definido.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>La confirmación de Prometheus de S13 validaba valores de la corrida anterior.</td>
+<td>La celda comprobaba que cada métrica tuviera <em>algún</em> valor.</td>
+<td>Comparar cada valor devuelto con el recién publicado (3.5).</td>
+<td>La celda imprime el valor devuelto junto al publicado y falla si difieren.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidencia de aprendizaje:</strong></p>
+<ul>
+<li>Lista de comprobación de configuración completada con el resultado real de cada punto (3.2).</li>
+<li>Comprobaciones de salud probadas a mano y aplicadas, con <code>docker ps</code> mostrando <code>(healthy)</code> (3.3).</li>
+<li>Credenciales parametrizadas y verificadas con <code>docker compose config</code> (3.4).</li>
+<li>Prueba de no regresión con la tabla antes/después y el defecto que encontró (3.5).</li>
+<li>Tabla de riesgos aceptados con justificación (3.6).</li>
+<li>Métricas con su origen, guion de demostración y explicación técnica (3.7-3.9).</li>
+<li>Bitácora de la revisión con la prueba de cada corrección (3.10).</li>
+</ul>
+<h2 id="4-crea-actividad-autonoma">4. Crea: actividad autónoma<a class="headerlink" href="#4-crea-actividad-autonoma" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 2h 30 min fuera del aula.</p>
+<h3 id="41-actividad">4.1 Actividad<a class="headerlink" href="#41-actividad" title="Permanent link">&para;</a></h3>
+<p>Revisión técnica final y preparación de la demostración del <strong>Proyecto Sello</strong> propio del equipo.</p>
+<p>Completa y evidencia estas tareas:</p>
+<ol>
+<li>Completa la lista de comprobación de configuración (Tabla 2) sobre los archivos de despliegue de tu propio sistema, con el resultado real de cada punto.</li>
+<li>Corrige al menos <strong>dos</strong> fallos que encuentres, con la prueba de que quedaron corregidos.</li>
+<li>Repite la ejecución integrada de tu pipeline (S13) después de tus cambios y compárala con una ejecución anterior en una tabla, indicando qué diferencias son esperables y cuáles serían una regresión.</li>
+<li>Escribe tu propia tabla de riesgos aceptados: cada fila con su justificación y qué cambiaría en producción.</li>
+<li>Prepara el guion de tu demostración (tiempos, comando, resultado esperado y plan alternativo por paso), con las métricas de tu sistema y el origen de cada una, y ensáyalo con cronómetro.</li>
+<li>Redacta la explicación técnica de tu sistema: al menos tres decisiones propias con su porqué y lo que cuestan.</li>
+</ol>
+<h3 id="42-proposito">4.2 Propósito<a class="headerlink" href="#42-proposito" title="Permanent link">&para;</a></h3>
+<p>Que cada estudiante demuestre, de forma individual y fuera del aula, que puede revisar y endurecer su propio sistema, comprobar que sus cambios no lo rompieron, y defenderlo con cifras reales y decisiones justificadas.</p>
+<h3 id="43-indicaciones">4.3 Indicaciones<a class="headerlink" href="#43-indicaciones" title="Permanent link">&para;</a></h3>
+<p>Entrega un PDF con el siguiente nombre:</p>
+<div class="highlight"><pre><span></span><code>S14_Equipo##_ApellidoNombre.pdf
+</code></pre></div>
+<p>Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del sistema (fecha y hora) y tu usuario o foto de perfil (Windows, VS Code o navegador) visibles en pantalla — es lo que permite verificar que la evidencia es tuya y que corresponde al momento real de tu trabajo.</p>
+<h4 id="431-estructura-del-informe">4.3.1 Estructura del informe<a class="headerlink" href="#431-estructura-del-informe" title="Permanent link">&para;</a></h4>
+<p><strong>Datos del estudiante</strong></p>
+<ul>
+<li>Nombre:</li>
+<li>Equipo:</li>
+<li>Sesión: S14 - Revisión técnica final y hardening</li>
+<li>Rol o aporte realizado:</li>
+<li>Link de GitHub:</li>
+</ul>
+<p><strong>Evidencia técnica</strong></p>
+<p>Incluye capturas o extractos con una breve explicación debajo de cada uno, organizados en los mismos 4 bloques de la rúbrica (4.6):</p>
+<ol>
+<li><em>Revisión y hardening de la configuración</em><ul>
+<li>La lista de comprobación completada y al menos dos fallos corregidos, con la prueba de cada corrección.</li>
+</ul>
+</li>
+<li><em>Prueba de no regresión</em><ul>
+<li>La ejecución integrada de tu pipeline antes y después de tus cambios, comparada en una tabla.</li>
+</ul>
+</li>
+<li><em>Riesgos aceptados y métricas</em><ul>
+<li>Tu tabla de riesgos aceptados con justificación, y las métricas de tu sistema con su origen.</li>
+</ul>
+</li>
+<li><em>Guion y explicación técnica</em><ul>
+<li>El guion de la demostración con plan alternativo por paso, y la explicación de al menos tres decisiones con su costo.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Error o hallazgo</strong></p>
+<p>Describe un error real: una comprobación de salud que dejó un servicio <code>unhealthy</code>, un cambio de configuración que rompió algo que parecía no relacionado, una comprobación que pasaba con datos viejos, o cualquier otro obstáculo real de esta sesión.</p>
+<p><strong>Reflexión técnica breve</strong></p>
+<p>Responde en 5 a 8 líneas:</p>
+<div class="highlight"><pre><span></span><code>Relaciona el caso de Cloudflare (1.6) con tu propio sistema: ¿qué
+cambio de configuración tuyo podría llegar a todos los componentes a la
+vez, qué prueba repetirías después de hacerlo para saber que no rompió
+nada, y qué parte de esa prueba tendría que ser de punta a punta?
+</code></pre></div>
+<p><strong>Anexo: Feedback de la sesión</strong></p>
+<p>Pega esta página como la última hoja del PDF, con tus respuestas.</p>
+<ol>
+<li>¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?</li>
+<li>¿Qué punto de la clase te resultó más confuso o te dejó con dudas?</li>
+<li>¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?</li>
+<li>Sobre tu nivel de comprensión de la clase de hoy, marca una opción:<ul>
+<li>¡Entendido! - Lo domino y podría explicarlo.</li>
+<li>Más o menos. - Entendí la idea general, pero tengo dudas.</li>
+<li>Necesito ayuda. - Me siento perdido/a con este tema.</li>
+</ul>
+</li>
+<li>¿Cómo puedo ayudarte a comprender mejor el tema?</li>
+<li>Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías? Marca una opción:<ul>
+<li>Muy Comprometido/a: Me esforcé al máximo.</li>
+<li>Comprometido/a: Sé que podría haberme esforzado un poco más.</li>
+<li>Poco Comprometido/a: Hoy no di mi mejor esfuerzo.</li>
+</ul>
+</li>
+<li>Mi satisfacción con la clase fue... (califica del 1 al 10, donde 1 es insatisfecho y 10 es muy satisfecho).</li>
+</ol>
+<h3 id="44-criterios-minimos-de-aceptacion">4.4 Criterios mínimos de aceptación<a class="headerlink" href="#44-criterios-minimos-de-aceptacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>El archivo respeta el nombre solicitado.</li>
+<li>La lista de comprobación de configuración está completada con el resultado real de cada punto.</li>
+<li>Al menos dos fallos de configuración corregidos, cada uno con su prueba de corrección.</li>
+<li>La ejecución integrada se repitió después de los cambios y se comparó con una anterior en una tabla.</li>
+<li>La tabla de riesgos aceptados tiene justificación y qué cambiaría en producción en cada fila.</li>
+<li>El guion de demostración tiene tiempos, comando, resultado esperado y plan alternativo por paso, y fue ensayado.</li>
+<li>Las métricas citadas tienen su origen indicado.</li>
+<li>La explicación técnica incluye al menos tres decisiones propias con su porqué y su costo.</li>
+<li>Cada captura de la evidencia técnica muestra el reloj del sistema y el usuario/perfil visible, sin recortar.</li>
+<li>Las fechas y horas de las capturas son coherentes con el historial de commits de su repositorio en GitHub.</li>
+<li>Incluye un error o hallazgo técnico diagnosticado.</li>
+<li>Incluye la reflexión técnica breve solicitada.</li>
+<li>Incluye el Anexo de feedback de la sesión respondido, como última página del PDF.</li>
+</ul>
+<h3 id="45-preguntas-de-defensa">4.5 Preguntas de defensa<a class="headerlink" href="#45-preguntas-de-defensa" title="Permanent link">&para;</a></h3>
+<ol>
+<li>¿Qué diferencia hay entre un contenedor que arrancó y uno que está listo, y qué se puede hacer con esa diferencia una vez que existe un <code>healthcheck</code>?</li>
+<li>¿Por qué se prueba un <code>healthcheck</code> a mano dentro del contenedor antes de escribirlo en el archivo?</li>
+<li>¿Por qué un cambio de configuración puede provocar una regresión aunque no toques ninguna línea de código?</li>
+<li>En tu comparación antes/después, ¿qué diferencias eran esperables y cuáles habrían sido una regresión?</li>
+<li>¿Qué diferencia hay entre un riesgo aceptado y un descuido, y qué tiene tu tabla que lo demuestra?</li>
+<li>Elige una decisión de tu arquitectura: ¿qué se pierde al tomarla y por qué sigue valiendo la pena?</li>
+<li>Relaciona el caso de Cloudflare (1.6) con tu propio proceso de cambio: ¿cómo evitas que un cambio llegue a todo a la vez sin probarse?</li>
+</ol>
+<h3 id="46-rubrica-de-evaluacion">4.6 Rúbrica de evaluación<a class="headerlink" href="#46-rubrica-de-evaluacion" title="Permanent link">&para;</a></h3>
+<p><strong>Tabla 10. Rúbrica de evaluación</strong></p>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align: right;">Peso (%)</th>
+<th>A (20 pts)</th>
+<th>B (15 pts)</th>
+<th>C (10 pts)</th>
+<th>D (5 pts)</th>
+<th style="text-align: right;">Nivel obtenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Revisión y hardening de la configuración*</td>
+<td style="text-align: right;">25</td>
+<td>Lista de comprobación completa con resultado real por punto y al menos dos fallos corregidos con su prueba.</td>
+<td>Lista completa, con un fallo corregido o con alguna prueba de corrección ausente.</td>
+<td>Lista parcial, o fallos señalados sin corregir.</td>
+<td>No presenta revisión de la configuración.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>2. Prueba de no regresión*</td>
+<td style="text-align: right;">25</td>
+<td>Ejecución integrada antes y después comparada en una tabla, distinguiendo diferencias esperables de regresiones.</td>
+<td>Antes y después presentados, sin la comparación explicada.</td>
+<td>Solo una de las dos ejecuciones.</td>
+<td>No presenta prueba de no regresión.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>3. Riesgos aceptados y métricas*</td>
+<td style="text-align: right;">25</td>
+<td>Tabla de riesgos con justificación y cambio en producción por fila, y métricas con su origen.</td>
+<td>Tabla completa, con métricas sin origen, o al revés.</td>
+<td>Tabla parcial o sin justificación.</td>
+<td>No presenta riesgos ni métricas.</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>4. Guion y explicación técnica*</td>
+<td style="text-align: right;">25</td>
+<td>Guion con plan alternativo por paso, ensayado, y al menos tres decisiones con su costo.</td>
+<td>Guion completo, o decisiones con el costo incompleto.</td>
+<td>Guion sin plan alternativo, o decisiones sin costo.</td>
+<td>No presenta ninguno de los dos.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+<p>* Agregado manual.</p>
+<p>Nota final = suma de (<code>Peso</code> / 100 × <code>Puntos del nivel obtenido</code>) = ____ / 20.</p>
+<p>Para usar la rúbrica con IA, solicita:</p>
+<div class="highlight"><pre><span></span><code>Evalúa el PDF usando la rúbrica de la sesión.
+Para cada criterio selecciona el nivel obtenido usando la escala A=20, B=15, C=10, D=5 puntos.
+Justifica brevemente cada nivel asignado.
+Verifica que cada captura muestre reloj del sistema y usuario/perfil visible, y que las fechas sean coherentes con el historial de commits de GitHub. Si falta esta evidencia o hay inconsistencias, indícalo explícitamente antes de calificar.
+Calcula la nota final con la fórmula: suma de (Peso/100 × Puntos del nivel obtenido), directamente sobre 20.
+Indica 2 fortalezas y 2 recomendaciones.
+</code></pre></div>
+<h2 id="5-cierre">5. Cierre<a class="headerlink" href="#5-cierre" title="Permanent link">&para;</a></h2>
+<p>Tiempo: 5 min.</p>
+<p><strong>Resumen breve:</strong> hoy <code>lambda26</code> dejó de ser un conjunto de contenedores que arrancan y pasó a ser uno que declara cuándo está listo, espera a sus dependencias de verdad y no lleva credenciales escritas en el archivo. La revisión recorrió la configuración con una lista, encontró tres fallos y los corrigió; la prueba de no regresión demostró que el sistema siguió funcionando, y además encontró un defecto en la propia comprobación de S13, que validaba valores de la corrida anterior. Lo que no se corrigió —Kafka sin volumen ni autenticación, las claves por defecto— quedó registrado como riesgo aceptado, con su justificación y lo que cambiaría en producción. El caso de Cloudflare lo resume: un cambio de configuración merece el mismo cuidado que un cambio de código.</p>
+<p><strong>Dinámica participativa:</strong> en una ronda rápida, cada estudiante comparte en una frase el fallo de configuración que encontró en su propio sistema y que "funcionaba" sin que nadie lo hubiera notado.</p>
+<p><strong>Metacognición:</strong> ¿qué te costó más entender hoy: por qué un contenedor puede estar en ejecución y no estar listo, o por qué una prueba que pasa sin errores puede estar validando datos viejos?</p>
+<p><strong>Proyección:</strong> S15 es la evaluación de la Unidad III: resolverás la evaluación teórico-práctica y sustentarás el sistema Big Data end-to-end, con el guion, las métricas y la explicación técnica que preparaste hoy.</p>
+<h2 id="bibliografia">Bibliografía<a class="headerlink" href="#bibliografia" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Cloudflare. (2019, 12 de julio). <em>Details of the Cloudflare outage on July 2, 2019</em>. https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
