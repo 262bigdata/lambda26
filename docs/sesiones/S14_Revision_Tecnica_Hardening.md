@@ -175,7 +175,35 @@ DataOps, hardening, documentación y demo son comunes a todo el grupo: se presen
 
 **Producto del paso:** el stack de `lambda26` arriba y la ejecución integrada de S13 corriendo antes de cambiar nada.
 
-Levanta los cuatro grupos como en S13 (3.1) y el productor de `campo-electrico`. Antes de tocar la configuración, ejecuta `13_integracion_dataops.ipynb` completo una vez: si no pasa **antes** de tus cambios, no puedes saber si algo que falle después lo causaste tú. Guarda el manifiesto que deja (`artifacts/manifiesto_<runId>.json`) como punto de comparación.
+Levanta los cuatro grupos como en S13 (3.1) y el productor de `campo-electrico`. Desde la raíz del repositorio, en PowerShell:
+
+```powershell
+docker compose -f kafka/compose.yml up -d
+docker compose -f pyspark/compose.yml -f pyspark/compose.kafka.yml up -d
+docker compose -f obs/compose.yml up -d
+docker compose -f uso-campo-electrico/compose.yml up -d
+docker exec -d lambda26-uso-campo-electrico python producer_campo_electrico.py
+```
+
+La opción `-d` de `docker exec` lanza el productor en segundo plano, sin ocupar una terminal. Confirma que sigue publicando leyendo el desplazamiento (*offset*) del topic **dos veces**, con unos segundos de diferencia:
+
+```powershell
+docker exec lambda26-kafka /opt/kafka/bin/kafka-get-offsets.sh --bootstrap-server localhost:9092 --topic campo-electrico-eventos
+```
+
+Resultado real de esta sesión: `campo-electrico-eventos:0:25883` y, unos 20 segundos después, `campo-electrico-eventos:0:25890`. El número crece con un evento cada 3 segundos; si no cambia, el productor no está publicando.
+
+Antes de tocar la configuración, ejecuta `13_integracion_dataops.ipynb` completo una vez: si no pasa **antes** de tus cambios, no puedes saber si algo que falle después lo causaste tú. Puedes hacerlo desde Jupyter o, sin abrir el navegador, con este comando (tarda entre 75 y 305 segundos):
+
+```powershell
+docker exec lambda26-pyspark jupyter nbconvert --to notebook --execute --inplace /opt/s13-integracion-dataops/13_integracion_dataops.ipynb --ExecutePreprocessor.timeout=900
+```
+
+`--inplace` guarda las salidas de la corrida en el propio notebook. Guarda el manifiesto que deja como punto de comparación y localiza el más reciente con:
+
+```powershell
+Get-ChildItem pyspark/sesiones/s13-integracion-dataops/artifacts/manifiesto_*.json | Sort-Object LastWriteTime -Descending | Select-Object -First 3 Name
+```
 
 ### 3.2 Revisar la configuración con la lista de comprobación
 
@@ -274,6 +302,8 @@ docker ps --filter name=lambda26 --format "{{.Names}}\t{{.Status}}"
 
 Resultado real de esta sesión: ambas validaciones sin errores, `up -d --wait` termina con código `0` (espera a que cada servicio con `healthcheck` esté `Healthy` antes de devolver el control), y `docker ps` muestra `lambda26-kafka`, `lambda26-prometheus`, `lambda26-pushgateway` y `lambda26-grafana` con `(healthy)`.
 
+Si reinicias Docker o la PC, los contenedores arrancan solos (`restart: unless-stopped`), pero `kafka-exporter` puede reiniciarse varias veces hasta que Kafka esté listo: en esta sesión aparecía como `Restarting (255)` durante los primeros segundos. Volver a correr `docker compose -f kafka/compose.yml up -d --wait` espera a que todos estén sanos y lo deja estable. Tras el reinicio, el productor de `campo-electrico` hay que lanzarlo de nuevo (el contenedor arranca en `sleep infinity`).
+
 Un efecto que debes conocer: cambiar la configuración de un servicio **recrea su contenedor**. `kafka/compose.yml` no define ningún volumen, así que recrear el contenedor de Kafka vacía sus *topics* (3.6). Tras recrearlo, el productor de `campo-electrico` se reconectó solo y el topic volvió a llenarse; verifícalo con una lectura del topic antes de seguir.
 
 **Error frecuente**: dejar `start_period` en cero. Kafka tarda unos segundos en aceptar conexiones y, sin un periodo de gracia, esos segundos cuentan como fallos del `healthcheck`; con suficientes reintentos fallidos el contenedor queda `unhealthy` aunque termine arrancando bien.
@@ -311,11 +341,11 @@ Con la configuración de 3.3 y 3.4 aplicada, ejecuta de nuevo `13_integracion_da
 | Seis compuertas previas | Todas `OK` | Todas `OK` |
 | Eventos del batch / ratio de válidos | 1 866 / 1,0000 | 1 866 / 1,0000 |
 | Latencia p50 / p95 | 11 491 ms / 1 488 930 ms | 11 491 ms / 1 488 930 ms |
-| Filas procesadas por el *stream* en 45 s | 15 | 14 |
-| Error del modelo (MAE) | 0,0330 y 0,0426 en dos corridas | 0,0423 |
-| Duración | 76,8 s y 304,5 s | 90,0 s |
+| Filas procesadas por el *stream* en 45 s | 15 | 14 y 15 |
+| Error del modelo (MAE) | 0,0330 y 0,0426 en dos corridas | 0,0423 y 0,0699 |
+| Duración | 76,8 s y 304,5 s | 90,0 s y 97,7 s |
 
-Los valores del batch son idénticos porque salen del mismo Parquet; los del *stream* varían porque cada corrida procesa lecturas en vivo distintas (S13, 2.5). Que el MAE cambie **no** es una regresión; que dejaran de pasar las compuertas, o que el *stream* procesara cero filas, sí lo sería.
+Los valores del batch son idénticos porque salen del mismo Parquet; los del *stream* varían porque cada corrida procesa lecturas en vivo distintas (S13, 2.5). La segunda corrida de la columna «Después» se hizo el 13 de noviembre, tras reiniciar Docker: pasó las seis compuertas y Prometheus devolvió cada valor recién publicado. Que el MAE cambie, incluso hasta 0,0699, **no** es una regresión; que dejaran de pasar las compuertas, o que el *stream* procesara cero filas, sí lo sería.
 
 Esta repetición encontró un defecto, y estaba en la propia comprobación de S13. En la línea de confirmación de Prometheus, la celda mostró `lambda26_int_stream_mae: 0.0426` y la marca de tiempo de la corrida **anterior**, mientras esa corrida acababa de calcular un MAE distinto. La celda de S13 (3.7) se daba por satisfecha en cuanto cada métrica tenía *algún* valor, así que validaba datos viejos. Se corrigió para comparar cada valor devuelto con el que acaba de publicarse (`coincide(...)`), y se volvió a ejecutar: ahora cada línea imprime el valor devuelto junto al publicado, y la celda falla con `Prometheus no devolvio los valores recien publicados` si no coinciden.
 
@@ -351,7 +381,7 @@ Esta tabla es lo que diferencia un riesgo aceptado de un descuido: cada fila dic
 | Latencia de la cola (p95) | 1 488 930 ms (~25 min) | Ídem. |
 | Eventos con más de 1 minuto de latencia | 45,3 % | Ídem. |
 | Filas procesadas por el *stream* en 45 s | 14 a 15 | Celda de *streaming* (S13, 3.5). |
-| Error del modelo en producción | 0,03 a 0,05 (MAE, varía por corrida) | Celda de MAE (S13, 3.6). |
+| Error del modelo en el stream simulado | 0,03 a 0,07 (MAE, varía por corrida) | Celda de MAE (S13, 3.6). |
 | Duración de la ejecución integrada | 75 s a 305 s | Manifiesto. |
 
 Cada cifra que digas en la demostración debe poder señalarse en el manifiesto o en una consulta de Prometheus. Una cifra sin origen es una afirmación.
