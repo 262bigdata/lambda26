@@ -160,6 +160,17 @@ Tiempo: 2h 30 min.
 - **3.9** Explicación técnica del sistema.
 - **3.10** Registrar los hallazgos en la bitácora.
 
+**Presentación de referencia:** el producto final de `lambda26` está presentado en [lambda26_U3_campo_electrico_integrado.pptx](../presentaciones/lambda26_U3_campo_electrico_integrado.pptx), un ejemplo del docente. Estas son las láminas que corresponden a esta sesión:
+
+- **3.3 y 3.4:** lámina 13, DataOps.
+- **3.5:** lámina 14, hardening y prueba de no regresión.
+- **3.6:** lámina 15, riesgos aceptados.
+- **3.7:** láminas 11 y 12, un solo sistema y observabilidad.
+- **3.8:** lámina 16, demo end-to-end.
+- **3.9:** láminas 5 y 19, arquitectura y limitaciones.
+
+DataOps, hardening, documentación y demo son comunes a todo el grupo: se presentan una sola vez, y cada integrante debe saber explicarlos.
+
 ### 3.1 Reanudar el entorno y confirmar el punto de partida
 
 **Producto del paso:** el stack de `lambda26` arriba y la ejecución integrada de S13 corriendo antes de cambiar nada.

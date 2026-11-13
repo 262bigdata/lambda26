@@ -65,6 +65,8 @@ flowchart LR
         P2["uso-rapido, uso-microserv<br/>(secundario)"]
     end
 
+    D["Datasets en BD o archivos<br/>sXX/data/*.csv"]
+
     K[("kafka")]
 
     subgraph RT["Realtime Pipeline<br/>(consumidor de Kafka)"]
@@ -77,15 +79,15 @@ flowchart LR
         BP1["uso-pyspark<br/>batch (notebook Jupyter)<br/>descriptiva/diagnóstica<br/>+ predictiva"]
     end
 
-    Grafana["obs<br/>Pushgateway +<br/>Prometheus +<br/>Grafana"]
+    OBS["obs<br/>Pushgateway +<br/>Prometheus +<br/>Grafana<br/>(dashboards y alertas)"]
+    NB["Resultados del notebook<br/>tablas, gráficos<br/>y modelo guardado"]
 
-    D["Datasets en BD o archivos<br/>sXX/data/*.csv"]
-
-    A3 -->|"publica key=sensorId"| K
-    P2 -->|"publica"| K
+    A3 -->|"eventos<br/>key=sensorId"| K
+    P2 -->|"eventos"| K
+    K -->|"eventos"| RT1
     D --> BP1
-    K -->|"consume"| RT
-    RT1 --> Grafana
+    RT1 --> OBS
+    BP1 --> NB
     BP1 -.->|"modelo entrenado"| RT1
 ```
 
