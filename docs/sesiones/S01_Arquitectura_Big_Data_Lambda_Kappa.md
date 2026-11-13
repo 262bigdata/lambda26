@@ -59,12 +59,9 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 
 ```mermaid
 flowchart LR
-    W["ESP32 + DHT22 + potenciómetro<br/>firmware Arduino real<br/>(Wokwi, en el navegador)"]
-    M["Broker MQTT público<br/>test.mosquitto.org"]
-
     subgraph Producers["Productores de Kafka"]
         direction TB
-        A3["uso-atmos<br/>bridge_mqtt_kafka.py<br/>suscrito al mismo topic"]
+        A3["uso-atmos<br/>ESP32: sensores atmosféricos<br/>(bridge_mqtt_kafka.py)"]
         P2["uso-rapido, uso-microserv<br/>(secundario)"]
     end
 
@@ -82,11 +79,9 @@ flowchart LR
 
     Grafana["obs<br/>Pushgateway +<br/>Prometheus +<br/>Grafana"]
 
-    D["Datasets en archivos<br/>sXX/data/*.csv"]
+    D["Datasets en BD o archivos<br/>sXX/data/*.csv"]
 
-    W -->|"MQTT<br/>publica JSON"| M
-    M -->|"suscripción"| A3
-    A3 -->|"publica key=sensorId<br/>sin validar ni transformar"| K
+    A3 -->|"publica key=sensorId"| K
     P2 -->|"publica"| K
     D --> BP1
     K -->|"consume"| RT
@@ -96,7 +91,7 @@ flowchart LR
 
 Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline es la **dimensión U1** (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la **dimensión U2** (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).
 
-En la figura, el ESP32 simulado en Wokwi y el broker MQTT público son externos a `lambda26`; el productor propio es `uso-atmos`, cuyo puente `bridge_mqtt_kafka.py` se suscribe al broker y reenvía al topic `atmos-eventos` de Kafka, sin validar ni transformar. Se construye en S7 (Figura 3 de esa sesión).
+En la figura, `uso-atmos` resume la ruta de sensores atmosféricos: un ESP32 simulado en Wokwi publica por MQTT a un broker público (`test.mosquitto.org`, configurado dentro del propio puente), y `bridge_mqtt_kafka.py` lo reenvía al topic `atmos-eventos` de Kafka, sin validar ni transformar. El detalle de esa ruta se construye en S7 (Figura 3 de esa sesión).
 
 En esta figura los **productores** publican eventos a Kafka, y el **consumidor** es el pipeline en tiempo real: `uso-pyspark` lee de Kafka, aplica la inferencia y entrega los resultados a `obs`, donde los usuarios los consultan en Grafana.
 
