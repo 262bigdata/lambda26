@@ -21,6 +21,7 @@ Al cierre de Unidad 3, el sistema debe integrar — sin excepción — todo lo c
 - Modelo ML, inferencia de series de tiempo o salida BI según el alcance del proyecto (Unidad 1 y 2).
 - Prácticas de DataOps/DevOps para la integración, empaquetado o despliegue del sistema: servicios con comprobación de salud y espera por dependencias, configuración y credenciales fuera del código, y una ejecución integrada con compuertas de calidad y manifiesto de ejecución.
 - Revisión técnica final: lista de comprobación de configuración aplicada, prueba de no regresión tras cada cambio y tabla de riesgos aceptados con su justificación.
+- Matriz de trazabilidad que relaciona la variable, la dimensión de cada integrante, sus indicadores U1 y U2, la fuente y técnica, y la evidencia.
 - Evidencias reproducibles de ejecución en el laboratorio.
 - Documentación técnica, operativa y demo final end-to-end.
 
@@ -62,6 +63,7 @@ Evalúa la sustentación y el producto (u3-producto.md, adaptada al instrumento 
 Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta del sistema completo (Unidades 1 y 2 integradas).
 Para el criterio 6, verifica explícitamente los 7 subaspectos de la Tabla 2 antes de asignar el nivel.
+Verifica que la matriz de trazabilidad relacione la variable con la dimensión y los indicadores U1 y U2 de cada integrante, y que cada fila tenga su evidencia.
 Calcula la nota final con la fórmula: suma de (Peso / 100 × Puntos de la calificación obtenida), directamente sobre 20.
 Indica 2 fortalezas y 2 recomendaciones finales del producto.
 ```
@@ -83,15 +85,19 @@ La presentación puede organizarse con una secuencia breve de apoyo visual. El v
 | 1 | Título del proyecto y equipo | Identificar el proyecto, integrantes y dominio de datos elegido. | CE044 |
 | 2 | Video pitch o introducción ejecutiva | Presentar problema, solución, valor y participación del equipo. | CE044 |
 | 3 | Problema y alcance | Explicar la necesidad analítica, las fuentes de datos y el alcance del sistema. | CE042 |
-| 4 | Arquitectura Big Data | Mostrar ingesta, procesamiento, almacenamiento, consumo y observabilidad. | CE042 |
-| 5 | Procesamiento batch | Explicar el pipeline Spark, transformaciones, calidad de datos y salidas en Parquet. | CE042 |
-| 6 | Ingesta y streaming | Mostrar el flujo de eventos con Kafka y el procesamiento con Spark Structured Streaming. | CE042 |
-| 7 | Observabilidad y costos | Presentar métricas, paneles, logs y estimación de costos operacionales. | CE044 |
-| 8 | Resultados BI/ML | Mostrar el modelo, la inferencia o el tablero BI generado para la toma de decisiones. | CE043 + CE044 |
-| 9 | Demo end-to-end | Ejecutar o evidenciar el flujo batch/streaming completo del sistema. | CE042 + CE043 |
-| 10 | Aporte individual | Indicar qué hizo cada integrante. | CE044 |
-| 11 | Repositorio y estándares | Mostrar repositorio, topics, estructura, documentación publicada en MkDocs o equivalente, y forma de ejecución. | CE044 |
-| 12 | Limitaciones y mejoras | Reconocer límites del producto, los riesgos aceptados con su justificación y las mejoras posibles. | CE044 |
+| 4 | Matriz de trazabilidad | Relacionar la variable y su pregunta con la dimensión de cada integrante, sus indicadores batch (U1) y streaming (U2), la fuente y técnica, y la evidencia. | CE042 + CE044 |
+| 5 | Dimensiones por integrante | Mostrar la dimensión que mide cada integrante y sus dos indicadores. | CE044 |
+| 6 | Arquitectura Big Data | Mostrar ingesta, procesamiento, almacenamiento, consumo y observabilidad. | CE042 |
+| 7 | Procesamiento batch | Explicar el pipeline Spark, transformaciones, calidad de datos y salidas en Parquet. | CE042 |
+| 8 | Ingesta y streaming | Mostrar el flujo de eventos con Kafka y el procesamiento con Spark Structured Streaming. | CE042 |
+| 9 | Observabilidad y costos | Presentar métricas, paneles, logs y estimación de costos operacionales. | CE044 |
+| 10 | Resultados BI/ML | Mostrar el modelo, la inferencia o el tablero BI generado para la toma de decisiones. | CE043 + CE044 |
+| 11 | Demo end-to-end | Ejecutar o evidenciar el flujo batch/streaming completo del sistema. | CE042 + CE043 |
+| 12 | Aporte individual | Indicar qué hizo cada integrante: su dimensión con sus dos indicadores y una decisión propia, con lo que gana y lo que cuesta. | CE044 |
+| 13 | Repositorio y estándares | Mostrar repositorio, topics, estructura, documentación publicada en MkDocs o equivalente, y forma de ejecución. | CE044 |
+| 14 | Limitaciones y mejoras | Reconocer límites del producto, los riesgos aceptados con su justificación y las mejoras posibles. | CE044 |
+
+Lo común al grupo (arquitectura, DataOps, hardening, demo y repositorio) se presenta una sola vez; cada integrante responde individualmente sobre ello.
 
 ## 5. Documentación y reporte del producto final
 
@@ -125,6 +131,7 @@ El informe debe documentar el producto de manera breve, verificable y alineada a
 | Portada | Nombre del proyecto, curso, sección, integrantes, docente y semestre. | Datos completos del equipo. |
 | Resumen del proyecto | Problema de datos, solución Big Data y valor analítico. | Síntesis de 8 a 12 líneas. |
 | Competencia y alcance | Competencia/capacidad del proyecto y competencias relacionadas. | CE042, CE043 y CE044 vinculadas al producto. |
+| Matriz de trazabilidad | Variable y pregunta central, dimensión de cada integrante, indicadores U1 y U2, fuente y técnica, y evidencia. | Tabla completa: una fila por indicador y por integrante. |
 | Problema y datos | Necesidad analítica, fuentes, alcance y restricciones. | Descripción del problema y dataset. |
 | Arquitectura Big Data | Componentes de ingesta, procesamiento, almacenamiento, consumo y observabilidad. | Diagrama y decisiones técnicas. |
 | Procesamiento batch | Jobs, transformaciones, validaciones de calidad y salidas en Parquet. | Notebooks, comandos, salidas y capturas. |

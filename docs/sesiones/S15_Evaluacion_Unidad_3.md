@@ -44,6 +44,8 @@ Preguntas de referencia (el docente puede formular equivalentes):
 8. ¿Qué diferencia hay entre un servicio en ejecución y uno listo, y qué configuración de tu sistema lo expresa?
 9. Después de un cambio de configuración, ¿qué prueba repetiste para saber que no rompiste nada, y qué diferencias entre antes y después serían esperables?
 10. Elige un riesgo que aceptaste en tu sistema: ¿cuál es su justificación y qué cambiarías en producción?
+11. En tu matriz de trazabilidad, ¿qué fila tiene la evidencia más débil, y qué harías para fortalecerla?
+12. Defiende una decisión técnica propia: ¿qué ganas con ella y qué te cuesta?
 
 ## 4. Sustentación del producto final
 
@@ -52,7 +54,7 @@ Preguntas de referencia (el docente puede formular equivalentes):
 | Momento | Tiempo | Propósito |
 |---|---:|---|
 | Video pitch / introducción ejecutiva | 3 min | Presentar problema, solución, valor del producto y participación del equipo. |
-| Exposición técnica | 10 min | Presentar problema, arquitectura, fuentes, pipelines, observabilidad, resultados y valor analítico ([Tabla 3 de `u3-producto.md`](../proyecto-sello/u3-producto.md#4-secuencia-sugerida-de-presentacion)). |
+| Exposición técnica | 10 min | Presentar problema, matriz de trazabilidad, arquitectura, fuentes, pipelines, observabilidad, resultados y valor analítico ([Tabla 3 de `u3-producto.md`](../proyecto-sello/u3-producto.md#4-secuencia-sugerida-de-presentacion)). |
 | Demostración end-to-end | 5 min | Ejecutar o evidenciar el flujo batch/streaming completo, salidas generadas, métricas y resultados BI/ML. |
 | Preguntas individuales | 5 min | Verificar dominio y aporte propio, con base en la Tabla 1 y el producto completo. |
 
@@ -61,6 +63,7 @@ Preguntas de referencia (el docente puede formular equivalentes):
 | Entregable | Evidencia mínima | Criterio de aceptación |
 |---|---|---|
 | Producto final | [`u3-producto.md`](../proyecto-sello/u3-producto.md), adaptado al instrumento propio del equipo | Integra y estabiliza lo construido en Unidad 1 y Unidad 2 |
+| Matriz de trazabilidad | Variable y pregunta central, dimensión de cada integrante, indicadores U1 y U2, fuente y técnica, y evidencia ([Tabla 3 de `u3-producto.md`](../proyecto-sello/u3-producto.md#4-secuencia-sugerida-de-presentacion)) | Una fila por indicador y por integrante, cada una con su evidencia verificable |
 | Evidencia de integración end-to-end | Flujo batch, streaming y BI/ML ejecutados juntos, con al menos un caso de error | Verificable en vivo, no solo documentada |
 | Evidencia de DataOps y hardening | Empaquetado/despliegue reproducible; checklist de hardening completado | Reproducible por otra persona desde el repositorio |
 | Repositorio y documentación | Topics académicos vigentes, documentación completa publicada en MkDocs o equivalente, informe del proyecto | Reproducible sin ayuda del equipo |
@@ -73,6 +76,8 @@ Criterios mínimos de aceptación:
 - Al menos una práctica de DataOps/DevOps es verificable (empaquetado, script de despliegue, CI).
 - La documentación (MkDocs o equivalente) permite a otra persona reproducir el sistema sin ayuda del equipo.
 - El repositorio mantiene los topics académicos y evidencia de commits a lo largo del curso.
+- La matriz de trazabilidad relaciona la variable con la dimensión y los indicadores U1 y U2 de cada integrante, y cada fila tiene su evidencia.
+- Lo común al grupo (arquitectura, DataOps, hardening, demo y repositorio) se presenta una sola vez; cada integrante responde individualmente sobre ello.
 - La sustentación cubre los 7 subaspectos de la sustentación integral (`u3-producto.md`, Tabla 2), conectando resultados con valor real para la toma de decisiones.
 - Cada integrante responde individualmente al menos una pregunta de la Tabla 1.
 
