@@ -1435,8 +1435,8 @@
 
 <h1 id="big-data-producto-de-unidad-1">Big Data - Producto de Unidad 1<a class="headerlink" href="#big-data-producto-de-unidad-1" title="Permanent link">&para;</a></h1>
 <p><strong>Esta es la plantilla-ejemplo del producto de Unidad 1 de Big Data.</strong> La estructura (arquitectura seleccionada, transformaciones distribuidas, calidad y particionamiento, componente ML) es exigible a todos. El contenido usa los datasets reales que el docente trabajó en clase (H&amp;M para calidad y particionamiento; campo eléctrico/magnético para el componente ML) como ejemplo — cada equipo lo reemplaza por el de su propio instrumento, declarado en su <a href="../brief/">Brief técnico-analítico</a> de S2.</p>
-<p>Tu <a href="../brief/">Brief técnico-analítico</a> (hito de S2) define el contenido real: cada equipo declara una <strong>pregunta central de negocio</strong>, y <strong>cada integrante</strong> aporta su propia <strong>dimensión U1</strong> de esa pregunta — descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real (la dimensión U2, con inferencia en vivo sobre streaming, es contenido de Unidad II, evaluado en S12). Los integrantes de un mismo equipo suelen compartir el instrumento o fuente física (el mismo sensor, el mismo dataset base), pero cada uno construye y sustenta <strong>su propio notebook y su propio modelo</strong>, sobre su propia variable objetivo — no un pipeline único repartido entre el equipo.</p>
-<p>El modelo predictivo de tu dimensión U1 puede ser de <strong>regresión o de clasificación</strong>, según lo que pida tu propia pregunta (el brief lo deja explícito) — S4 enseñó la técnica concreta con <code>LinearRegression</code>/<code>RandomForestRegressor</code>, pero la misma disciplina (entrenar, evaluar con varias métricas, comparar más de una configuración, guardar el ganador) aplica igual si tu dimensión necesita <code>LogisticRegression</code>/<code>RandomForestClassifier</code> en su lugar.</p>
+<p>Tu <a href="../brief/">Brief técnico-analítico</a> (hito de S2) define el contenido real: cada equipo declara una <strong>pregunta central de negocio</strong>, y <strong>cada integrante</strong> toma una <strong>dimensión</strong> de la variable y la mide con su <strong>indicador U1</strong> — descriptivo/diagnóstico y predictivo, sin inferencia en tiempo real (el indicador U2, con inferencia en vivo sobre streaming, es contenido de Unidad II, evaluado en S12). Los integrantes de un mismo equipo suelen compartir el instrumento o fuente física (el mismo sensor, el mismo dataset base), pero cada uno construye y sustenta <strong>su propio notebook y su propio modelo</strong>, sobre su propia variable objetivo — no un pipeline único repartido entre el equipo.</p>
+<p>El modelo predictivo de tu indicador U1 puede ser de <strong>regresión o de clasificación</strong>, según lo que pida tu propia pregunta (el brief lo deja explícito) — S4 enseñó la técnica concreta con <code>LinearRegression</code>/<code>RandomForestRegressor</code>, pero la misma disciplina (entrenar, evaluar con varias métricas, comparar más de una configuración, guardar el ganador) aplica igual si tu dimensión necesita <code>LogisticRegression</code>/<code>RandomForestClassifier</code> en su lugar.</p>
 <h2 id="producto">Producto<a class="headerlink" href="#producto" title="Permanent link">&para;</a></h2>
 <p><strong>Pipeline batch de ETL distribuido con salidas analíticas en Parquet listas para BI/ML.</strong></p>
 <h2 id="1-arquitectura-big-data-seleccionada">1. Arquitectura Big Data seleccionada<a class="headerlink" href="#1-arquitectura-big-data-seleccionada" title="Permanent link">&para;</a></h2>
@@ -1529,7 +1529,7 @@
 </tr>
 </tbody>
 </table>
-<p>Sobre tu propia dimensión U1 (brief, sección 3), esto significa el indicador que tú declaraste — no necesariamente <code>CE</code>, y no necesariamente una regresión: si tu pregunta predictiva es de clasificación (por ejemplo, "¿qué tan probable es una tormenta?", como el ejemplo de sensores atmosféricos del brief), la Tabla 2 aplica igual cambiando <code>LinearRegression</code>/<code>RandomForestRegressor</code> por <code>LogisticRegression</code>/<code>RandomForestClassifier</code>, y RMSE/R²/MAE por las métricas de clasificación correspondientes (<code>areaUnderROC</code>, <code>f1</code>, etc.) — la disciplina es la misma: comparar antes de confiar en un único modelo (1.6 de S4).</p>
+<p>Sobre tu indicador U1 (brief, sección 3), esto significa la métrica que tú declaraste — no necesariamente <code>CE</code>, y no necesariamente una regresión: si tu pregunta predictiva es de clasificación (por ejemplo, "¿qué tan probable es una tormenta?", como el ejemplo de sensores atmosféricos del brief), la Tabla 2 aplica igual cambiando <code>LinearRegression</code>/<code>RandomForestRegressor</code> por <code>LogisticRegression</code>/<code>RandomForestClassifier</code>, y RMSE/R²/MAE por las métricas de clasificación correspondientes (<code>areaUnderROC</code>, <code>f1</code>, etc.) — la disciplina es la misma: comparar antes de confiar en un único modelo (1.6 de S4).</p>
 <p><strong>Figura 1. Pipeline batch completo, Unidad I (estructura general)</strong></p>
 <pre class="mermaid"><code>flowchart LR
     Arq["Arquitectura Big Data&lt;br/&gt;Lambda o Kappa, S1"]
@@ -1644,7 +1644,7 @@
 <tbody>
 <tr>
 <td>1. Aporte individual</td>
-<td>Cada integrante demuestra su propia dimensión U1 (brief, sección 3) — no el trabajo del resto del equipo.</td>
+<td>Cada integrante demuestra su propio indicador U1 (brief, sección 3) — no el trabajo del resto del equipo.</td>
 </tr>
 <tr>
 <td>2. Comunicación y orden</td>
@@ -1660,16 +1660,16 @@
 </tr>
 <tr>
 <td>5. MkDocs o equivalente</td>
-<td>Documentación de tu dimensión U1 publicada, navegable y alineada con <code>u1-producto.md</code>.</td>
+<td>Documentación de tu indicador U1 publicada, navegable y alineada con <code>u1-producto.md</code>.</td>
 </tr>
 <tr>
 <td>6. Pitch/demo ejecutiva</td>
-<td>Introducción breve de tu dimensión U1 y su avance, con apoyo visual (.pptx, Canva o equivalente) — no reemplaza la demo técnica de la Tabla 3 de S5, la precede.</td>
+<td>Introducción breve de tu indicador U1 y su avance, con apoyo visual (.pptx, Canva o equivalente) — no reemplaza la demo técnica de la Tabla 3 de S5, la precede.</td>
 </tr>
 </tbody>
 </table>
 <p>Para usar la rúbrica con IA, solicita:</p>
-<div class="highlight"><pre><span></span><code>Evalúa la sustentación y el producto (u1-producto.md, adaptada a la dimensión U1 propia del estudiante) usando la rúbrica de esta sección.
+<div class="highlight"><pre><span></span><code>Evalúa la sustentación y el producto (u1-producto.md, adaptada al indicador U1 propio del estudiante) usando la rúbrica de esta sección.
 Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta (código, capturas, métricas reales).
 Para el criterio 7, verifica explícitamente los 6 subaspectos de la Tabla 4 antes de asignar el nivel.
