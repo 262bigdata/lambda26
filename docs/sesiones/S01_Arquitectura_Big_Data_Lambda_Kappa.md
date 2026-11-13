@@ -41,7 +41,7 @@ Diagrama de arquitectura Big Data (Lambda o Kappa) para el Proyecto Sello del eq
 
 #### 1.6.1 Caso: Uber y el almacenamiento por niveles con Kafka
 
-Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de sus sistemas en tiempo real: la misma plataforma alimenta el procesamiento histórico y el procesamiento de eventos en vivo, como dos sistemas separados. Para sostener esa escala sin encarecer el clúster, aplica almacenamiento por niveles (*tiered storage*): los eventos recientes quedan en el disco local de los brokers (horas), mientras el histórico se mueve a almacenamiento remoto más barato (S3/GCS/HDFS) por días o meses, sin perder la capacidad de leerlo directamente desde Kafka. La idea de `lambda26` es construir un pipeline con ese mismo espíritu: batch y tiempo real como sistemas separados, ambos alimentados por Kafka.
+Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de sus sistemas en tiempo real: la misma plataforma alimenta el procesamiento histórico y el procesamiento de eventos en vivo, como dos sistemas separados. Para sostener esa escala sin encarecer el clúster, aplica almacenamiento por niveles (*tiered storage*): los eventos recientes quedan en el disco local de los brokers (horas), mientras el histórico se mueve a almacenamiento remoto más barato (S3/GCS/HDFS) por días o meses, sin perder la capacidad de leerlo directamente desde Kafka. La idea de `lambda26` toma de ahí el espíritu de dos pipelines separados, batch y tiempo real, con una diferencia deliberada: en Uber ambos leen de Kafka, mientras que en `lambda26` el batch de PySpark lee archivos (`sXX/data/*.csv`) y solo el pipeline en tiempo real lee de Kafka.
 
 **Figura 1. Arquitectura de Kafka en Uber: productores, pipeline batch y pipeline en tiempo real**
 
@@ -53,9 +53,9 @@ Uber usa Apache Kafka como columna vertebral tanto de sus sistemas batch como de
 
 Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tiered-storage/).
 
-`lambda26` sigue el mismo patrón, con sus propios componentes en vez de los de Uber:
+`lambda26` adapta ese patrón con sus propios componentes en vez de los de Uber:
 
-**Figura 2. `lambda26` con el mismo patrón de Uber: productores, pipeline en tiempo real y pipeline batch**
+**Figura 2. `lambda26` con el patrón de Uber adaptado: productores, pipeline en tiempo real y pipeline batch**
 
 ```mermaid
 flowchart LR
@@ -63,33 +63,37 @@ flowchart LR
         direction TB
         P1["uso-atmos<br/>ESP32: sensores atmosféricos"]
         P2["uso-rapido, uso-microserv<br/>(secundario)"]
-        P3["uso-replica-cdc<br/>MySQL"]
     end
 
     K[("kafka")]
 
-    subgraph RT["Realtime Pipeline"]
+    subgraph RT["Realtime Pipeline = Dimensión U2"]
         direction TB
-        RT1["uso-pyspark<br/>streaming + inferencia ML"]
+        RT1["uso-pyspark<br/>streaming (script .py)<br/>descriptiva/diagnóstica<br/>+ predictiva con<br/>inferencia ML en vivo"]
     end
 
-    subgraph BP["Batch Pipeline"]
+    subgraph BP["Batch Pipeline = Dimensión U1"]
         direction TB
-        BP1["uso-pyspark<br/>batch, interactivo"]
-        BP2["Data warehouse +<br/>uso-bi-tiempo-real (dbt)"]
+        BP1["uso-pyspark<br/>batch (notebook Jupyter)<br/>descriptiva/diagnóstica<br/>+ predictiva"]
     end
 
-    Grafana["obs<br/>Prometheus + Grafana"]
+    Grafana["obs<br/>Pushgateway +<br/>Prometheus +<br/>Grafana"]
 
-    Producers --> K
+    D["Datasets en archivos<br/>sXX/data/*.csv"]
+
+    P1 --> K
+    P2 --> K
+    D --> BP1
     K --> RT
-    K -.-> BP
     RT1 --> Grafana
-    BP2 --> Grafana
     BP1 -.->|"modelo entrenado"| RT1
 ```
 
-`uso-pyspark` aparece dos veces en la Figura 2: son dos **contenedores separados de la misma imagen**, no dos tecnologías distintas. El de Batch Pipeline corre Jupyter (notebooks, exploración/entrenamiento), y el de Realtime Pipeline ejecuta `spark-submit` sobre un script `.py` como proceso persistente (streaming + inferencia). Se separan porque un notebook no es apto para un job que debe correr sin parar, y un job de producción no debería competir por recursos con el contenedor de exploración — por eso, aunque comparten la misma base tecnológica, Lambda los trata como dos sistemas independientes.
+Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline es la **dimensión U1** (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la **dimensión U2** (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).
+
+La diferencia con Uber está en la entrada del batch: el `uso-pyspark` batch no lee de Kafka, lee archivos CSV montados como volumen. Kafka alimenta solo al Realtime Pipeline, y lo único que cruza del batch al tiempo real es el **modelo entrenado**. Los módulos `uso-replica-cdc` y `uso-bi-tiempo-real` (réplica de MySQL y data warehouse con dbt) no forman parte de esta figura: son una extensión pendiente del laboratorio, que aparece en el índice del curso.
+
+`uso-pyspark` aparece dos veces en la Figura 2: son dos **contenedores separados de la misma imagen**, no dos tecnologías distintas. El de Batch Pipeline corre Jupyter (notebooks, exploración/entrenamiento), y el de Realtime Pipeline ejecuta `spark-submit` sobre un script `.py` como proceso persistente (streaming + inferencia). Se separan porque un notebook no es apto para un job que debe correr sin parar, y un job de producción no debería competir por recursos con el contenedor de exploración — por eso, aunque comparten la misma base tecnológica, Lambda los trata como dos sistemas independientes. En el curso, por simplicidad, el streaming y la inferencia también se desarrollan y se ejecutan desde Jupyter (S8 a S13); la figura muestra cómo se separarían en producción.
 
 Es el mismo patrón que usa **Databricks** (la plataforma que suelen usar las certificaciones de ingeniería de datos): **All-Purpose Clusters** para notebooks/exploración (equivalente al contenedor batch/interactivo de la Figura 2) y **Job Clusters** — efímeros, creados solo para correr un Job y destruidos al terminar — para todo proceso productivo, incluido streaming. Databricks incluso recomienda explícitamente correr Structured Streaming como Job sobre Job Compute y no en un cluster interactivo, por las mismas dos razones: no competir por recursos con la exploración, y que un Job reintenta/reinicia automáticamente si el proceso se cae, algo que un notebook "dejado corriendo" no garantiza. `lambda26` reproduce esa misma separación con Docker, a escala de laboratorio. En la industria, Databricks corre sobre AWS, Azure o GCP (no es una nube en sí misma); su principal competidor, **Snowflake**, no usa Spark — es un data warehouse SQL-first. Muchas empresas usan ambos: Snowflake para BI/reportes, Databricks para ML e ingeniería de datos pesada.
 
