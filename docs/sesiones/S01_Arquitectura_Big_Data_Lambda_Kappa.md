@@ -70,12 +70,12 @@ flowchart LR
 
     K[("kafka")]
 
-    subgraph RT["Realtime Pipeline = Dimensión U2<br/>(consumidor de Kafka)"]
+    subgraph RT["Realtime Pipeline<br/>(consumidor de Kafka)"]
         direction TB
         RT1["uso-pyspark<br/>streaming (script .py)<br/>descriptiva/diagnóstica<br/>+ predictiva con<br/>inferencia ML en vivo"]
     end
 
-    subgraph BP["Batch Pipeline = Dimensión U1"]
+    subgraph BP["Batch Pipeline"]
         direction TB
         BP1["uso-pyspark<br/>batch (notebook Jupyter)<br/>descriptiva/diagnóstica<br/>+ predictiva"]
     end
