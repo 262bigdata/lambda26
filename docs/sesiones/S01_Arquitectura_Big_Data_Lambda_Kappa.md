@@ -59,15 +59,18 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 
 ```mermaid
 flowchart LR
-    subgraph Producers["Productores"]
+    W["ESP32 + DHT22 + potenciómetro<br/>firmware Arduino real<br/>(Wokwi, en el navegador)"]
+    M["Broker MQTT público<br/>test.mosquitto.org"]
+
+    subgraph Producers["Productores de Kafka"]
         direction TB
-        P1["uso-atmos<br/>ESP32: sensores atmosféricos"]
+        A3["uso-atmos<br/>bridge_mqtt_kafka.py<br/>suscrito al mismo topic"]
         P2["uso-rapido, uso-microserv<br/>(secundario)"]
     end
 
     K[("kafka")]
 
-    subgraph RT["Realtime Pipeline = Dimensión U2"]
+    subgraph RT["Realtime Pipeline = Dimensión U2<br/>(consumidor de Kafka)"]
         direction TB
         RT1["uso-pyspark<br/>streaming (script .py)<br/>descriptiva/diagnóstica<br/>+ predictiva con<br/>inferencia ML en vivo"]
     end
@@ -81,15 +84,21 @@ flowchart LR
 
     D["Datasets en archivos<br/>sXX/data/*.csv"]
 
-    P1 --> K
-    P2 --> K
+    W -->|"MQTT<br/>publica JSON"| M
+    M -->|"suscripción"| A3
+    A3 -->|"publica key=sensorId<br/>sin validar ni transformar"| K
+    P2 -->|"publica"| K
     D --> BP1
-    K --> RT
+    K -->|"consume"| RT
     RT1 --> Grafana
     BP1 -.->|"modelo entrenado"| RT1
 ```
 
 Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline es la **dimensión U1** (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la **dimensión U2** (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).
+
+En la figura, el ESP32 simulado en Wokwi y el broker MQTT público son externos a `lambda26`; el productor propio es `uso-atmos`, cuyo puente `bridge_mqtt_kafka.py` se suscribe al broker y reenvía al topic `atmos-eventos` de Kafka, sin validar ni transformar. Se construye en S7 (Figura 3 de esa sesión).
+
+En esta figura los **productores** publican eventos a Kafka, y el **consumidor** es el pipeline en tiempo real: `uso-pyspark` lee de Kafka, aplica la inferencia y entrega los resultados a `obs`, donde los usuarios los consultan en Grafana.
 
 La diferencia con Uber está en la entrada del batch: el `uso-pyspark` batch no lee de Kafka, lee archivos CSV montados como volumen. Kafka alimenta solo al Realtime Pipeline, y lo único que cruza del batch al tiempo real es el **modelo entrenado**. Los módulos `uso-replica-cdc` y `uso-bi-tiempo-real` (réplica de MySQL y data warehouse con dbt) no forman parte de esta figura: son una extensión pendiente del laboratorio, que aparece en el índice del curso.
 
