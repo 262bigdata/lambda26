@@ -2169,37 +2169,7 @@
 <p>Fuente: <a href="https://www.uber.com/us/en/blog/kafka-tiered-storage/">Kafka tiered storage at Uber</a>.</p>
 <p><code>lambda26</code> adapta ese patrón con sus propios componentes en vez de los de Uber:</p>
 <p><strong>Figura 2. <code>lambda26</code> con el patrón de Uber adaptado: productores, pipeline en tiempo real y pipeline batch</strong></p>
-<pre class="mermaid"><code>flowchart LR
-    subgraph Producers["Productores de Kafka"]
-        direction TB
-        A3["uso-atmos&lt;br/&gt;ESP32: sensores atmosféricos&lt;br/&gt;(bridge_mqtt_kafka.py)"]
-        P2["uso-rapido, uso-microserv&lt;br/&gt;(secundario)"]
-    end
-
-    D["Datasets en BD o archivos&lt;br/&gt;sXX/data/*.csv"]
-
-    K[("kafka")]
-
-    subgraph RT["Realtime Pipeline&lt;br/&gt;(consumidor de Kafka)"]
-        direction TB
-        RT1["uso-pyspark&lt;br/&gt;streaming (script .py)&lt;br/&gt;descriptiva/diagnóstica&lt;br/&gt;+ predictiva con&lt;br/&gt;inferencia ML en vivo"]
-    end
-
-    subgraph BP["Batch Pipeline"]
-        direction TB
-        BP1["uso-pyspark&lt;br/&gt;batch (notebook Jupyter)&lt;br/&gt;descriptiva/diagnóstica&lt;br/&gt;+ predictiva"]
-    end
-
-    OBS["obs&lt;br/&gt;Pushgateway +&lt;br/&gt;Prometheus +&lt;br/&gt;Grafana&lt;br/&gt;(dashboards y alertas)"]
-    NB["Resultados del notebook&lt;br/&gt;tablas, gráficos&lt;br/&gt;y modelo guardado"]
-
-    A3 --&gt;|"eventos&lt;br/&gt;key=sensorId"| K
-    P2 --&gt;|"eventos"| K
-    K --&gt;|"eventos"| RT1
-    D --&gt; BP1
-    RT1 --&gt; OBS
-    BP1 --&gt; NB
-    BP1 -.-&gt;|"modelo entrenado"| RT1</code></pre>
+<p><img alt="Figura 2. lambda26 con el patrón de Uber adaptado: productores de Kafka, Realtime Pipeline arriba y Batch Pipeline abajo, separados por una línea punteada" src="../img/s01-1.6-figura2-lambda26-uber.png" /></p>
 <p>Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello (<a href="../../proyecto-sello/brief/#3-dimensiones-de-analisis-y-fuentes-previstas">brief, sección 3</a>): el Batch Pipeline es la <strong>dimensión U1</strong> (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la <strong>dimensión U2</strong> (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).</p>
 <p>En la figura, <code>uso-atmos</code> resume la ruta de sensores atmosféricos: un ESP32 simulado en Wokwi publica por MQTT a un broker público (<code>test.mosquitto.org</code>, configurado dentro del propio puente), y <code>bridge_mqtt_kafka.py</code> lo reenvía al topic <code>atmos-eventos</code> de Kafka, sin validar ni transformar. El detalle de esa ruta se construye en S7 (Figura 3 de esa sesión).</p>
 <p>En esta figura los <strong>productores</strong> publican eventos a Kafka, y el <strong>consumidor</strong> es el pipeline en tiempo real: <code>uso-pyspark</code> lee de Kafka, aplica la inferencia y entrega los resultados a <code>obs</code>, donde los usuarios los consultan en Grafana.</p>
