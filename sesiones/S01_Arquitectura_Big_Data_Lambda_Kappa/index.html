@@ -2170,12 +2170,9 @@
 <p><code>lambda26</code> adapta ese patrón con sus propios componentes en vez de los de Uber:</p>
 <p><strong>Figura 2. <code>lambda26</code> con el patrón de Uber adaptado: productores, pipeline en tiempo real y pipeline batch</strong></p>
 <pre class="mermaid"><code>flowchart LR
-    W["ESP32 + DHT22 + potenciómetro&lt;br/&gt;firmware Arduino real&lt;br/&gt;(Wokwi, en el navegador)"]
-    M["Broker MQTT público&lt;br/&gt;test.mosquitto.org"]
-
     subgraph Producers["Productores de Kafka"]
         direction TB
-        A3["uso-atmos&lt;br/&gt;bridge_mqtt_kafka.py&lt;br/&gt;suscrito al mismo topic"]
+        A3["uso-atmos&lt;br/&gt;ESP32: sensores atmosféricos&lt;br/&gt;(bridge_mqtt_kafka.py)"]
         P2["uso-rapido, uso-microserv&lt;br/&gt;(secundario)"]
     end
 
@@ -2193,18 +2190,16 @@
 
     Grafana["obs&lt;br/&gt;Pushgateway +&lt;br/&gt;Prometheus +&lt;br/&gt;Grafana"]
 
-    D["Datasets en archivos&lt;br/&gt;sXX/data/*.csv"]
+    D["Datasets en BD o archivos&lt;br/&gt;sXX/data/*.csv"]
 
-    W --&gt;|"MQTT&lt;br/&gt;publica JSON"| M
-    M --&gt;|"suscripción"| A3
-    A3 --&gt;|"publica key=sensorId&lt;br/&gt;sin validar ni transformar"| K
+    A3 --&gt;|"publica key=sensorId"| K
     P2 --&gt;|"publica"| K
     D --&gt; BP1
     K --&gt;|"consume"| RT
     RT1 --&gt; Grafana
     BP1 -.-&gt;|"modelo entrenado"| RT1</code></pre>
 <p>Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello (<a href="../../proyecto-sello/brief/#3-dimensiones-de-analisis-y-fuentes-previstas">brief, sección 3</a>): el Batch Pipeline es la <strong>dimensión U1</strong> (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la <strong>dimensión U2</strong> (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).</p>
-<p>En la figura, el ESP32 simulado en Wokwi y el broker MQTT público son externos a <code>lambda26</code>; el productor propio es <code>uso-atmos</code>, cuyo puente <code>bridge_mqtt_kafka.py</code> se suscribe al broker y reenvía al topic <code>atmos-eventos</code> de Kafka, sin validar ni transformar. Se construye en S7 (Figura 3 de esa sesión).</p>
+<p>En la figura, <code>uso-atmos</code> resume la ruta de sensores atmosféricos: un ESP32 simulado en Wokwi publica por MQTT a un broker público (<code>test.mosquitto.org</code>, configurado dentro del propio puente), y <code>bridge_mqtt_kafka.py</code> lo reenvía al topic <code>atmos-eventos</code> de Kafka, sin validar ni transformar. El detalle de esa ruta se construye en S7 (Figura 3 de esa sesión).</p>
 <p>En esta figura los <strong>productores</strong> publican eventos a Kafka, y el <strong>consumidor</strong> es el pipeline en tiempo real: <code>uso-pyspark</code> lee de Kafka, aplica la inferencia y entrega los resultados a <code>obs</code>, donde los usuarios los consultan en Grafana.</p>
 <p>La diferencia con Uber está en la entrada del batch: el <code>uso-pyspark</code> batch no lee de Kafka, lee archivos CSV montados como volumen. Kafka alimenta solo al Realtime Pipeline, y lo único que cruza del batch al tiempo real es el <strong>modelo entrenado</strong>. Los módulos <code>uso-replica-cdc</code> y <code>uso-bi-tiempo-real</code> (réplica de MySQL y data warehouse con dbt) no forman parte de esta figura: son una extensión pendiente del laboratorio, que aparece en el índice del curso.</p>
 <p><code>uso-pyspark</code> aparece dos veces en la Figura 2: son dos <strong>contenedores separados de la misma imagen</strong>, no dos tecnologías distintas. El de Batch Pipeline corre Jupyter (notebooks, exploración/entrenamiento), y el de Realtime Pipeline ejecuta <code>spark-submit</code> sobre un script <code>.py</code> como proceso persistente (streaming + inferencia). Se separan porque un notebook no es apto para un job que debe correr sin parar, y un job de producción no debería competir por recursos con el contenedor de exploración — por eso, aunque comparten la misma base tecnológica, Lambda los trata como dos sistemas independientes. En el curso, por simplicidad, el streaming y la inferencia también se desarrollan y se ejecutan desde Jupyter (S8 a S13); la figura muestra cómo se separarían en producción.</p>
