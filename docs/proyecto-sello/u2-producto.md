@@ -22,7 +22,7 @@ Implementa un pipeline Big Data en tiempo real que integra ingesta de eventos em
 | S11 | BI/ML distribuido: KPIs y visualización de la predicción. | Tablero BI con los KPIs del flujo de eventos en tiempo real, junto con la predicción de series de tiempo de S10, en la misma sesión. |
 | S12 (esta evaluación) | Ensambla todo lo anterior en un solo pipeline y lo sustenta. | El pipeline completo de Unidad 2 + sección 4 de la guía de evaluación. |
 
-Lo que sustentas en S12 es **tu propia dimensión U2**: las capacidades que tú construiste en S6-S11, sobre el instrumento de tu Proyecto Sello — no el ejemplo del docente.
+Lo que sustentas en S12 es **tu propio indicador U2**: las capacidades que tú construiste en S6-S11, sobre el instrumento de tu Proyecto Sello — no el ejemplo del docente.
 
 ## 2. Rúbrica de Evaluación
 
@@ -49,17 +49,17 @@ El criterio 8 se evalúa con los mismos 6 subaspectos de la sustentación integr
 
 | Subaspecto | Qué observa en Unidad 2 |
 |---|---|
-| 1. Aporte individual | Cada integrante demuestra su propia dimensión U2 — no el trabajo del resto del equipo. |
+| 1. Aporte individual | Cada integrante demuestra su propio indicador U2 — no el trabajo del resto del equipo. |
 | 2. Comunicación y orden | Claridad, estructura, tiempo y lenguaje técnico durante la presentación. |
 | 3. Presentación personal y actitud | Puntualidad, vestimenta limpia y adecuada, higiene, cabello ordenado, actitud profesional, respeto, honestidad y coherencia con los valores y principios cristianos de la institución. |
 | 4. Repositorio y estándares | Topics académicos vigentes, organización, commits y reproducibilidad del pipeline streaming. |
-| 5. MkDocs o equivalente | Documentación de tu dimensión U2 publicada, navegable y alineada con `u2-producto.md`. |
+| 5. MkDocs o equivalente | Documentación de tu indicador U2 publicada, navegable y alineada con `u2-producto.md`. |
 | 6. Pitch/demo ejecutiva | Introducción breve de cómo evolucionó tu dimensión desde Unidad 1, con apoyo visual (.pptx, Canva o equivalente) — no reemplaza la demo técnica de la Tabla 2 de S12, la precede. |
 
 Para usar la rúbrica con IA, solicita:
 
 ```text
-Evalúa la sustentación y el producto (u2-producto.md, adaptada a la dimensión U2 propia del estudiante) usando la rúbrica de esta sección.
+Evalúa la sustentación y el producto (u2-producto.md, adaptada al indicador U2 propio del estudiante) usando la rúbrica de esta sección.
 Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta (eventos publicados/consumidos, panel de observabilidad, tablero BI, métricas del modelo).
 Para el criterio 8, verifica explícitamente los 6 subaspectos de la Tabla 3 antes de asignar el nivel.

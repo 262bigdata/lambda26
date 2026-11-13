@@ -17,7 +17,7 @@ Del sílabo, el producto de la Unidad II es:
 
 El producto completo — plantilla-ejemplo con el ejemplo de referencia del docente — vive en [`u2-producto.md`](../proyecto-sello/u2-producto.md): ingesta de eventos empresariales e IoT, procesamiento streaming, observabilidad y costos, series de tiempo, BI/ML distribuido. La estructura es exigible a todos; el contenido se reemplaza por el del propio instrumento de cada equipo.
 
-Lo que sustentas en S12 es **tu propia dimensión U2**: las capacidades que tú construiste en S6-S11, sobre el instrumento de tu Proyecto Sello. `u2-producto.md` (Tabla 1) muestra cómo cada sesión se ensambla en el pipeline terminado.
+Lo que sustentas en S12 es **tu propio indicador U2**: las capacidades que tú construiste en S6-S11, sobre el instrumento de tu Proyecto Sello. `u2-producto.md` (Tabla 1) muestra cómo cada sesión se ensambla en el pipeline terminado.
 
 ## 3. Evaluación teórico-práctica (S6-S11)
 
@@ -44,7 +44,7 @@ Preguntas de referencia (el docente puede formular equivalentes):
 6. ¿Por qué tu modelo de series de tiempo se compara primero contra un baseline de persistencia, y qué significaría que tu modelo no le gane?
 7. ¿Qué diferencia hay entre un KPI de negocio y una métrica de infraestructura o de aplicación, y por qué Pushgateway es un atajo pragmático —no la forma recomendada— para exponer la de un job que no termina?
 
-## 4. Sustentación de tu dimensión U2
+## 4. Sustentación de tu indicador U2
 
 **Tabla 3. Distribución de tiempo de la sustentación**
 
@@ -52,15 +52,15 @@ Preguntas de referencia (el docente puede formular equivalentes):
 |---|---:|---|---|
 | Alcance del proyecto (diapositiva) | 2-3 min | Grupal | Pregunta central de negocio (`brief.md`, sección 2), para quién, y su relación con el Proyecto Sello. |
 | Arquitectura (diapositiva) | 2-3 min | Grupal | Componentes reales del pipeline (ingesta Kafka empresarial/IoT, Spark streaming, Grafana) — diagrama simple: fuentes → Kafka → Spark → Grafana/BI. |
-| Asignación de tareas (diapositiva) | 2-3 min | Grupal | Asignación por dimensión de negocio: cada integrante presenta sus dos dimensiones de la pregunta central (U1 batch y U2 streaming, `brief.md` sección 3), no un módulo aparte. |
-| Demo y sustentación | 3 min por integrante | Individual | Cada integrante ejecuta en vivo su propia dimensión U2 (streaming) en el tablero Grafana compartido, y la contrasta con su dimensión U1. |
+| Asignación de tareas (diapositiva) | 2-3 min | Grupal | Asignación por dimensión de la variable: cada integrante presenta su dimensión, con sus dos indicadores (U1 batch y U2 streaming, `brief.md` sección 3), no un módulo aparte. |
+| Demo y sustentación | 3 min por integrante | Individual | Cada integrante ejecuta en vivo su propio indicador U2 (streaming) en el tablero Grafana compartido, y la contrasta con su indicador U1. |
 | Preguntas | 3 min por integrante | Individual | Verificar dominio y aporte propio, con base en la Tabla 1. |
 
 **Tabla 4. Entregables obligatorios**
 
 | Entregable | Evidencia mínima | Criterio de aceptación |
 |---|---|---|
-| Producto de tu dimensión U2 | [`u2-producto.md`](../proyecto-sello/u2-producto.md), con tu propio instrumento | Coherente con el sílabo y con el pipeline real ejecutable |
+| Producto de tu indicador U2 | [`u2-producto.md`](../proyecto-sello/u2-producto.md), con tu propio instrumento | Coherente con el sílabo y con el pipeline real ejecutable |
 | Evidencia de ingesta y streaming | Eventos empresariales e IoT publicados/consumidos en vivo; procesamiento con ventana y *watermarking* verificado | Trazabilidad verificable en logs, no solo documentada |
 | Evidencia de observabilidad y costos | Panel operativo con métricas correlacionadas; estimación de costos justificada | Verificable en vivo, no solo descrita |
 | Evidencia de BI/ML | Serie de tiempo o inferencia validada, integrada al tablero BI con KPIs | Métricas reales reportadas |

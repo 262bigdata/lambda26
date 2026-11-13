@@ -15,13 +15,13 @@ Del sílabo, el producto de la Unidad I es:
 
 El producto completo — plantilla-ejemplo con los datasets reales del docente (H&M para calidad y particionamiento; campo eléctrico/magnético para ML) — vive en [`u1-producto.md`](../proyecto-sello/u1-producto.md): arquitectura seleccionada, transformaciones distribuidas, calidad y particionamiento, componente ML. La estructura es exigible a todos; el contenido se reemplaza por el del propio instrumento de cada equipo, declarado en su [Brief técnico-analítico](../proyecto-sello/brief.md) de S2.
 
-Lo que sustentas en S5 es **tu propia dimensión U1**: el indicador y la pregunta predictiva que tú declaraste en el brief, sobre el instrumento de tu Proyecto Sello — no el dataset H&M ni el del campo eléctrico, y no necesariamente el mismo indicador que el resto de tu equipo.
+Lo que sustentas en S5 es **tu indicador U1**: la métrica y la pregunta predictiva que tú declaraste en el brief, para tu dimensión, sobre el instrumento de tu Proyecto Sello — no el dataset H&M ni el del campo eléctrico, y no necesariamente el mismo indicador que el resto de tu equipo.
 
 ### Lo que acumulaste sesión por sesión
 
-Este producto no se construye en S5: se ensambla con lo que cada sesión anterior ya te pidió sobre tu propia dimensión U1.
+Este producto no se construye en S5: se ensambla con lo que cada sesión anterior ya te pidió sobre tu propio indicador U1.
 
-**Tabla 1. De la sesión a tu dimensión U1 evaluada**
+**Tabla 1. De la sesión a tu indicador U1 evaluado**
 
 | Sesión | Qué produjiste (tu propia dimensión, sobre el instrumento de tu Proyecto Sello) | Dónde queda en `u1-producto.md` |
 |---|---|---|
@@ -54,7 +54,7 @@ Preguntas de referencia (el docente puede formular equivalentes):
 4. ¿Por qué particionar una salida Parquet por una columna de alta cardinalidad (como un ID único) sería un error, y qué columna sí conviene usar?
 5. ¿Por qué `VectorAssembler` es obligatorio en Spark MLlib y no en scikit-learn, y qué pasaría si tu modelo ganara la comparación pero guardaras el primero que entrenaste en vez de ese?
 
-## 4. Sustentación de tu dimensión U1
+## 4. Sustentación de tu indicador U1
 
 Aunque el equipo comparte instrumento y pregunta central, la sustentación de U1 es **individual**: cada integrante presenta y defiende su propia dimensión (brief, sección 3) — el aporte individual es, además, un subaspecto explícito de la sustentación integral del Proyecto Sello.
 
@@ -62,7 +62,7 @@ Aunque el equipo comparte instrumento y pregunta central, la sustentación de U1
 
 | Momento | Tiempo | Propósito |
 |---|---:|---|
-| Presentación técnica | 8 min | Explicar tu dimensión U1 (sección 2), las decisiones tomadas y su evolución desde S1. |
+| Presentación técnica | 8 min | Explicar tu indicador U1 (sección 2), las decisiones tomadas y su evolución desde S1. |
 | Demo técnica | 5 min | Ejecutar tu notebook (o las celdas clave) en vivo: transformación, control de calidad, particionamiento y entrenamiento/comparación del modelo. |
 | Preguntas individuales | 5 min | Verificar dominio y aporte propio, con base en la Tabla 2. |
 
@@ -70,7 +70,7 @@ Aunque el equipo comparte instrumento y pregunta central, la sustentación de U1
 
 | Entregable | Evidencia mínima | Criterio de aceptación |
 |---|---|---|
-| Producto de tu dimensión U1 | [`u1-producto.md`](../proyecto-sello/u1-producto.md), con tu propia dimensión y variable objetivo (brief, sección 3) | Coherente con el sílabo y con el notebook real ejecutable |
+| Producto de tu indicador U1 | [`u1-producto.md`](../proyecto-sello/u1-producto.md), con tu propia dimensión y variable objetivo (brief, sección 3) | Coherente con el sílabo y con el notebook real ejecutable |
 | Evidencia de calidad de datos | Controles de la Tabla 1 de `u1-producto.md` aplicados y verificados sobre tu propio histórico | Trazabilidad verificable con capturas y código, no solo documentada |
 | Evidencia del componente ML | Componentes de la Tabla 2 de `u1-producto.md` aplicados y verificados sobre tu propia variable objetivo | Métricas reales reportadas, modelo guardado coincide con el ganador |
 | Sustentación individual | Preguntas y defensa por integrante (sección 3) | Autoría demostrada |
@@ -79,7 +79,7 @@ Cada captura de pantalla del informe debe mostrar, sin recortar, el reloj del si
 
 Secuencia sugerida de presentación (referencias a secciones de `u1-producto.md`):
 
-1. Presentar la arquitectura Big Data del equipo y tu propia dimensión U1 dentro de la pregunta central del Proyecto Sello.
+1. Presentar la arquitectura Big Data del equipo y tu propio indicador U1 dentro de la pregunta central del Proyecto Sello.
 2. Ejecutar en vivo una transformación distribuida y mostrar el plan de ejecución con `explain(True)`.
 3. Mostrar los controles de calidad aplicados: duplicados y nulos, antes y después.
 4. Ejecutar la escritura y lectura de la salida particionada, con `PartitionFilters` confirmado en el plan de ejecución.

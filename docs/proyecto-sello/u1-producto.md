@@ -2,9 +2,9 @@
 
 **Esta es la plantilla-ejemplo del producto de Unidad 1 de Big Data.** La estructura (arquitectura seleccionada, transformaciones distribuidas, calidad y particionamiento, componente ML) es exigible a todos. El contenido usa los datasets reales que el docente trabajó en clase (H&M para calidad y particionamiento; campo eléctrico/magnético para el componente ML) como ejemplo — cada equipo lo reemplaza por el de su propio instrumento, declarado en su [Brief técnico-analítico](brief.md) de S2.
 
-Tu [Brief técnico-analítico](brief.md) (hito de S2) define el contenido real: cada equipo declara una **pregunta central de negocio**, y **cada integrante** aporta su propia **dimensión U1** de esa pregunta — descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real (la dimensión U2, con inferencia en vivo sobre streaming, es contenido de Unidad II, evaluado en S12). Los integrantes de un mismo equipo suelen compartir el instrumento o fuente física (el mismo sensor, el mismo dataset base), pero cada uno construye y sustenta **su propio notebook y su propio modelo**, sobre su propia variable objetivo — no un pipeline único repartido entre el equipo.
+Tu [Brief técnico-analítico](brief.md) (hito de S2) define el contenido real: cada equipo declara una **pregunta central de negocio**, y **cada integrante** toma una **dimensión** de la variable y la mide con su **indicador U1** — descriptivo/diagnóstico y predictivo, sin inferencia en tiempo real (el indicador U2, con inferencia en vivo sobre streaming, es contenido de Unidad II, evaluado en S12). Los integrantes de un mismo equipo suelen compartir el instrumento o fuente física (el mismo sensor, el mismo dataset base), pero cada uno construye y sustenta **su propio notebook y su propio modelo**, sobre su propia variable objetivo — no un pipeline único repartido entre el equipo.
 
-El modelo predictivo de tu dimensión U1 puede ser de **regresión o de clasificación**, según lo que pida tu propia pregunta (el brief lo deja explícito) — S4 enseñó la técnica concreta con `LinearRegression`/`RandomForestRegressor`, pero la misma disciplina (entrenar, evaluar con varias métricas, comparar más de una configuración, guardar el ganador) aplica igual si tu dimensión necesita `LogisticRegression`/`RandomForestClassifier` en su lugar.
+El modelo predictivo de tu indicador U1 puede ser de **regresión o de clasificación**, según lo que pida tu propia pregunta (el brief lo deja explícito) — S4 enseñó la técnica concreta con `LinearRegression`/`RandomForestRegressor`, pero la misma disciplina (entrenar, evaluar con varias métricas, comparar más de una configuración, guardar el ganador) aplica igual si tu dimensión necesita `LogisticRegression`/`RandomForestClassifier` en su lugar.
 
 ## Producto
 
@@ -63,7 +63,7 @@ Sobre tu propia dimensión, esto significa una salida Gold real, particionada, c
 | Comparación de configuraciones | Al menos una configuración alternativa (regularización, otro algoritmo) comparada con las mismas métricas. | `regParam`/`elasticNetParam`, o un segundo algoritmo |
 | Modelo guardado | El modelo persistido es el que realmente ganó la comparación, no el primero que se entrenó. | `model.write().overwrite().save(...)` |
 
-Sobre tu propia dimensión U1 (brief, sección 3), esto significa el indicador que tú declaraste — no necesariamente `CE`, y no necesariamente una regresión: si tu pregunta predictiva es de clasificación (por ejemplo, "¿qué tan probable es una tormenta?", como el ejemplo de sensores atmosféricos del brief), la Tabla 2 aplica igual cambiando `LinearRegression`/`RandomForestRegressor` por `LogisticRegression`/`RandomForestClassifier`, y RMSE/R²/MAE por las métricas de clasificación correspondientes (`areaUnderROC`, `f1`, etc.) — la disciplina es la misma: comparar antes de confiar en un único modelo (1.6 de S4).
+Sobre tu indicador U1 (brief, sección 3), esto significa la métrica que tú declaraste — no necesariamente `CE`, y no necesariamente una regresión: si tu pregunta predictiva es de clasificación (por ejemplo, "¿qué tan probable es una tormenta?", como el ejemplo de sensores atmosféricos del brief), la Tabla 2 aplica igual cambiando `LinearRegression`/`RandomForestRegressor` por `LogisticRegression`/`RandomForestClassifier`, y RMSE/R²/MAE por las métricas de clasificación correspondientes (`areaUnderROC`, `f1`, etc.) — la disciplina es la misma: comparar antes de confiar en un único modelo (1.6 de S4).
 
 **Figura 1. Pipeline batch completo, Unidad I (estructura general)**
 
@@ -106,17 +106,17 @@ El criterio 7 se evalúa con los mismos 6 subaspectos de la sustentación integr
 
 | Subaspecto | Qué observa en Unidad 1 |
 |---|---|
-| 1. Aporte individual | Cada integrante demuestra su propia dimensión U1 (brief, sección 3) — no el trabajo del resto del equipo. |
+| 1. Aporte individual | Cada integrante demuestra su propio indicador U1 (brief, sección 3) — no el trabajo del resto del equipo. |
 | 2. Comunicación y orden | Claridad, estructura, tiempo y lenguaje técnico durante la presentación. |
 | 3. Presentación personal y actitud | Puntualidad, vestimenta limpia y adecuada, higiene, cabello ordenado, actitud profesional, respeto, honestidad y coherencia con los valores y principios cristianos de la institución. |
 | 4. Repositorio y estándares | Topics académicos configurados desde S2, organización, commits y reproducibilidad del notebook. |
-| 5. MkDocs o equivalente | Documentación de tu dimensión U1 publicada, navegable y alineada con `u1-producto.md`. |
-| 6. Pitch/demo ejecutiva | Introducción breve de tu dimensión U1 y su avance, con apoyo visual (.pptx, Canva o equivalente) — no reemplaza la demo técnica de la Tabla 3 de S5, la precede. |
+| 5. MkDocs o equivalente | Documentación de tu indicador U1 publicada, navegable y alineada con `u1-producto.md`. |
+| 6. Pitch/demo ejecutiva | Introducción breve de tu indicador U1 y su avance, con apoyo visual (.pptx, Canva o equivalente) — no reemplaza la demo técnica de la Tabla 3 de S5, la precede. |
 
 Para usar la rúbrica con IA, solicita:
 
 ```text
-Evalúa la sustentación y el producto (u1-producto.md, adaptada a la dimensión U1 propia del estudiante) usando la rúbrica de esta sección.
+Evalúa la sustentación y el producto (u1-producto.md, adaptada al indicador U1 propio del estudiante) usando la rúbrica de esta sección.
 Para cada criterio selecciona la calificación obtenida: A=20, B=15, C=10, D=5.
 Justifica brevemente cada nivel con evidencia concreta (código, capturas, métricas reales).
 Para el criterio 7, verifica explícitamente los 6 subaspectos de la Tabla 4 antes de asignar el nivel.

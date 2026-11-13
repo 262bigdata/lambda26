@@ -59,7 +59,7 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 
 ![Figura 2. lambda26 con el patrón de Uber adaptado: productores de Kafka, Realtime Pipeline arriba y Batch Pipeline abajo, separados por una línea punteada](img/s01-1.6-figura2-lambda26-uber.png)
 
-Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline es la **dimensión U1** (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la **dimensión U2** (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).
+Cada pipeline de la figura corresponde a uno de los dos indicadores con los que cada integrante mide su dimensión en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline mide el **indicador U1** (descriptivo/diagnóstico y predictivo, sin inferencia en tiempo real) y el Realtime Pipeline mide el **indicador U2** (descriptivo/diagnóstico y predictivo, con inferencia de series de tiempo en tiempo real).
 
 En la figura, `uso-atmos` resume la ruta de sensores atmosféricos: un ESP32 simulado en Wokwi publica por MQTT a un broker público (`test.mosquitto.org`, configurado dentro del propio puente), y `bridge_mqtt_kafka.py` lo reenvía al topic `atmos-eventos` de Kafka, sin validar ni transformar. El detalle de esa ruta se construye en S7 (Figura 3 de esa sesión).
 

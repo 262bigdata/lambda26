@@ -22,14 +22,15 @@ Cada equipo llena una sola copia de este brief, la publica en su repositorio (o 
 | | |
 | | |
 
-Este rol es un **énfasis de coordinación a nivel de equipo** (quién profundiza más en X aspecto compartido, como la observabilidad común o el empaquetado DataOps), no un reemplazo del trabajo individual: cada integrante igual construye de extremo a extremo sus dos dimensiones — U1 y U2 (sección 3) —, sin importar el rol que tenga aquí.
+Este rol es un **énfasis de coordinación a nivel de equipo** (quién profundiza más en X aspecto compartido, como la observabilidad común o el empaquetado DataOps), no un reemplazo del trabajo individual: cada integrante igual construye de extremo a extremo su dimensión, medida con sus dos indicadores — U1 y U2 (sección 3) —, sin importar el rol que tenga aquí.
 
 ## 2. Dominio del proyecto
 
 - Nombre del proyecto:
 - Problema o necesidad que resuelve (2-4 líneas):
 - Dominio de datos (breve — sector o rubro, ej. logística, salud, retail, IoT industrial, finanzas, y qué se mide o registra):
-- **Pregunta central de negocio** que responde el sistema completo (1-2 líneas, redactada como pregunta — ej. "¿cómo optimizar la operación logística de reparto de la empresa X?"). Es el hilo conductor único del proyecto: en la sección 3, cada integrante no trae su propia pregunta independiente, trae **dos dimensiones** de esta misma pregunta central (U1 y U2), y todas convergen en un solo tablero/historia final, no en tableros sueltos:
+- **Variable de interés** — el concepto que contiene la pregunta central (ej. «operación logística», «riesgo eléctrico atmosférico»):
+- **Pregunta central de negocio** que responde el sistema completo (1-2 líneas, redactada como pregunta — ej. "¿cómo optimizar la operación logística de reparto de la empresa X?"). Es el hilo conductor único del proyecto: en la sección 3, la variable se **dimensiona** en sus componentes medibles; cada integrante no trae su propia pregunta independiente, toma una **dimensión** de esa variable y la mide con **dos indicadores** (U1 batch y U2 streaming), y todas convergen en un solo tablero/historia final, no en tableros sueltos:
 - Usuarios / actores principales (quién consume las salidas del sistema — analista, gerente, otro sistema automatizado, etc.):
 - Arquitectura Big Data prevista — Lambda o Kappa, y por qué (justificación breve, criterio de decisión en S1, 2.5.1):
 - Fuente de datos batch (dataset real o realista — público, de datos abiertos de gobierno, o real de una organización; no completamente inventado sin fundamento). Indica cuál y de dónde:
@@ -41,93 +42,75 @@ Este rol es un **énfasis de coordinación a nivel de equipo** (quién profundiz
 
 ## 3. Dimensiones de análisis y fuentes previstas
 
-**Regla de asignación:** cada integrante propone (o hereda) **dos dimensiones** de la pregunta central de negocio declarada en la sección 2 — no una pregunta independiente propia, sino dos ángulos de esa misma pregunta. Todas las dimensiones del equipo deben converger en **un solo tablero o historia final** — no en tableros sueltos por integrante. Esto evita lo que el Proyecto Sello marca como inválido: "notebooks o jobs Spark aislados sin un flujo de datos común".
+**Regla de asignación:** la variable de interés declarada en la sección 2 se **dimensiona**: se descompone en sus componentes medibles. Cada integrante propone (o hereda) **una dimensión** y la mide con **dos indicadores**: uno **batch (U1)** y uno **streaming (U2)**. Todas las dimensiones del equipo deben converger en **un solo tablero o historia final** — no en tableros sueltos por integrante. Esto evita lo que el Proyecto Sello marca como inválido: "notebooks o jobs Spark aislados sin un flujo de datos común".
 
-Esta estructura es la misma **matriz de operacionalización de variables** de metodología de la investigación, aplicada al proyecto: la pregunta central contiene la(s) **variable(s)** de interés (ej. "operación logística", "condiciones climáticas de riesgo"); cada **dimensión** es un aspecto de esa variable; cada dimensión se mide con uno o más **indicadores** (la métrica concreta, la que termina siendo el KPI); y cada indicador se recoge con un **instrumento** — que aquí es, literalmente, la fuente batch o streaming de la ficha (el sensor, el evento, el dataset).
+Esta estructura es la misma **matriz de operacionalización de variables** de metodología de la investigación, aplicada al proyecto: la pregunta central contiene la **variable** de interés (ej. «operación logística», «riesgo eléctrico atmosférico»); la variable se divide en **dimensiones**, sus componentes (en el ejemplo atmosférico: campo eléctrico, campo magnético, temperatura, viento, humedad y presión); cada dimensión se mide con **indicadores** (la métrica concreta, la que termina siendo el KPI; aquí, uno batch y uno streaming); y cada indicador se recoge con un **instrumento** — que aquí es, literalmente, la fuente batch o streaming de la ficha (el sensor, el evento, el dataset).
 
-Siguiendo el sílabo tal cual está organizado por unidad, **las dos dimensiones son descriptiva/diagnóstica + predictiva** — ninguna se queda solo en lo descriptivo. Lo que las distingue no es si predicen o no, es si esa predicción corre **en tiempo real**:
+Siguiendo el sílabo tal cual está organizado por unidad, **los dos indicadores son descriptivo/diagnóstico + predictivo** — ninguno se queda solo en lo descriptivo. Lo que los distingue no es si predicen o no, es si esa predicción corre **en tiempo real**:
 
-- **Dimensión U1 — descriptiva/diagnóstica + predictiva, sin inferencia en tiempo real** (¿qué pasó?, ¿cómo se compara?, y también ¿qué se puede esperar, en general?): se responde con **batch** — histórico, para describir el pasado y, sobre ese mismo histórico, entrenar un modelo predictivo (regresión, clasificación — equivalente a Spark MLlib, S4). La predicción existe, pero es una foto fija: se calcula al correr el pipeline, no se actualiza dato por dato ni reacciona a lo que llega después. Se reporta dentro del propio **notebook Jupyter/PySpark** donde corre el pipeline (tablas, gráficos con pandas/matplotlib, la predicción del modelo incluida) — es el medio ya establecido para esta unidad (S1-S4), no hace falta llevarla a Grafana.
-- **Dimensión U2 — descriptiva/diagnóstica + predictiva, con inferencia de series de tiempo en tiempo real** (¿qué está pasando ahora?, y además ¿qué va a pasar?, ¿cuándo?): se responde con **streaming** — el indicador describe el estado en vivo, dato por dato (equivalente a la ingesta de eventos empresariales/IoT en `lambda26`, S6-S9), y sobre ese mismo flujo corre el modelo de series de tiempo: hay que **entrenarlo y dejarlo corriendo en Spark Structured Streaming**, aplicando la inferencia a cada dato que llega — la predicción se actualiza en vivo, junto con el indicador, no es una foto fija. Se reporta en vivo en **Grafana** — indicador y predicción actualizándose juntos, dato por dato; si el caso lo amerita, incluye alertas (ej. temperatura fuera de un rango normal).
+- **Indicador U1 — descriptivo/diagnóstico + predictivo, sin inferencia en tiempo real** (¿qué pasó?, ¿cómo se compara?, y también ¿qué se puede esperar, en general?): se responde con **batch** — histórico, para describir el pasado y, sobre ese mismo histórico, entrenar un modelo predictivo (regresión, como en S4; una clasificación sigue la plantilla de referencia del curso). La predicción existe, pero es una foto fija: se calcula al correr el pipeline, no se actualiza dato por dato ni reacciona a lo que llega después. Se reporta dentro del propio **notebook Jupyter/PySpark** donde corre el pipeline (tablas, gráficos con pandas/matplotlib, la predicción del modelo incluida) — es el medio ya establecido para esta unidad (S1-S4), no hace falta llevarla a Grafana.
+- **Indicador U2 — descriptivo/diagnóstico + predictivo, con inferencia de series de tiempo en tiempo real** (¿qué está pasando ahora?, y además ¿qué va a pasar?, ¿cuándo?): se responde con **streaming** — el indicador describe el estado en vivo, dato por dato (equivalente a la ingesta de eventos empresariales/IoT en `lambda26`, S6-S9), y sobre ese mismo flujo corre el modelo de series de tiempo: hay que **entrenarlo y dejarlo corriendo en Spark Structured Streaming**, aplicando la inferencia a cada dato que llega — la predicción se actualiza en vivo, junto con el indicador, no es una foto fija. Se reporta en vivo en **Grafana** — indicador y predicción actualizándose juntos, dato por dato; si el caso lo amerita, incluye alertas (ej. temperatura fuera de un rango normal).
 
-Ambas dimensiones pueden venir del **mismo origen físico** (ver sección 2) — ej. un sensor atmosférico: U2 usa la lectura en vivo (temperatura, humedad, campo eléctrico, tal como llega), U1 usa la acumulación histórica de esas mismas variables, procesada por lotes. No es obligatorio que sean fuentes distintas — sí es obligatorio que el tratamiento (streaming vs. batch, y con o sin inferencia en tiempo real) sea real y distinto entre las dos.
+Ambos indicadores miden la **misma dimensión** y pueden venir del **mismo origen físico** (ver sección 2) — ej. un sensor atmosférico: U2 usa la lectura en vivo del campo eléctrico, tal como llega, y U1 usa la acumulación histórica de esas mismas lecturas, procesada por lotes. No es obligatorio que sean fuentes distintas — sí es obligatorio que el tratamiento (streaming vs. batch, y con o sin inferencia en tiempo real) sea real y distinto entre las dos.
 
 Esto es, **a nivel de cada integrante** (el curso evalúa [aporte individual](index.md#subaspectos-de-la-sustentacion-integral) — subaspecto 4 de la sustentación integral —, con evidencia de U1 y U2 por separado según el [alineamiento por sesiones](index.md#alineamiento-por-sesiones)), lo que garantiza que todos, sin excepción, construyan y defiendan ambas capas del curso — no solo que "alguien del equipo" haya tocado streaming.
 
-**Ejemplo de una pregunta central desglosada en dimensiones** (pregunta central: "¿cómo optimizar la operación logística de reparto de la empresa X?"):
+**Ejemplo de una variable dimensionada** (pregunta central: "¿cómo optimizar la operación logística de reparto de la empresa X?"; variable: operación logística):
 
-| Integrante | Tipo | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
+| Integrante | Dimensión | Indicador U1 (batch) | Indicador U2 (streaming) | Fuente/instrumento batch (U1) | Fuente/instrumento streaming (U2) |
 |---|---|---|---|---|---|
-| A | Predictiva (U1, batch) | ¿Cuál es el tiempo de entrega promedio por zona, y qué tiempo se puede esperar según distancia y franja horaria? | Minutos promedio por zona; minutos estimados por un modelo de regresión (distancia, franja horaria) | Histórico de tiempos de entrega por zona | Eventos de entrega en vivo (mismo origen que U2, acumulados aquí — no se procesan en vivo) |
-| A | Predictiva (U2, streaming) | ¿Cuál será el tiempo de entrega esperado en la próxima hora, por zona, según la tendencia actual? | Minutos de entrega proyectados, por zona | (mismo histórico, para entrenar) | Eventos de entrega en vivo |
-| B | Predictiva (U1, batch) | ¿Qué porcentaje de recorridos se desvió de la ruta planificada, y qué unidades tienen mayor probabilidad de desviarse según su perfil? | % de desvío por unidad y por mes; probabilidad de desvío estimada por un modelo de clasificación | Histórico de recorridos vs. rutas planificadas | Ubicaciones GPS en vivo (mismo origen que U2, acumuladas aquí — no se procesan en vivo) |
-| B | Predictiva (U2, streaming) | ¿Qué unidades es probable que lleguen tarde en los próximos 30 minutos, según su velocidad y trayectoria? | Probabilidad de retraso, por unidad | (mismo histórico, para entrenar) | Ubicaciones y velocidad GPS en vivo |
-| C | Predictiva (U1, batch) | ¿Cuál fue la demanda histórica de pedidos por zona y por mes, y qué demanda se puede esperar el próximo mes según la tendencia? | Número de pedidos por zona y por mes; pedidos proyectados por un modelo de regresión sobre el histórico mensual | Histórico de pedidos por zona | Pedidos en vivo (mismo origen que U2, acumulados aquí — no se procesan en vivo) |
-| C | Predictiva (U2, streaming) | ¿Cuál es la demanda esperada de pedidos por zona la próxima semana? | Número de pedidos proyectados, por zona y por día | (mismo histórico, para entrenar el modelo) | Pedidos en vivo (para contrastar contra lo predicho) |
+| A | Tiempo de entrega | Minutos promedio por zona y por día; minutos esperados por un modelo de regresión (distancia, franja horaria) | Minutos de entrega proyectados por zona para el siguiente intervalo | Histórico de tiempos de entrega por zona | Eventos de entrega en vivo |
+| B | Cumplimiento de la ruta | % de desvío por unidad y por semana; desvío esperado por un modelo de regresión sobre el histórico | Desvío proyectado de cada unidad en el siguiente intervalo, según su trayectoria | Histórico de recorridos vs. rutas planificadas | Ubicaciones y velocidad GPS en vivo |
+| C | Demanda de pedidos | Pedidos por zona y por día; pedidos esperados del día siguiente, por un modelo de regresión | Pedidos proyectados por zona para el siguiente intervalo | Histórico de pedidos por zona | Pedidos en vivo |
 
-Seis dimensiones, tres integrantes, todas responden a la **misma** operación logística — juntas arman un solo tablero de "salud de la operación de reparto", no proyectos sueltos. Cada integrante tiene su par completo: una predictiva sin tiempo real (U1, batch) y una predictiva con tiempo real (U2, streaming), ambas sobre el mismo ángulo de la pregunta central.
+Tres dimensiones, tres integrantes, todas componentes de la **misma** operación logística — juntas arman un solo tablero de "salud de la operación de reparto", no proyectos sueltos. Cada integrante mide su dimensión con dos indicadores: uno batch sin tiempo real (U1) y uno con tiempo real (U2).
 
-**Otro ejemplo, con sensores atmosféricos** (pregunta central: "¿cómo anticipar condiciones climáticas de riesgo en la zona monitoreada?"):
+**Otro ejemplo, con sensores atmosféricos** (pregunta central: "¿cómo anticipar condiciones climáticas de riesgo en la zona monitoreada?"; variable: condiciones climáticas de riesgo):
 
-| Integrante | Tipo | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
+| Integrante | Dimensión | Indicador U1 (batch) | Indicador U2 (streaming) | Fuente/instrumento batch (U1) | Fuente/instrumento streaming (U2) |
 |---|---|---|---|---|---|
-| A | Predictiva (U1, batch) | ¿Cuál fue la temperatura mínima y máxima registrada por mes, y qué temperatura se puede esperar el próximo mes según la tendencia histórica? | Temperatura mín./máx. en °C, por mes; temperatura proyectada por un modelo de regresión sobre el histórico mensual | Histórico de temperatura de la estación | Lecturas en vivo del sensor de temperatura (mismo origen que U2, acumuladas aquí — no se procesan en vivo) |
-| A | Predictiva (U2, streaming) | ¿Cuándo se espera que la temperatura supere el umbral de riesgo (helada o calor extremo)? | Temperatura proyectada en °C, próximas horas | (mismo histórico, para entrenar) | Lecturas en vivo del sensor de temperatura |
-| B | Predictiva (U1, batch) | ¿Con qué frecuencia ocurrieron tormentas eléctricas en la zona, y qué condiciones históricas se asocian a mayor probabilidad de tormenta? | Número de tormentas por temporada; probabilidad estimada por un modelo de clasificación sobre condiciones históricas | Histórico de campo eléctrico y magnético asociado a tormentas pasadas | Lecturas en vivo de campo eléctrico y magnético (mismo origen que U2, acumuladas aquí — no se procesan en vivo) |
-| B | Predictiva (U2, streaming) | ¿Qué tan probable es una tormenta eléctrica en las próximas horas? | Probabilidad de tormenta, próximas horas | (mismo histórico, para entrenar) | Lecturas en vivo de campo eléctrico y magnético |
-| C | Predictiva (U1, batch) | ¿Cuál fue el riesgo de inundación según la lluvia acumulada por temporada, y qué riesgo se puede esperar la próxima temporada según la tendencia? | Milímetros acumulados por temporada; riesgo proyectado por un modelo de regresión sobre el histórico | Histórico de precipitación acumulada por temporada | Lecturas en vivo de lluvia (mismo origen que U2, acumuladas aquí — no se procesan en vivo) |
-| C | Predictiva (U2, streaming) | ¿Cuánta lluvia se espera en las próximas horas, según la tendencia actual? | Milímetros de lluvia proyectados, próximas 3-6h | (mismo histórico, para entrenar) | Lecturas de lluvia en vivo |
+| A | Temperatura | Temperatura mín./máx. por día, en °C; temperatura esperada del día siguiente, por un modelo de regresión sobre el histórico diario | Temperatura proyectada en el siguiente intervalo de lectura, con alerta si cruza el umbral (helada o calor extremo) | Histórico de temperatura de la estación | Lecturas en vivo del sensor de temperatura |
+| B | Campo eléctrico | % de lecturas fuera de su rango de referencia, por día; campo eléctrico esperado según las condiciones ambientales (regresión) | Campo eléctrico proyectado en el próximo minuto, con alerta si se acerca al umbral de riesgo | Histórico de campo eléctrico y de variables ambientales | Lecturas en vivo del campo eléctrico |
+| C | Lluvia | Milímetros acumulados por día y su tendencia; acumulado esperado del día siguiente (regresión) | Milímetros proyectados en el siguiente intervalo, con alerta por acumulación | Histórico de precipitación | Lecturas de lluvia en vivo |
 
-Aquí las dimensiones pueden salir del **mismo sensor físico** (distintas variables que mide a la vez) — lo que las conecta no es el sensor, es que todas alimentan la misma pregunta central: el riesgo climático de la zona, visible en un solo tablero con paneles de temperatura, tormenta, inundación y su pronóstico.
+Dos precisiones sobre estos ejemplos. El **rango de referencia** del indicador U1 de la dimensión B se define con un periodo de referencia (por ejemplo, los primeros días del histórico) y se aplica al resto: si se calculara sobre todo el histórico, el porcentaje fuera de rango saldría casi fijo por definición y no informaría nada. Y el **horizonte** del indicador U2 es el siguiente intervalo de lectura — lo que S10 entrena y valida —; un pronóstico más largo es una extensión, no el requisito.
+
+Aquí las dimensiones pueden salir del **mismo sensor físico** (distintas magnitudes que mide a la vez) — lo que las conecta no es el sensor, es que todas componen la misma variable: las condiciones climáticas de riesgo de la zona, visibles en un solo tablero con paneles de temperatura, campo eléctrico, lluvia y su pronóstico.
 
 **Tabla de asignación:**
 
-| Integrante | Tipo (Predictiva U1/batch o Predictiva U2/streaming) | Dimensión (como pregunta) | Indicador | Fuente/instrumento batch | Fuente/instrumento streaming |
+| Integrante | Dimensión | Indicador U1 (batch) | Indicador U2 (streaming) | Fuente/instrumento batch (U1) | Fuente/instrumento streaming (U2) |
 |---|---|---|---|---|---|
-| | Predictiva (U1, batch) | | | | |
-| | Predictiva (U2, streaming) | | | | |
-| | Predictiva (U1, batch) | | | | |
-| | Predictiva (U2, streaming) | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
 
-Cada integrante ocupa dos filas seguidas — su dimensión U1 y su dimensión U2 — no una fila suelta.
+Cada integrante ocupa **una fila**: su dimensión, medida con un indicador batch (U1) y uno streaming (U2). Un grupo de tres o cuatro integrantes cubre tres o cuatro dimensiones de la misma variable.
 
-En ninguna de las dos dimensiones alcanza con el indicador solo — el modelo predictivo (visto arriba) es obligatorio en ambas. Los paneles de **todas** las dimensiones U2 del equipo se muestran en el **mismo Grafana**, no en instancias separadas por integrante — el resultado visible en tiempo real del proyecto es un solo tablero con varios paneles, uno por dimensión U2; las dimensiones U1 se documentan en sus respectivos notebooks.
+En ninguno de los dos indicadores alcanza con la métrica sola — el modelo predictivo (visto arriba) es obligatorio en ambos. Los paneles de **todos** los indicadores U2 del equipo se muestran en el **mismo Grafana**, no en instancias separadas por integrante — el resultado visible en tiempo real del proyecto es un solo tablero con varios paneles, uno por dimensión; los indicadores U1 se documentan en sus respectivos notebooks.
 
-**Ficha por dimensión** — completa un bloque como este por cada fila de la tabla anterior (dos bloques por integrante: uno para su dimensión U1, otro para su dimensión U2):
+**Ficha por dimensión** — completa un bloque como este por cada integrante (un bloque por dimensión):
 
 ### Dimensión: ______ (integrante: ______)
 
-- Tipo: predictiva sin tiempo real (U1, batch) o predictiva con tiempo real (U2, streaming):
-- Dimensión, redactada como pregunta completa (1-2 líneas), y cómo se relaciona con la pregunta central de la sección 2:
-- Indicador(es) — la métrica concreta que responde a la dimensión (la que se convierte en el KPI del tablero), incluido el valor que entrega el modelo predictivo:
-- Decisión o acción que habilita (qué hace alguien distinto gracias a esta respuesta):
+- Dimensión (componente de la variable) y cómo se relaciona con la pregunta central de la sección 2:
+- Decisión o acción que habilita (qué hace alguien distinto gracias a esta dimensión):
+- **Indicador U1 (batch, sin tiempo real)** — pregunta que responde (1-2 líneas), métrica concreta (la que se convierte en KPI) y valor que entrega el modelo predictivo:
+- Modelo predictivo U1 — tipo (regresión o clasificación) y que corre una sola vez:
 - Instrumento/fuente batch — descripción, esquema (campos/columnas clave) y origen (dataset público/URL, API, exporte periódico, etc.):
-- Instrumento/fuente streaming — descripción, esquema y origen (tópico Kafka, sensor simulado, evento de negocio, etc.); en la dimensión U1, si tu histórico es la acumulación del mismo streaming que usa tu U2, indícalo igual aquí (mismo instrumento, solo que aquí no se procesa en vivo); si tu fuente batch es un origen totalmente aparte (ej. un dataset público sin componente en vivo), escribe "no aplica":
-- Modelo predictivo — tipo (regresión/clasificación para U1; series de tiempo para U2) y si corre una sola vez (U1) o en vivo sobre el flujo (U2):
-- Salida: si es U1, cómo se reporta en el notebook (tablas/gráficos, predicción incluida); si es U2, el panel de KPI y de predicción en el Grafana común, ambos en vivo — describe lo que corresponda a tu tipo:
+- Salida U1 — cómo se reporta en el notebook (tablas/gráficos, predicción incluida):
+- **Indicador U2 (streaming, con tiempo real)** — pregunta que responde, métrica y horizonte del pronóstico (el siguiente intervalo de lectura es suficiente):
+- Modelo predictivo U2 — modelo de series de tiempo, comparado contra la persistencia, que corre en vivo sobre el flujo:
+- Instrumento/fuente streaming — descripción, esquema y origen (tópico Kafka, sensor simulado, evento de negocio, etc.); si tu histórico es la acumulación del mismo streaming que usa tu indicador U2, indícalo igual aquí (mismo instrumento, solo que en U1 no se procesa en vivo):
+- Salida U2 — el panel del indicador y de la predicción en el Grafana común, ambos en vivo:
 - ¿Con qué otra(s) dimensión(es) del equipo se combina en el tablero final? (todas deben aportar a la misma historia, no quedar sueltas). Si todavía no lo sabes, escribe "por definir".
 - Lista inicial de requisitos (mínimo 3, redactados como "el sistema debe..."):
     1.
     2.
     3.
 
-### Dimensión: ______ (integrante: ______)
-
-- Tipo: predictiva sin tiempo real (U1) o predictiva con tiempo real (U2):
-- Dimensión, redactada como pregunta completa, y relación con la pregunta central:
-- Indicador(es), incluido el valor del modelo predictivo:
-- Decisión o acción que habilita:
-- Instrumento/fuente batch:
-- Instrumento/fuente streaming:
-- Modelo predictivo (tipo y si corre una vez o en vivo):
-- Salida (notebook si es U1; Grafana en vivo si es U2):
-- ¿Con qué otra(s) dimensión(es) del equipo se combina?
-- Lista inicial de requisitos:
-    1.
-    2.
-    3.
-
-*(repite este bloque por cada fila restante de la tabla, hasta cubrirla completa — dos bloques por integrante)*
+*(repite este bloque por cada integrante del equipo)*
 
 - Qué SÍ cubre este proyecto en conjunto:
 - Qué NO cubre — fuera de alcance, explícito:
