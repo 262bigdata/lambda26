@@ -162,12 +162,12 @@ Tiempo: 2h 30 min.
 
 **Presentación de referencia:** el producto final de `lambda26` está presentado en [lambda26_U3_campo_electrico_integrado.pptx](../presentaciones/lambda26_U3_campo_electrico_integrado.pptx), un ejemplo del docente. Estas son las láminas que corresponden a esta sesión:
 
-- **3.3 y 3.4:** lámina 15, DataOps.
-- **3.5:** lámina 16, hardening y prueba de no regresión.
-- **3.6:** lámina 17, riesgos aceptados.
-- **3.7:** láminas 13 y 14, un solo sistema y observabilidad.
-- **3.8:** lámina 18, demo end-to-end.
-- **3.9:** láminas 5 y 21, arquitectura y limitaciones.
+- **3.3 y 3.4:** lámina 16, DataOps.
+- **3.5:** lámina 17, hardening y prueba de no regresión.
+- **3.6:** lámina 18, riesgos aceptados.
+- **3.7:** láminas 14 y 15, un solo sistema y observabilidad.
+- **3.8:** lámina 19, demo end-to-end.
+- **3.9:** láminas 6 y 22, arquitectura y limitaciones; la lámina 4 es la matriz de trazabilidad.
 
 DataOps, hardening, documentación y demo son comunes a todo el grupo: se presentan una sola vez, y cada integrante debe saber explicarlos.
 
