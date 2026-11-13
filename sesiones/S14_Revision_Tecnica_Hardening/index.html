@@ -2345,7 +2345,23 @@
 <p>DataOps, hardening, documentación y demo son comunes a todo el grupo: se presentan una sola vez, y cada integrante debe saber explicarlos.</p>
 <h3 id="31-reanudar-el-entorno-y-confirmar-el-punto-de-partida">3.1 Reanudar el entorno y confirmar el punto de partida<a class="headerlink" href="#31-reanudar-el-entorno-y-confirmar-el-punto-de-partida" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> el stack de <code>lambda26</code> arriba y la ejecución integrada de S13 corriendo antes de cambiar nada.</p>
-<p>Levanta los cuatro grupos como en S13 (3.1) y el productor de <code>campo-electrico</code>. Antes de tocar la configuración, ejecuta <code>13_integracion_dataops.ipynb</code> completo una vez: si no pasa <strong>antes</strong> de tus cambios, no puedes saber si algo que falle después lo causaste tú. Guarda el manifiesto que deja (<code>artifacts/manifiesto_&lt;runId&gt;.json</code>) como punto de comparación.</p>
+<p>Levanta los cuatro grupos como en S13 (3.1) y el productor de <code>campo-electrico</code>. Desde la raíz del repositorio, en PowerShell:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">kafka</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="o">-f</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">kafka</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">obs</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">compose</span> <span class="o">-f</span> <span class="n">uso-campo-electrico</span><span class="p">/</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span> <span class="n">up</span> <span class="n">-d</span>
+<span class="n">docker</span> <span class="n">exec</span> <span class="n">-d</span> <span class="n">lambda26-uso-campo-electrico</span> <span class="n">python</span> <span class="n">producer_campo_electrico</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<p>La opción <code>-d</code> de <code>docker exec</code> lanza el productor en segundo plano, sin ocupar una terminal. Confirma que sigue publicando leyendo el desplazamiento (<em>offset</em>) del topic <strong>dos veces</strong>, con unos segundos de diferencia:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">lambda26-kafka</span> <span class="p">/</span><span class="n">opt</span><span class="p">/</span><span class="n">kafka</span><span class="p">/</span><span class="n">bin</span><span class="p">/</span><span class="n">kafka-get-offsets</span><span class="p">.</span><span class="n">sh</span> <span class="p">-</span><span class="n">-bootstrap-server</span> <span class="n">localhost</span><span class="p">:</span><span class="n">9092</span> <span class="p">-</span><span class="n">-topic</span> <span class="n">campo-electrico-eventos</span>
+</code></pre></div>
+<p>Resultado real de esta sesión: <code>campo-electrico-eventos:0:25883</code> y, unos 20 segundos después, <code>campo-electrico-eventos:0:25890</code>. El número crece con un evento cada 3 segundos; si no cambia, el productor no está publicando.</p>
+<p>Antes de tocar la configuración, ejecuta <code>13_integracion_dataops.ipynb</code> completo una vez: si no pasa <strong>antes</strong> de tus cambios, no puedes saber si algo que falle después lo causaste tú. Puedes hacerlo desde Jupyter o, sin abrir el navegador, con este comando (tarda entre 75 y 305 segundos):</p>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span> <span class="n">exec</span> <span class="n">lambda26-pyspark</span> <span class="n">jupyter</span> <span class="n">nbconvert</span> <span class="p">-</span><span class="n">-to</span> <span class="n">notebook</span> <span class="p">-</span><span class="n">-execute</span> <span class="p">-</span><span class="n">-inplace</span> <span class="p">/</span><span class="n">opt</span><span class="p">/</span><span class="n">s13-integracion-dataops</span><span class="p">/</span><span class="n">13_integracion_dataops</span><span class="p">.</span><span class="n">ipynb</span> <span class="p">-</span><span class="n">-ExecutePreprocessor</span><span class="p">.</span><span class="n">timeout</span><span class="p">=</span><span class="n">900</span>
+</code></pre></div>
+<p><code>--inplace</code> guarda las salidas de la corrida en el propio notebook. Guarda el manifiesto que deja como punto de comparación y localiza el más reciente con:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">Get-ChildItem</span> <span class="n">pyspark</span><span class="p">/</span><span class="n">sesiones</span><span class="p">/</span><span class="n">s13-integracion-dataops</span><span class="p">/</span><span class="n">artifacts</span><span class="p">/</span><span class="n">manifiesto_</span><span class="p">*.</span><span class="n">json</span> <span class="p">|</span> <span class="nb">Sort-Object</span> <span class="n">LastWriteTime</span> <span class="n">-Descending</span> <span class="p">|</span> <span class="nb">Select-Object</span> <span class="n">-First</span> <span class="n">3</span> <span class="n">Name</span>
+</code></pre></div>
 <h3 id="32-revisar-la-configuracion-con-la-lista-de-comprobacion">3.2 Revisar la configuración con la lista de comprobación<a class="headerlink" href="#32-revisar-la-configuracion-con-la-lista-de-comprobacion" title="Permanent link">&para;</a></h3>
 <p><strong>Producto del paso:</strong> la Tabla 2 completada con el resultado real de cada punto.</p>
 <p>Recorre los tres archivos de Docker Compose con comandos de lectura (desde la raíz del repositorio):</p>
@@ -2451,6 +2467,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> 
 docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="nv">name</span><span class="o">=</span>lambda26<span class="w"> </span>--format<span class="w"> </span><span class="s2">"{{.Names}}\t{{.Status}}"</span>
 </code></pre></div>
 <p>Resultado real de esta sesión: ambas validaciones sin errores, <code>up -d --wait</code> termina con código <code>0</code> (espera a que cada servicio con <code>healthcheck</code> esté <code>Healthy</code> antes de devolver el control), y <code>docker ps</code> muestra <code>lambda26-kafka</code>, <code>lambda26-prometheus</code>, <code>lambda26-pushgateway</code> y <code>lambda26-grafana</code> con <code>(healthy)</code>.</p>
+<p>Si reinicias Docker o la PC, los contenedores arrancan solos (<code>restart: unless-stopped</code>), pero <code>kafka-exporter</code> puede reiniciarse varias veces hasta que Kafka esté listo: en esta sesión aparecía como <code>Restarting (255)</code> durante los primeros segundos. Volver a correr <code>docker compose -f kafka/compose.yml up -d --wait</code> espera a que todos estén sanos y lo deja estable. Tras el reinicio, el productor de <code>campo-electrico</code> hay que lanzarlo de nuevo (el contenedor arranca en <code>sleep infinity</code>).</p>
 <p>Un efecto que debes conocer: cambiar la configuración de un servicio <strong>recrea su contenedor</strong>. <code>kafka/compose.yml</code> no define ningún volumen, así que recrear el contenedor de Kafka vacía sus <em>topics</em> (3.6). Tras recrearlo, el productor de <code>campo-electrico</code> se reconectó solo y el topic volvió a llenarse; verifícalo con una lectura del topic antes de seguir.</p>
 <p><strong>Error frecuente</strong>: dejar <code>start_period</code> en cero. Kafka tarda unos segundos en aceptar conexiones y, sin un periodo de gracia, esos segundos cuentan como fallos del <code>healthcheck</code>; con suficientes reintentos fallidos el contenedor queda <code>unhealthy</code> aunque termine arrancando bien.</p>
 <h3 id="34-parametrizar-las-credenciales-de-grafana">3.4 Parametrizar las credenciales de Grafana<a class="headerlink" href="#34-parametrizar-las-credenciales-de-grafana" title="Permanent link">&para;</a></h3>
@@ -2495,21 +2512,21 @@ docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w">
 <tr>
 <td>Filas procesadas por el <em>stream</em> en 45 s</td>
 <td>15</td>
-<td>14</td>
+<td>14 y 15</td>
 </tr>
 <tr>
 <td>Error del modelo (MAE)</td>
 <td>0,0330 y 0,0426 en dos corridas</td>
-<td>0,0423</td>
+<td>0,0423 y 0,0699</td>
 </tr>
 <tr>
 <td>Duración</td>
 <td>76,8 s y 304,5 s</td>
-<td>90,0 s</td>
+<td>90,0 s y 97,7 s</td>
 </tr>
 </tbody>
 </table>
-<p>Los valores del batch son idénticos porque salen del mismo Parquet; los del <em>stream</em> varían porque cada corrida procesa lecturas en vivo distintas (S13, 2.5). Que el MAE cambie <strong>no</strong> es una regresión; que dejaran de pasar las compuertas, o que el <em>stream</em> procesara cero filas, sí lo sería.</p>
+<p>Los valores del batch son idénticos porque salen del mismo Parquet; los del <em>stream</em> varían porque cada corrida procesa lecturas en vivo distintas (S13, 2.5). La segunda corrida de la columna «Después» se hizo el 13 de noviembre, tras reiniciar Docker: pasó las seis compuertas y Prometheus devolvió cada valor recién publicado. Que el MAE cambie, incluso hasta 0,0699, <strong>no</strong> es una regresión; que dejaran de pasar las compuertas, o que el <em>stream</em> procesara cero filas, sí lo sería.</p>
 <p>Esta repetición encontró un defecto, y estaba en la propia comprobación de S13. En la línea de confirmación de Prometheus, la celda mostró <code>lambda26_int_stream_mae: 0.0426</code> y la marca de tiempo de la corrida <strong>anterior</strong>, mientras esa corrida acababa de calcular un MAE distinto. La celda de S13 (3.7) se daba por satisfecha en cuanto cada métrica tenía <em>algún</em> valor, así que validaba datos viejos. Se corrigió para comparar cada valor devuelto con el que acaba de publicarse (<code>coincide(...)</code>), y se volvió a ejecutar: ahora cada línea imprime el valor devuelto junto al publicado, y la celda falla con <code>Prometheus no devolvio los valores recien publicados</code> si no coinciden.</p>
 <p><strong>Error frecuente</strong>: dar por pasada la prueba de no regresión porque "no hubo errores". Un resultado sin errores solo demuestra que nada falló de forma ruidosa; la tabla compara resultados, que es lo que detecta un cambio silencioso.</p>
 <h3 id="36-riesgos-aceptados">3.6 Riesgos aceptados<a class="headerlink" href="#36-riesgos-aceptados" title="Permanent link">&para;</a></h3>
@@ -2595,8 +2612,8 @@ docker<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w">
 <td>Celda de <em>streaming</em> (S13, 3.5).</td>
 </tr>
 <tr>
-<td>Error del modelo en producción</td>
-<td>0,03 a 0,05 (MAE, varía por corrida)</td>
+<td>Error del modelo en el stream simulado</td>
+<td>0,03 a 0,07 (MAE, varía por corrida)</td>
 <td>Celda de MAE (S13, 3.6).</td>
 </tr>
 <tr>
