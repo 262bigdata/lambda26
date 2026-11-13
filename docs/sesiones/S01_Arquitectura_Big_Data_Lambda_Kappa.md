@@ -57,39 +57,7 @@ Fuente: [Kafka tiered storage at Uber](https://www.uber.com/us/en/blog/kafka-tie
 
 **Figura 2. `lambda26` con el patrón de Uber adaptado: productores, pipeline en tiempo real y pipeline batch**
 
-```mermaid
-flowchart LR
-    subgraph Producers["Productores de Kafka"]
-        direction TB
-        A3["uso-atmos<br/>ESP32: sensores atmosféricos<br/>(bridge_mqtt_kafka.py)"]
-        P2["uso-rapido, uso-microserv<br/>(secundario)"]
-    end
-
-    D["Datasets en BD o archivos<br/>sXX/data/*.csv"]
-
-    K[("kafka")]
-
-    subgraph RT["Realtime Pipeline<br/>(consumidor de Kafka)"]
-        direction TB
-        RT1["uso-pyspark<br/>streaming (script .py)<br/>descriptiva/diagnóstica<br/>+ predictiva con<br/>inferencia ML en vivo"]
-    end
-
-    subgraph BP["Batch Pipeline"]
-        direction TB
-        BP1["uso-pyspark<br/>batch (notebook Jupyter)<br/>descriptiva/diagnóstica<br/>+ predictiva"]
-    end
-
-    OBS["obs<br/>Pushgateway +<br/>Prometheus +<br/>Grafana<br/>(dashboards y alertas)"]
-    NB["Resultados del notebook<br/>tablas, gráficos<br/>y modelo guardado"]
-
-    A3 -->|"eventos<br/>key=sensorId"| K
-    P2 -->|"eventos"| K
-    K -->|"eventos"| RT1
-    D --> BP1
-    RT1 --> OBS
-    BP1 --> NB
-    BP1 -.->|"modelo entrenado"| RT1
-```
+![Figura 2. lambda26 con el patrón de Uber adaptado: productores de Kafka, Realtime Pipeline arriba y Batch Pipeline abajo, separados por una línea punteada](img/s01-1.6-figura2-lambda26-uber.png)
 
 Cada pipeline de la figura corresponde a una de las dos dimensiones que cada integrante construye en el Proyecto Sello ([brief, sección 3](../proyecto-sello/brief.md#3-dimensiones-de-analisis-y-fuentes-previstas)): el Batch Pipeline es la **dimensión U1** (descriptiva/diagnóstica y predictiva, sin inferencia en tiempo real) y el Realtime Pipeline es la **dimensión U2** (descriptiva/diagnóstica y predictiva, con inferencia de series de tiempo en tiempo real).
 

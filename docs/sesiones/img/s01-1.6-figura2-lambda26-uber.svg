@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="960" height="480" font-family="Segoe UI, Calibri, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3f6c99"/>
+    </marker>
+    <marker id="flechaAmbar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c98a1b"/>
+    </marker>
+  </defs>
+  <rect width="960" height="480" fill="#ffffff"/>
+
+  <!-- línea de separación entre los dos pipelines (como en la figura de Uber) -->
+  <line x1="20" y1="268" x2="940" y2="268" stroke="#3f6c99" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>
+  <text x="24" y="252" font-size="15" font-weight="700" fill="#1f4e79">Realtime Pipeline</text>
+  <text x="24" y="292" font-size="15" font-weight="700" fill="#1f4e79">Batch Pipeline</text>
+
+  <!-- Productores de Kafka -->
+  <rect x="20" y="20" width="262" height="205" rx="6" fill="none" stroke="#9aa9bd" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="36" y="42" font-size="12" font-weight="700" fill="#5a6b85" letter-spacing="1">PRODUCTORES DE KAFKA</text>
+  <rect x="36" y="56" width="230" height="84" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="151" y="82" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">uso-atmos</text>
+  <text x="151" y="102" font-size="12.5" text-anchor="middle" fill="#33415c">ESP32: sensores atmosféricos</text>
+  <text x="151" y="121" font-size="12.5" text-anchor="middle" fill="#33415c">(bridge_mqtt_kafka.py)</text>
+  <rect x="36" y="152" width="230" height="58" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="151" y="177" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">uso-rapido, uso-microserv</text>
+  <text x="151" y="196" font-size="12.5" text-anchor="middle" fill="#33415c">(secundario)</text>
+
+  <!-- Kafka -->
+  <path d="M352,100 L352,168 A38,13 0 0 0 428,168 L428,100" fill="#e3eef7" stroke="#7a8fb0" stroke-width="1.4"/>
+  <ellipse cx="390" cy="100" rx="38" ry="13" fill="#eef5fb" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="390" y="140" font-size="15" font-weight="700" text-anchor="middle" fill="#1a2333">kafka</text>
+
+  <!-- Productores -> Kafka -->
+  <path d="M266,98 C312,98 322,118 350,124" fill="none" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <text x="312" y="70" font-size="11.5" fill="#33415c" text-anchor="middle">eventos</text>
+  <text x="312" y="84" font-size="11.5" fill="#33415c" text-anchor="middle">key=sensorId</text>
+  <path d="M266,181 C312,181 322,160 350,152" fill="none" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <text x="304" y="199" font-size="11.5" fill="#33415c" text-anchor="middle">eventos</text>
+
+  <!-- Kafka -> Realtime -->
+  <line x1="430" y1="134" x2="548" y2="134" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <text x="489" y="126" font-size="11.5" fill="#33415c" text-anchor="middle">eventos</text>
+
+  <!-- Realtime: consumidor de Kafka -->
+  <rect x="550" y="24" width="262" height="200" rx="6" fill="none" stroke="#9aa9bd" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="566" y="44" font-size="12" font-weight="700" fill="#5a6b85" letter-spacing="1">CONSUMIDOR DE KAFKA</text>
+  <rect x="566" y="58" width="230" height="150" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="681" y="86" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">uso-pyspark</text>
+  <text x="681" y="107" font-size="12.5" text-anchor="middle" fill="#33415c">streaming (script .py)</text>
+  <text x="681" y="130" font-size="12.5" text-anchor="middle" fill="#33415c">descriptiva/diagnóstica</text>
+  <text x="681" y="148" font-size="12.5" text-anchor="middle" fill="#33415c">+ predictiva con</text>
+  <text x="681" y="166" font-size="12.5" text-anchor="middle" fill="#33415c">inferencia ML en vivo</text>
+
+  <!-- Realtime -> obs -->
+  <line x1="797" y1="134" x2="834" y2="134" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <rect x="836" y="68" width="106" height="132" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="889" y="92" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">obs</text>
+  <text x="889" y="114" font-size="12" text-anchor="middle" fill="#33415c">Pushgateway +</text>
+  <text x="889" y="131" font-size="12" text-anchor="middle" fill="#33415c">Prometheus +</text>
+  <text x="889" y="148" font-size="12" text-anchor="middle" fill="#33415c">Grafana</text>
+  <text x="889" y="170" font-size="11.5" text-anchor="middle" fill="#5a6b85">dashboards</text>
+  <text x="889" y="185" font-size="11.5" text-anchor="middle" fill="#5a6b85">y alertas</text>
+
+  <!-- Batch -->
+  <rect x="36" y="354" width="230" height="84" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="151" y="386" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">Datasets en BD o archivos</text>
+  <text x="151" y="408" font-size="12.5" text-anchor="middle" fill="#33415c">sXX/data/*.csv</text>
+  <line x1="268" y1="396" x2="348" y2="396" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+
+  <rect x="350" y="344" width="262" height="112" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="481" y="372" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">uso-pyspark</text>
+  <text x="481" y="392" font-size="12.5" text-anchor="middle" fill="#33415c">batch (notebook Jupyter)</text>
+  <text x="481" y="415" font-size="12.5" text-anchor="middle" fill="#33415c">descriptiva/diagnóstica</text>
+  <text x="481" y="433" font-size="12.5" text-anchor="middle" fill="#33415c">+ predictiva</text>
+
+  <line x1="614" y1="400" x2="676" y2="400" stroke="#3f6c99" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <rect x="678" y="354" width="262" height="92" rx="4" fill="#eef2f8" stroke="#7a8fb0" stroke-width="1.4"/>
+  <text x="809" y="386" font-size="14" font-weight="700" text-anchor="middle" fill="#1a2333">Resultados del notebook</text>
+  <text x="809" y="408" font-size="12.5" text-anchor="middle" fill="#33415c">tablas, gráficos</text>
+  <text x="809" y="426" font-size="12.5" text-anchor="middle" fill="#33415c">y modelo guardado</text>
+
+  <!-- modelo entrenado: del batch al tiempo real, cruza la línea de separación -->
+  <path d="M540,342 C540,300 660,300 681,210" fill="none" stroke="#c98a1b" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#flechaAmbar)"/>
+  <rect x="560" y="303" width="112" height="20" fill="#ffffff"/>
+  <text x="616" y="318" font-size="12" font-style="italic" font-weight="600" text-anchor="middle" fill="#8a5d0b">modelo entrenado</text>
+</svg>
