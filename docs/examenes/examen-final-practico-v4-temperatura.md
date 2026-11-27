@@ -2,6 +2,8 @@
 
 ## 1. Propósito
 
+**Este examen se desarrolla sobre tu propio proyecto: usas tu Kafka, tu PySpark, tu Prometheus, tu Pushgateway y tu Grafana, y agregas un flujo nuevo. No empiezas un proyecto desde cero.**
+
 Demuestras que sabes **extender tu arquitectura Lambda con un flujo nuevo de punta a punta**: un sensor simulado en Wokwi publica lecturas, Kafka las recibe, con ellas entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Todo lo que necesitas está en las guías de S07, S10 y S11.
 
 ## 2. Reglas
