@@ -4,7 +4,7 @@
 
 **Este examen se desarrolla sobre tu propio proyecto: usas tu Kafka, tu PySpark, tu Prometheus, tu Pushgateway y tu Grafana, y agregas un flujo nuevo. No empiezas un proyecto desde cero.**
 
-Demuestras que sabes **extender tu arquitectura Lambda con un flujo nuevo de punta a punta**: un sensor simulado en Wokwi publica lecturas, Kafka las recibe, con ellas entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Todo lo que necesitas está en las guías de S07, S10 y S11.
+Demuestras que sabes **extender tu arquitectura Lambda con un flujo nuevo de punta a punta**: un sensor simulado en Wokwi publica lecturas, Kafka las recibe, con ellas entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Todo lo que necesitas está en las guías de S03, S07, S10 y S11.
 
 ## 2. Reglas
 
@@ -59,10 +59,14 @@ flowchart TB
 
 ### Pregunta 1 — Ingesta: Wokwi, MQTT y Kafka (5 puntos)
 
+**Guías:** S07, pasos 3.7 (puente MQTT a Kafka) y 3.8 (ESP32 en Wokwi).
+
 1. **Circuito y programa (sketch) en Wokwi (2 ptos).** En Wokwi usa el circuito de S07 y ajusta el programa (`sketch.ino`) para leer temperatura (sensor DHT22, como en S07) y publicar cada segundo el contrato de la sección 3 en el topic MQTT de la Tabla 1. El monitor serie muestra cada publicación.
 2. **Puente en Python y topic de Kafka (3 ptos).** Ajusta el puente de S07 (`bridge_mqtt_kafka.py`, código Python que lee del topic MQTT) para que reenvíe a tu topic de Kafka (`<tunombre>-temperatura-eventos`), con `sensorId` como llave. Créalo si no existe. En Kafka UI se ven los mensajes llegando.
 
 ### Pregunta 2 — Historial y modelo (6 puntos)
+
+**Guías:** S03 (escribir Parquet) y S10, pasos 3.3 a 3.6 (preparación de datos, modelo, evaluación y guardado).
 
 Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los **10 minutos** de lecturas que se acumulan mientras avanzas (se acepta un mínimo de 5).
 
@@ -72,9 +76,13 @@ Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los *
 
 ### Pregunta 3 — Inferencia en streaming (4 puntos)
 
+**Guías:** S10, paso 3.7 (inferencia en tiempo real).
+
 1. **Inferencia en streaming, en el cuaderno (4 ptos).** En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con `foreachBatch` sobre el topic de Kafka. Cada lectura nueva produce una predicción del valor siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.
 
 ### Pregunta 4 — Grafana (5 puntos)
+
+**Guías:** S11, pasos 3.4 (Pushgateway y Prometheus), 3.8 y 3.9 (publicar y confirmar cada predicción) y 3.11 (tablero de Grafana).
 
 **Figura 2. Prototipo del panel**
 
