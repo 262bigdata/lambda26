@@ -70,7 +70,7 @@ flowchart TB
 
 Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los **10 minutos** de lecturas que se acumulan mientras avanzas (se acepta un mínimo de 5).
 
-1. **Historial en Parquet (2 ptos).** Guarda en Parquet las lecturas del topic acumuladas (unas 600 con 1 lectura por segundo). Muestra el conteo.
+1. **Historial en Parquet (2 ptos).** Guarda en Parquet las lecturas de temperatura acumuladas en el topic (unas 600 con 1 lectura por segundo). Muestra el conteo.
 2. **Dataset supervisado y división (2 ptos).** Construye el `label` con `lead(temperatura, 1)` en orden cronológico y divide 80/20 **por posición en el tiempo**, no al azar.
 3. **Modelo y baseline (2 ptos).** Evalúa primero el baseline de persistencia (predecir el valor actual), entrena `LinearRegression`, compara el RMSE (raíz del error cuadrático medio) de ambos y guarda el modelo. No se califica que el modelo gane al baseline, sino que la comparación sea correcta y honesta.
 
@@ -78,7 +78,7 @@ Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los *
 
 **Guías:** S10, paso 3.7 (inferencia en tiempo real).
 
-1. **Inferencia en streaming, en el cuaderno (4 ptos).** En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con `foreachBatch` sobre el topic de Kafka. Cada lectura nueva produce una predicción del valor siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.
+1. **Inferencia en streaming, en el cuaderno (4 ptos).** En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con `foreachBatch` sobre el topic de Kafka. Cada lectura nueva produce una predicción de temperatura para la lectura siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.
 
 ### Pregunta 4 — Grafana (5 puntos)
 
@@ -100,7 +100,7 @@ Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los *
 
 1. **Publicar en el Pushgateway (2 ptos).** En cada micro-lote publica la lectura real y la predicción con el `job` y las métricas de la Tabla 1, como en S11.
 2. **Prometheus las ve (1 pto).** Consulta las dos métricas en Prometheus y devuelven valores.
-3. **Panel de Grafana en vivo (1 pto).** Un panel *Time series* en Grafana con las dos series, que cambian entre un *refresh* y el siguiente.
+3. **Panel de Grafana en vivo (1 pto).** Un panel *Time series* en Grafana con las dos series de temperatura, que cambian entre un *refresh* y el siguiente.
 4. **Cambio en vivo desde Wokwi (1 pto).** El docente te pide mover el control del sensor en Wokwi: el valor cambia en el monitor serie, aparece un mensaje nuevo en Kafka UI y el panel se mueve.
 
 ## 5. Calificación
@@ -109,16 +109,16 @@ Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los *
 
 | Pregunta | Ítem | Con Wokwi | Con productor Python | Puntaje obtenido |
 |---|---|---|---|---|
-| 1 | Circuito y programa (sketch) en Wokwi | 2 | 1 | |
-| 1 | Puente en Python y topic de Kafka | 3 | 1.5 | |
-| 2 | Historial en Parquet | 2 | 2 | |
-| 2 | Dataset supervisado y división | 2 | 2 | |
-| 2 | Modelo y baseline | 2 | 2 | |
-| 3 | Inferencia en streaming (en el cuaderno) | 4 | 4 | |
-| 4 | Publicar en el Pushgateway | 2 | 2 | |
-| 4 | Prometheus las ve | 1 | 1 | |
-| 4 | Panel de Grafana en vivo | 1 | 1 | |
-| 4 | Cambio en vivo desde Wokwi | 1 | 0.5 | |
+| 1 | Circuito y programa (sketch) en Wokwi: temperatura | 2 | 1 | |
+| 1 | Puente en Python y topic `<tunombre>-temperatura-eventos` | 3 | 1.5 | |
+| 2 | Historial de temperatura en Parquet | 2 | 2 | |
+| 2 | Dataset supervisado y división sobre `temperatura` | 2 | 2 | |
+| 2 | Modelo y baseline de temperatura | 2 | 2 | |
+| 3 | Inferencia en streaming de temperatura (en el cuaderno) | 4 | 4 | |
+| 4 | Publicar `temperatura` real y su predicción en el Pushgateway | 2 | 2 | |
+| 4 | Prometheus ve las métricas de `temperatura` | 1 | 1 | |
+| 4 | Panel de Grafana en vivo de temperatura | 1 | 1 | |
+| 4 | Cambio en vivo: mover temperatura en Wokwi | 1 | 0.5 | |
 | | **Total** | **20** | **17** | |
 
 Con el productor Python de S07 el máximo es 17. Los ítems que dependen de datos que no llegaron se califican 0 sin descontar otra vez el mismo error.
