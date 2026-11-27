@@ -1419,14 +1419,14 @@
 <p><strong>Guías:</strong> S03 (escribir Parquet) y S10, pasos 3.3 a 3.6 (preparación de datos, modelo, evaluación y guardado).</p>
 <p>Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los <strong>10 minutos</strong> de lecturas que se acumulan mientras avanzas (se acepta un mínimo de 5).</p>
 <ol>
-<li><strong>Historial en Parquet (2 ptos).</strong> Guarda en Parquet las lecturas del topic acumuladas (unas 600 con 1 lectura por segundo). Muestra el conteo.</li>
+<li><strong>Historial en Parquet (2 ptos).</strong> Guarda en Parquet las lecturas de temperatura acumuladas en el topic (unas 600 con 1 lectura por segundo). Muestra el conteo.</li>
 <li><strong>Dataset supervisado y división (2 ptos).</strong> Construye el <code>label</code> con <code>lead(temperatura, 1)</code> en orden cronológico y divide 80/20 <strong>por posición en el tiempo</strong>, no al azar.</li>
 <li><strong>Modelo y baseline (2 ptos).</strong> Evalúa primero el baseline de persistencia (predecir el valor actual), entrena <code>LinearRegression</code>, compara el RMSE (raíz del error cuadrático medio) de ambos y guarda el modelo. No se califica que el modelo gane al baseline, sino que la comparación sea correcta y honesta.</li>
 </ol>
 <h3 id="pregunta-3-inferencia-en-streaming-4-puntos">Pregunta 3 — Inferencia en streaming (4 puntos)<a class="headerlink" href="#pregunta-3-inferencia-en-streaming-4-puntos" title="Permanent link">&para;</a></h3>
 <p><strong>Guías:</strong> S10, paso 3.7 (inferencia en tiempo real).</p>
 <ol>
-<li><strong>Inferencia en streaming, en el cuaderno (4 ptos).</strong> En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con <code>foreachBatch</code> sobre el topic de Kafka. Cada lectura nueva produce una predicción del valor siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.</li>
+<li><strong>Inferencia en streaming, en el cuaderno (4 ptos).</strong> En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con <code>foreachBatch</code> sobre el topic de Kafka. Cada lectura nueva produce una predicción de temperatura para la lectura siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.</li>
 </ol>
 <h3 id="pregunta-4-grafana-5-puntos">Pregunta 4 — Grafana (5 puntos)<a class="headerlink" href="#pregunta-4-grafana-5-puntos" title="Permanent link">&para;</a></h3>
 <p><strong>Guías:</strong> S11, pasos 3.4 (Pushgateway y Prometheus), 3.8 y 3.9 (publicar y confirmar cada predicción) y 3.11 (tablero de Grafana).</p>
@@ -1444,7 +1444,7 @@
 <ol>
 <li><strong>Publicar en el Pushgateway (2 ptos).</strong> En cada micro-lote publica la lectura real y la predicción con el <code>job</code> y las métricas de la Tabla 1, como en S11.</li>
 <li><strong>Prometheus las ve (1 pto).</strong> Consulta las dos métricas en Prometheus y devuelven valores.</li>
-<li><strong>Panel de Grafana en vivo (1 pto).</strong> Un panel <em>Time series</em> en Grafana con las dos series, que cambian entre un <em>refresh</em> y el siguiente.</li>
+<li><strong>Panel de Grafana en vivo (1 pto).</strong> Un panel <em>Time series</em> en Grafana con las dos series de temperatura, que cambian entre un <em>refresh</em> y el siguiente.</li>
 <li><strong>Cambio en vivo desde Wokwi (1 pto).</strong> El docente te pide mover el control del sensor en Wokwi: el valor cambia en el monitor serie, aparece un mensaje nuevo en Kafka UI y el panel se mueve.</li>
 </ol>
 <h2 id="5-calificacion">5. Calificación<a class="headerlink" href="#5-calificacion" title="Permanent link">&para;</a></h2>
@@ -1462,70 +1462,70 @@
 <tbody>
 <tr>
 <td>1</td>
-<td>Circuito y programa (sketch) en Wokwi</td>
+<td>Circuito y programa (sketch) en Wokwi: temperatura</td>
 <td>2</td>
 <td>1</td>
 <td></td>
 </tr>
 <tr>
 <td>1</td>
-<td>Puente en Python y topic de Kafka</td>
+<td>Puente en Python y topic <code>&lt;tunombre&gt;-temperatura-eventos</code></td>
 <td>3</td>
 <td>1.5</td>
 <td></td>
 </tr>
 <tr>
 <td>2</td>
-<td>Historial en Parquet</td>
+<td>Historial de temperatura en Parquet</td>
 <td>2</td>
 <td>2</td>
 <td></td>
 </tr>
 <tr>
 <td>2</td>
-<td>Dataset supervisado y división</td>
+<td>Dataset supervisado y división sobre <code>temperatura</code></td>
 <td>2</td>
 <td>2</td>
 <td></td>
 </tr>
 <tr>
 <td>2</td>
-<td>Modelo y baseline</td>
+<td>Modelo y baseline de temperatura</td>
 <td>2</td>
 <td>2</td>
 <td></td>
 </tr>
 <tr>
 <td>3</td>
-<td>Inferencia en streaming (en el cuaderno)</td>
+<td>Inferencia en streaming de temperatura (en el cuaderno)</td>
 <td>4</td>
 <td>4</td>
 <td></td>
 </tr>
 <tr>
 <td>4</td>
-<td>Publicar en el Pushgateway</td>
+<td>Publicar <code>temperatura</code> real y su predicción en el Pushgateway</td>
 <td>2</td>
 <td>2</td>
 <td></td>
 </tr>
 <tr>
 <td>4</td>
-<td>Prometheus las ve</td>
+<td>Prometheus ve las métricas de <code>temperatura</code></td>
 <td>1</td>
 <td>1</td>
 <td></td>
 </tr>
 <tr>
 <td>4</td>
-<td>Panel de Grafana en vivo</td>
+<td>Panel de Grafana en vivo de temperatura</td>
 <td>1</td>
 <td>1</td>
 <td></td>
 </tr>
 <tr>
 <td>4</td>
-<td>Cambio en vivo desde Wokwi</td>
+<td>Cambio en vivo: mover temperatura en Wokwi</td>
 <td>1</td>
 <td>0.5</td>
 <td></td>
