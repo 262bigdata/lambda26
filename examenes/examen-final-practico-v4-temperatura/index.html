@@ -1334,7 +1334,7 @@
 <h1 id="examen-final-practico-de-big-data-variante-4-temperatura-practica">Examen final práctico de Big Data — Variante 4: temperatura (práctica)<a class="headerlink" href="#examen-final-practico-de-big-data-variante-4-temperatura-practica" title="Permanent link">&para;</a></h1>
 <h2 id="1-proposito">1. Propósito<a class="headerlink" href="#1-proposito" title="Permanent link">&para;</a></h2>
 <p><strong>Este examen se desarrolla sobre tu propio proyecto: usas tu Kafka, tu PySpark, tu Prometheus, tu Pushgateway y tu Grafana, y agregas un flujo nuevo. No empiezas un proyecto desde cero.</strong></p>
-<p>Demuestras que sabes <strong>extender tu arquitectura Lambda con un flujo nuevo de punta a punta</strong>: un sensor simulado en Wokwi publica lecturas, Kafka las recibe, con ellas entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Todo lo que necesitas está en las guías de S07, S10 y S11.</p>
+<p>Demuestras que sabes <strong>extender tu arquitectura Lambda con un flujo nuevo de punta a punta</strong>: un sensor simulado en Wokwi publica lecturas, Kafka las recibe, con ellas entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Todo lo que necesitas está en las guías de S03, S07, S10 y S11.</p>
 <h2 id="2-reglas">2. Reglas<a class="headerlink" href="#2-reglas" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Duración:</strong> 120 minutos. <strong>Puntaje:</strong> 20 puntos. <strong>Sin IA.</strong></li>
@@ -1410,11 +1410,13 @@
     R --&gt; D["Grafana:&lt;br/&gt;real vs predicción"]</code></pre>
 <h2 id="4-preguntas">4. Preguntas<a class="headerlink" href="#4-preguntas" title="Permanent link">&para;</a></h2>
 <h3 id="pregunta-1-ingesta-wokwi-mqtt-y-kafka-5-puntos">Pregunta 1 — Ingesta: Wokwi, MQTT y Kafka (5 puntos)<a class="headerlink" href="#pregunta-1-ingesta-wokwi-mqtt-y-kafka-5-puntos" title="Permanent link">&para;</a></h3>
+<p><strong>Guías:</strong> S07, pasos 3.7 (puente MQTT a Kafka) y 3.8 (ESP32 en Wokwi).</p>
 <ol>
 <li><strong>Circuito y programa (sketch) en Wokwi (2 ptos).</strong> En Wokwi usa el circuito de S07 y ajusta el programa (<code>sketch.ino</code>) para leer temperatura (sensor DHT22, como en S07) y publicar cada segundo el contrato de la sección 3 en el topic MQTT de la Tabla 1. El monitor serie muestra cada publicación.</li>
 <li><strong>Puente en Python y topic de Kafka (3 ptos).</strong> Ajusta el puente de S07 (<code>bridge_mqtt_kafka.py</code>, código Python que lee del topic MQTT) para que reenvíe a tu topic de Kafka (<code>&lt;tunombre&gt;-temperatura-eventos</code>), con <code>sensorId</code> como llave. Créalo si no existe. En Kafka UI se ven los mensajes llegando.</li>
 </ol>
 <h3 id="pregunta-2-historial-y-modelo-6-puntos">Pregunta 2 — Historial y modelo (6 puntos)<a class="headerlink" href="#pregunta-2-historial-y-modelo-6-puntos" title="Permanent link">&para;</a></h3>
+<p><strong>Guías:</strong> S03 (escribir Parquet) y S10, pasos 3.3 a 3.6 (preparación de datos, modelo, evaluación y guardado).</p>
 <p>Empieza esta pregunta cuando ya tengas lecturas llegando. El historial son los <strong>10 minutos</strong> de lecturas que se acumulan mientras avanzas (se acepta un mínimo de 5).</p>
 <ol>
 <li><strong>Historial en Parquet (2 ptos).</strong> Guarda en Parquet las lecturas del topic acumuladas (unas 600 con 1 lectura por segundo). Muestra el conteo.</li>
@@ -1422,10 +1424,12 @@
 <li><strong>Modelo y baseline (2 ptos).</strong> Evalúa primero el baseline de persistencia (predecir el valor actual), entrena <code>LinearRegression</code>, compara el RMSE (raíz del error cuadrático medio) de ambos y guarda el modelo. No se califica que el modelo gane al baseline, sino que la comparación sea correcta y honesta.</li>
 </ol>
 <h3 id="pregunta-3-inferencia-en-streaming-4-puntos">Pregunta 3 — Inferencia en streaming (4 puntos)<a class="headerlink" href="#pregunta-3-inferencia-en-streaming-4-puntos" title="Permanent link">&para;</a></h3>
+<p><strong>Guías:</strong> S10, paso 3.7 (inferencia en tiempo real).</p>
 <ol>
 <li><strong>Inferencia en streaming, en el cuaderno (4 ptos).</strong> En tu cuaderno de Jupyter, recarga el modelo guardado y aplícalo con <code>foreachBatch</code> sobre el topic de Kafka. Cada lectura nueva produce una predicción del valor siguiente, visible en la salida de la celda o en un Parquet. Aquí no se usa Grafana: el tablero es la pregunta 4.</li>
 </ol>
 <h3 id="pregunta-4-grafana-5-puntos">Pregunta 4 — Grafana (5 puntos)<a class="headerlink" href="#pregunta-4-grafana-5-puntos" title="Permanent link">&para;</a></h3>
+<p><strong>Guías:</strong> S11, pasos 3.4 (Pushgateway y Prometheus), 3.8 y 3.9 (publicar y confirmar cada predicción) y 3.11 (tablero de Grafana).</p>
 <p><strong>Figura 2. Prototipo del panel</strong></p>
 <div class="highlight"><pre><span></span><code>+--------------------------------------------+
 | Tablero: temperatura                       |
