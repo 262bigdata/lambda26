@@ -9,6 +9,8 @@ Esta sesión no agrega contenido ni rúbrica nueva: es la continuación de [S15]
 
 No hay un segundo producto ni una segunda rúbrica: todo lo evaluado aquí sigue siendo el mismo [`u3-producto.md`](../proyecto-sello/u3-producto.md) de S15, con la misma rúbrica.
 
+**Práctica del examen práctico:** el examen final práctico consiste en extender, sobre tu propio proyecto, tu arquitectura Lambda con un flujo nuevo: un sensor simulado en Wokwi publica por MQTT, Kafka recibe las lecturas, con unos 10 minutos de historial entrenas un modelo, lo aplicas en streaming y publicas la lectura real y la predicción en Grafana. Para prepararte, desarrolla completa la [variante de práctica (temperatura)](../examenes/examen-final-practico-v4-temperatura.md) en tu proyecto; el día del examen tendrás una variante distinta con la misma estructura.
+
 ## 2. Para equipos o integrantes pendientes de sustentar
 
 Repite exactamente la secuencia de la sección 4 de [S15](S15_Evaluacion_Unidad_3.md#4-sustentacion-del-producto-final) — video pitch o introducción, exposición técnica, demostración end-to-end y preguntas individuales — y responde a la evaluación teórico-práctica de la sección 3 de esa misma guía, sobre S13-S14.

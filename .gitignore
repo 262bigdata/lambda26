@@ -20,3 +20,9 @@ __pycache__/
 
 # SO
 .DS_Store
+
+# Big Data: examen final práctico. Solo se versiona la variante de práctica (temperatura):
+# su enunciado y su ficha. Las variantes de examen (ruido, vibración, peso) no se suben nunca.
+docs/examenes/*
+!docs/examenes/*temperatura*
+docs/examenes/~$*
